@@ -24,7 +24,9 @@ export type Database = {
           notas_internas: string | null
           policial_denunciado: string | null
           status: Database["public"]["Enums"]["denuncia_status"]
+          numero_registro: number
           titulo: string
+          dados_detalhados: Json | null
           updated_at: string
         }
         Insert: {
@@ -37,6 +39,7 @@ export type Database = {
           policial_denunciado?: string | null
           status?: Database["public"]["Enums"]["denuncia_status"]
           titulo: string
+          dados_detalhados?: Json | null
           updated_at?: string
         }
         Update: {
@@ -49,6 +52,7 @@ export type Database = {
           policial_denunciado?: string | null
           status?: Database["public"]["Enums"]["denuncia_status"]
           titulo?: string
+          dados_detalhados?: Json | null
           updated_at?: string
         }
         Relationships: []
@@ -58,18 +62,21 @@ export type Database = {
           badge_number: string | null
           created_at: string
           full_name: string
+          patente: string | null
           id: string
         }
         Insert: {
           badge_number?: string | null
           created_at?: string
           full_name: string
+          patente?: string | null
           id: string
         }
         Update: {
           badge_number?: string | null
           created_at?: string
           full_name?: string
+          patente?: string | null
           id?: string
         }
         Relationships: []
@@ -94,6 +101,61 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      investigacoes: {
+        Row: {
+          id: string
+          numero_registro: number
+          titulo: string
+          descricao: string | null
+          investigado: string | null
+          status: Database["public"]["Enums"]["denuncia_status"]
+          notas_internas: string | null
+          tipo_procedimento: string | null
+          autoridade_responsavel: string | null
+          autoridade_patente: string | null
+          autoridade_departamento: string | null
+          investigado_badge: string | null
+          investigado_patente: string | null
+          investigado_unidade: string | null
+          origem_caso: string | null
+          origem_outro: string | null
+          fundamentacao: string | null
+          medidas_iniciais: Json | null
+          medidas_outro: string | null
+          detalhes_adicionais: string | null
+          created_at: string
+        }
+        Insert: any
+        Update: any
+        Relationships: []
+      }
+      relatorios: {
+        Row: {
+          id: string
+          titulo: string
+          tipo_denuncia: string
+          oficial: string
+          conteudo: string
+          status: Database["public"]["Enums"]["denuncia_status"]
+          dados_detalhados: Json | null
+          created_at: string
+        }
+        Insert: any
+        Update: any
+        Relationships: []
+      }
+      denuncia_relatorio: {
+        Row: { denuncia_id: string; relatorio_id: string }
+        Insert: any; Update: any; Relationships: []
+      }
+      investigacao_relatorio: {
+        Row: { investigacao_id: string; relatorio_id: string }
+        Insert: any; Update: any; Relationships: []
+      }
+      denuncia_investigacao: {
+        Row: { denuncia_id: string; investigacao_id: string }
+        Insert: any; Update: any; Relationships: []
       }
     }
     Views: {

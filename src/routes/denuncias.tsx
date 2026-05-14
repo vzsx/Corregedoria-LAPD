@@ -1,164 +1,474 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { z } from "zod";
-import { Shield, CheckCircle2 } from "lucide-react";
-import { toast } from "sonner";
+import { 
+  Shield, FileText, CheckCircle2, ShieldAlert, 
+  User, Users, MapPin, Image, CheckSquare, Info,
+  ArrowLeft
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
+import { useAuth } from "@/hooks/use-auth";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { toast } from "sonner";
+import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 
 export const Route = createFileRoute("/denuncias")({
-  head: () => ({
-    meta: [
-      { title: "Fazer Denúncia — LAPD Corregedoria Compton" },
-      { name: "description", content: "Registre uma denúncia anônima contra um policial da LAPD Compton." },
-    ],
-  }),
-  component: DenunciasPage,
+  component: Denuncias,
 });
 
-const schema = z.object({
-  titulo: z.string().trim().min(5, "Título muito curto").max(150),
-  descricao: z.string().trim().min(20, "Descreva com pelo menos 20 caracteres").max(5000),
-  policial_denunciado: z.string().trim().max(200).optional(),
-  data_ocorrido: z.string().trim().max(100).optional(),
-  contato_opcional: z.string().trim().max(200).optional(),
-});
+const TIPO_DENUNCIA_OPTIONS = [
+  "Abuso de Autoridade",
+  "Uso Excessivo de Força",
+  "Corrupção / Suborno",
+  "Má Conduta Profissional",
+  "Discriminação",
+  "Negligência de Dever",
+];
 
-function DenunciasPage() {
-  const [submitted, setSubmitted] = useState(false);
+const PROVAS_OPTIONS = [
+  "Vídeo",
+  "Áudio",
+  "Fotos",
+  "Documentos",
+  "Mensagens/Chat",
+];
+
+function Denuncias() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  
+  const [formData, setFormData] = useState({
+    reclamante_nome: "",
+    reclamante_id: "",
+    reclamante_contato: "",
+    reclamante_anonimo: "Não",
+    denunciado_nome: "",
+    denunciado_patente: "",
+    denunciado_badge: "",
+    tipo_denuncia: [] as string[],
+    tipo_denuncia_outro: "",
+    incidente_data: "",
+    incidente_horario: "",
+    incidente_local: "",
+    relato_fatos: "",
+    testemunhas_tem: "Não",
+    testemunhas_nomes: "",
+    provas_selecionadas: [] as string[],
+    provas_outro: "",
+    provas_descricao: "",
+    declaracao_assinatura: ""
+  });
+
+  const handleCheckboxChange = (listName: 'tipo_denuncia' | 'provas_selecionadas', value: string) => {
+    setFormData(prev => {
+      const list = prev[listName];
+      if (list.includes(value)) {
+        return { ...prev, [listName]: list.filter(i => i !== value) };
+      } else {
+        return { ...prev, [listName]: [...list, value] };
+      }
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const fd = new FormData(e.currentTarget);
-    const raw = {
-      titulo: String(fd.get("titulo") ?? ""),
-      descricao: String(fd.get("descricao") ?? ""),
-      policial_denunciado: String(fd.get("policial_denunciado") ?? "") || undefined,
-      data_ocorrido: String(fd.get("data_ocorrido") ?? "") || undefined,
-      contato_opcional: String(fd.get("contato_opcional") ?? "") || undefined,
-    };
-    const provas = String(fd.get("provas") ?? "").trim();
-    
-    const parsed = schema.safeParse(raw);
-    if (!parsed.success) {
-      toast.error(parsed.error.issues[0].message);
-      return;
-    }
-
-    let finalDescricao = parsed.data.descricao;
-    if (provas) {
-      finalDescricao += `\n\n--- PROVAS ANEXADAS ---\n${provas}`;
-    }
-
-    const payload = {
-      ...parsed.data,
-      descricao: finalDescricao
-    };
-
     setLoading(true);
-    const { error } = await supabase.from("denuncias").insert(payload);
-    setLoading(false);
 
+    const finalReclamanteNome = formData.reclamante_anonimo === "Sim" ? "ANÔNIMO" : (formData.reclamante_nome || "Desconhecido");
+
+    const { error } = await supabase
+      .from("denuncias")
+      .insert([{
+        titulo: `DENÚNCIA: ${formData.denunciado_nome || "Oficial Desconhecido"}`,
+        descricao: `Denúncia via formulário IAG. Reclamante: ${finalReclamanteNome}`,
+        policial_denunciado: formData.denunciado_nome,
+        data_ocorrido: `${formData.incidente_data} ${formData.incidente_horario}`,
+        contato_opcional: formData.reclamante_contato,
+        status: "pendente",
+        dados_detalhados: formData
+      }]);
+      
+    setLoading(false);
+    
     if (error) {
-      toast.error("Não foi possível enviar. Tente novamente.");
-      return;
+      console.error("Erro ao enviar denúncia:", error);
+      toast.error("Erro ao enviar denúncia. Tente novamente.");
+    } else {
+      toast.success("Denúncia protocolada com sucesso!");
+      setSubmitted(true);
     }
-    setSubmitted(true);
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#020617] text-slate-200">
       <SiteHeader />
 
-      <section className="container mx-auto max-w-2xl px-6 py-16">
-        <div className="mb-10 text-center">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-gold/30 bg-card/50 px-4 py-1.5 text-xs font-medium uppercase tracking-widest text-gold">
-            <Shield className="h-3 w-3" /> Canal Oficial
+      <main className="container mx-auto max-w-3xl px-6 py-12">
+        <div className="mb-12 text-center">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-red-400">
+            <ShieldAlert className="h-3 w-3" /> Canal de Ética e Corregedoria
           </div>
-          <h1 className="font-display text-4xl font-bold uppercase tracking-tight">
-            Fazer uma Denúncia
+          <h1 className="font-display text-4xl font-black uppercase tracking-tighter text-white sm:text-5xl">
+            Internal Affairs Group <span className="text-red-600">(IAG)</span>
           </h1>
-          <p className="mt-3 text-muted-foreground">
-            Sua denúncia é anônima por padrão. Forneça contato apenas se desejar
-            ser chamado para depoimento.
+          <p className="mt-4 text-sm font-medium uppercase tracking-widest text-slate-500">
+            Formulário Simplificado de Denúncia
           </p>
+          <div className="mx-auto mt-6 h-1 w-24 bg-red-600"></div>
         </div>
 
         {submitted ? (
-          <div className="rounded-xl border border-gold/30 bg-card p-10 text-center shadow-elegant">
-            <CheckCircle2 className="mx-auto h-14 w-14 text-gold" />
-            <h2 className="mt-4 font-display text-2xl font-bold uppercase tracking-wide">
-              Denúncia Registrada
+          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-12 text-center shadow-2xl animate-in fade-in zoom-in duration-500">
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-500">
+              <CheckCircle2 className="h-10 w-10" />
+            </div>
+            <h2 className="mt-8 font-display text-3xl font-black uppercase tracking-tight text-white">
+              Denúncia Protocolada
             </h2>
-            <p className="mt-2 text-muted-foreground">
-              Sua denúncia foi recebida e será analisada pela Corregedoria.
-              Obrigado por contribuir com a integridade da LAPD.
+            <p className="mt-4 leading-relaxed text-slate-400">
+              Seu relato foi recebido pelo sistema de integridade do Internal Affairs Group. 
+              Um corregedor será designado para analisar as informações fornecidas.
             </p>
-            <Button className="mt-6" variant="outline" onClick={() => setSubmitted(false)}>
-              Enviar outra denúncia
-            </Button>
+            <div className="mt-10 flex flex-col items-center gap-4">
+              <Button asChild className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold tracking-widest uppercase px-8">
+                <Link to="/">Voltar ao Início</Link>
+              </Button>
+              <button onClick={() => setSubmitted(false)} className="text-xs text-slate-500 hover:text-slate-300 underline underline-offset-4">
+                Enviar outro relato
+              </button>
+            </div>
           </div>
         ) : (
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-5 rounded-xl border border-border bg-card p-8 shadow-elegant"
-          >
-            <div>
-              <Label htmlFor="titulo">Título *</Label>
-              <Input id="titulo" name="titulo" required maxLength={150} placeholder="Ex: Abuso de autoridade durante abordagem" />
-            </div>
-            <div>
-              <Label htmlFor="policial_denunciado">Policial denunciado</Label>
-              <Input id="policial_denunciado" name="policial_denunciado" maxLength={200} placeholder="Nome / número de placa (se souber)" />
-            </div>
-            <div>
-              <Label htmlFor="data_ocorrido">Quando ocorreu?</Label>
-              <Input id="data_ocorrido" name="data_ocorrido" maxLength={100} placeholder="Ex: 12/05 por volta das 23h" />
-            </div>
-            <div>
-              <Label htmlFor="descricao">Descrição detalhada *</Label>
-              <Textarea
-                id="descricao"
-                name="descricao"
-                required
-                rows={7}
-                maxLength={5000}
-                placeholder="Descreva o ocorrido: local, pessoas envolvidas, o que aconteceu..."
-              />
-            </div>
-            <div>
-              <Label htmlFor="provas">Anexar provas</Label>
-              <Textarea
-                id="provas"
-                name="provas"
-                rows={3}
-                maxLength={2000}
-                placeholder="Cole aqui os links das imagens (Imgur, Lightshot) ou vídeos (YouTube, Medal, etc.)"
-              />
-              <p className="mt-1 text-xs text-muted-foreground">
-                Insira os links para comprovar a sua denúncia.
-              </p>
-            </div>
-            <div>
-              <Label htmlFor="contato_opcional">Contato (opcional)</Label>
-              <Input id="contato_opcional" name="contato_opcional" maxLength={200} placeholder="Discord, telefone in-game, etc." />
-              <p className="mt-1 text-xs text-muted-foreground">
-                Deixe em branco para denúncia 100% anônima.
-              </p>
-            </div>
+          <form onSubmit={handleSubmit} className="space-y-8 pb-20">
+            
+            {/* 1. DADOS DO DENUNCIANTE */}
+            <section className="rounded-xl border border-slate-800 bg-[#0d141e] p-6 shadow-xl transition-all hover:border-slate-700">
+              <div className="mb-6 flex items-center gap-3 border-b border-slate-800 pb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded bg-blue-500/10 text-blue-400">
+                  <User className="h-5 w-5" />
+                </div>
+                <h3 className="font-bold uppercase tracking-wider text-white">1. Dados do Denunciante</h3>
+              </div>
+              
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Nome Completo</Label>
+                  <Input 
+                    value={formData.reclamante_nome}
+                    onChange={(e) => setFormData({...formData, reclamante_nome: e.target.value})}
+                    placeholder="Seu nome oficial" 
+                    className="bg-slate-950 border-slate-800 text-white focus:border-blue-500/50" 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Número do ID</Label>
+                  <Input 
+                    value={formData.reclamante_id}
+                    onChange={(e) => setFormData({...formData, reclamante_id: e.target.value})}
+                    placeholder="Ex: 12345" 
+                    className="bg-slate-950 border-slate-800 text-white focus:border-blue-500/50" 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Telefone / Discord</Label>
+                  <Input 
+                    value={formData.reclamante_contato}
+                    onChange={(e) => setFormData({...formData, reclamante_contato: e.target.value})}
+                    placeholder="Contato para retorno" 
+                    className="bg-slate-950 border-slate-800 text-white focus:border-blue-500/50" 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Deseja permanecer anônimo?</Label>
+                  <RadioGroup value={formData.reclamante_anonimo} onValueChange={(v) => setFormData({...formData, reclamante_anonimo: v})} className="flex gap-4 pt-2">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="Sim" id="anon-sim" className="border-slate-700 text-red-500" />
+                      <Label htmlFor="anon-sim" className="text-sm cursor-pointer">Sim</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="Não" id="anon-nao" className="border-slate-700 text-blue-500" />
+                      <Label htmlFor="anon-nao" className="text-sm cursor-pointer">Não</Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+              </div>
+            </section>
 
-            <Button type="submit" disabled={loading} className="w-full bg-badge-gradient shadow-glow">
-              {loading ? "Enviando..." : "Enviar Denúncia"}
-            </Button>
+            {/* 2. DADOS DO POLICIAL */}
+            <section className="rounded-xl border border-slate-800 bg-[#0d141e] p-6 shadow-xl transition-all hover:border-slate-700">
+              <div className="mb-6 flex items-center gap-3 border-b border-slate-800 pb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded bg-red-500/10 text-red-400">
+                  <Shield className="h-5 w-5" />
+                </div>
+                <h3 className="font-bold uppercase tracking-wider text-white">2. Dados do Policial Denunciado</h3>
+              </div>
+              
+              <div className="grid gap-6 md:grid-cols-3">
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Nome do Policial</Label>
+                  <Input 
+                    value={formData.denunciado_nome}
+                    onChange={(e) => setFormData({...formData, denunciado_nome: e.target.value})}
+                    placeholder="Nome ou Apelido" 
+                    className="bg-slate-950 border-slate-800 text-white" 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Patente/Cargo</Label>
+                  <Input 
+                    value={formData.denunciado_patente}
+                    onChange={(e) => setFormData({...formData, denunciado_patente: e.target.value})}
+                    placeholder="Ex: Sargento" 
+                    className="bg-slate-950 border-slate-800 text-white" 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Badge Number</Label>
+                  <Input 
+                    value={formData.denunciado_badge}
+                    onChange={(e) => setFormData({...formData, denunciado_badge: e.target.value})}
+                    placeholder="Número da Placa" 
+                    className="bg-slate-950 border-slate-800 text-white" 
+                  />
+                </div>
+              </div>
+            </section>
+
+            {/* 3. TIPO DE DENÚNCIA */}
+            <section className="rounded-xl border border-slate-800 bg-[#0d141e] p-6 shadow-xl">
+              <div className="mb-6 flex items-center gap-3 border-b border-slate-800 pb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded bg-amber-500/10 text-amber-400">
+                  <ShieldAlert className="h-5 w-5" />
+                </div>
+                <h3 className="font-bold uppercase tracking-wider text-white">3. Tipo de Denúncia</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {TIPO_DENUNCIA_OPTIONS.map(opt => (
+                  <div key={opt} className="flex items-center space-x-3 rounded-lg border border-slate-800 bg-slate-950/50 p-3 transition-colors hover:bg-slate-900">
+                    <Checkbox 
+                      id={`tipo-${opt}`} 
+                      checked={formData.tipo_denuncia.includes(opt)}
+                      onCheckedChange={() => handleCheckboxChange('tipo_denuncia', opt)}
+                      className="border-slate-700 data-[state=checked]:bg-amber-600 data-[state=checked]:border-amber-600"
+                    />
+                    <Label htmlFor={`tipo-${opt}`} className="text-xs font-medium uppercase tracking-tight cursor-pointer flex-1">{opt}</Label>
+                  </div>
+                ))}
+                <div className="col-span-1 md:col-span-2 space-y-2 mt-2">
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Outro Tipo de Violação</Label>
+                  <Input 
+                    value={formData.tipo_denuncia_outro}
+                    onChange={(e) => setFormData({...formData, tipo_denuncia_outro: e.target.value})}
+                    placeholder="Especifique o tipo de denúncia..." 
+                    className="bg-slate-950 border-slate-800 text-white" 
+                  />
+                </div>
+              </div>
+            </section>
+
+            {/* 4. INFORMAÇÕES DO OCORRIDO */}
+            <section className="rounded-xl border border-slate-800 bg-[#0d141e] p-6 shadow-xl">
+              <div className="mb-6 flex items-center gap-3 border-b border-slate-800 pb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded bg-indigo-500/10 text-indigo-400">
+                  <MapPin className="h-5 w-5" />
+                </div>
+                <h3 className="font-bold uppercase tracking-wider text-white">4. Informações do Ocorrido</h3>
+              </div>
+              
+              <div className="grid gap-6 md:grid-cols-3">
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Data do Ocorrido</Label>
+                  <Input 
+                    type="date"
+                    value={formData.incidente_data}
+                    onChange={(e) => setFormData({...formData, incidente_data: e.target.value})}
+                    className="bg-slate-950 border-slate-800 text-white" 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Horário Aproximado</Label>
+                  <Input 
+                    type="time"
+                    value={formData.incidente_horario}
+                    onChange={(e) => setFormData({...formData, incidente_horario: e.target.value})}
+                    className="bg-slate-950 border-slate-800 text-white" 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Local do Ocorrido</Label>
+                  <Input 
+                    value={formData.incidente_local}
+                    onChange={(e) => setFormData({...formData, incidente_local: e.target.value})}
+                    placeholder="Ex: DP Sul, Praça Central..." 
+                    className="bg-slate-950 border-slate-800 text-white" 
+                  />
+                </div>
+              </div>
+            </section>
+
+            {/* 5. RELATO DOS FATOS */}
+            <section className="rounded-xl border border-slate-800 bg-[#0d141e] p-6 shadow-xl">
+              <div className="mb-6 flex items-center gap-3 border-b border-slate-800 pb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded bg-slate-500/10 text-slate-400">
+                  <FileText className="h-5 w-5" />
+                </div>
+                <h3 className="font-bold uppercase tracking-wider text-white">5. Relato dos Fatos</h3>
+              </div>
+              
+              <div className="space-y-2">
+                <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Descrição Resumida do Evento</Label>
+                <Textarea 
+                  value={formData.relato_fatos}
+                  onChange={(e) => setFormData({...formData, relato_fatos: e.target.value})}
+                  rows={6}
+                  placeholder="Relate com o máximo de detalhes possível o que aconteceu..." 
+                  className="bg-slate-950 border-slate-800 text-white leading-relaxed resize-none" 
+                  required
+                />
+              </div>
+            </section>
+
+            {/* 6. TESTEMUNHAS */}
+            <section className="rounded-xl border border-slate-800 bg-[#0d141e] p-6 shadow-xl">
+              <div className="mb-6 flex items-center gap-3 border-b border-slate-800 pb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded bg-emerald-500/10 text-emerald-400">
+                  <Users className="h-5 w-5" />
+                </div>
+                <h3 className="font-bold uppercase tracking-wider text-white">6. Testemunhas</h3>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Havia testemunhas no local?</Label>
+                  <RadioGroup value={formData.testemunhas_tem} onValueChange={(v) => setFormData({...formData, testemunhas_tem: v})} className="flex gap-4 pt-1">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="Sim" id="test-sim" className="border-slate-700" />
+                      <Label htmlFor="test-sim" className="text-sm cursor-pointer">Sim</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="Não" id="test-nao" className="border-slate-700" />
+                      <Label htmlFor="test-nao" className="text-sm cursor-pointer">Não</Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+                
+                {formData.testemunhas_tem === "Sim" && (
+                  <div className="space-y-2 animate-in slide-in-from-top-2 duration-300">
+                    <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Nome(s) das Testemunhas</Label>
+                    <Input 
+                      value={formData.testemunhas_nomes}
+                      onChange={(e) => setFormData({...formData, testemunhas_nomes: e.target.value})}
+                      placeholder="Separe os nomes por vírgula" 
+                      className="bg-slate-950 border-slate-800 text-white" 
+                    />
+                  </div>
+                )}
+              </div>
+            </section>
+
+            {/* 7. PROVAS */}
+            <section className="rounded-xl border border-slate-800 bg-[#0d141e] p-6 shadow-xl">
+              <div className="mb-6 flex items-center gap-3 border-b border-slate-800 pb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded bg-purple-500/10 text-purple-400">
+                  <Image className="h-5 w-5" />
+                </div>
+                <h3 className="font-bold uppercase tracking-wider text-white">7. Provas</h3>
+              </div>
+              
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+                {PROVAS_OPTIONS.map(opt => (
+                  <div key={opt} className="flex items-center space-x-3 rounded-lg border border-slate-800 bg-slate-950/50 p-3">
+                    <Checkbox 
+                      id={`prova-${opt}`} 
+                      checked={formData.provas_selecionadas.includes(opt)}
+                      onCheckedChange={() => handleCheckboxChange('provas_selecionadas', opt)}
+                      className="border-slate-700 data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-600"
+                    />
+                    <Label htmlFor={`prova-${opt}`} className="text-xs font-medium uppercase tracking-tight cursor-pointer flex-1">{opt}</Label>
+                  </div>
+                ))}
+              </div>
+              
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Outros tipos de Prova</Label>
+                  <Input 
+                    value={formData.provas_outro}
+                    onChange={(e) => setFormData({...formData, provas_outro: e.target.value})}
+                    placeholder="Especifique..." 
+                    className="bg-slate-950 border-slate-800 text-white" 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Descrição das Provas (Links)</Label>
+                  <Textarea 
+                    value={formData.provas_descricao}
+                    onChange={(e) => setFormData({...formData, provas_descricao: e.target.value})}
+                    rows={3}
+                    placeholder="Cole aqui os links de vídeos, fotos ou áudios comprobatórios" 
+                    className="bg-slate-950 border-slate-800 text-white text-xs resize-none" 
+                  />
+                  <p className="text-[9px] text-slate-500 italic mt-1">
+                    * Importante: Todas as provas (vídeos, imagens, áudios) devem ser enviadas através de links (Imgur, YouTube, Medal, etc).
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            {/* 8. DECLARAÇÃO FINAL */}
+            <section className="rounded-xl border border-red-600/30 bg-red-600/5 p-6 shadow-xl">
+              <div className="mb-6 flex items-center gap-3 border-b border-red-600/20 pb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded bg-red-600/20 text-red-400">
+                  <CheckSquare className="h-5 w-5" />
+                </div>
+                <h3 className="font-bold uppercase tracking-wider text-white">8. Declaração Final</h3>
+              </div>
+              
+              <div className="space-y-6">
+                <div className="rounded-lg bg-slate-950/80 p-4 border border-red-900/30">
+                  <p className="text-sm text-slate-300 italic">
+                    "Declaro que as informações fornecidas são verdadeiras de acordo com meu conhecimento, 
+                    estando ciente de que a falsidade desta declaração pode acarretar em sanções administrativas e penais."
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-red-500">Assinatura / Nome Completo</Label>
+                  <Input 
+                    value={formData.declaracao_assinatura}
+                    onChange={(e) => setFormData({...formData, declaracao_assinatura: e.target.value})}
+                    required
+                    placeholder="Digite seu nome completo para assinar" 
+                    className="bg-slate-950 border-red-900/50 text-white font-serif italic text-lg" 
+                  />
+                </div>
+              </div>
+            </section>
+
+            <div className="pt-8">
+              <Button 
+                type="submit" 
+                disabled={loading} 
+                className="w-full h-16 bg-red-600 hover:bg-red-500 text-white text-lg font-black uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(220,38,38,0.4)] transition-all hover:scale-[1.02] active:scale-[0.98]"
+              >
+                {loading ? "Protocolando..." : "Protocolar Denúncia Oficial"}
+              </Button>
+              <div className="mt-4 flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-[0.3em] text-slate-600">
+                <Info className="h-3 w-3" />
+                Sistema de Segurança de Dados Criptografado
+              </div>
+            </div>
           </form>
         )}
-      </section>
+      </main>
 
       <SiteFooter />
     </div>

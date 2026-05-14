@@ -37,34 +37,26 @@ export function SiteHeader() {
           >
             Fazer Denúncia
           </Link>
-          {isCorregedor && (
-            <Link
-              to="/corregedoria"
-              className="px-4 py-2 text-sm font-medium text-gold transition-colors hover:opacity-80"
-              activeProps={{ className: "px-4 py-2 text-sm font-bold text-gold" }}
-            >
-              Painel
-            </Link>
-          )}
-          {isAdmin && (
-            <Link
-              to="/admin"
-              className="px-4 py-2 text-sm font-medium text-gold transition-colors hover:opacity-80"
-            >
-              Admin
-            </Link>
-          )}
         </nav>
 
         <div className="flex items-center gap-2">
           {user ? (
-            <Button variant="ghost" size="sm" onClick={signOut}>
-              <LogOut className="mr-2 h-4 w-4" /> Sair
-            </Button>
+            <div className="flex items-center gap-2">
+              {(isCorregedor || isAdmin) && (
+                <Link to="/corregedoria">
+                  <Button size="sm" className="bg-badge-gradient text-white">
+                    Abrir Terminal
+                  </Button>
+                </Link>
+              )}
+              <Button variant="ghost" size="sm" onClick={signOut}>
+                <LogOut className="mr-2 h-4 w-4" /> Sair
+              </Button>
+            </div>
           ) : (
             <Link to="/auth">
               <Button size="sm" className="bg-badge-gradient">
-                Acesso restrito
+                Acesso Restrito
               </Button>
             </Link>
           )}
