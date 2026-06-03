@@ -72,11 +72,11 @@ function Index() {
 
             {/* PMESP Logo */}
             <div
-              className={`mx-auto mb-6 flex h-28 w-28 items-center justify-center rounded-full bg-card/30 p-2 border border-border/50 shadow-glow transition-all duration-700 ${
+              className={`mx-auto mb-6 flex h-32 w-32 items-center justify-center transition-all duration-700 ${
                 mounted ? "opacity-100 scale-100" : "opacity-0 scale-90"
               }`}
             >
-              <img src="/pmesp-logo.png" alt="Logo PMESP" className="h-full w-full object-contain" />
+              <img src="/pmesp-logo.png" alt="Logo PMESP" className="h-full w-full object-contain drop-shadow-[0_0_12px_rgba(255,255,255,0.25)]" style={{mixBlendMode: "screen"}} />
             </div>
 
             {/* Badge pill */}
@@ -94,17 +94,13 @@ function Index() {
 
             {/* Headline */}
             <h1
-              className={`font-display text-5xl font-bold uppercase leading-tight tracking-tight text-foreground md:text-7xl transition-all duration-700 delay-150 ${
+              className={`font-display text-3xl font-bold uppercase leading-snug tracking-wide text-foreground md:text-4xl transition-all duration-700 delay-150 ${
                 mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
               }`}
             >
-              Corregedoria da{" "}
-              <span className="text-foreground relative">
-                PMESP
-                <span className="absolute -inset-1 bg-white/5 blur-lg rounded-lg -z-10 animate-pulse" />
-              </span>
+              Corregedoria Polícia Militar
               <br />
-              Estado de São Paulo
+              <span className="text-muted-foreground font-medium text-2xl md:text-3xl tracking-widest">do Estado de São Paulo</span>
             </h1>
 
             {/* Subtitle */}
