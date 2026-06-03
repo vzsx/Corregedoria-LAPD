@@ -17,10 +17,13 @@ function AuthPage() {
   const { user, roles, loading: authLoading, refreshRoles } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [email, setEmail] = useState("");
+  const [loginName, setLoginName] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
-  const [badgeNumber, setBadgeNumber] = useState("");
+
+  // Normaliza o nome para ser usado como prefixo do email
+  const normalizeName = (name: string) =>
+    name.trim().toLowerCase().replace(/\s+/g, ".").replace(/[^a-z0-9.]/g, "");
 
   useEffect(() => {
     if (user && !authLoading) {
@@ -32,8 +35,9 @@ function AuthPage() {
     e.preventDefault();
     setLoading(true);
 
+    const emailFormatted = `${normalizeName(loginName)}@pmesp.sp.gov.br`;
     const { error } = await supabase.auth.signInWithPassword({
-      email: `${badgeNumber.trim()}@pmesp.sp.gov.br`,
+      email: emailFormatted,
       password,
     });
 
@@ -41,7 +45,7 @@ function AuthPage() {
       await refreshRoles();
       toast.success("Login realizado com sucesso.");
     } else {
-      toast.error(error.message);
+      toast.error("Nome ou senha incorretos.");
     }
     
     setLoading(false);
@@ -51,13 +55,14 @@ function AuthPage() {
     e.preventDefault();
     setLoading(true);
 
+    const emailFormatted = `${normalizeName(fullName)}@pmesp.sp.gov.br`;
+
     const { data, error } = await supabase.auth.signUp({
-      email: `${badgeNumber.trim()}@pmesp.sp.gov.br`,
+      email: emailFormatted,
       password,
       options: {
         data: {
           full_name: fullName,
-          badge_number: badgeNumber,
         },
       },
     });
@@ -84,7 +89,7 @@ function AuthPage() {
       const { error: profileError } = await supabase.from("profiles").insert({
         id: data.user.id,
         full_name: fullName,
-        badge_number: badgeNumber,
+        badge_number: emailFormatted,
         patente: "Oficial",
       });
 
@@ -133,13 +138,14 @@ function AuthPage() {
             <TabsContent value="signin">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="badge" className="text-xs uppercase tracking-wider text-slate-400">Número do RE (Registro Especial)</Label>
+                  <Label htmlFor="login-name" className="text-xs uppercase tracking-wider text-slate-400">Nome</Label>
                   <Input
-                    id="badge"
-                    placeholder="Ex: 123456"
-                    value={badgeNumber}
-                    onChange={(e) => setBadgeNumber(e.target.value)}
+                    id="login-name"
+                    placeholder="Ex: João Silva"
+                    value={loginName}
+                    onChange={(e) => setLoginName(e.target.value)}
                     required
+                    autoComplete="username"
                     className="bg-black border-border focus:ring-1 focus:ring-white/40 focus:border-white/50 text-white"
                   />
                 </div>
@@ -151,6 +157,7 @@ function AuthPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                    autoComplete="current-password"
                     className="bg-black border-border focus:ring-1 focus:ring-white/40 focus:border-white/50 text-white"
                   />
                 </div>
@@ -166,21 +173,11 @@ function AuthPage() {
                   <Label htmlFor="name" className="text-xs uppercase tracking-wider text-slate-400">Nome Completo</Label>
                   <Input
                     id="name"
-                    placeholder="Nome e Sobrenome"
+                    placeholder="Ex: João Silva"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     required
-                    className="bg-black border-border focus:ring-1 focus:ring-white/40 focus:border-white/50 text-white"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-badge" className="text-xs uppercase tracking-wider text-slate-400">Número do RE (Registro Especial)</Label>
-                  <Input
-                    id="signup-badge"
-                    placeholder="Ex: 123456"
-                    value={badgeNumber}
-                    onChange={(e) => setBadgeNumber(e.target.value)}
-                    required
+                    autoComplete="name"
                     className="bg-black border-border focus:ring-1 focus:ring-white/40 focus:border-white/50 text-white"
                   />
                 </div>
@@ -192,10 +189,12 @@ function AuthPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                    autoComplete="new-password"
                     className="bg-black border-border focus:ring-1 focus:ring-white/40 focus:border-white/50 text-white"
                   />
                 </div>
-                <Button type="submit" disabled={loading} className="w-full bg-white text-black hover:bg-zinc-200 hover:scale-[1.02] active:scale-[0.98] transition-all font-bold uppercase tracking-widest mt-4">
+                <p className="text-[10px] text-slate-500 pt-1">Seu nome será usado como identificador de acesso ao sistema.</p>
+                <Button type="submit" disabled={loading} className="w-full bg-white text-black hover:bg-zinc-200 hover:scale-[1.02] active:scale-[0.98] transition-all font-bold uppercase tracking-widest mt-2">
                   {loading ? "Enviando solicitação..." : "Solicitar Acesso"}
                 </Button>
               </form>
