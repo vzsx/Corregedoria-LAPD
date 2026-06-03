@@ -10,14 +10,14 @@ export function SiteHeader() {
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
       <div className="container mx-auto flex h-16 items-center justify-between px-6">
         <Link to="/" className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-md bg-badge-gradient shadow-glow">
-            <Shield className="h-5 w-5 text-primary-foreground" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-md overflow-hidden bg-card border border-border shadow-glow">
+            <img src="/corregedoria-logo.jpg" alt="Brasão Corregedoria PMESP" className="h-full w-full object-cover" />
           </div>
           <div className="flex flex-col leading-tight">
             <span className="font-display text-sm font-bold uppercase tracking-widest text-foreground">
-              LAPD · Corregedoria
+              PMESP · Corregedoria
             </span>
-            <span className="text-xs text-muted-foreground">Compton Division</span>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Corregedoria Geral</span>
           </div>
         </Link>
 

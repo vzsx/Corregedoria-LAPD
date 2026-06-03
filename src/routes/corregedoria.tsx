@@ -558,7 +558,7 @@ function Corregedoria() {
       ato_tipo_outro: "",
       ato_autoridade_nome: "",
       ato_autoridade_cargo: "",
-      ato_autoridade_unidade: "Internal Affairs Group (IAG)",
+      ato_autoridade_unidade: "Corregedoria Geral (PMESP)",
       ato_objeto_descricao: "",
       ato_fundamentacao_selecionada: [] as string[],
       ato_fundamentacao_outro: "",
@@ -587,7 +587,7 @@ function Corregedoria() {
     tipo_procedimento: "Investigação Administrativa",
     autoridade_responsavel: "",
     autoridade_patente: "",
-    autoridade_departamento: "Internal Affairs Group (IAG)",
+    autoridade_departamento: "Corregedoria Geral (PMESP)",
     investigado_badge: "",
     investigado_patente: "",
     investigado_unidade: "",
@@ -849,7 +849,7 @@ function Corregedoria() {
         ato_tipo_outro: "",
         ato_autoridade_nome: "",
         ato_autoridade_cargo: "",
-        ato_autoridade_unidade: "Internal Affairs Group (IAG)",
+        ato_autoridade_unidade: "Corregedoria Geral (PMESP)",
         ato_objeto_descricao: "",
         ato_fundamentacao_selecionada: [],
         ato_fundamentacao_complementar: "",
@@ -941,7 +941,7 @@ function Corregedoria() {
       tipo_procedimento: "Investigação Administrativa",
       autoridade_responsavel: user?.user_metadata?.full_name || "",
       autoridade_patente: "",
-      autoridade_departamento: "Internal Affairs Group (IAG)",
+      autoridade_departamento: "Corregedoria Geral (PMESP)",
       investigado_badge: "",
       investigado_patente: "",
       investigado_unidade: "",
@@ -967,7 +967,7 @@ function Corregedoria() {
       tipo_procedimento: inv.tipo_procedimento || "Investigação Administrativa",
       autoridade_responsavel: inv.autoridade_responsavel || "",
       autoridade_patente: inv.autoridade_patente || "",
-      autoridade_departamento: inv.autoridade_departamento || "Internal Affairs Group (IAG)",
+      autoridade_departamento: inv.autoridade_departamento || "Corregedoria Geral (PMESP)",
       investigado_badge: inv.investigado_badge || "",
       investigado_patente: inv.investigado_patente || "",
       investigado_unidade: inv.investigado_unidade || "",
@@ -1096,7 +1096,7 @@ function Corregedoria() {
         ato_tipo_outro: "",
         ato_autoridade_nome: "",
         ato_autoridade_cargo: "",
-        ato_autoridade_unidade: "Internal Affairs Group (IAG)",
+        ato_autoridade_unidade: "Corregedoria Geral (PMESP)",
         ato_objeto_descricao: "",
         ato_fundamentacao_selecionada: [],
         ato_fundamentacao_complementar: "",
@@ -1801,7 +1801,7 @@ function Corregedoria() {
                             </div>
                             <div className="space-y-2">
                               <Label className="text-slate-400 text-[10px] uppercase">Departamento</Label>
-                              <Input disabled value="Internal Affairs Group (IAG)" className="bg-slate-950 border-slate-800 text-slate-500 h-8 text-xs" />
+                              <Input disabled value="Corregedoria Geral (PMESP)" className="bg-slate-950 border-slate-800 text-slate-500 h-8 text-xs" />
                             </div>
                           </div>
                         </div>
@@ -2337,7 +2337,7 @@ function Corregedoria() {
                     <DialogContent className="sm:max-w-[600px] bg-[#0d141e] border-slate-800 text-slate-300">
                       <DialogHeader>
                         <div className="text-center pb-2 border-b border-slate-800">
-                          <p className="text-[9px] font-bold uppercase tracking-widest text-blue-400 mb-1">Internal Affairs Group (IAG)</p>
+                          <p className="text-[9px] font-bold uppercase tracking-widest text-blue-400 mb-1">Corregedoria Geral (PMESP)</p>
                           <DialogTitle className="text-white uppercase tracking-wider text-sm">Formulário Oficial de Abertura de Inquérito</DialogTitle>
                         </div>
                       </DialogHeader>
@@ -3008,7 +3008,7 @@ function Corregedoria() {
         <DialogContent className="sm:max-w-[600px] bg-[#0d141e] border-slate-800 text-slate-300">
           <DialogHeader>
             <div className="text-center pb-2 border-b border-slate-800">
-              <p className="text-[9px] font-bold uppercase tracking-widest text-blue-400 mb-1">Internal Affairs Group (IAG)</p>
+              <p className="text-[9px] font-bold uppercase tracking-widest text-blue-400 mb-1">Corregedoria Geral (PMESP)</p>
               <DialogTitle className="text-white uppercase tracking-wider text-sm">Editar {relatorioForm.tipo_denuncia}</DialogTitle>
             </div>
           </DialogHeader>

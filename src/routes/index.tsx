@@ -70,17 +70,26 @@ function Index() {
         <div className="container relative mx-auto px-6 py-24 md:py-32">
           <div className="mx-auto max-w-3xl text-center" ref={heroSection.ref}>
 
+            {/* PMESP Logo */}
+            <div
+              className={`mx-auto mb-6 flex h-28 w-28 items-center justify-center rounded-full bg-card/30 p-2 border border-border/50 shadow-glow transition-all duration-700 ${
+                mounted ? "opacity-100 scale-100" : "opacity-0 scale-90"
+              }`}
+            >
+              <img src="/pmesp-logo.png" alt="Logo PMESP" className="h-full w-full object-contain" />
+            </div>
+
             {/* Badge pill */}
             <div
-              className={`mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--gold)]/30 bg-card/50 px-4 py-1.5 text-xs font-medium uppercase tracking-widest text-[var(--gold)] backdrop-blur transition-all duration-700 ${
+              className={`mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card/50 px-4 py-1.5 text-xs font-medium uppercase tracking-widest text-foreground backdrop-blur transition-all duration-700 ${
                 mounted ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
               }`}
             >
               <span className="relative flex h-3 w-3 items-center justify-center">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--gold)] opacity-50" />
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-foreground opacity-50" />
                 <Shield className="h-3 w-3 relative z-10" />
               </span>
-              Internal Affairs Division
+              Corregedoria Geral PMESP
             </div>
 
             {/* Headline */}
@@ -90,12 +99,12 @@ function Index() {
               }`}
             >
               Corregedoria da{" "}
-              <span className="text-[var(--gold)] relative">
-                LAPD
-                <span className="absolute -inset-1 bg-[var(--gold)]/10 blur-lg rounded-lg -z-10 animate-pulse" />
+              <span className="text-foreground relative">
+                PMESP
+                <span className="absolute -inset-1 bg-white/5 blur-lg rounded-lg -z-10 animate-pulse" />
               </span>
               <br />
-              Compton
+              Estado de São Paulo
             </h1>
 
             {/* Subtitle */}
@@ -104,8 +113,8 @@ function Index() {
                 mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
               }`}
             >
-              Fiscalizamos a conduta dos policiais para garantir integridade,
-              transparência e justiça em cada operação no perímetro de Compton.
+              Fiscalizamos a conduta dos policiais militares para garantir integridade,
+              transparência e justiça em cada operação no Estado de São Paulo.
             </p>
 
             {/* CTA Buttons */}
@@ -173,7 +182,7 @@ function Index() {
             Quem Somos
           </h2>
           <p className="mt-4 text-muted-foreground">
-            O <span className="text-[var(--gold)] font-semibold">Internal Affairs Group (IAG)</span>, ou Assuntos Internos, é uma divisão especializada dentro de agências de aplicação da lei (polícias) encarregada de investigar suspeitas de má conduta, corrupção, uso excessivo de força ou violação de políticas por parte de seus próprios agentes. Atua como uma corregedoria, com o objetivo de manter a integridade da polícia e garantir a confiança do público.
+            A <span className="font-semibold text-foreground">Corregedoria da Polícia Militar (PMESP)</span> é o órgão encarregado de investigar suspeitas de má conduta, corrupção, uso excessivo de força ou violação de regulamentos por parte de seus próprios policiais. Seu principal objetivo é manter a integridade da corporação militar e garantir a transparência perante a sociedade.
           </p>
         </div>
 

@@ -33,7 +33,7 @@ function AuthPage() {
     setLoading(true);
 
     const { error } = await supabase.auth.signInWithPassword({
-      email: `${badgeNumber.trim()}@lapd.com`,
+      email: `${badgeNumber.trim()}@pmesp.sp.gov.br`,
       password,
     });
 
@@ -52,7 +52,7 @@ function AuthPage() {
     setLoading(true);
 
     const { data, error } = await supabase.auth.signUp({
-      email: `${badgeNumber.trim()}@lapd.com`,
+      email: `${badgeNumber.trim()}@pmesp.sp.gov.br`,
       password,
       options: {
         data: {
@@ -109,52 +109,52 @@ function AuthPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#020617] p-6 font-mono">
+    <div className="flex min-h-screen items-center justify-center bg-background p-6 font-mono">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-600/20 text-red-500 shadow-[0_0_20px_rgba(220,38,38,0.3)]">
-            <Shield className="h-8 w-8" />
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full overflow-hidden bg-card border border-border shadow-glow">
+            <img src="/corregedoria-logo.jpg" alt="Brasão Corregedoria PMESP" className="h-full w-full object-cover" />
           </div>
-          <h1 className="mt-6 font-display text-3xl font-black uppercase tracking-widest text-white">
-            Terminal IA<span className="text-red-600">G</span>
+          <h1 className="mt-6 font-display text-2xl font-black uppercase tracking-widest text-white">
+            Terminal Corregedoria
           </h1>
-          <p className="mt-2 text-xs font-medium uppercase tracking-[0.3em] text-slate-500">
-            Internal Affairs Group · LAPD
+          <p className="mt-2 text-xs font-medium uppercase tracking-[0.2em] text-slate-500">
+            Corregedoria Geral · PMESP
           </p>
         </div>
 
-        <div className="rounded-xl border border-slate-800 bg-[#0d141e] p-8 shadow-2xl">
+        <div className="rounded-xl border border-border bg-card p-8 shadow-2xl">
           <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="mb-8 grid w-full grid-cols-2 bg-slate-950 p-1">
-              <TabsTrigger value="signin" className="data-[state=active]:bg-slate-800 data-[state=active]:text-white">ENTRAR</TabsTrigger>
-              <TabsTrigger value="signup" className="data-[state=active]:bg-slate-800 data-[state=active]:text-white">CADASTRAR</TabsTrigger>
+            <TabsList className="mb-8 grid w-full grid-cols-2 bg-black border border-border p-1">
+              <TabsTrigger value="signin" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-white cursor-pointer">ENTRAR</TabsTrigger>
+              <TabsTrigger value="signup" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-white cursor-pointer">CADASTRAR</TabsTrigger>
             </TabsList>
 
             <TabsContent value="signin">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="badge">Número do Distintivo (Badge)</Label>
+                  <Label htmlFor="badge" className="text-xs uppercase tracking-wider text-slate-400">Número do RE (Registro Especial)</Label>
                   <Input
                     id="badge"
-                    placeholder="Ex: 55432"
+                    placeholder="Ex: 123456"
                     value={badgeNumber}
                     onChange={(e) => setBadgeNumber(e.target.value)}
                     required
-                    className="bg-slate-950 border-slate-800 focus:border-red-600/50"
+                    className="bg-black border-border focus:ring-1 focus:ring-white/40 focus:border-white/50 text-white"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password">Senha de Acesso</Label>
+                  <Label htmlFor="password" className="text-xs uppercase tracking-wider text-slate-400">Senha de Acesso</Label>
                   <Input
                     id="password"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="bg-slate-950 border-slate-800 focus:border-red-600/50"
+                    className="bg-black border-border focus:ring-1 focus:ring-white/40 focus:border-white/50 text-white"
                   />
                 </div>
-                <Button type="submit" disabled={loading} className="w-full bg-red-600 hover:bg-red-500 font-bold uppercase tracking-widest mt-4">
+                <Button type="submit" disabled={loading} className="w-full bg-white text-black hover:bg-zinc-200 hover:scale-[1.02] active:scale-[0.98] transition-all font-bold uppercase tracking-widest mt-4">
                   {loading ? "Processando..." : "Autenticar"}
                 </Button>
               </form>
@@ -163,39 +163,39 @@ function AuthPage() {
             <TabsContent value="signup">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Nome Completo</Label>
+                  <Label htmlFor="name" className="text-xs uppercase tracking-wider text-slate-400">Nome Completo</Label>
                   <Input
                     id="name"
-                    placeholder="Oficial Nome Sobrenome"
+                    placeholder="Nome e Sobrenome"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     required
-                    className="bg-slate-950 border-slate-800 focus:border-red-600/50"
+                    className="bg-black border-border focus:ring-1 focus:ring-white/40 focus:border-white/50 text-white"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-badge">Número do Distintivo (Badge)</Label>
+                  <Label htmlFor="signup-badge" className="text-xs uppercase tracking-wider text-slate-400">Número do RE (Registro Especial)</Label>
                   <Input
                     id="signup-badge"
-                    placeholder="Ex: 55432"
+                    placeholder="Ex: 123456"
                     value={badgeNumber}
                     onChange={(e) => setBadgeNumber(e.target.value)}
                     required
-                    className="bg-slate-950 border-slate-800 focus:border-red-600/50"
+                    className="bg-black border-border focus:ring-1 focus:ring-white/40 focus:border-white/50 text-white"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-password">Senha</Label>
+                  <Label htmlFor="signup-password" className="text-xs uppercase tracking-wider text-slate-400">Senha</Label>
                   <Input
                     id="signup-password"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="bg-slate-950 border-slate-800 focus:border-red-600/50"
+                    className="bg-black border-border focus:ring-1 focus:ring-white/40 focus:border-white/50 text-white"
                   />
                 </div>
-                <Button type="submit" disabled={loading} className="w-full bg-red-600 hover:bg-red-500 font-bold uppercase tracking-widest mt-4">
+                <Button type="submit" disabled={loading} className="w-full bg-white text-black hover:bg-zinc-200 hover:scale-[1.02] active:scale-[0.98] transition-all font-bold uppercase tracking-widest mt-4">
                   {loading ? "Enviando solicitação..." : "Solicitar Acesso"}
                 </Button>
               </form>
@@ -203,9 +203,9 @@ function AuthPage() {
           </Tabs>
         </div>
 
-        <div className="flex items-center justify-center gap-2 text-[10px] uppercase tracking-[0.2em] text-slate-600">
-          <BadgeCheck className="h-3 w-3" />
-          Sistema de Uso Restrito da Polícia de Los Angeles
+        <div className="flex items-center justify-center gap-2 text-[10px] uppercase tracking-[0.2em] text-slate-600 text-center">
+          <BadgeCheck className="h-3 w-3 flex-shrink-0" />
+          <span>Sistema de Uso Restrito da Polícia Militar de São Paulo</span>
         </div>
       </div>
     </div>

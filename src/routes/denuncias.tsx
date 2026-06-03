@@ -88,7 +88,7 @@ function Denuncias() {
       .from("denuncias")
       .insert([{
         titulo: `DENÚNCIA: ${formData.denunciado_nome || "Oficial Desconhecido"}`,
-        descricao: `Denúncia via formulário IAG. Reclamante: ${finalReclamanteNome}`,
+        descricao: `Denúncia via formulário da Corregedoria. Reclamante: ${finalReclamanteNome}`,
         policial_denunciado: formData.denunciado_nome,
         data_ocorrido: `${formData.incidente_data} ${formData.incidente_horario}`,
         contato_opcional: formData.reclamante_contato,
@@ -108,21 +108,25 @@ function Denuncias() {
   };
 
   return (
-    <div className="min-h-screen bg-[#020617] text-slate-200">
+    <div className="min-h-screen bg-background text-slate-200">
       <SiteHeader />
 
       <main className="container mx-auto max-w-3xl px-6 py-12">
         <div className="mb-12 text-center">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-red-400">
-            <ShieldAlert className="h-3 w-3" /> Canal de Ética e Corregedoria
+          {/* PMESP Logo */}
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-card/50 p-2 border border-border shadow-glow">
+            <img src="/pmesp-logo.png" alt="Logo PMESP" className="h-full w-full object-contain" />
+          </div>
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-foreground">
+            <ShieldAlert className="h-3 w-3 text-white" /> Canal de Ética e Corregedoria
           </div>
           <h1 className="font-display text-4xl font-black uppercase tracking-tighter text-white sm:text-5xl">
-            Internal Affairs Group <span className="text-red-600">(IAG)</span>
+            Corregedoria Geral <span className="text-slate-400">PMESP</span>
           </h1>
           <p className="mt-4 text-sm font-medium uppercase tracking-widest text-slate-500">
             Formulário Simplificado de Denúncia
           </p>
-          <div className="mx-auto mt-6 h-1 w-24 bg-red-600"></div>
+          <div className="mx-auto mt-6 h-1 w-24 bg-white"></div>
         </div>
 
         {submitted ? (
@@ -134,7 +138,7 @@ function Denuncias() {
               Denúncia Protocolada
             </h2>
             <p className="mt-4 leading-relaxed text-slate-400">
-              Seu relato foi recebido pelo sistema de integridade do Internal Affairs Group. 
+              Seu relato foi recebido pelo sistema de integridade da Corregedoria Geral da PMESP. 
               Um corregedor será designado para analisar as informações fornecidas.
             </p>
             <div className="mt-10 flex flex-col items-center gap-4">
@@ -425,29 +429,29 @@ function Denuncias() {
             </section>
 
             {/* 8. DECLARAÇÃO FINAL */}
-            <section className="rounded-xl border border-red-600/30 bg-red-600/5 p-6 shadow-xl">
-              <div className="mb-6 flex items-center gap-3 border-b border-red-600/20 pb-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded bg-red-600/20 text-red-400">
+            <section className="rounded-xl border border-border bg-card p-6 shadow-xl">
+              <div className="mb-6 flex items-center gap-3 border-b border-border pb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded bg-white/10 text-white">
                   <CheckSquare className="h-5 w-5" />
                 </div>
                 <h3 className="font-bold uppercase tracking-wider text-white">8. Declaração Final</h3>
               </div>
               
               <div className="space-y-6">
-                <div className="rounded-lg bg-slate-950/80 p-4 border border-red-900/30">
+                <div className="rounded-lg bg-black p-4 border border-border">
                   <p className="text-sm text-slate-300 italic">
                     "Declaro que as informações fornecidas são verdadeiras de acordo com meu conhecimento, 
                     estando ciente de que a falsidade desta declaração pode acarretar em sanções administrativas e penais."
                   </p>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-bold uppercase tracking-widest text-red-500">Assinatura / Nome Completo</Label>
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-white">Assinatura / Nome Completo</Label>
                   <Input 
                     value={formData.declaracao_assinatura}
                     onChange={(e) => setFormData({...formData, declaracao_assinatura: e.target.value})}
                     required
                     placeholder="Digite seu nome completo para assinar" 
-                    className="bg-slate-950 border-red-900/50 text-white font-serif italic text-lg" 
+                    className="bg-black border-border focus:ring-1 focus:ring-white/40 focus:border-white/50 text-white font-serif italic text-lg" 
                   />
                 </div>
               </div>
@@ -457,7 +461,7 @@ function Denuncias() {
               <Button 
                 type="submit" 
                 disabled={loading} 
-                className="w-full h-16 bg-red-600 hover:bg-red-500 text-white text-lg font-black uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(220,38,38,0.4)] transition-all hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full h-16 bg-white text-black hover:bg-zinc-200 text-lg font-black uppercase tracking-[0.2em] shadow-glow transition-all hover:scale-[1.02] active:scale-[0.98]"
               >
                 {loading ? "Protocolando..." : "Protocolar Denúncia Oficial"}
               </Button>
