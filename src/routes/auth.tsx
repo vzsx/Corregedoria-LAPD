@@ -113,7 +113,7 @@ function AuthPage() {
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
           <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full overflow-hidden bg-card border border-border shadow-glow">
-            <img src="/corregedoria-logo.jpg" alt="Brasão Corregedoria PMESP" className="h-full w-full object-cover" />
+            <img src="/corregedoria-logo.png" alt="Brasão Corregedoria PMESP" className="h-full w-full object-cover" />
           </div>
           <h1 className="mt-6 font-display text-2xl font-black uppercase tracking-widest text-white">
             Terminal Corregedoria

@@ -127,10 +127,10 @@ const STATUS_LABEL: Record<Status, string> = {
 };
 
 const STATUS_COLOR: Record<Status, string> = {
-  pendente: "bg-red-500/20 text-red-400 border-red-500/40",
-  em_analise: "bg-blue-500/20 text-blue-400 border-blue-500/40",
+  pendente: "bg-red-500/20 text-zinc-300 border-red-500/40",
+  em_analise: "bg-white/15 text-white border-white/30",
   concluida: "bg-emerald-500/20 text-emerald-400 border-emerald-500/40",
-  arquivada: "bg-slate-700/50 text-slate-400 border-slate-700",
+  arquivada: "bg-slate-700/50 text-slate-400 border-border",
 };
 
 const formatDateSafe = (dateStr: any, formatStr: string) => {
@@ -169,15 +169,15 @@ const RelatorioCard = ({
   );
 
   return (
-    <div className="rounded-lg border border-slate-800 bg-[#0d141e] overflow-hidden">
+    <div className="rounded-lg border border-border bg-card overflow-hidden">
       <div 
-        className="flex w-full items-center justify-between gap-4 p-5 text-left transition-colors hover:bg-slate-800/50 cursor-pointer"
+        className="flex w-full items-center justify-between gap-4 p-5 text-left transition-colors hover:bg-zinc-800/50 cursor-pointer"
         onClick={onToggle}
       >
         <div className="flex items-center gap-4 flex-1">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-blue-500/10">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-white/10">
             {relatorio.tipo_denuncia === "Inquérito Policial" ? (
-              <FileSignature className="h-5 w-5 text-blue-400" />
+              <FileSignature className="h-5 w-5 text-white" />
             ) : (
               <FileText className="h-5 w-5 text-emerald-400" />
             )}
@@ -185,7 +185,7 @@ const RelatorioCard = ({
           <div className="overflow-hidden">
             <div className="flex items-center gap-3 whitespace-nowrap overflow-hidden">
               <h4 className="font-bold uppercase text-white tracking-wide truncate max-w-[200px]">{relatorio.titulo}</h4>
-              <Badge variant="outline" className="text-[9px] uppercase border-slate-700 text-slate-400 bg-slate-900/50">
+              <Badge variant="outline" className="text-[9px] uppercase border-border text-slate-400 bg-zinc-900/50">
                 {relatorio.tipo_denuncia}
               </Badge>
               <Badge className={(STATUS_COLOR[relatorio.status as Status] || STATUS_COLOR.pendente) + " text-[9px] uppercase border"}>
@@ -202,10 +202,10 @@ const RelatorioCard = ({
         <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
           <div className="flex gap-1 ml-4">
             <Select value={relatorio.status} onValueChange={(v: Status) => onUpdateStatus(relatorio.id, v)}>
-              <SelectTrigger className="h-8 bg-slate-900 border-slate-800 text-[10px] text-slate-400 uppercase tracking-widest w-[140px]">
+              <SelectTrigger className="h-8 bg-zinc-900 border-border text-[10px] text-slate-400 uppercase tracking-widest w-[140px]">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-slate-900 border-slate-800 text-white">
+              <SelectContent className="bg-zinc-900 border-border text-white">
                 {Object.entries(STATUS_LABEL).map(([val, lab]) => (
                   <SelectItem key={val} value={val} className="text-[10px] uppercase">{lab}</SelectItem>
                 ))}
@@ -214,7 +214,7 @@ const RelatorioCard = ({
             <Button 
               size="sm" 
               variant="ghost" 
-              className="h-8 w-8 p-0 text-blue-500 hover:text-blue-400 hover:bg-blue-500/10"
+              className="h-8 w-8 p-0 text-white hover:text-white hover:bg-white/10"
               onClick={() => onEdit(relatorio)}
               title="Editar"
             >
@@ -234,18 +234,18 @@ const RelatorioCard = ({
       </div>
 
       {expanded && (
-        <div className="border-t border-slate-800/50 bg-slate-900/30 p-6 space-y-6">
+        <div className="border-t border-border/50 bg-zinc-900/30 p-6 space-y-6">
           <div className="grid gap-6 md:grid-cols-2">
             {/* Denúncias Vinculadas */}
-            <div className="rounded border border-slate-800 bg-slate-950/50 p-4">
+            <div className="rounded border border-border bg-black/50 p-4">
               <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400">
                 <Activity className="h-4 w-4" /> Denúncias Vinculadas
               </div>
               {linkedDenuncias.length > 0 ? (
                 <div className="space-y-2 mb-4">
                   {linkedDenuncias.map((d: any) => (
-                    <div key={d.id} className="flex items-center gap-3 rounded bg-slate-900 px-3 py-2 text-sm border border-slate-800">
-                      <Badge variant="outline" className="bg-slate-950 border-blue-900/50 text-blue-400 font-mono text-[10px]">
+                    <div key={d.id} className="flex items-center gap-3 rounded bg-zinc-900 px-3 py-2 text-sm border border-border">
+                      <Badge variant="outline" className="bg-black border-white/20 text-white font-mono text-[10px]">
                         #{d.numero_registro?.toString().padStart(4, '0')}
                       </Badge>
                       <span className="text-slate-300">{d.titulo}</span>
@@ -258,32 +258,32 @@ const RelatorioCard = ({
             <div className="flex gap-2 items-end">
               <div className="flex-1">
                 <Select value={linkDenunciaId} onValueChange={setLinkDenunciaId}>
-                  <SelectTrigger className="bg-slate-900 border-slate-800 text-slate-300 text-xs h-8">
+                  <SelectTrigger className="bg-zinc-900 border-border text-slate-300 text-xs h-8">
                     <SelectValue placeholder="Vincular denúncia..." />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-900 border-slate-800 text-slate-300">
+                  <SelectContent className="bg-zinc-900 border-border text-slate-300">
                     {availableDenuncias.map((d: any) => (
                       <SelectItem key={d.id} value={d.id}>#{d.numero_registro?.toString().padStart(4, '0')} - {d.titulo}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-              <Button size="sm" onClick={() => onLinkDenuncia(relatorio.id)} disabled={linking || !linkDenunciaId} className="h-8 bg-slate-800 hover:bg-slate-700 text-blue-400 text-[10px]">
+              <Button size="sm" onClick={() => onLinkDenuncia(relatorio.id)} disabled={linking || !linkDenunciaId} className="h-8 bg-zinc-800 hover:bg-slate-700 text-white text-[10px]">
                 {linking ? "..." : "Link"}
               </Button>
             </div>
             </div>
 
             {/* Investigações Vinculadas */}
-            <div className="rounded border border-slate-800 bg-slate-950/50 p-4">
+            <div className="rounded border border-border bg-black/50 p-4">
               <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400">
                 <Shield className="h-4 w-4" /> Investigações Vinculadas
               </div>
               {linkedInvestigacoes.length > 0 ? (
                 <div className="space-y-2 mb-4">
                   {linkedInvestigacoes.map((i: any) => (
-                    <div key={i.id} className="flex items-center gap-3 rounded bg-slate-900 px-3 py-2 text-sm border border-slate-800">
-                      <Badge variant="outline" className="bg-slate-950 border-red-900/50 text-red-400 font-mono text-[10px]">
+                    <div key={i.id} className="flex items-center gap-3 rounded bg-zinc-900 px-3 py-2 text-sm border border-border">
+                      <Badge variant="outline" className="bg-black border-zinc-700 text-zinc-300 font-mono text-[10px]">
                         #{i.numero_registro.toString().padStart(4, '0')}
                       </Badge>
                       <span className="text-slate-300">{i.titulo}</span>
@@ -296,17 +296,17 @@ const RelatorioCard = ({
             <div className="flex gap-2 items-end">
               <div className="flex-1">
                 <Select value={linkInvestigacaoId} onValueChange={setLinkInvestigacaoId}>
-                  <SelectTrigger className="bg-slate-900 border-slate-800 text-slate-300 text-xs h-8">
+                  <SelectTrigger className="bg-zinc-900 border-border text-slate-300 text-xs h-8">
                     <SelectValue placeholder="Vincular investigação..." />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-900 border-slate-800 text-slate-300">
+                  <SelectContent className="bg-zinc-900 border-border text-slate-300">
                     {availableInvestigacoes.map((i: any) => (
                       <SelectItem key={i.id} value={i.id}>#{i.numero_registro.toString().padStart(4, '0')} - {i.titulo}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-              <Button size="sm" onClick={() => onLinkInvestigacao(relatorio.id)} disabled={linking || !linkInvestigacaoId} className="h-8 bg-slate-800 hover:bg-slate-700 text-red-400 text-[10px]">
+              <Button size="sm" onClick={() => onLinkInvestigacao(relatorio.id)} disabled={linking || !linkInvestigacaoId} className="h-8 bg-zinc-800 hover:bg-slate-700 text-zinc-300 text-[10px]">
                 {linking ? "..." : "Link"}
               </Button>
             </div>
@@ -314,7 +314,7 @@ const RelatorioCard = ({
           </div>
 
           {relatorio.tipo_denuncia === "Inquérito Policial" && relatorio.dados_detalhados && (
-            <div className="space-y-6 border-b border-slate-800 pb-6">
+            <div className="space-y-6 border-b border-border pb-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <div className="border-l-2 border-red-600 pl-3 bg-red-500/5 py-2">
@@ -326,8 +326,8 @@ const RelatorioCard = ({
                       <p className="text-[10px] text-slate-400">Recebimento: <span className="text-white">{formatDateSafe(relatorio.dados_detalhados.data_recebimento, "dd/MM/yyyy")}</span></p>
                     </div>
                   </div>
-                  <div className="border-l-2 border-blue-600 pl-3 bg-blue-500/5 py-2">
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-blue-500 mb-2">1. DADOS DO RECLAMANTE</h4>
+                  <div className="border-l-2 border-zinc-500 pl-3 bg-white/5 py-2">
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-white mb-2">1. DADOS DO RECLAMANTE</h4>
                     <div className="grid grid-cols-2 gap-2">
                       <p className="text-[10px] text-slate-400">Nome: <span className="text-white">{relatorio.dados_detalhados.reclamante_nome}</span></p>
                       <p className="text-[10px] text-slate-400">ID: <span className="text-white">{relatorio.dados_detalhados.reclamante_id}</span></p>
@@ -346,14 +346,14 @@ const RelatorioCard = ({
                   </div>
                 </div>
                 <div className="space-y-4">
-                  <div className="border-l-2 border-amber-600 pl-3 bg-amber-500/5 py-2">
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-amber-500 mb-2">3. TIPO DE DENÚNCIA</h4>
-                    <Badge variant="outline" className="bg-amber-500/10 border-amber-500/30 text-amber-400 text-[10px] uppercase">
+                  <div className="border-l-2 border-zinc-600 pl-3 bg-white/5 py-2">
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-300 mb-2">3. TIPO DE DENÚNCIA</h4>
+                    <Badge variant="outline" className="bg-white/10 border-white/30 text-zinc-300 text-[10px] uppercase">
                       {relatorio.dados_detalhados.tipo_denuncia_selecionado}
                     </Badge>
                   </div>
-                  <div className="border-l-2 border-violet-600 pl-3 bg-violet-500/5 py-2">
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-violet-400 mb-2">4. INFORMAÇÕES DO INCIDENTE</h4>
+                  <div className="border-l-2 border-zinc-600 pl-3 bg-white/5 py-2">
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-300 mb-2">4. INFORMAÇÕES DO INCIDENTE</h4>
                     <div className="grid grid-cols-2 gap-2 mb-2">
                       <p className="text-[10px] text-slate-400">Data: <span className="text-white">{formatDateSafe(relatorio.dados_detalhados.incidente_data, "dd/MM/yyyy")}</span></p>
                       <p className="text-[10px] text-slate-400">Horário: <span className="text-white">{relatorio.dados_detalhados.incidente_horario}</span></p>
@@ -368,18 +368,18 @@ const RelatorioCard = ({
                         <Badge key={p} variant="outline" className="bg-emerald-500/10 border-emerald-500/30 text-emerald-400 text-[9px] uppercase">{p}</Badge>
                       ))}
                     </div>
-                    <p className="text-[10px] text-slate-400 italic bg-slate-950/40 p-1.5 rounded border border-emerald-500/10">{relatorio.dados_detalhados.provas_descricao || "Nenhuma descrição adicional."}</p>
+                    <p className="text-[10px] text-slate-400 italic bg-black/40 p-1.5 rounded border border-emerald-500/10">{relatorio.dados_detalhados.provas_descricao || "Nenhuma descrição adicional."}</p>
                   </div>
                 </div>
               </div>
               
               {relatorio.dados_detalhados.ato_id_vinculado && (
-                <div className="mt-4 p-3 rounded border border-blue-900/30 bg-blue-500/5">
-                  <h4 className="text-[9px] font-bold uppercase tracking-widest text-blue-400 mb-2 flex items-center gap-2">
+                <div className="mt-4 p-3 rounded border border-white/10 bg-white/5">
+                  <h4 className="text-[9px] font-bold uppercase tracking-widest text-white mb-2 flex items-center gap-2">
                     <LinkIcon className="h-3 w-3" /> Ato Administrativo Vinculado
                   </h4>
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="bg-slate-900 border-blue-500/30 text-blue-300 text-[10px]">
+                    <Badge variant="outline" className="bg-zinc-900 border-white/30 text-zinc-300 text-[10px]">
                       {relatorios?.find((r: Relatorio) => r.id === relatorio.dados_detalhados.ato_id_vinculado)?.titulo || "Documento não encontrado"}
                     </Badge>
                   </div>
@@ -398,12 +398,12 @@ const RelatorioCard = ({
                   <p className="text-xs text-slate-400">Ato: <span className="text-white">#{relatorio.dados_detalhados.ato_numero}</span></p>
                   <p className="text-xs text-slate-400">Emissão: <span className="text-white">{formatDateSafe(relatorio.dados_detalhados.ato_data_emissao, "dd/MM/yyyy")}</span></p>
                 </div>
-                <p className="text-xs text-slate-400 mt-2">Tipo: <Badge variant="outline" className="ml-1 text-[9px] bg-red-500/10 text-red-400 border-red-500/30">{relatorio.dados_detalhados.ato_tipo === "Outro" ? relatorio.dados_detalhados.ato_tipo_outro : relatorio.dados_detalhados.ato_tipo}</Badge></p>
+                <p className="text-xs text-slate-400 mt-2">Tipo: <Badge variant="outline" className="ml-1 text-[9px] bg-red-500/10 text-zinc-300 border-red-500/30">{relatorio.dados_detalhados.ato_tipo === "Outro" ? relatorio.dados_detalhados.ato_tipo_outro : relatorio.dados_detalhados.ato_tipo}</Badge></p>
               </div>
 
               {/* 2. AUTORIDADE */}
-              <div className="border-l-2 border-blue-600 pl-4 bg-blue-500/5 py-3">
-                <h4 className="text-[10px] font-bold uppercase tracking-widest text-blue-500 mb-2">2. AUTORIDADE EMISSORA</h4>
+              <div className="border-l-2 border-zinc-500 pl-4 bg-white/5 py-3">
+                <h4 className="text-[10px] font-bold uppercase tracking-widest text-white mb-2">2. AUTORIDADE EMISSORA</h4>
                 <div className="grid md:grid-cols-3 gap-4">
                   <p className="text-xs text-slate-400">Corregedor: <span className="text-white">{relatorio.dados_detalhados.ato_autoridade_nome}</span></p>
                   <p className="text-xs text-slate-400">Cargo: <span className="text-white">{relatorio.dados_detalhados.ato_autoridade_cargo}</span></p>
@@ -418,23 +418,23 @@ const RelatorioCard = ({
               </div>
 
               {/* 4. FUNDAMENTAÇÃO */}
-              <div className="border-l-2 border-amber-600 pl-4 bg-amber-500/5 py-3">
-                <h4 className="text-[10px] font-bold uppercase tracking-widest text-amber-500 mb-2">4. FUNDAMENTAÇÃO</h4>
+              <div className="border-l-2 border-zinc-600 pl-4 bg-white/5 py-3">
+                <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-300 mb-2">4. FUNDAMENTAÇÃO</h4>
                 <div className="flex flex-wrap gap-1 mb-3">
                   {relatorio.dados_detalhados.ato_fundamentacao_selecionada?.map((f: string) => (
-                    <Badge key={f} variant="outline" className="text-[9px] bg-amber-500/5 border-amber-500/20 text-amber-500/70">{f}</Badge>
+                    <Badge key={f} variant="outline" className="text-[9px] bg-white/5 border-white/20 text-zinc-300/70">{f}</Badge>
                   ))}
                 </div>
                 {relatorio.dados_detalhados.ato_fundamentacao_complementar && (
-                  <p className="text-xs text-slate-400 bg-slate-950/30 p-2 rounded border border-amber-500/10 italic">
+                  <p className="text-xs text-slate-400 bg-black/30 p-2 rounded border border-white/10 italic">
                     {relatorio.dados_detalhados.ato_fundamentacao_complementar}
                   </p>
                 )}
               </div>
 
               {/* 5. DECISÃO */}
-              <div className="border-l-2 border-indigo-600 pl-4 bg-indigo-500/5 py-3">
-                <h4 className="text-[10px] font-bold uppercase tracking-widest text-indigo-500 mb-2">5. DECISÃO</h4>
+              <div className="border-l-2 border-zinc-600 pl-4 bg-white/5 py-3">
+                <h4 className="text-[10px] font-bold uppercase tracking-widest text-white mb-2">5. DECISÃO</h4>
                 <p className="text-sm text-white whitespace-pre-wrap">{relatorio.dados_detalhados.ato_decisao}</p>
               </div>
 
@@ -447,7 +447,7 @@ const RelatorioCard = ({
                   ))}
                 </div>
                 {relatorio.dados_detalhados.ato_medidas_detalhamento && (
-                   <p className="text-xs text-slate-400 bg-slate-950/30 p-2 rounded border border-emerald-500/10 whitespace-pre-wrap">
+                   <p className="text-xs text-slate-400 bg-black/30 p-2 rounded border border-emerald-500/10 whitespace-pre-wrap">
                     {relatorio.dados_detalhados.ato_medidas_detalhamento}
                   </p>
                 )}
@@ -456,7 +456,7 @@ const RelatorioCard = ({
           )}
 
           <div className="pt-2">
-            <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2 border-b border-slate-800 pb-1">Conteúdo do Documento</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2 border-b border-border pb-1">Conteúdo do Documento</p>
             <p className="text-sm whitespace-pre-wrap text-slate-300 leading-relaxed font-mono mt-4">{relatorio.conteudo}</p>
           </div>
         </div>
@@ -1236,7 +1236,7 @@ function Corregedoria() {
   if (loading || fetching) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#0a0f16]">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-white" />
       </div>
     );
   }
@@ -1244,15 +1244,15 @@ function Corregedoria() {
   if (!isCorregedor && roles.includes("pending")) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#0a0f16] p-6 text-center text-slate-300">
-        <div className="max-w-md rounded-lg border border-slate-800 bg-[#0d141e] p-8 shadow-2xl">
-          <Shield className="mx-auto h-16 w-16 text-blue-500/50" />
+        <div className="max-w-md rounded-lg border border-border bg-card p-8 shadow-2xl">
+          <Shield className="mx-auto h-16 w-16 text-white/50" />
           <h1 className="mt-6 text-2xl font-bold uppercase tracking-widest text-white shadow-blue-500/20 drop-shadow-md">
             Acesso Pendente
           </h1>
           <p className="mt-4 text-slate-400">
             Sua conta de oficial está aguardando aprovação administrativa para acessar o terminal seguro.
           </p>
-          <Button onClick={handleLogout} variant="outline" className="mt-8 border-slate-700 bg-transparent text-slate-300 hover:bg-slate-800 hover:text-white">
+          <Button onClick={handleLogout} variant="outline" className="mt-8 border-border bg-transparent text-slate-300 hover:bg-zinc-800 hover:text-white">
             Voltar para o Login
           </Button>
         </div>
@@ -1264,7 +1264,7 @@ function Corregedoria() {
   if (!isCorregedor) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#0a0f16]">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-white" />
       </div>
     );
   }
@@ -1272,14 +1272,14 @@ function Corregedoria() {
   return (
     <div className="flex h-screen w-full overflow-hidden bg-[#0a0f16] text-slate-300 font-mono">
       {/* SIDEBAR */}
-      <aside className="flex w-64 flex-col border-r border-slate-800 bg-[#0d141e]">
-        <div className="flex items-center gap-3 border-b border-slate-800 p-6">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-blue-500/20">
-            <Shield className="h-6 w-6 text-blue-400" />
+      <aside className="flex w-64 flex-col border-r border-border bg-card">
+        <div className="flex items-center gap-3 border-b border-border p-6">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-white/15">
+            <Shield className="h-6 w-6 text-white" />
           </div>
           <div>
             <h1 className="text-sm font-bold uppercase tracking-widest text-white">MDT Policial</h1>
-            <p className="text-[10px] text-blue-400/70 tracking-widest">SECURE TERMINAL</p>
+            <p className="text-[10px] text-white/70 tracking-widest">SECURE TERMINAL</p>
           </div>
         </div>
 
@@ -1337,10 +1337,10 @@ function Corregedoria() {
           )}
         </nav>
 
-        <div className="border-t border-slate-800 p-4">
+        <div className="border-t border-border p-4">
           <button 
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-md px-4 py-2 text-sm text-slate-400 transition-colors hover:bg-red-500/10 hover:text-red-400"
+            className="flex w-full items-center gap-3 rounded-md px-4 py-2 text-sm text-slate-400 transition-colors hover:bg-red-500/10 hover:text-zinc-300"
           >
             <LogOut className="h-4 w-4" />
             Desconectar
@@ -1354,7 +1354,7 @@ function Corregedoria() {
       {/* MAIN CONTENT */}
       <main className="flex-1 flex flex-col overflow-hidden relative">
         {/* Header / Top Bar */}
-        <header className="flex h-20 shrink-0 items-center justify-between border-b border-slate-800 bg-[#0a0f16]/80 px-8 backdrop-blur-sm z-10">
+        <header className="flex h-20 shrink-0 items-center justify-between border-b border-border bg-[#0a0f16]/80 px-8 backdrop-blur-sm z-10">
           <div className="flex flex-col">
             <span className="text-xs font-medium tracking-widest text-slate-500 uppercase">Sistema Operacional</span>
             <h2 className="text-2xl font-bold uppercase tracking-wider text-white" style={{ textShadow: '0 0 10px rgba(59, 130, 246, 0.5)'}}>
@@ -1379,19 +1379,19 @@ function Corregedoria() {
                   title="Total de Denúncias" 
                   value={denuncias.length.toString()} 
                   icon={Activity} 
-                  color="text-blue-400" 
+                  color="text-white" 
                 />
                 <StatCard 
                   title="Investigações Ativas" 
                   value={investigacoes.filter(i => i.status !== "concluida" && i.status !== "arquivada").length.toString()} 
                   icon={Shield} 
-                  color="text-red-400" 
+                  color="text-zinc-300" 
                 />
                 <StatCard 
                   title="Inquéritos Policiais" 
                   value={relatorios.filter(r => r.tipo_denuncia === "Inquérito Policial").length.toString()} 
                   icon={FileSignature} 
-                  color="text-blue-400" 
+                  color="text-white" 
                 />
                 <StatCard 
                   title="Atos Administrativos" 
@@ -1403,13 +1403,13 @@ function Corregedoria() {
                   title="Aguardando Revisão" 
                   value={relatorios.filter(r => r.status === "pendente").length.toString()} 
                   icon={Shield} 
-                  color="text-amber-400" 
+                  color="text-zinc-300" 
                 />
               </div>
 
               {/* Recent Records */}
               <div>
-                <div className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-blue-400">
+                <div className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-white">
                   <Shield className="h-4 w-4" />
                   Registros Recentes
                 </div>
@@ -1420,7 +1420,7 @@ function Corregedoria() {
                     .slice(0, 5)
                     .map((item) => {
                       return (
-                        <div key={item.id} className="flex flex-col gap-1 rounded-lg border border-slate-800 bg-[#0d141e] p-5">
+                        <div key={item.id} className="flex flex-col gap-1 rounded-lg border border-border bg-card p-5">
                           <div className="flex items-center justify-between">
                             <h4 className="font-bold uppercase text-white tracking-wide">
                               Denúncia #{item.numero_registro?.toString().padStart(4, '0')} - {item.titulo}
@@ -1436,7 +1436,7 @@ function Corregedoria() {
                       );
                     })}
                   {denuncias.filter(d => d.status === "pendente").length === 0 && (
-                    <div className="rounded-lg border border-slate-800 border-dashed bg-[#0d141e]/50 p-8 text-center text-slate-500">
+                    <div className="rounded-lg border border-border border-dashed bg-card/50 p-8 text-center text-slate-500">
                       Nenhuma denúncia pendente no momento.
                     </div>
                   )}
@@ -1448,7 +1448,7 @@ function Corregedoria() {
           {/* DENUNCIAS TAB (OCORRÊNCIAS) */}
           {activeTab === "denuncias" && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="flex flex-col gap-4 border-b border-slate-800 pb-4">
+              <div className="flex flex-col gap-4 border-b border-border pb-4">
                 <h3 className="text-lg font-bold uppercase tracking-wider text-white">Registro de Denúncias</h3>
                 
                 <div className="flex flex-wrap items-center gap-2">
@@ -1456,7 +1456,7 @@ function Corregedoria() {
                   <Button 
                     size="sm" 
                     variant="outline"
-                    className={`font-mono text-xs h-8 ${denunciaFilter === "todas" ? "bg-slate-700 text-white border-slate-600" : "bg-transparent text-slate-400 border-slate-800 hover:text-white"}`}
+                    className={`font-mono text-xs h-8 ${denunciaFilter === "todas" ? "bg-slate-700 text-white border-slate-600" : "bg-transparent text-slate-400 border-border hover:text-white"}`}
                     onClick={() => setDenunciaFilter("todas")}
                   >
                     TODAS
@@ -1466,7 +1466,7 @@ function Corregedoria() {
                       key={status}
                       size="sm" 
                       variant="outline"
-                      className={`font-mono text-xs h-8 ${denunciaFilter === status ? STATUS_COLOR[status].split(" ")[0] + " text-white border-transparent" : "bg-transparent text-slate-400 border-slate-800 hover:text-white"}`}
+                      className={`font-mono text-xs h-8 ${denunciaFilter === status ? STATUS_COLOR[status].split(" ")[0] + " text-white border-transparent" : "bg-transparent text-slate-400 border-border hover:text-white"}`}
                       onClick={() => setDenunciaFilter(status)}
                     >
                       {STATUS_LABEL[status].toUpperCase()}
@@ -1476,7 +1476,7 @@ function Corregedoria() {
               </div>
 
               {denuncias.filter(d => denunciaFilter === "todas" || d.status === denunciaFilter).length === 0 ? (
-                <div className="rounded-lg border border-slate-800 border-dashed bg-[#0d141e]/50 p-12 text-center text-slate-500">
+                <div className="rounded-lg border border-border border-dashed bg-card/50 p-12 text-center text-slate-500">
                   Nenhuma denúncia encontrada com o status atual.
                 </div>
               ) : (
@@ -1495,14 +1495,14 @@ function Corregedoria() {
                     );
 
                     return (
-                      <div key={d.id} className="rounded-lg border border-slate-800 bg-[#0d141e] overflow-hidden">
+                      <div key={d.id} className="rounded-lg border border-border bg-card overflow-hidden">
                         <button
                           onClick={() => setExpandedId(expanded ? null : d.id)}
-                          className="flex w-full items-start justify-between gap-4 p-5 text-left transition-colors hover:bg-slate-800/50"
+                          className="flex w-full items-start justify-between gap-4 p-5 text-left transition-colors hover:bg-zinc-800/50"
                         >
                           <div className="flex-1 min-w-0">
                             <div className="flex flex-wrap items-center gap-3 mb-2">
-                              <Badge variant="outline" className="bg-slate-900 border-blue-900/50 text-blue-400 font-mono">
+                              <Badge variant="outline" className="bg-zinc-900 border-white/20 text-white font-mono">
                                 #{d.numero_registro?.toString().padStart(4, '0')}
                               </Badge>
                               <h3 className="font-bold uppercase text-white tracking-wide">
@@ -1520,10 +1520,10 @@ function Corregedoria() {
                         </button>
 
                         {expanded && (
-                          <div className="space-y-6 border-t border-slate-800 bg-slate-900/30 p-6">
+                          <div className="space-y-6 border-t border-border bg-zinc-900/30 p-6">
                             
                             {/* Anexos de Relatório */}
-                            <div className="rounded border border-slate-800 bg-slate-950/50 p-4">
+                            <div className="rounded border border-border bg-black/50 p-4">
                               <div className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400">
                                 <LinkIcon className="h-4 w-4" /> Documentos Anexados
                               </div>
@@ -1531,22 +1531,22 @@ function Corregedoria() {
                                {linkedRelatorios.length > 0 ? (
                                  <div className="space-y-2 mb-4">
                                    {linkedRelatorios.map(r => (
-                                     <div key={r.id} className="flex items-center justify-between rounded bg-slate-900 px-3 py-2 text-sm border border-slate-800">
+                                     <div key={r.id} className="flex items-center justify-between rounded bg-zinc-900 px-3 py-2 text-sm border border-border">
                                        <div className="flex items-center gap-3">
                                          {r.tipo_denuncia === "Inquérito Policial" ? (
-                                           <FileSignature className="h-4 w-4 text-blue-400" />
+                                           <FileSignature className="h-4 w-4 text-white" />
                                          ) : (
                                            <FileText className="h-4 w-4 text-emerald-400" />
                                          )}
                                          <span className="text-slate-300 font-bold">{r.titulo}</span>
-                                         <Badge variant="outline" className="text-[9px] uppercase border-slate-800 text-slate-500">
+                                         <Badge variant="outline" className="text-[9px] uppercase border-border text-slate-500">
                                            {r.tipo_denuncia}
                                          </Badge>
                                        </div>
                                        <Button 
                                          size="sm" 
                                          variant="ghost" 
-                                         className="h-7 text-xs text-blue-400 hover:text-blue-300 hover:bg-blue-500/10"
+                                         className="h-7 text-xs text-white hover:text-zinc-300 hover:bg-white/10"
                                          onClick={() => {
                                            setActiveTab(r.tipo_denuncia === "Inquérito Policial" ? "inqueritos" : "atos");
                                            setExpandedId(r.id);
@@ -1564,10 +1564,10 @@ function Corregedoria() {
                               <div className="flex gap-2 items-end">
                                 <div className="flex-1">
                                   <Select value={linkRelatorioId} onValueChange={setLinkRelatorioId}>
-                                    <SelectTrigger className="bg-slate-900 border-slate-800 text-slate-300 text-xs">
+                                    <SelectTrigger className="bg-zinc-900 border-border text-slate-300 text-xs">
                                       <SelectValue placeholder="Selecione um documento para vincular..." />
                                     </SelectTrigger>
-                                    <SelectContent className="bg-slate-900 border-slate-800 text-slate-300">
+                                    <SelectContent className="bg-zinc-900 border-border text-slate-300">
                                       {availableRelatorios.map(r => (
                                         <SelectItem key={r.id} value={r.id}>{r.titulo} - {r.oficial}</SelectItem>
                                       ))}
@@ -1578,7 +1578,7 @@ function Corregedoria() {
                                   size="sm" 
                                   onClick={() => handleLinkRelatorio(d.id)}
                                   disabled={linking || !linkRelatorioId}
-                                  className="bg-slate-800 hover:bg-slate-700 text-blue-400"
+                                  className="bg-zinc-800 hover:bg-slate-700 text-white"
                                 >
                                   {linking ? "Vinculando..." : "Vincular"}
                                 </Button>
@@ -1589,8 +1589,8 @@ function Corregedoria() {
                             {d.dados_detalhados && (
                               <div className="mt-4 space-y-4 animate-in fade-in duration-500">
                                 <div className="grid md:grid-cols-2 gap-4">
-                                  <div className="border-l-2 border-blue-500 pl-3 bg-blue-500/5 py-2">
-                                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-blue-500 mb-2">1. DADOS DO DENUNCIANTE</h4>
+                                  <div className="border-l-2 border-blue-500 pl-3 bg-white/5 py-2">
+                                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-white mb-2">1. DADOS DO DENUNCIANTE</h4>
                                     <p className="text-xs text-slate-400">Nome: <span className="text-white">{d.dados_detalhados.reclamante_nome}</span></p>
                                     <p className="text-xs text-slate-400">ID: <span className="text-white">{d.dados_detalhados.reclamante_id}</span></p>
                                     <p className="text-xs text-slate-400">Contato: <span className="text-white">{d.dados_detalhados.reclamante_contato}</span></p>
@@ -1604,14 +1604,14 @@ function Corregedoria() {
                                   </div>
                                 </div>
 
-                                <div className="border-l-2 border-amber-500 pl-3 bg-amber-500/5 py-2">
-                                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-amber-500 mb-2">3. TIPOS DE VIOLAÇÃO</h4>
+                                <div className="border-l-2 border-amber-500 pl-3 bg-white/5 py-2">
+                                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-300 mb-2">3. TIPOS DE VIOLAÇÃO</h4>
                                   <div className="flex flex-wrap gap-1">
                                     {(d.dados_detalhados.tipo_denuncia || d.dados_detalhados.tipo_denuncia)?.map((t: string) => (
-                                      <Badge key={t} variant="outline" className="text-[9px] bg-amber-500/10 border-amber-500/30 text-amber-400 uppercase">{t}</Badge>
+                                      <Badge key={t} variant="outline" className="text-[9px] bg-white/10 border-white/30 text-zinc-300 uppercase">{t}</Badge>
                                     ))}
                                     {(d.dados_detalhados.tipo_denuncia_outro || d.dados_detalhados.tipo_denuncia_outro) && (
-                                      <Badge variant="outline" className="text-[9px] bg-slate-800 text-slate-400">
+                                      <Badge variant="outline" className="text-[9px] bg-zinc-800 text-slate-400">
                                         {d.dados_detalhados.tipo_denuncia_outro || d.dados_detalhados.tipo_denuncia_outro}
                                       </Badge>
                                     )}
@@ -1619,8 +1619,8 @@ function Corregedoria() {
                                 </div>
 
                                 <div className="grid md:grid-cols-2 gap-4">
-                                  <div className="border-l-2 border-indigo-500 pl-3 bg-indigo-500/5 py-2">
-                                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-indigo-500 mb-2">4. INF. OCORRIDO</h4>
+                                  <div className="border-l-2 border-indigo-500 pl-3 bg-white/5 py-2">
+                                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-white mb-2">4. INF. OCORRIDO</h4>
                                     <p className="text-xs text-slate-400">Data: <span className="text-white">{d.dados_detalhados.incidente_data}</span></p>
                                     <p className="text-xs text-slate-400">Hora: <span className="text-white">{d.dados_detalhados.incidente_horario}</span></p>
                                     <p className="text-xs text-slate-400">Local: <span className="text-white">{d.dados_detalhados.incidente_local}</span></p>
@@ -1638,10 +1638,10 @@ function Corregedoria() {
                                     {d.dados_detalhados.provas_selecionadas?.map((p: string) => (
                                       <Badge key={p} variant="outline" className="text-[9px] bg-purple-500/10 border-purple-500/30 text-purple-400 uppercase">{p}</Badge>
                                     ))}
-                                    {d.dados_detalhados.provas_outro && <Badge variant="outline" className="text-[9px] bg-slate-800 text-slate-400">{d.dados_detalhados.provas_outro}</Badge>}
+                                    {d.dados_detalhados.provas_outro && <Badge variant="outline" className="text-[9px] bg-zinc-800 text-slate-400">{d.dados_detalhados.provas_outro}</Badge>}
                                   </div>
                                   {d.dados_detalhados.provas_descricao && (
-                                    <p className="text-xs text-slate-400 italic bg-slate-950/50 p-2 rounded border border-purple-500/10 whitespace-pre-wrap">{d.dados_detalhados.provas_descricao}</p>
+                                    <p className="text-xs text-slate-400 italic bg-black/50 p-2 rounded border border-purple-500/10 whitespace-pre-wrap">{d.dados_detalhados.provas_descricao}</p>
                                   )}
                                 </div>
 
@@ -1677,10 +1677,10 @@ function Corregedoria() {
                                   defaultValue={d.status}
                                   onValueChange={(v) => updateStatus(d.id, v as Status)}
                                 >
-                                  <SelectTrigger className="bg-slate-950 border-slate-800 text-slate-300"><SelectValue /></SelectTrigger>
-                                  <SelectContent className="bg-slate-900 border-slate-800 text-slate-300">
+                                  <SelectTrigger className="bg-black border-border text-slate-300"><SelectValue /></SelectTrigger>
+                                  <SelectContent className="bg-zinc-900 border-border text-slate-300">
                                     {(Object.keys(STATUS_LABEL) as Status[]).map((s) => (
-                                      <SelectItem key={s} value={s} className="hover:bg-slate-800">{STATUS_LABEL[s]}</SelectItem>
+                                      <SelectItem key={s} value={s} className="hover:bg-zinc-800">{STATUS_LABEL[s]}</SelectItem>
                                     ))}
                                   </SelectContent>
                                 </Select>
@@ -1692,12 +1692,12 @@ function Corregedoria() {
                                 defaultValue={d.notas_internas ?? ""}
                                 rows={4}
                                 id={`notas-${d.id}`}
-                                className="bg-slate-950 border-slate-800 text-slate-300 placeholder:text-slate-700"
+                                className="bg-black border-border text-slate-300 placeholder:text-slate-700"
                                 placeholder="Observações da investigação..."
                               />
                               <Button
                                 size="sm"
-                                className="mt-3 bg-slate-800 hover:bg-slate-700 text-white"
+                                className="mt-3 bg-zinc-800 hover:bg-slate-700 text-white"
                                 onClick={() => {
                                   const el = document.getElementById(`notas-${d.id}`) as HTMLTextAreaElement;
                                   updateNotas(d.id, el.value);
@@ -1718,7 +1718,7 @@ function Corregedoria() {
 
           {activeTab === "investigacoes" && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="flex flex-col gap-4 border-b border-slate-800 pb-4">
+              <div className="flex flex-col gap-4 border-b border-border pb-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-bold uppercase tracking-wider text-white">Investigações Internas</h3>
                   
@@ -1733,7 +1733,7 @@ function Corregedoria() {
                         Iniciar Investigação
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[600px] bg-[#0d141e] border-slate-800 text-slate-300">
+                    <DialogContent className="sm:max-w-[600px] bg-card border-border text-slate-300">
                       <DialogHeader>
                         <DialogTitle className="text-white uppercase tracking-wider">
                           {editingInvestigacaoId ? "Editar Investigação Interna" : "Nova Investigação Interna"}
@@ -1749,17 +1749,17 @@ function Corregedoria() {
                               value={investigacaoForm.titulo} 
                               onChange={(e) => setInvestigacaoForm({...investigacaoForm, titulo: e.target.value})}
                               placeholder="Ex: Operação Limpeza"
-                              className="bg-slate-950 border-slate-800 text-white h-8 text-xs" 
+                              className="bg-black border-border text-white h-8 text-xs" 
                             />
                           </div>
                           <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                               <Label className="text-slate-400 text-[10px] uppercase">Número do Inquérito</Label>
-                              <Input disabled value="AUTO-GERADO" className="bg-slate-950 border-slate-800 text-slate-500 h-8 text-xs" />
+                              <Input disabled value="AUTO-GERADO" className="bg-black border-border text-slate-500 h-8 text-xs" />
                             </div>
                             <div className="space-y-2">
                               <Label className="text-slate-400 text-[10px] uppercase">Data de Abertura</Label>
-                              <Input disabled value={format(new Date(), "dd/MM/yyyy")} className="bg-slate-950 border-slate-800 text-slate-500 h-8 text-xs" />
+                              <Input disabled value={format(new Date(), "dd/MM/yyyy")} className="bg-black border-border text-slate-500 h-8 text-xs" />
                             </div>
                           </div>
                           <div className="space-y-2">
@@ -1771,7 +1771,7 @@ function Corregedoria() {
                             >
                               {["Investigação Administrativa", "Investigação Disciplinar", "Investigação Criminal Interna"].map(tipo => (
                                 <div key={tipo} className="flex items-center space-x-2">
-                                  <RadioGroupItem value={tipo} id={tipo} className="border-slate-700 text-red-600" />
+                                  <RadioGroupItem value={tipo} id={tipo} className="border-border text-red-600" />
                                   <Label htmlFor={tipo} className="text-xs text-slate-300 font-normal">{tipo}</Label>
                                 </div>
                               ))}
@@ -1780,14 +1780,14 @@ function Corregedoria() {
                         </div>
 
                         {/* 2. AUTORIDADE RESPONSÁVEL */}
-                        <div className="space-y-4 border-l-2 border-blue-600 pl-4 bg-blue-500/5 py-2">
-                          <h4 className="text-xs font-bold uppercase tracking-widest text-blue-500">2. AUTORIDADE RESPONSÁVEL</h4>
+                        <div className="space-y-4 border-l-2 border-zinc-500 pl-4 bg-white/5 py-2">
+                          <h4 className="text-xs font-bold uppercase tracking-widest text-white">2. AUTORIDADE RESPONSÁVEL</h4>
                           <div className="space-y-2">
                             <Label className="text-slate-400 text-[10px] uppercase">Corregedor / Investigador Responsável</Label>
                             <Input 
                               value={investigacaoForm.autoridade_responsavel} 
                               onChange={(e) => setInvestigacaoForm({...investigacaoForm, autoridade_responsavel: e.target.value})}
-                              className="bg-slate-950 border-slate-800 text-white h-8 text-xs" 
+                              className="bg-black border-border text-white h-8 text-xs" 
                             />
                           </div>
                           <div className="grid grid-cols-2 gap-4">
@@ -1796,12 +1796,12 @@ function Corregedoria() {
                               <Input 
                                 value={investigacaoForm.autoridade_patente} 
                                 onChange={(e) => setInvestigacaoForm({...investigacaoForm, autoridade_patente: e.target.value})}
-                                className="bg-slate-950 border-slate-800 text-white h-8 text-xs" 
+                                className="bg-black border-border text-white h-8 text-xs" 
                               />
                             </div>
                             <div className="space-y-2">
                               <Label className="text-slate-400 text-[10px] uppercase">Departamento</Label>
-                              <Input disabled value="Corregedoria Geral (PMESP)" className="bg-slate-950 border-slate-800 text-slate-500 h-8 text-xs" />
+                              <Input disabled value="Corregedoria Geral (PMESP)" className="bg-black border-border text-slate-500 h-8 text-xs" />
                             </div>
                           </div>
                         </div>
@@ -1815,7 +1815,7 @@ function Corregedoria() {
                               <Input 
                                 value={investigacaoForm.investigado} 
                                 onChange={(e) => setInvestigacaoForm({...investigacaoForm, investigado: e.target.value})}
-                                className="bg-slate-950 border-slate-800 text-white h-8 text-xs" 
+                                className="bg-black border-border text-white h-8 text-xs" 
                               />
                             </div>
                             <div className="space-y-2">
@@ -1823,7 +1823,7 @@ function Corregedoria() {
                               <Input 
                                 value={investigacaoForm.investigado_badge} 
                                 onChange={(e) => setInvestigacaoForm({...investigacaoForm, investigado_badge: e.target.value})}
-                                className="bg-slate-950 border-slate-800 text-white h-8 text-xs" 
+                                className="bg-black border-border text-white h-8 text-xs" 
                               />
                             </div>
                           </div>
@@ -1833,7 +1833,7 @@ function Corregedoria() {
                               <Input 
                                 value={investigacaoForm.investigado_patente} 
                                 onChange={(e) => setInvestigacaoForm({...investigacaoForm, investigado_patente: e.target.value})}
-                                className="bg-slate-950 border-slate-800 text-white h-8 text-xs" 
+                                className="bg-black border-border text-white h-8 text-xs" 
                               />
                             </div>
                             <div className="space-y-2">
@@ -1841,15 +1841,15 @@ function Corregedoria() {
                               <Input 
                                 value={investigacaoForm.investigado_unidade} 
                                 onChange={(e) => setInvestigacaoForm({...investigacaoForm, investigado_unidade: e.target.value})}
-                                className="bg-slate-950 border-slate-800 text-white h-8 text-xs" 
+                                className="bg-black border-border text-white h-8 text-xs" 
                               />
                             </div>
                           </div>
                         </div>
 
                         {/* 4. ORIGEM DA INVESTIGAÇÃO */}
-                        <div className="space-y-4 border-l-2 border-amber-600 pl-4 bg-amber-500/5 py-2">
-                          <h4 className="text-xs font-bold uppercase tracking-widest text-amber-500">4. ORIGEM DA INVESTIGAÇÃO</h4>
+                        <div className="space-y-4 border-l-2 border-zinc-600 pl-4 bg-white/5 py-2">
+                          <h4 className="text-xs font-bold uppercase tracking-widest text-zinc-300">4. ORIGEM DA INVESTIGAÇÃO</h4>
                           <RadioGroup 
                             value={investigacaoForm.origem_caso} 
                             onValueChange={(v) => setInvestigacaoForm({...investigacaoForm, origem_caso: v})}
@@ -1857,7 +1857,7 @@ function Corregedoria() {
                           >
                             {["Denúncia de civil", "Denúncia interna", "Auditoria interna", "Supervisão superior", "Análise de bodycam / evidências", "Outro"].map(origem => (
                               <div key={origem} className="flex items-center space-x-2">
-                                <RadioGroupItem value={origem} id={`origem-${origem}`} className="border-slate-700 text-amber-600" />
+                                <RadioGroupItem value={origem} id={`origem-${origem}`} className="border-border text-amber-600" />
                                 <Label htmlFor={`origem-${origem}`} className="text-xs text-slate-300 font-normal">{origem}</Label>
                               </div>
                             ))}
@@ -1867,15 +1867,15 @@ function Corregedoria() {
                               placeholder="Especifique a origem..." 
                               value={investigacaoForm.origem_outro}
                               onChange={(e) => setInvestigacaoForm({...investigacaoForm, origem_outro: e.target.value})}
-                              className="bg-slate-950 border-slate-800 text-white h-8 text-xs" 
+                              className="bg-black border-border text-white h-8 text-xs" 
                             />
                           )}
                           <div className="grid grid-cols-2 gap-4 mt-2">
                             <div className="space-y-2">
                               <Label className="text-slate-400 text-[10px] uppercase">Vincular Denúncia</Label>
                               <Select value={investigacaoForm.denuncia_id} onValueChange={(v) => setInvestigacaoForm({...investigacaoForm, denuncia_id: v})}>
-                                <SelectTrigger className="bg-slate-950 border-slate-800 text-white h-8 text-xs"><SelectValue placeholder="Selecione..." /></SelectTrigger>
-                                <SelectContent className="bg-slate-900 border-slate-800 text-white">
+                                <SelectTrigger className="bg-black border-border text-white h-8 text-xs"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                                <SelectContent className="bg-zinc-900 border-border text-white">
                                   {denuncias.map(d => <SelectItem key={d.id} value={d.id}>#{d.numero_registro} - {d.titulo}</SelectItem>)}
                                 </SelectContent>
                               </Select>
@@ -1883,8 +1883,8 @@ function Corregedoria() {
                             <div className="space-y-2">
                               <Label className="text-slate-400 text-[10px] uppercase">Vincular Inquérito (Opcional)</Label>
                               <Select value={investigacaoForm.relatorio_id_ip} onValueChange={(v) => setInvestigacaoForm({...investigacaoForm, relatorio_id_ip: v})}>
-                                <SelectTrigger className="bg-slate-950 border-slate-800 text-white h-8 text-xs"><SelectValue placeholder="Selecione..." /></SelectTrigger>
-                                <SelectContent className="bg-slate-900 border-slate-800 text-white">
+                                <SelectTrigger className="bg-black border-border text-white h-8 text-xs"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                                <SelectContent className="bg-zinc-900 border-border text-white">
                                   <SelectItem value="none" className="text-slate-500 italic">Nenhum</SelectItem>
                                   {relatorios.filter(r => r.tipo_denuncia === "Inquérito Policial").map(r => <SelectItem key={r.id} value={r.id}>{r.titulo}</SelectItem>)}
                                 </SelectContent>
@@ -1893,8 +1893,8 @@ function Corregedoria() {
                             <div className="space-y-2">
                               <Label className="text-slate-400 text-[10px] uppercase">Vincular Ato Adm. (Opcional)</Label>
                               <Select value={investigacaoForm.relatorio_id_ato} onValueChange={(v) => setInvestigacaoForm({...investigacaoForm, relatorio_id_ato: v})}>
-                                <SelectTrigger className="bg-slate-950 border-slate-800 text-white h-8 text-xs"><SelectValue placeholder="Selecione..." /></SelectTrigger>
-                                <SelectContent className="bg-slate-900 border-slate-800 text-white">
+                                <SelectTrigger className="bg-black border-border text-white h-8 text-xs"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                                <SelectContent className="bg-zinc-900 border-border text-white">
                                   <SelectItem value="none" className="text-slate-500 italic">Nenhum</SelectItem>
                                   {relatorios.filter(r => r.tipo_denuncia === "Ato Administrativo").map(r => <SelectItem key={r.id} value={r.id}>{r.titulo}</SelectItem>)}
                                 </SelectContent>
@@ -1910,7 +1910,7 @@ function Corregedoria() {
                             rows={4} 
                             value={investigacaoForm.descricao}
                             onChange={(e) => setInvestigacaoForm({...investigacaoForm, descricao: e.target.value})}
-                            className="bg-slate-950 border-slate-800 text-white text-xs" 
+                            className="bg-black border-border text-white text-xs" 
                             placeholder="Descreva o que aconteceu..."
                           />
                         </div>
@@ -1922,7 +1922,7 @@ function Corregedoria() {
                             rows={3} 
                             value={investigacaoForm.fundamentacao}
                             onChange={(e) => setInvestigacaoForm({...investigacaoForm, fundamentacao: e.target.value})}
-                            className="bg-slate-950 border-slate-800 text-white text-xs" 
+                            className="bg-black border-border text-white text-xs" 
                             placeholder="Motivo que justifica a abertura..."
                           />
                         </div>
@@ -1952,7 +1952,7 @@ function Corregedoria() {
                                     }
                                     setInvestigacaoForm({...investigacaoForm, medidas_iniciais: current});
                                   }}
-                                  className="border-slate-700 data-[state=checked]:bg-emerald-600" 
+                                  className="border-border data-[state=checked]:bg-emerald-600" 
                                 />
                                 <Label htmlFor={`medida-${medida}`} className="text-xs text-slate-300 font-normal">{medida}</Label>
                               </div>
@@ -1963,7 +1963,7 @@ function Corregedoria() {
                               placeholder="Especifique a medida..." 
                               value={investigacaoForm.medidas_outro}
                               onChange={(e) => setInvestigacaoForm({...investigacaoForm, medidas_outro: e.target.value})}
-                              className="bg-slate-950 border-slate-800 text-white h-8 text-xs" 
+                              className="bg-black border-border text-white h-8 text-xs" 
                             />
                           )}
                           <div className="space-y-2 mt-2">
@@ -1972,17 +1972,17 @@ function Corregedoria() {
                               rows={2} 
                               value={investigacaoForm.detalhes_adicionais}
                               onChange={(e) => setInvestigacaoForm({...investigacaoForm, detalhes_adicionais: e.target.value})}
-                              className="bg-slate-950 border-slate-800 text-white text-xs" 
+                              className="bg-black border-border text-white text-xs" 
                             />
                           </div>
                         </div>
 
-                        <div className="pt-4 flex justify-between items-center border-t border-slate-800">
+                        <div className="pt-4 flex justify-between items-center border-t border-border">
                           <div className="space-y-1">
                             <Label className="text-[10px] text-slate-500 uppercase">Status Inicial</Label>
                             <Select value={investigacaoForm.status} onValueChange={(v: Status) => setInvestigacaoForm({...investigacaoForm, status: v})}>
-                              <SelectTrigger className="bg-slate-950 border-slate-800 text-white h-8 text-xs w-32"><SelectValue /></SelectTrigger>
-                              <SelectContent className="bg-slate-900 border-slate-800 text-white">
+                              <SelectTrigger className="bg-black border-border text-white h-8 text-xs w-32"><SelectValue /></SelectTrigger>
+                              <SelectContent className="bg-zinc-900 border-border text-white">
                                 {Object.entries(STATUS_LABEL).map(([val, lab]) => <SelectItem key={val} value={val}>{lab}</SelectItem>)}
                               </SelectContent>
                             </Select>
@@ -2001,7 +2001,7 @@ function Corregedoria() {
                   <Button 
                     size="sm" 
                     variant="outline"
-                    className={`font-mono text-xs h-8 ${investigacaoFilter === "todas" ? "bg-slate-700 text-white border-slate-600" : "bg-transparent text-slate-400 border-slate-800 hover:text-white"}`}
+                    className={`font-mono text-xs h-8 ${investigacaoFilter === "todas" ? "bg-slate-700 text-white border-slate-600" : "bg-transparent text-slate-400 border-border hover:text-white"}`}
                     onClick={() => setInvestigacaoFilter("todas")}
                   >
                     TODAS
@@ -2011,7 +2011,7 @@ function Corregedoria() {
                       key={status}
                       size="sm" 
                       variant="outline"
-                      className={`font-mono text-xs h-8 ${investigacaoFilter === status ? STATUS_COLOR[status].split(" ")[0] + " text-white border-transparent" : "bg-transparent text-slate-400 border-slate-800 hover:text-white"}`}
+                      className={`font-mono text-xs h-8 ${investigacaoFilter === status ? STATUS_COLOR[status].split(" ")[0] + " text-white border-transparent" : "bg-transparent text-slate-400 border-border hover:text-white"}`}
                       onClick={() => setInvestigacaoFilter(status)}
                     >
                       {STATUS_LABEL[status].toUpperCase()}
@@ -2021,7 +2021,7 @@ function Corregedoria() {
               </div>
 
               {investigacoes.filter(i => investigacaoFilter === "todas" || i.status === investigacaoFilter).length === 0 ? (
-                <div className="rounded-lg border border-slate-800 border-dashed bg-[#0d141e]/50 p-12 text-center text-slate-500">
+                <div className="rounded-lg border border-border border-dashed bg-card/50 p-12 text-center text-slate-500">
                   Nenhuma investigação encontrada com o status atual.
                 </div>
               ) : (
@@ -2045,14 +2045,14 @@ function Corregedoria() {
                       );
 
                       return (
-                        <div key={inv.id} className="rounded-lg border border-slate-800 bg-[#0d141e] overflow-hidden">
+                        <div key={inv.id} className="rounded-lg border border-border bg-card overflow-hidden">
                           <button 
                             onClick={() => setExpandedId(expanded ? null : inv.id)}
-                            className="flex w-full items-start justify-between gap-4 p-5 text-left transition-colors hover:bg-slate-800/50"
+                            className="flex w-full items-start justify-between gap-4 p-5 text-left transition-colors hover:bg-zinc-800/50"
                           >
                             <div className="flex-1">
                               <div className="flex flex-wrap items-center gap-3 mb-2">
-                                <Badge variant="outline" className="bg-slate-900 border-red-900/50 text-red-400 font-mono">
+                                <Badge variant="outline" className="bg-zinc-900 border-zinc-700 text-zinc-300 font-mono">
                                   #{inv.numero_registro.toString().padStart(4, '0')}
                                 </Badge>
                                 <h3 className="font-bold uppercase text-white tracking-wide">{inv.titulo}</h3>
@@ -2069,7 +2069,7 @@ function Corregedoria() {
                                 <Button 
                                   size="icon" 
                                   variant="ghost" 
-                                  className="h-8 w-8 text-blue-500 hover:text-blue-400 hover:bg-blue-500/10"
+                                  className="h-8 w-8 text-white hover:text-white hover:bg-white/10"
                                   onClick={() => handleEditInvestigacao(inv)}
                                 >
                                   <Edit className="h-4 w-4" />
@@ -2087,8 +2087,8 @@ function Corregedoria() {
                           </button>
 
                           {expanded && (
-                            <div className="space-y-6 border-t border-slate-800 bg-slate-900/30 p-6">
-                              <div className="rounded border border-slate-800 bg-slate-950/50 p-4">
+                            <div className="space-y-6 border-t border-border bg-zinc-900/30 p-6">
+                              <div className="rounded border border-border bg-black/50 p-4">
                                 <div className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400">
                                   <LinkIcon className="h-4 w-4" /> Documentos Anexados
                                 </div>
@@ -2096,22 +2096,22 @@ function Corregedoria() {
                                 {linkedRelatorios.length > 0 ? (
                                   <div className="space-y-2 mb-4">
                                     {linkedRelatorios.map(r => (
-                                      <div key={r.id} className="flex items-center justify-between rounded bg-slate-900 px-3 py-2 text-sm border border-slate-800">
+                                      <div key={r.id} className="flex items-center justify-between rounded bg-zinc-900 px-3 py-2 text-sm border border-border">
                                         <div className="flex items-center gap-3">
                                           {r.tipo_denuncia === "Inquérito Policial" ? (
-                                            <FileSignature className="h-4 w-4 text-blue-400" />
+                                            <FileSignature className="h-4 w-4 text-white" />
                                           ) : (
                                             <FileText className="h-4 w-4 text-emerald-400" />
                                           )}
                                           <span className="text-slate-300 font-bold">{r.titulo}</span>
-                                          <Badge variant="outline" className="text-[9px] uppercase border-slate-800 text-slate-500">
+                                          <Badge variant="outline" className="text-[9px] uppercase border-border text-slate-500">
                                             {r.tipo_denuncia}
                                           </Badge>
                                         </div>
                                         <Button 
                                           size="sm" 
                                           variant="ghost" 
-                                          className="h-7 text-xs text-blue-400"
+                                          className="h-7 text-xs text-white"
                                           onClick={() => { 
                                             setActiveTab(r.tipo_denuncia === "Inquérito Policial" ? "inqueritos" : "atos"); 
                                             setExpandedId(r.id); 
@@ -2129,10 +2129,10 @@ function Corregedoria() {
                                 <div className="flex gap-2 items-end">
                                   <div className="flex-1">
                                     <Select value={linkRelatorioId} onValueChange={setLinkRelatorioId}>
-                                      <SelectTrigger className="bg-slate-900 border-slate-800 text-slate-300 text-xs">
+                                      <SelectTrigger className="bg-zinc-900 border-border text-slate-300 text-xs">
                                         <SelectValue placeholder="Selecione um documento..." />
                                       </SelectTrigger>
-                                      <SelectContent className="bg-slate-900 border-slate-800 text-slate-300">
+                                      <SelectContent className="bg-zinc-900 border-border text-slate-300">
                                       {availableRelatorios.map(r => (
                                         <SelectItem key={r.id} value={r.id}>
                                           <div className="flex items-center justify-between w-full">
@@ -2148,14 +2148,14 @@ function Corregedoria() {
                                     size="sm" 
                                     onClick={() => handleLinkInvestigacaoRelatorio(inv.id)}
                                     disabled={linking || !linkRelatorioId}
-                                    className="bg-slate-800 text-blue-400"
+                                    className="bg-zinc-800 text-white"
                                   >
                                     {linking ? "..." : "Vincular"}
                                   </Button>
                                 </div>
                               </div>
 
-                              <div className="rounded border border-slate-800 bg-slate-950/50 p-4">
+                              <div className="rounded border border-border bg-black/50 p-4">
                                 <div className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400">
                                   <Activity className="h-4 w-4" /> Denúncias Vinculadas
                                 </div>
@@ -2163,9 +2163,9 @@ function Corregedoria() {
                                 {linkedDenuncias.length > 0 ? (
                                   <div className="space-y-2 mb-4">
                                     {linkedDenuncias.map(d => (
-                                      <div key={d.id} className="flex items-center justify-between rounded bg-slate-900 px-3 py-2 text-sm border border-slate-800">
+                                      <div key={d.id} className="flex items-center justify-between rounded bg-zinc-900 px-3 py-2 text-sm border border-border">
                                         <div className="flex items-center gap-3">
-                                          <Badge variant="outline" className="bg-slate-950 border-blue-900/50 text-blue-400 font-mono text-[10px]">
+                                          <Badge variant="outline" className="bg-black border-white/20 text-white font-mono text-[10px]">
                                             #{d.numero_registro?.toString().padStart(4, '0')}
                                           </Badge>
                                           <span className="text-slate-300 font-bold">{d.titulo}</span>
@@ -2173,7 +2173,7 @@ function Corregedoria() {
                                         <Button 
                                           size="sm" 
                                           variant="ghost" 
-                                          className="h-7 text-xs text-blue-400"
+                                          className="h-7 text-xs text-white"
                                           onClick={() => { setActiveTab("denuncias"); setExpandedId(d.id); }}
                                         >
                                           Ver Denúncia
@@ -2188,10 +2188,10 @@ function Corregedoria() {
                                 <div className="flex gap-2 items-end">
                                   <div className="flex-1">
                                     <Select value={linkDenunciaId} onValueChange={setLinkDenunciaId}>
-                                      <SelectTrigger className="bg-slate-900 border-slate-800 text-slate-300 text-xs">
+                                      <SelectTrigger className="bg-zinc-900 border-border text-slate-300 text-xs">
                                         <SelectValue placeholder="Vincular denúncia..." />
                                       </SelectTrigger>
-                                      <SelectContent className="bg-slate-900 border-slate-800 text-slate-300">
+                                      <SelectContent className="bg-zinc-900 border-border text-slate-300">
                                         {denuncias.filter(d => !denunciaInvestigacoes.some(di => di.investigacao_id === inv.id && di.denuncia_id === d.id)).map(d => (
                                           <SelectItem key={d.id} value={d.id}>#{d.numero_registro?.toString().padStart(4, '0')} - {d.titulo}</SelectItem>
                                         ))}
@@ -2215,7 +2215,7 @@ function Corregedoria() {
                                       });
                                     }}
                                     disabled={linking || !linkDenunciaId}
-                                    className="bg-slate-800 text-blue-400"
+                                    className="bg-zinc-800 text-white"
                                   >
                                     {linking ? "..." : "Vincular"}
                                   </Button>
@@ -2230,8 +2230,8 @@ function Corregedoria() {
                                     <p className="text-xs text-slate-400">Abertura: <span className="text-white">{format(new Date(inv.created_at), "dd/MM/yyyy")}</span></p>
                                   </div>
 
-                                  <div className="border-l-2 border-blue-600 pl-3 bg-blue-500/5 py-2">
-                                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-blue-500 mb-2">2. AUTORIDADE</h4>
+                                  <div className="border-l-2 border-zinc-500 pl-3 bg-white/5 py-2">
+                                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-white mb-2">2. AUTORIDADE</h4>
                                     <p className="text-xs text-slate-400">Resp: <span className="text-white">{inv.autoridade_responsavel}</span></p>
                                     <p className="text-xs text-slate-400">Patente: <span className="text-white">{inv.autoridade_patente}</span></p>
                                     <p className="text-xs text-slate-400">Dept: <span className="text-white">{inv.autoridade_departamento}</span></p>
@@ -2247,8 +2247,8 @@ function Corregedoria() {
                                 </div>
 
                                 <div className="space-y-4">
-                                  <div className="border-l-2 border-amber-600 pl-3 bg-amber-500/5 py-2">
-                                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-amber-500 mb-2">4. ORIGEM</h4>
+                                  <div className="border-l-2 border-zinc-600 pl-3 bg-white/5 py-2">
+                                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-300 mb-2">4. ORIGEM</h4>
                                     <p className="text-xs text-slate-400">Caso: <span className="text-white">{inv.origem_caso === "Outro" ? inv.origem_outro : inv.origem_caso}</span></p>
                                   </div>
 
@@ -2267,8 +2267,8 @@ function Corregedoria() {
 
                                   <Field label="Status da Investigação">
                                     <Select defaultValue={inv.status} onValueChange={(v) => updateInvestigacaoStatus(inv.id, v as Status)}>
-                                      <SelectTrigger className="bg-slate-950 border-slate-800 text-slate-300 h-8 text-xs"><SelectValue /></SelectTrigger>
-                                      <SelectContent className="bg-slate-900 border-slate-800 text-slate-300">
+                                      <SelectTrigger className="bg-black border-border text-slate-300 h-8 text-xs"><SelectValue /></SelectTrigger>
+                                      <SelectContent className="bg-zinc-900 border-border text-slate-300">
                                         {Object.entries(STATUS_LABEL).map(([s, l]) => (
                                           <SelectItem key={s} value={s}>{l}</SelectItem>
                                         ))}
@@ -2280,11 +2280,11 @@ function Corregedoria() {
 
                               <div className="space-y-4">
                                 <Field label="5. DESCRIÇÃO SUMÁRIA DOS FATOS">
-                                  <p className="whitespace-pre-wrap text-sm text-slate-300 leading-relaxed bg-slate-950/50 p-3 rounded border border-slate-800">{inv.descricao}</p>
+                                  <p className="whitespace-pre-wrap text-sm text-slate-300 leading-relaxed bg-black/50 p-3 rounded border border-border">{inv.descricao}</p>
                                 </Field>
 
                                 <Field label="6. FUNDAMENTAÇÃO PARA ABERTURA">
-                                  <p className="whitespace-pre-wrap text-sm text-slate-300 leading-relaxed bg-slate-950/50 p-3 rounded border border-slate-800">{inv.fundamentacao}</p>
+                                  <p className="whitespace-pre-wrap text-sm text-slate-300 leading-relaxed bg-black/50 p-3 rounded border border-border">{inv.fundamentacao}</p>
                                 </Field>
 
                                 <Field label="Notas da Corregedoria">
@@ -2292,12 +2292,12 @@ function Corregedoria() {
                                     defaultValue={inv.notas_internas || ""}
                                     rows={4}
                                     id={`notas-inv-${inv.id}`}
-                                    className="bg-slate-950 border-slate-800 text-slate-300 text-xs"
+                                    className="bg-black border-border text-slate-300 text-xs"
                                     placeholder="Anotações internas restritas..."
                                   />
                                   <Button
                                     size="sm"
-                                    className="mt-3 bg-slate-800 hover:bg-slate-700 text-white text-xs"
+                                    className="mt-3 bg-zinc-800 hover:bg-slate-700 text-white text-xs"
                                     onClick={() => {
                                       const el = document.getElementById(`notas-inv-${inv.id}`) as HTMLTextAreaElement;
                                       updateInvestigacaoNotas(inv.id, el.value);
@@ -2320,7 +2320,7 @@ function Corregedoria() {
           {/* INQUÉRITOS POLICIAIS TAB */}
           {activeTab === "inqueritos" && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="flex flex-col gap-4 border-b border-slate-800 pb-4">
+              <div className="flex flex-col gap-4 border-b border-border pb-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-bold uppercase tracking-wider text-white">Inquéritos Policiais</h3>
                   
@@ -2328,56 +2328,56 @@ function Corregedoria() {
                     <DialogTrigger asChild>
                       <Button 
                         onClick={() => setRelatorioForm({...relatorioForm, tipo_denuncia: "Inquérito Policial"})}
-                        className="bg-blue-600 hover:bg-blue-500 text-white font-bold tracking-wider uppercase text-xs"
+                        className="bg-zinc-700 hover:bg-blue-500 text-white font-bold tracking-wider uppercase text-xs"
                       >
                         <Plus className="h-4 w-4 mr-2" />
                         Novo Inquérito
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[600px] bg-[#0d141e] border-slate-800 text-slate-300">
+                    <DialogContent className="sm:max-w-[600px] bg-card border-border text-slate-300">
                       <DialogHeader>
-                        <div className="text-center pb-2 border-b border-slate-800">
-                          <p className="text-[9px] font-bold uppercase tracking-widest text-blue-400 mb-1">Corregedoria Geral (PMESP)</p>
+                        <div className="text-center pb-2 border-b border-border">
+                          <p className="text-[9px] font-bold uppercase tracking-widest text-white mb-1">Corregedoria Geral (PMESP)</p>
                           <DialogTitle className="text-white uppercase tracking-wider text-sm">Formulário Oficial de Abertura de Inquérito</DialogTitle>
                         </div>
                       </DialogHeader>
                       <form onSubmit={submitRelatorio} className="space-y-4 mt-2">
                         <div className="max-h-[70vh] overflow-y-auto pr-2 space-y-5 custom-scrollbar">
                           <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-1"><Label className="text-[10px] uppercase text-slate-500">Título / Número do Caso</Label><Input className="bg-slate-950 border-slate-800 text-white h-8 text-xs" value={relatorioForm.titulo} onChange={(e) => setRelatorioForm({ ...relatorioForm, titulo: e.target.value })} placeholder="EX: IP-001/26" /></div>
-                            <div className="space-y-1"><Label className="text-[10px] uppercase text-slate-500">Status Inicial</Label><Select value={relatorioForm.status} onValueChange={(v: Status) => setRelatorioForm({ ...relatorioForm, status: v })}><SelectTrigger className="bg-slate-950 border-slate-800 text-white h-8 text-xs"><SelectValue /></SelectTrigger><SelectContent className="bg-slate-900 border-slate-800 text-white">{Object.entries(STATUS_LABEL).map(([val, lab]) => <SelectItem key={val} value={val}>{lab}</SelectItem>)}</SelectContent></Select></div>
+                            <div className="space-y-1"><Label className="text-[10px] uppercase text-slate-500">Título / Número do Caso</Label><Input className="bg-black border-border text-white h-8 text-xs" value={relatorioForm.titulo} onChange={(e) => setRelatorioForm({ ...relatorioForm, titulo: e.target.value })} placeholder="EX: IP-001/26" /></div>
+                            <div className="space-y-1"><Label className="text-[10px] uppercase text-slate-500">Status Inicial</Label><Select value={relatorioForm.status} onValueChange={(v: Status) => setRelatorioForm({ ...relatorioForm, status: v })}><SelectTrigger className="bg-black border-border text-white h-8 text-xs"><SelectValue /></SelectTrigger><SelectContent className="bg-zinc-900 border-border text-white">{Object.entries(STATUS_LABEL).map(([val, lab]) => <SelectItem key={val} value={val}>{lab}</SelectItem>)}</SelectContent></Select></div>
                           </div>
 
                           {/* 0. DADOS DO CORREGEDOR */}
                           <div className="space-y-2 border-l-2 border-red-600 pl-4 bg-red-500/5 py-2">
                             <h4 className="text-[10px] font-bold uppercase tracking-widest text-red-500">0. Dados do Corregedor</h4>
                             <div className="grid grid-cols-2 gap-3">
-                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Número do Caso (IP-Nº)</Label><Input value={relatorioForm.dados_detalhados.numero_caso} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, numero_caso: e.target.value}})} placeholder="IP-Nº000" className="h-8 bg-slate-950 border-slate-800 text-white text-xs" /></div>
-                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Data de Abertura</Label><Input value={relatorioForm.dados_detalhados.data_abertura} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, data_abertura: e.target.value}})} type="date" className="h-8 bg-slate-950 border-slate-800 text-white text-xs" /></div>
+                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Número do Caso (IP-Nº)</Label><Input value={relatorioForm.dados_detalhados.numero_caso} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, numero_caso: e.target.value}})} placeholder="IP-Nº000" className="h-8 bg-black border-border text-white text-xs" /></div>
+                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Data de Abertura</Label><Input value={relatorioForm.dados_detalhados.data_abertura} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, data_abertura: e.target.value}})} type="date" className="h-8 bg-black border-border text-white text-xs" /></div>
                             </div>
                             <div className="grid grid-cols-2 gap-3">
-                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Corregedor Responsável</Label><Input value={relatorioForm.oficial} disabled className="h-8 bg-slate-950 border-slate-800 text-slate-500 text-xs" /></div>
-                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Patente do Corregedor</Label><Input value={relatorioForm.dados_detalhados.corregedor_patente} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, corregedor_patente: e.target.value}})} className="h-8 bg-slate-950 border-slate-800 text-white text-xs" /></div>
+                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Corregedor Responsável</Label><Input value={relatorioForm.oficial} disabled className="h-8 bg-black border-border text-slate-500 text-xs" /></div>
+                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Patente do Corregedor</Label><Input value={relatorioForm.dados_detalhados.corregedor_patente} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, corregedor_patente: e.target.value}})} className="h-8 bg-black border-border text-white text-xs" /></div>
                             </div>
-                            <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Data de Recebimento</Label><Input value={relatorioForm.dados_detalhados.data_recebimento} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, data_recebimento: e.target.value}})} type="date" className="h-8 bg-slate-950 border-slate-800 text-white text-xs" /></div>
+                            <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Data de Recebimento</Label><Input value={relatorioForm.dados_detalhados.data_recebimento} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, data_recebimento: e.target.value}})} type="date" className="h-8 bg-black border-border text-white text-xs" /></div>
                           </div>
 
                           {/* 1. DADOS DO RECLAMANTE */}
-                          <div className="space-y-2 border-l-2 border-blue-600 pl-4 bg-blue-500/5 py-2">
-                            <h4 className="text-[10px] font-bold uppercase tracking-widest text-blue-500">1. Dados do Reclamante / Denunciante</h4>
+                          <div className="space-y-2 border-l-2 border-zinc-500 pl-4 bg-white/5 py-2">
+                            <h4 className="text-[10px] font-bold uppercase tracking-widest text-white">1. Dados do Reclamante / Denunciante</h4>
                             <div className="grid grid-cols-2 gap-3">
-                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Nome Completo</Label><Input value={relatorioForm.dados_detalhados.reclamante_nome} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_nome: e.target.value}})} className="h-8 bg-slate-950 border-slate-800 text-white text-xs" /></div>
-                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Número do ID</Label><Input value={relatorioForm.dados_detalhados.reclamante_id} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_id: e.target.value}})} className="h-8 bg-slate-950 border-slate-800 text-white text-xs" /></div>
+                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Nome Completo</Label><Input value={relatorioForm.dados_detalhados.reclamante_nome} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_nome: e.target.value}})} className="h-8 bg-black border-border text-white text-xs" /></div>
+                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Número do ID</Label><Input value={relatorioForm.dados_detalhados.reclamante_id} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_id: e.target.value}})} className="h-8 bg-black border-border text-white text-xs" /></div>
                             </div>
                             <div className="grid grid-cols-2 gap-3">
-                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Telefone</Label><Input value={relatorioForm.dados_detalhados.reclamante_telefone} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_telefone: e.target.value}})} className="h-8 bg-slate-950 border-slate-800 text-white text-xs" /></div>
-                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Discord</Label><Input value={relatorioForm.dados_detalhados.reclamante_discord} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_discord: e.target.value}})} className="h-8 bg-slate-950 border-slate-800 text-white text-xs" /></div>
+                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Telefone</Label><Input value={relatorioForm.dados_detalhados.reclamante_telefone} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_telefone: e.target.value}})} className="h-8 bg-black border-border text-white text-xs" /></div>
+                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Discord</Label><Input value={relatorioForm.dados_detalhados.reclamante_discord} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_discord: e.target.value}})} className="h-8 bg-black border-border text-white text-xs" /></div>
                             </div>
                             <div className="space-y-1">
                               <Label className="text-[9px] uppercase text-slate-500">Denúncia Anônima?</Label>
                               <RadioGroup value={relatorioForm.dados_detalhados.reclamante_anonimo} onValueChange={(v) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_anonimo: v}})} className="flex gap-4 mt-1">
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="Sim" id="anon-sim" className="border-slate-700 text-blue-600" /><Label htmlFor="anon-sim" className="text-xs text-slate-300 font-normal">Sim</Label></div>
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="Não" id="anon-nao" className="border-slate-700 text-blue-600" /><Label htmlFor="anon-nao" className="text-xs text-slate-300 font-normal">Não</Label></div>
+                                <div className="flex items-center space-x-2"><RadioGroupItem value="Sim" id="anon-sim" className="border-border text-blue-600" /><Label htmlFor="anon-sim" className="text-xs text-slate-300 font-normal">Sim</Label></div>
+                                <div className="flex items-center space-x-2"><RadioGroupItem value="Não" id="anon-nao" className="border-border text-blue-600" /><Label htmlFor="anon-nao" className="text-xs text-slate-300 font-normal">Não</Label></div>
                               </RadioGroup>
                             </div>
                           </div>
@@ -2386,49 +2386,49 @@ function Corregedoria() {
                           <div className="space-y-2 border-l-2 border-slate-600 pl-4 bg-slate-500/5 py-2">
                             <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">2. Dados do Policial Denunciado</h4>
                             <div className="grid grid-cols-2 gap-3">
-                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Nome do Policial</Label><Input value={relatorioForm.dados_detalhados.denunciado_nome} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, denunciado_nome: e.target.value}})} className="h-8 bg-slate-950 border-slate-800 text-white text-xs" /></div>
-                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Patente / Cargo</Label><Input value={relatorioForm.dados_detalhados.denunciado_patente} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, denunciado_patente: e.target.value}})} className="h-8 bg-slate-950 border-slate-800 text-white text-xs" /></div>
+                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Nome do Policial</Label><Input value={relatorioForm.dados_detalhados.denunciado_nome} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, denunciado_nome: e.target.value}})} className="h-8 bg-black border-border text-white text-xs" /></div>
+                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Patente / Cargo</Label><Input value={relatorioForm.dados_detalhados.denunciado_patente} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, denunciado_patente: e.target.value}})} className="h-8 bg-black border-border text-white text-xs" /></div>
                             </div>
                             <div className="grid grid-cols-2 gap-3">
-                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Badge / Nº de Identificação</Label><Input value={relatorioForm.dados_detalhados.denunciado_badge} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, denunciado_badge: e.target.value}})} className="h-8 bg-slate-950 border-slate-800 text-white text-xs" /></div>
-                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Divisão / Unidade</Label><Input value={relatorioForm.dados_detalhados.denunciado_unidade} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, denunciado_unidade: e.target.value}})} className="h-8 bg-slate-950 border-slate-800 text-white text-xs" /></div>
+                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Badge / Nº de Identificação</Label><Input value={relatorioForm.dados_detalhados.denunciado_badge} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, denunciado_badge: e.target.value}})} className="h-8 bg-black border-border text-white text-xs" /></div>
+                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Divisão / Unidade</Label><Input value={relatorioForm.dados_detalhados.denunciado_unidade} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, denunciado_unidade: e.target.value}})} className="h-8 bg-black border-border text-white text-xs" /></div>
                             </div>
-                            <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Prefixo / Modelo da Viatura (se houver)</Label><Input value={relatorioForm.dados_detalhados.denunciado_viatura} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, denunciado_viatura: e.target.value}})} placeholder="Ex: Adam-12 / Charger" className="h-8 bg-slate-950 border-slate-800 text-white text-xs" /></div>
+                            <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Prefixo / Modelo da Viatura (se houver)</Label><Input value={relatorioForm.dados_detalhados.denunciado_viatura} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, denunciado_viatura: e.target.value}})} placeholder="Ex: Adam-12 / Charger" className="h-8 bg-black border-border text-white text-xs" /></div>
                           </div>
 
                           {/* 3. TIPO DE DENÚNCIA */}
-                          <div className="space-y-2 border-l-2 border-amber-600 pl-4 bg-amber-500/5 py-2">
-                            <h4 className="text-[10px] font-bold uppercase tracking-widest text-amber-500">3. Tipo de Denúncia</h4>
+                          <div className="space-y-2 border-l-2 border-zinc-600 pl-4 bg-white/5 py-2">
+                            <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-300">3. Tipo de Denúncia</h4>
                             <div className="grid grid-cols-2 gap-y-2">
                               {["Uso excessivo da força","Abuso de autoridade","Corrupção","Conduta imprópria","Discriminação / Racismo","Ameaça / Intimidação","Violação de procedimentos","Falsificação de relatório","Assédio","Outro"].map(tipo => (
                                 <div key={tipo} className="flex items-center space-x-2">
-                                  <Checkbox id={`tipo-ip-${tipo}`} checked={relatorioForm.dados_detalhados.tipo_denuncia_selecionado === tipo} onCheckedChange={() => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, tipo_denuncia_selecionado: tipo}})} className="border-slate-700 data-[state=checked]:bg-amber-600 data-[state=checked]:border-amber-600" />
+                                  <Checkbox id={`tipo-ip-${tipo}`} checked={relatorioForm.dados_detalhados.tipo_denuncia_selecionado === tipo} onCheckedChange={() => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, tipo_denuncia_selecionado: tipo}})} className="border-border data-[state=checked]:bg-amber-600 data-[state=checked]:border-zinc-600" />
                                   <Label htmlFor={`tipo-ip-${tipo}`} className="text-[10px] text-slate-300 font-normal">{tipo}</Label>
                                 </div>
                               ))}
                             </div>
-                            {relatorioForm.dados_detalhados.tipo_denuncia_selecionado === "Outro" && <Input placeholder="Especifique..." value={relatorioForm.dados_detalhados.tipo_denuncia_outro} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, tipo_denuncia_outro: e.target.value}})} className="h-8 bg-slate-950 border-slate-800 text-white text-xs" />}
+                            {relatorioForm.dados_detalhados.tipo_denuncia_selecionado === "Outro" && <Input placeholder="Especifique..." value={relatorioForm.dados_detalhados.tipo_denuncia_outro} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, tipo_denuncia_outro: e.target.value}})} className="h-8 bg-black border-border text-white text-xs" />}
                           </div>
 
                           {/* 4. INFORMAÇÕES DO INCIDENTE */}
-                          <div className="space-y-2 border-l-2 border-violet-600 pl-4 bg-violet-500/5 py-2">
-                            <h4 className="text-[10px] font-bold uppercase tracking-widest text-violet-400">4. Informações do Incidente</h4>
+                          <div className="space-y-2 border-l-2 border-zinc-600 pl-4 bg-white/5 py-2">
+                            <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-300">4. Informações do Incidente</h4>
                             <div className="grid grid-cols-2 gap-3">
-                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Data do Ocorrido</Label><Input value={relatorioForm.dados_detalhados.incidente_data} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, incidente_data: e.target.value}})} type="date" className="h-8 bg-slate-950 border-slate-800 text-white text-xs" /></div>
-                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Horário Aproximado</Label><Input value={relatorioForm.dados_detalhados.incidente_horario} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, incidente_horario: e.target.value}})} type="time" className="h-8 bg-slate-950 border-slate-800 text-white text-xs" /></div>
+                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Data do Ocorrido</Label><Input value={relatorioForm.dados_detalhados.incidente_data} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, incidente_data: e.target.value}})} type="date" className="h-8 bg-black border-border text-white text-xs" /></div>
+                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Horário Aproximado</Label><Input value={relatorioForm.dados_detalhados.incidente_horario} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, incidente_horario: e.target.value}})} type="time" className="h-8 bg-black border-border text-white text-xs" /></div>
                             </div>
-                            <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Local do Incidente</Label><Input value={relatorioForm.dados_detalhados.incidente_local} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, incidente_local: e.target.value}})} className="h-8 bg-slate-950 border-slate-800 text-white text-xs" /></div>
+                            <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Local do Incidente</Label><Input value={relatorioForm.dados_detalhados.incidente_local} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, incidente_local: e.target.value}})} className="h-8 bg-black border-border text-white text-xs" /></div>
                             <div className="space-y-1">
                               <Label className="text-[9px] uppercase text-slate-500">Havia Testemunhas?</Label>
                               <RadioGroup value={relatorioForm.dados_detalhados.incidente_testemunhas} onValueChange={(v) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, incidente_testemunhas: v}})} className="flex gap-4 mt-1">
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="Sim" id="test-sim" className="border-slate-700 text-violet-600" /><Label htmlFor="test-sim" className="text-xs text-slate-300 font-normal">Sim</Label></div>
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="Não" id="test-nao" className="border-slate-700 text-violet-600" /><Label htmlFor="test-nao" className="text-xs text-slate-300 font-normal">Não</Label></div>
+                                <div className="flex items-center space-x-2"><RadioGroupItem value="Sim" id="test-sim" className="border-border text-violet-600" /><Label htmlFor="test-sim" className="text-xs text-slate-300 font-normal">Sim</Label></div>
+                                <div className="flex items-center space-x-2"><RadioGroupItem value="Não" id="test-nao" className="border-border text-violet-600" /><Label htmlFor="test-nao" className="text-xs text-slate-300 font-normal">Não</Label></div>
                               </RadioGroup>
                             </div>
                             {relatorioForm.dados_detalhados.incidente_testemunhas === "Sim" && (
                               <div className="grid grid-cols-2 gap-3">
-                                <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Nome(s) da(s) Testemunha(s)</Label><Textarea rows={2} value={relatorioForm.dados_detalhados.incidente_testemunhas_nomes} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, incidente_testemunhas_nomes: e.target.value}})} className="bg-slate-950 border-slate-800 text-white text-xs" /></div>
-                                <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Contato(s) da(s) Testemunha(s)</Label><Textarea rows={2} value={relatorioForm.dados_detalhados.incidente_testemunhas_contatos} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, incidente_testemunhas_contatos: e.target.value}})} className="bg-slate-950 border-slate-800 text-white text-xs" /></div>
+                                <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Nome(s) da(s) Testemunha(s)</Label><Textarea rows={2} value={relatorioForm.dados_detalhados.incidente_testemunhas_nomes} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, incidente_testemunhas_nomes: e.target.value}})} className="bg-black border-border text-white text-xs" /></div>
+                                <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Contato(s) da(s) Testemunha(s)</Label><Textarea rows={2} value={relatorioForm.dados_detalhados.incidente_testemunhas_contatos} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, incidente_testemunhas_contatos: e.target.value}})} className="bg-black border-border text-white text-xs" /></div>
                               </div>
                             )}
                           </div>
@@ -2436,7 +2436,7 @@ function Corregedoria() {
                           {/* 5. RELATÓRIO DOS FATOS */}
                           <div className="space-y-2">
                             <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">5. Relatório dos Fatos Anexado à Denúncia</Label>
-                            <Textarea rows={5} className="bg-slate-950 border-slate-800 text-white text-xs leading-relaxed" value={relatorioForm.conteudo} onChange={(e) => setRelatorioForm({ ...relatorioForm, conteudo: e.target.value })} placeholder="Descreva os fatos em detalhes..." />
+                            <Textarea rows={5} className="bg-black border-border text-white text-xs leading-relaxed" value={relatorioForm.conteudo} onChange={(e) => setRelatorioForm({ ...relatorioForm, conteudo: e.target.value })} placeholder="Descreva os fatos em detalhes..." />
                           </div>
 
                           {/* 6. PROVAS E EVIDÊNCIAS */}
@@ -2445,24 +2445,24 @@ function Corregedoria() {
                             <div className="grid grid-cols-3 gap-y-2">
                               {["Fotos","Vídeos","Áudios","Documentos","Bodycam / Dashcam","Outro"].map(prova => (
                                 <div key={prova} className="flex items-center space-x-2">
-                                  <Checkbox id={`prova-ip-${prova}`} checked={relatorioForm.dados_detalhados.provas_selecionadas?.includes(prova)} onCheckedChange={(checked) => { const c=[...(relatorioForm.dados_detalhados.provas_selecionadas||[])]; if(checked) c.push(prova); else c.splice(c.indexOf(prova),1); setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, provas_selecionadas: c}}); }} className="border-slate-700 data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600" />
+                                  <Checkbox id={`prova-ip-${prova}`} checked={relatorioForm.dados_detalhados.provas_selecionadas?.includes(prova)} onCheckedChange={(checked) => { const c=[...(relatorioForm.dados_detalhados.provas_selecionadas||[])]; if(checked) c.push(prova); else c.splice(c.indexOf(prova),1); setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, provas_selecionadas: c}}); }} className="border-border data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600" />
                                   <Label htmlFor={`prova-ip-${prova}`} className="text-[10px] text-slate-300 font-normal">{prova}</Label>
                                 </div>
                               ))}
                             </div>
-                            <div className="space-y-1 mt-2"><Label className="text-[9px] uppercase text-slate-500">Descrição das Provas</Label><Textarea rows={2} value={relatorioForm.dados_detalhados.provas_descricao} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, provas_descricao: e.target.value}})} className="bg-slate-950 border-slate-800 text-white text-xs" placeholder="Descreva as provas..." /></div>
+                            <div className="space-y-1 mt-2"><Label className="text-[9px] uppercase text-slate-500">Descrição das Provas</Label><Textarea rows={2} value={relatorioForm.dados_detalhados.provas_descricao} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, provas_descricao: e.target.value}})} className="bg-black border-border text-white text-xs" placeholder="Descreva as provas..." /></div>
                           </div>
 
-                          <div className="pt-4 border-t border-slate-800 space-y-4">
+                          <div className="pt-4 border-t border-border space-y-4">
                             <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Documentos Anexos (Opcional)</h4>
                             <div className="grid grid-cols-3 gap-4">
                               <div className="space-y-1">
                                 <Label className="text-[9px] text-slate-500 uppercase">Denúncia</Label>
                                 <Select value={relatorioForm.denuncia_id} onValueChange={(v) => setRelatorioForm({ ...relatorioForm, denuncia_id: v })}>
-                                  <SelectTrigger className="bg-slate-950 border-slate-800 text-white h-8 text-[10px] uppercase">
+                                  <SelectTrigger className="bg-black border-border text-white h-8 text-[10px] uppercase">
                                     <SelectValue placeholder="Nenhum" />
                                   </SelectTrigger>
-                                  <SelectContent className="bg-slate-900 border-slate-800 text-white">
+                                  <SelectContent className="bg-zinc-900 border-border text-white">
                                     <SelectItem value="none">Nenhum</SelectItem>
                                     {denuncias.map(d => (
                                       <SelectItem key={d.id} value={d.id} className="text-[10px]">#{d.numero_registro} - {d.titulo}</SelectItem>
@@ -2473,10 +2473,10 @@ function Corregedoria() {
                               <div className="space-y-1">
                                 <Label className="text-[9px] text-slate-500 uppercase">Investigação</Label>
                                 <Select value={relatorioForm.investigacao_id} onValueChange={(v) => setRelatorioForm({ ...relatorioForm, investigacao_id: v })}>
-                                  <SelectTrigger className="bg-slate-950 border-slate-800 text-white h-8 text-[10px] uppercase">
+                                  <SelectTrigger className="bg-black border-border text-white h-8 text-[10px] uppercase">
                                     <SelectValue placeholder="Nenhum" />
                                   </SelectTrigger>
-                                  <SelectContent className="bg-slate-900 border-slate-800 text-white">
+                                  <SelectContent className="bg-zinc-900 border-border text-white">
                                     <SelectItem value="none">Nenhum</SelectItem>
                                     {investigacoes.map(i => (
                                       <SelectItem key={i.id} value={i.id} className="text-[10px]">#{i.numero_registro} - {i.titulo}</SelectItem>
@@ -2489,8 +2489,8 @@ function Corregedoria() {
                           </div>
 
                         </div>
-                        <div className="pt-4 border-t border-slate-800 flex justify-end">
-                          <Button type="submit" disabled={submitting} className="bg-blue-600 hover:bg-blue-500 text-white font-bold tracking-widest px-8 uppercase text-[10px]">
+                        <div className="pt-4 border-t border-border flex justify-end">
+                          <Button type="submit" disabled={submitting} className="bg-zinc-700 hover:bg-blue-500 text-white font-bold tracking-widest px-8 uppercase text-[10px]">
                             {submitting ? "Processando..." : "ABRIR INQUÉRITO"}
                           </Button>
                         </div>
@@ -2503,7 +2503,7 @@ function Corregedoria() {
                   <span className="text-xs font-bold uppercase tracking-widest text-slate-500 mr-2">Filtrar por Status:</span>
                   <Button 
                     size="sm" variant="outline"
-                    className={`font-mono text-[10px] h-7 ${inqueritoFilter === "todas" ? "bg-slate-700 text-white" : "text-slate-400 border-slate-800"}`}
+                    className={`font-mono text-[10px] h-7 ${inqueritoFilter === "todas" ? "bg-slate-700 text-white" : "text-slate-400 border-border"}`}
                     onClick={() => setInqueritoFilter("todas")}
                   >
                     TODOS
@@ -2512,7 +2512,7 @@ function Corregedoria() {
                     <Button 
                       key={val}
                       size="sm" variant="outline"
-                      className={`font-mono text-[10px] h-7 ${inqueritoFilter === val ? "bg-slate-700 text-white border-slate-600" : "text-slate-400 border-slate-800"}`}
+                      className={`font-mono text-[10px] h-7 ${inqueritoFilter === val ? "bg-slate-700 text-white border-slate-600" : "text-slate-400 border-border"}`}
                       onClick={() => setInqueritoFilter(val as Status)}
                     >
                       {lab.toUpperCase()}
@@ -2525,7 +2525,7 @@ function Corregedoria() {
                 {relatorios
                   .filter(r => r.tipo_denuncia === "Inquérito Policial" && (inqueritoFilter === "todas" || r.status === inqueritoFilter))
                   .length === 0 ? (
-                    <div className="rounded-lg border border-slate-800 border-dashed bg-[#0d141e]/50 p-12 text-center text-slate-500">
+                    <div className="rounded-lg border border-border border-dashed bg-card/50 p-12 text-center text-slate-500">
                       Nenhum inquérito encontrado com este filtro.
                     </div>
                   ) : (
@@ -2579,7 +2579,7 @@ function Corregedoria() {
           {/* ATOS ADMINISTRATIVOS TAB */}
           {activeTab === "atos" && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="flex flex-col gap-4 border-b border-slate-800 pb-4">
+              <div className="flex flex-col gap-4 border-b border-border pb-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-bold uppercase tracking-wider text-white">Atos Administrativos</h3>
                   
@@ -2593,7 +2593,7 @@ function Corregedoria() {
                         Novo Ato
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[600px] bg-[#0d141e] border-slate-800 text-slate-300">
+                    <DialogContent className="sm:max-w-[600px] bg-card border-border text-slate-300">
                       <DialogHeader>
                         <DialogTitle className="text-white uppercase tracking-wider">Registrar Ato Administrativo</DialogTitle>
                       </DialogHeader>
@@ -2604,7 +2604,7 @@ function Corregedoria() {
                               <Label htmlFor="titulo-ato" className="text-slate-400 text-xs uppercase tracking-wider">Título do Ato</Label>
                               <Input
                                 id="titulo-ato"
-                                className="bg-slate-950 border-slate-800 text-white"
+                                className="bg-black border-border text-white"
                                 value={relatorioForm.titulo}
                                 onChange={(e) => setRelatorioForm({ ...relatorioForm, titulo: e.target.value })}
                                 placeholder="EX: ATO-001/26 - SUSPENSÃO"
@@ -2613,8 +2613,8 @@ function Corregedoria() {
                             <div className="space-y-2">
                               <Label className="text-slate-400 text-xs uppercase tracking-wider">Status do Ato</Label>
                               <Select value={relatorioForm.status} onValueChange={(v: Status) => setRelatorioForm({ ...relatorioForm, status: v })}>
-                                <SelectTrigger className="bg-slate-950 border-slate-800 text-white h-10"><SelectValue /></SelectTrigger>
-                                <SelectContent className="bg-slate-900 border-slate-800 text-white">
+                                <SelectTrigger className="bg-black border-border text-white h-10"><SelectValue /></SelectTrigger>
+                                <SelectContent className="bg-zinc-900 border-border text-white">
                                   {Object.entries(STATUS_LABEL).map(([val, lab]) => <SelectItem key={val} value={val}>{lab}</SelectItem>)}
                                 </SelectContent>
                               </Select>
@@ -2629,23 +2629,23 @@ function Corregedoria() {
                               <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1">
                                   <Label className="text-[9px] uppercase text-slate-500">Número do Inquérito</Label>
-                                  <Input value={relatorioForm.dados_detalhados.ato_numero_inquerito} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_numero_inquerito: e.target.value}})} placeholder="Nº000" className="h-8 bg-slate-950 border-slate-800 text-xs" />
+                                  <Input value={relatorioForm.dados_detalhados.ato_numero_inquerito} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_numero_inquerito: e.target.value}})} placeholder="Nº000" className="h-8 bg-black border-border text-xs" />
                                 </div>
                                 <div className="space-y-1">
                                   <Label className="text-[9px] uppercase text-slate-500">Número do Ato Administrativo</Label>
-                                  <Input value={relatorioForm.dados_detalhados.ato_numero} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_numero: e.target.value}})} placeholder="Nº000" className="h-8 bg-slate-950 border-slate-800 text-xs" />
+                                  <Input value={relatorioForm.dados_detalhados.ato_numero} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_numero: e.target.value}})} placeholder="Nº000" className="h-8 bg-black border-border text-xs" />
                                 </div>
                               </div>
                               <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1">
                                   <Label className="text-[9px] uppercase text-slate-500">Data de Emissão</Label>
-                                  <Input type="date" value={relatorioForm.dados_detalhados.ato_data_emissao} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_data_emissao: e.target.value}})} className="h-8 bg-slate-950 border-slate-800 text-xs" />
+                                  <Input type="date" value={relatorioForm.dados_detalhados.ato_data_emissao} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_data_emissao: e.target.value}})} className="h-8 bg-black border-border text-xs" />
                                 </div>
                                 <div className="space-y-1">
                                   <Label className="text-[9px] uppercase text-slate-500">Tipo de Ato</Label>
                                   <Select value={relatorioForm.dados_detalhados.ato_tipo} onValueChange={(v) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_tipo: v}})}>
-                                    <SelectTrigger className="h-8 bg-slate-950 border-slate-800 text-xs"><SelectValue placeholder="Selecione..." /></SelectTrigger>
-                                    <SelectContent className="bg-slate-900 border-slate-800 text-white">
+                                    <SelectTrigger className="h-8 bg-black border-border text-xs"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                                    <SelectContent className="bg-zinc-900 border-border text-white">
                                       <SelectItem value="Aplicação de Medida Disciplinar">Aplicação de Medida Disciplinar</SelectItem>
                                       <SelectItem value="Suspensão Preventiva">Suspensão Preventiva</SelectItem>
                                       <SelectItem value="Arquivamento">Arquivamento</SelectItem>
@@ -2654,35 +2654,35 @@ function Corregedoria() {
                                   </Select>
                                 </div>
                               </div>
-                              {relatorioForm.dados_detalhados.ato_tipo === "Outro" && <Input placeholder="Especifique..." value={relatorioForm.dados_detalhados.ato_tipo_outro} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_tipo_outro: e.target.value}})} className="h-8 bg-slate-950 border-slate-800 text-xs mt-1" />}
+                              {relatorioForm.dados_detalhados.ato_tipo === "Outro" && <Input placeholder="Especifique..." value={relatorioForm.dados_detalhados.ato_tipo_outro} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_tipo_outro: e.target.value}})} className="h-8 bg-black border-border text-xs mt-1" />}
                             </div>
 
                             {/* 2. AUTORIDADE EMISSORA */}
-                            <div className="space-y-2 border-l-2 border-blue-600 pl-4 bg-blue-500/5 py-2">
-                              <h4 className="text-[10px] font-bold uppercase tracking-widest text-blue-500">2. AUTORIDADE EMISSORA</h4>
+                            <div className="space-y-2 border-l-2 border-zinc-500 pl-4 bg-white/5 py-2">
+                              <h4 className="text-[10px] font-bold uppercase tracking-widest text-white">2. AUTORIDADE EMISSORA</h4>
                               <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1">
                                   <Label className="text-[9px] uppercase text-slate-500">Nome do Corregedor</Label>
-                                  <Input value={relatorioForm.dados_detalhados.ato_autoridade_nome} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_autoridade_nome: e.target.value}})} className="h-8 bg-slate-950 border-slate-800 text-xs" />
+                                  <Input value={relatorioForm.dados_detalhados.ato_autoridade_nome} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_autoridade_nome: e.target.value}})} className="h-8 bg-black border-border text-xs" />
                                 </div>
                                 <div className="space-y-1">
                                   <Label className="text-[9px] uppercase text-slate-500">Cargo/Patente</Label>
-                                  <Input value={relatorioForm.dados_detalhados.ato_autoridade_cargo} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_autoridade_cargo: e.target.value}})} className="h-8 bg-slate-950 border-slate-800 text-xs" />
+                                  <Input value={relatorioForm.dados_detalhados.ato_autoridade_cargo} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_autoridade_cargo: e.target.value}})} className="h-8 bg-black border-border text-xs" />
                                 </div>
                               </div>
-                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Departamento / Unidade</Label><Input value={relatorioForm.dados_detalhados.ato_autoridade_unidade} disabled className="h-8 bg-slate-950 border-slate-800 text-slate-500 text-xs" /></div>
+                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Departamento / Unidade</Label><Input value={relatorioForm.dados_detalhados.ato_autoridade_unidade} disabled className="h-8 bg-black border-border text-slate-500 text-xs" /></div>
                             </div>
 
                             {/* 3. OBJETO DO ATO */}
                             <div className="space-y-2 border-l-2 border-slate-600 pl-4 bg-slate-500/5 py-3">
                               <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">3. OBJETO DO ATO</h4>
                               <Label className="text-[9px] uppercase text-slate-500">Descrição Resumida</Label>
-                              <Textarea value={relatorioForm.dados_detalhados.ato_objeto_descricao} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_objeto_descricao: e.target.value}})} rows={2} className="bg-slate-950 border-slate-800 text-xs" placeholder="Descreva o objeto..." />
+                              <Textarea value={relatorioForm.dados_detalhados.ato_objeto_descricao} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_objeto_descricao: e.target.value}})} rows={2} className="bg-black border-border text-xs" placeholder="Descreva o objeto..." />
                             </div>
 
                             {/* 4. FUNDAMENTAÇÃO */}
-                            <div className="space-y-2 border-l-2 border-amber-600 pl-4 bg-amber-500/5 py-2">
-                              <h4 className="text-[10px] font-bold uppercase tracking-widest text-amber-500">4. FUNDAMENTAÇÃO</h4>
+                            <div className="space-y-2 border-l-2 border-zinc-600 pl-4 bg-white/5 py-2">
+                              <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-300">4. FUNDAMENTAÇÃO</h4>
                               <Label className="text-[9px] uppercase text-slate-500">Base do Ato Administrativo</Label>
                               <div className="grid grid-cols-2 gap-2">
                                 {["Relatório interno", "Denúncia formal", "Evidências coletadas", "Ordem superior", "Auditoria interna", "Outro"].map(f => (
@@ -2692,7 +2692,7 @@ function Corregedoria() {
                                   </div>
                                 ))}
                               </div>
-                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Descrição Complementar</Label><Textarea value={relatorioForm.dados_detalhados.ato_fundamentacao_complementar} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_fundamentacao_complementar: e.target.value}})} rows={2} className="bg-slate-950 border-slate-800 text-xs mt-2" placeholder="Descreva a fundamentação..." /></div>
+                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Descrição Complementar</Label><Textarea value={relatorioForm.dados_detalhados.ato_fundamentacao_complementar} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_fundamentacao_complementar: e.target.value}})} rows={2} className="bg-black border-border text-xs mt-2" placeholder="Descreva a fundamentação..." /></div>
                             </div>
 
                             {/* 5. DECISÃO */}
@@ -2700,13 +2700,13 @@ function Corregedoria() {
                               <h4 className="text-[10px] font-bold uppercase tracking-widest text-emerald-500">5. DECISÃO</h4>
                               <div className="space-y-1">
                                 <Label className="text-[9px] uppercase text-slate-500">Deliberação da Autoridade</Label>
-                                <Textarea value={relatorioForm.dados_detalhados.ato_decisao} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_decisao: e.target.value}})} rows={2} className="bg-slate-950 border-slate-800 text-xs" placeholder="Deliberação..." />
+                                <Textarea value={relatorioForm.dados_detalhados.ato_decisao} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_decisao: e.target.value}})} rows={2} className="bg-black border-border text-xs" placeholder="Deliberação..." />
                               </div>
                             </div>
 
                             {/* 6. MEDIDAS DETERMINADAS */}
-                            <div className="space-y-2 border-l-2 border-indigo-600 pl-4 bg-indigo-500/5 py-2">
-                              <h4 className="text-[10px] font-bold uppercase tracking-widest text-indigo-500">6. MEDIDAS DETERMINADAS</h4>
+                            <div className="space-y-2 border-l-2 border-zinc-600 pl-4 bg-white/5 py-2">
+                              <h4 className="text-[10px] font-bold uppercase tracking-widest text-white">6. MEDIDAS DETERMINADAS</h4>
                               <div className="grid grid-cols-1 gap-2">
                                 {[
                                   "Abertura de inquérito administrativo", 
@@ -2726,25 +2726,25 @@ function Corregedoria() {
                               </div>
                               <div className="space-y-1">
                                 <Label className="text-[9px] uppercase text-slate-500">Detalhamento das medidas</Label>
-                                <Textarea value={relatorioForm.dados_detalhados.ato_medidas_detalhamento} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_medidas_detalhamento: e.target.value}})} rows={3} className="bg-slate-950 border-slate-800 text-xs mt-2" placeholder="Detalhes das medidas..." />
+                                <Textarea value={relatorioForm.dados_detalhados.ato_medidas_detalhamento} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_medidas_detalhamento: e.target.value}})} rows={3} className="bg-black border-border text-xs mt-2" placeholder="Detalhes das medidas..." />
                               </div>
                             </div>
 
                             <div className="space-y-2">
                               <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Conteúdo Detalhado do Ato</Label>
-                              <Textarea rows={6} className="bg-slate-950 border-slate-800 text-white font-mono text-xs leading-relaxed" value={relatorioForm.conteudo} onChange={(e) => setRelatorioForm({ ...relatorioForm, conteudo: e.target.value })} placeholder="Texto integral do ato administrativo..." />
+                              <Textarea rows={6} className="bg-black border-border text-white font-mono text-xs leading-relaxed" value={relatorioForm.conteudo} onChange={(e) => setRelatorioForm({ ...relatorioForm, conteudo: e.target.value })} placeholder="Texto integral do ato administrativo..." />
                             </div>
 
-                            <div className="pt-4 border-t border-slate-800 space-y-4">
+                            <div className="pt-4 border-t border-border space-y-4">
                               <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Documentos Anexos (Opcional)</h4>
                               <div className="grid grid-cols-3 gap-4">
                                 <div className="space-y-1">
                                   <Label className="text-[9px] text-slate-500 uppercase">Denúncia</Label>
                                   <Select value={relatorioForm.denuncia_id} onValueChange={(v) => setRelatorioForm({ ...relatorioForm, denuncia_id: v })}>
-                                    <SelectTrigger className="bg-slate-950 border-slate-800 text-white h-8 text-[10px] uppercase">
+                                    <SelectTrigger className="bg-black border-border text-white h-8 text-[10px] uppercase">
                                       <SelectValue placeholder="Nenhum" />
                                     </SelectTrigger>
-                                    <SelectContent className="bg-slate-900 border-slate-800 text-white">
+                                    <SelectContent className="bg-zinc-900 border-border text-white">
                                       <SelectItem value="none">Nenhum</SelectItem>
                                       {denuncias.map(d => (
                                         <SelectItem key={d.id} value={d.id} className="text-[10px]">#{d.numero_registro} - {d.titulo}</SelectItem>
@@ -2755,10 +2755,10 @@ function Corregedoria() {
                                 <div className="space-y-1">
                                   <Label className="text-[9px] text-slate-500 uppercase">Investigação</Label>
                                   <Select value={relatorioForm.investigacao_id} onValueChange={(v) => setRelatorioForm({ ...relatorioForm, investigacao_id: v })}>
-                                    <SelectTrigger className="bg-slate-950 border-slate-800 text-white h-8 text-[10px] uppercase">
+                                    <SelectTrigger className="bg-black border-border text-white h-8 text-[10px] uppercase">
                                       <SelectValue placeholder="Nenhum" />
                                     </SelectTrigger>
-                                    <SelectContent className="bg-slate-900 border-slate-800 text-white">
+                                    <SelectContent className="bg-zinc-900 border-border text-white">
                                       <SelectItem value="none">Nenhum</SelectItem>
                                       {investigacoes.map(i => (
                                         <SelectItem key={i.id} value={i.id} className="text-[10px]">#{i.numero_registro} - {i.titulo}</SelectItem>
@@ -2772,7 +2772,7 @@ function Corregedoria() {
                           </div>
                         </div>
 
-                        <div className="pt-4 border-t border-slate-800 flex justify-end">
+                        <div className="pt-4 border-t border-border flex justify-end">
                           <Button type="submit" disabled={submitting} className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 font-bold tracking-widest text-[10px] uppercase">
                             {submitting ? "Registrando..." : "REGISTRAR ATO"}
                           </Button>
@@ -2786,7 +2786,7 @@ function Corregedoria() {
                   <span className="text-xs font-bold uppercase tracking-widest text-slate-500 mr-2">Filtrar por Status:</span>
                   <Button 
                     size="sm" variant="outline"
-                    className={`font-mono text-[10px] h-7 ${atoFilter === "todas" ? "bg-slate-700 text-white" : "text-slate-400 border-slate-800"}`}
+                    className={`font-mono text-[10px] h-7 ${atoFilter === "todas" ? "bg-slate-700 text-white" : "text-slate-400 border-border"}`}
                     onClick={() => setAtoFilter("todas")}
                   >
                     TODOS
@@ -2795,7 +2795,7 @@ function Corregedoria() {
                     <Button 
                       key={val}
                       size="sm" variant="outline"
-                      className={`font-mono text-[10px] h-7 ${atoFilter === val ? "bg-slate-700 text-white border-slate-600" : "text-slate-400 border-slate-800"}`}
+                      className={`font-mono text-[10px] h-7 ${atoFilter === val ? "bg-slate-700 text-white border-slate-600" : "text-slate-400 border-border"}`}
                       onClick={() => setAtoFilter(val as Status)}
                     >
                       {lab.toUpperCase()}
@@ -2808,7 +2808,7 @@ function Corregedoria() {
                 {relatorios
                   .filter(r => r.tipo_denuncia === "Ato Administrativo" && (atoFilter === "todas" || r.status === atoFilter))
                   .length === 0 ? (
-                    <div className="rounded-lg border border-slate-800 border-dashed bg-[#0d141e]/50 p-12 text-center text-slate-500">
+                    <div className="rounded-lg border border-border border-dashed bg-card/50 p-12 text-center text-slate-500">
                       Nenhum ato administrativo encontrado com este filtro.
                     </div>
                   ) : (
@@ -2862,19 +2862,19 @@ function Corregedoria() {
           {/* OFICIAIS & SOLICITACOES... (omitidos por brevidade caso não tivessem mudado, mas estão aqui em cima) */}
           {activeTab === "solicitacoes" && isAdmin && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+              <div className="flex items-center justify-between border-b border-border pb-4">
                 <h3 className="text-lg font-bold uppercase tracking-wider text-white">Solicitações de Acesso</h3>
                 <span className="text-sm text-slate-400">{pendingUsers.length} pendentes</span>
               </div>
               
               {pendingUsers.length === 0 ? (
-                <div className="rounded-lg border border-slate-800 border-dashed bg-[#0d141e]/50 p-12 text-center text-slate-500">
+                <div className="rounded-lg border border-border border-dashed bg-card/50 p-12 text-center text-slate-500">
                   Nenhuma solicitação pendente no momento.
                 </div>
               ) : (
                 <div className="grid gap-4">
                   {pendingUsers.map(user => (
-                    <div key={user.user_id} className="flex items-center justify-between rounded-lg border border-slate-800 bg-[#0d141e] p-5">
+                    <div key={user.user_id} className="flex items-center justify-between rounded-lg border border-border bg-card p-5">
                       <div>
                         <h4 className="font-bold text-white uppercase">{user.full_name}</h4>
                         <div className="mt-1 flex items-center gap-4 text-sm text-slate-400">
@@ -2885,13 +2885,13 @@ function Corregedoria() {
                       <div className="flex gap-2">
                         <Button 
                           onClick={() => approveUser(user.role_id, "corregedor")}
-                          className="bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 border border-blue-500/30 text-[10px] font-bold uppercase px-3"
+                          className="bg-white/15 text-white hover:bg-blue-500/30 border border-white/30 text-[10px] font-bold uppercase px-3"
                         >
                           Corregedor
                         </Button>
                         <Button 
                           onClick={() => approveUser(user.role_id, "admin")}
-                          className="bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 border border-amber-500/30 text-[10px] font-bold uppercase px-3"
+                          className="bg-amber-500/20 text-zinc-300 hover:bg-amber-500/30 border border-white/30 text-[10px] font-bold uppercase px-3"
                         >
                           Admin
                         </Button>
@@ -2911,17 +2911,17 @@ function Corregedoria() {
           
           {activeTab === "oficiais" && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+              <div className="flex items-center justify-between border-b border-border pb-4">
                 <h3 className="text-lg font-bold uppercase tracking-wider text-white">Diretório de Oficiais</h3>
                 <span className="text-sm text-slate-400">{oficiais.length} oficiais registrados</span>
               </div>
               
               <div className="grid gap-4 md:grid-cols-2">
                 {oficiais.map(oficial => (
-                  <div key={oficial.id} className="flex flex-col rounded-lg border border-slate-800 bg-[#0d141e] p-5">
+                  <div key={oficial.id} className="flex flex-col rounded-lg border border-border bg-card p-5">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-4">
-                        <div className="flex h-12 w-12 items-center justify-center rounded bg-blue-500/10 text-blue-400">
+                        <div className="flex h-12 w-12 items-center justify-center rounded bg-white/10 text-white">
                           <Users className="h-6 w-6" />
                         </div>
                         <div>
@@ -2942,7 +2942,7 @@ function Corregedoria() {
                       )}
                     </div>
                     
-                    <div className="flex flex-col gap-4 border-t border-slate-800 pt-4 mt-auto">
+                    <div className="flex flex-col gap-4 border-t border-border pt-4 mt-auto">
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
                           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Permissão</p>
@@ -2951,16 +2951,16 @@ function Corregedoria() {
                               defaultValue={oficial.role} 
                               onValueChange={(v: any) => changeUserRole(oficial.id, v)}
                             >
-                              <SelectTrigger className="bg-slate-950 border-slate-800 text-amber-500 font-bold text-[10px] uppercase h-9">
+                              <SelectTrigger className="bg-black border-border text-zinc-300 font-bold text-[10px] uppercase h-9">
                                 <SelectValue />
                               </SelectTrigger>
-                              <SelectContent className="bg-slate-900 border-slate-800 text-white">
+                              <SelectContent className="bg-zinc-900 border-border text-white">
                                 <SelectItem value="corregedor">Corregedor</SelectItem>
                                 <SelectItem value="admin">Administrador</SelectItem>
                               </SelectContent>
                             </Select>
                           ) : (
-                            <div className="flex items-center h-9 px-3 rounded-md bg-slate-950 border border-slate-800 text-amber-500 font-bold text-[10px] uppercase">
+                            <div className="flex items-center h-9 px-3 rounded-md bg-black border border-border text-zinc-300 font-bold text-[10px] uppercase">
                               {oficial.role}
                             </div>
                           )}
@@ -2973,7 +2973,7 @@ function Corregedoria() {
                               <Input 
                                 defaultValue={oficial.patente || "Oficial"}
                                 id={`patente-${oficial.id}`}
-                                className="bg-slate-950 border-slate-800 text-blue-400 font-mono text-[10px] uppercase h-9 flex-1"
+                                className="bg-black border-border text-white font-mono text-[10px] uppercase h-9 flex-1"
                               />
                               <Button 
                                 size="sm"
@@ -2981,13 +2981,13 @@ function Corregedoria() {
                                   const el = document.getElementById(`patente-${oficial.id}`) as HTMLInputElement;
                                   updatePatente(oficial.id, el.value);
                                 }}
-                                className="bg-slate-800 hover:bg-slate-700 text-white h-9 px-2"
+                                className="bg-zinc-800 hover:bg-slate-700 text-white h-9 px-2"
                               >
                                 Salvar
                               </Button>
                             </div>
                           ) : (
-                            <div className="flex items-center h-9 px-3 rounded-md bg-slate-950 border border-slate-800 text-blue-400 font-mono text-[10px] uppercase">
+                            <div className="flex items-center h-9 px-3 rounded-md bg-black border border-border text-white font-mono text-[10px] uppercase">
                               {oficial.patente || "Oficial"}
                             </div>
                           )}
@@ -3005,18 +3005,18 @@ function Corregedoria() {
 
       {/* DIALOG DE EDIÇÃO DE RELATÓRIO */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[600px] bg-[#0d141e] border-slate-800 text-slate-300">
+        <DialogContent className="sm:max-w-[600px] bg-card border-border text-slate-300">
           <DialogHeader>
-            <div className="text-center pb-2 border-b border-slate-800">
-              <p className="text-[9px] font-bold uppercase tracking-widest text-blue-400 mb-1">Corregedoria Geral (PMESP)</p>
+            <div className="text-center pb-2 border-b border-border">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-white mb-1">Corregedoria Geral (PMESP)</p>
               <DialogTitle className="text-white uppercase tracking-wider text-sm">Editar {relatorioForm.tipo_denuncia}</DialogTitle>
             </div>
           </DialogHeader>
           <form onSubmit={updateRelatorio} className="space-y-4 mt-2">
             <div className="max-h-[70vh] overflow-y-auto pr-2 space-y-5 custom-scrollbar">
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1"><Label className="text-[10px] uppercase text-slate-500">Título / Número do Caso</Label><Input className="bg-slate-950 border-slate-800 text-white h-8 text-xs" value={relatorioForm.titulo} onChange={(e) => setRelatorioForm({ ...relatorioForm, titulo: e.target.value })} /></div>
-                <div className="space-y-1"><Label className="text-[10px] uppercase text-slate-500">Status</Label><Select value={relatorioForm.status} onValueChange={(v: Status) => setRelatorioForm({ ...relatorioForm, status: v })}><SelectTrigger className="bg-slate-950 border-slate-800 text-white h-8 text-xs"><SelectValue /></SelectTrigger><SelectContent className="bg-slate-900 border-slate-800 text-white">{Object.entries(STATUS_LABEL).map(([val, lab]) => <SelectItem key={val} value={val}>{lab}</SelectItem>)}</SelectContent></Select></div>
+                <div className="space-y-1"><Label className="text-[10px] uppercase text-slate-500">Título / Número do Caso</Label><Input className="bg-black border-border text-white h-8 text-xs" value={relatorioForm.titulo} onChange={(e) => setRelatorioForm({ ...relatorioForm, titulo: e.target.value })} /></div>
+                <div className="space-y-1"><Label className="text-[10px] uppercase text-slate-500">Status</Label><Select value={relatorioForm.status} onValueChange={(v: Status) => setRelatorioForm({ ...relatorioForm, status: v })}><SelectTrigger className="bg-black border-border text-white h-8 text-xs"><SelectValue /></SelectTrigger><SelectContent className="bg-zinc-900 border-border text-white">{Object.entries(STATUS_LABEL).map(([val, lab]) => <SelectItem key={val} value={val}>{lab}</SelectItem>)}</SelectContent></Select></div>
               </div>
 
               {relatorioForm.tipo_denuncia === "Inquérito Policial" ? (
@@ -3025,17 +3025,17 @@ function Corregedoria() {
                   <div className="space-y-2 border-l-2 border-red-600 pl-4 bg-red-500/5 py-2">
                     <h4 className="text-[10px] font-bold uppercase tracking-widest text-red-500">0. Dados do Corregedor</h4>
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Número do Caso</Label><Input value={relatorioForm.dados_detalhados.numero_caso} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, numero_caso: e.target.value}})} className="h-8 bg-slate-950 border-slate-800 text-white text-xs" /></div>
-                      <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Data de Abertura</Label><Input value={relatorioForm.dados_detalhados.data_abertura} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, data_abertura: e.target.value}})} type="date" className="h-8 bg-slate-950 border-slate-800 text-white text-xs" /></div>
+                      <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Número do Caso</Label><Input value={relatorioForm.dados_detalhados.numero_caso} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, numero_caso: e.target.value}})} className="h-8 bg-black border-border text-white text-xs" /></div>
+                      <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Data de Abertura</Label><Input value={relatorioForm.dados_detalhados.data_abertura} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, data_abertura: e.target.value}})} type="date" className="h-8 bg-black border-border text-white text-xs" /></div>
                     </div>
                   </div>
 
                   {/* 1. DADOS DO RECLAMANTE */}
-                  <div className="space-y-2 border-l-2 border-blue-600 pl-4 bg-blue-500/5 py-2">
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-blue-500">1. Dados do Reclamante</h4>
+                  <div className="space-y-2 border-l-2 border-zinc-500 pl-4 bg-white/5 py-2">
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-white">1. Dados do Reclamante</h4>
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Nome</Label><Input value={relatorioForm.dados_detalhados.reclamante_nome} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_nome: e.target.value}})} className="h-8 bg-slate-950 border-slate-800 text-white text-xs" /></div>
-                      <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">ID</Label><Input value={relatorioForm.dados_detalhados.reclamante_id} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_id: e.target.value}})} className="h-8 bg-slate-950 border-slate-800 text-white text-xs" /></div>
+                      <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Nome</Label><Input value={relatorioForm.dados_detalhados.reclamante_nome} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_nome: e.target.value}})} className="h-8 bg-black border-border text-white text-xs" /></div>
+                      <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">ID</Label><Input value={relatorioForm.dados_detalhados.reclamante_id} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_id: e.target.value}})} className="h-8 bg-black border-border text-white text-xs" /></div>
                     </div>
                   </div>
 
@@ -3043,15 +3043,15 @@ function Corregedoria() {
                   <div className="space-y-2 border-l-2 border-slate-600 pl-4 bg-slate-500/5 py-2">
                     <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">2. Dados do Policial Denunciado</h4>
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Nome do Policial</Label><Input value={relatorioForm.dados_detalhados.denunciado_nome} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, denunciado_nome: e.target.value}})} className="h-8 bg-slate-950 border-slate-800 text-white text-xs" /></div>
-                      <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Badge</Label><Input value={relatorioForm.dados_detalhados.denunciado_badge} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, denunciado_badge: e.target.value}})} className="h-8 bg-slate-950 border-slate-800 text-white text-xs" /></div>
+                      <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Nome do Policial</Label><Input value={relatorioForm.dados_detalhados.denunciado_nome} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, denunciado_nome: e.target.value}})} className="h-8 bg-black border-border text-white text-xs" /></div>
+                      <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Badge</Label><Input value={relatorioForm.dados_detalhados.denunciado_badge} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, denunciado_badge: e.target.value}})} className="h-8 bg-black border-border text-white text-xs" /></div>
                     </div>
                   </div>
 
                   {/* 5. RELATÓRIO DOS FATOS */}
                   <div className="space-y-2">
                     <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">5. Relatório dos Fatos</Label>
-                    <Textarea rows={5} className="bg-slate-950 border-slate-800 text-white text-xs leading-relaxed" value={relatorioForm.conteudo} onChange={(e) => setRelatorioForm({ ...relatorioForm, conteudo: e.target.value })} />
+                    <Textarea rows={5} className="bg-black border-border text-white text-xs leading-relaxed" value={relatorioForm.conteudo} onChange={(e) => setRelatorioForm({ ...relatorioForm, conteudo: e.target.value })} />
                   </div>
                 </>
               ) : (
@@ -3060,25 +3060,25 @@ function Corregedoria() {
                   <div className="space-y-2 border-l-2 border-red-600 pl-4 bg-red-500/5 py-2">
                     <h4 className="text-[10px] font-bold uppercase tracking-widest text-red-500">1. IDENTIFICAÇÃO DO ATO</h4>
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Número do Ato</Label><Input value={relatorioForm.dados_detalhados.ato_numero} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_numero: e.target.value}})} className="h-8 bg-slate-950 border-slate-800 text-xs" /></div>
-                      <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Data de Emissão</Label><Input type="date" value={relatorioForm.dados_detalhados.ato_data_emissao} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_data_emissao: e.target.value}})} className="h-8 bg-slate-950 border-slate-800 text-xs" /></div>
+                      <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Número do Ato</Label><Input value={relatorioForm.dados_detalhados.ato_numero} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_numero: e.target.value}})} className="h-8 bg-black border-border text-xs" /></div>
+                      <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Data de Emissão</Label><Input type="date" value={relatorioForm.dados_detalhados.ato_data_emissao} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_data_emissao: e.target.value}})} className="h-8 bg-black border-border text-xs" /></div>
                     </div>
                   </div>
 
-                  <div className="space-y-2 border-l-2 border-blue-600 pl-4 bg-blue-500/5 py-2">
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-blue-500">2. AUTORIDADE EMISSORA</h4>
-                    <Input value={relatorioForm.dados_detalhados.ato_autoridade_nome} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_autoridade_nome: e.target.value}})} className="h-8 bg-slate-950 border-slate-800 text-xs" />
+                  <div className="space-y-2 border-l-2 border-zinc-500 pl-4 bg-white/5 py-2">
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-white">2. AUTORIDADE EMISSORA</h4>
+                    <Input value={relatorioForm.dados_detalhados.ato_autoridade_nome} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_autoridade_nome: e.target.value}})} className="h-8 bg-black border-border text-xs" />
                   </div>
 
                   <div className="space-y-2">
                     <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">5. DECISÃO</Label>
-                    <Textarea rows={5} className="bg-slate-950 border-slate-800 text-white text-xs leading-relaxed" value={relatorioForm.dados_detalhados.ato_decisao} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_decisao: e.target.value}})} />
+                    <Textarea rows={5} className="bg-black border-border text-white text-xs leading-relaxed" value={relatorioForm.dados_detalhados.ato_decisao} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_decisao: e.target.value}})} />
                   </div>
                 </>
               )}
             </div>
-            <div className="pt-4 border-t border-slate-800 flex justify-end">
-              <Button type="submit" disabled={submitting} className="bg-blue-600 hover:bg-blue-500 text-white px-8 font-bold tracking-widest text-[10px] uppercase">
+            <div className="pt-4 border-t border-border flex justify-end">
+              <Button type="submit" disabled={submitting} className="bg-zinc-700 hover:bg-blue-500 text-white px-8 font-bold tracking-widest text-[10px] uppercase">
                 {submitting ? "Salvando..." : "SALVAR ALTERAÇÕES"}
               </Button>
             </div>
@@ -3109,8 +3109,8 @@ function SidebarItem({
       onClick={onClick}
       className={`flex w-full items-center justify-between rounded-md px-4 py-3 text-sm font-medium transition-all ${
         active 
-          ? "bg-blue-500/10 text-blue-400 shadow-[inset_2px_0_0_0_rgba(59,130,246,1)]" 
-          : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+          ? "bg-white/10 text-white shadow-[inset_2px_0_0_0_rgba(59,130,246,1)]" 
+          : "text-slate-400 hover:bg-zinc-800 hover:text-slate-200"
       }`}
     >
       <div className="flex items-center gap-3">
@@ -3128,7 +3128,7 @@ function SidebarItem({
 
 function StatCard({ title, value, icon: Icon, color }: { title: string, value: string, icon: React.ElementType, color: string }) {
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-[#0d141e] p-6">
+    <div className="flex flex-col gap-2 rounded-lg border border-border bg-card p-6">
       <div className="flex items-center justify-between">
         <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{title}</span>
         <Icon className={`h-5 w-5 ${color}`} />
@@ -3146,3 +3146,5 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     </div>
   );
 }
+
+
