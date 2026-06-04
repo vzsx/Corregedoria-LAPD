@@ -3300,17 +3300,33 @@ function Corregedoria() {
                   <div className="space-y-2 border-l-2 border-red-600 pl-4 bg-red-500/5 py-2">
                     <h4 className="text-[10px] font-bold uppercase tracking-widest text-red-500">0. Dados do Corregedor</h4>
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Número do Caso</Label><Input value={relatorioForm.dados_detalhados.numero_caso} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, numero_caso: e.target.value}})} className="h-8 bg-background border-border text-foreground text-xs" /></div>
+                      <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Número do Caso (IP-Nº)</Label><Input value={relatorioForm.dados_detalhados.numero_caso} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, numero_caso: e.target.value}})} className="h-8 bg-background border-border text-foreground text-xs" /></div>
                       <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Data de Abertura</Label><Input value={relatorioForm.dados_detalhados.data_abertura} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, data_abertura: e.target.value}})} type="date" className="h-8 bg-background border-border text-foreground text-xs" /></div>
                     </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Corregedor Responsável</Label><Input value={relatorioForm.oficial} className="h-8 bg-background border-border text-foreground text-xs" onChange={(e) => setRelatorioForm({ ...relatorioForm, oficial: e.target.value })} /></div>
+                      <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Patente do Corregedor</Label><Input value={relatorioForm.dados_detalhados.corregedor_patente} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, corregedor_patente: e.target.value}})} className="h-8 bg-background border-border text-foreground text-xs" /></div>
+                    </div>
+                    <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Data de Recebimento</Label><Input value={relatorioForm.dados_detalhados.data_recebimento} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, data_recebimento: e.target.value}})} type="date" className="h-8 bg-background border-border text-foreground text-xs" /></div>
                   </div>
 
                   {/* 1. DADOS DO RECLAMANTE */}
                   <div className="space-y-2 border-l-2 border-zinc-500 pl-4 bg-muted/50 py-2">
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-foreground">1. Dados do Reclamante</h4>
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-foreground">1. Dados do Reclamante / Denunciante</h4>
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Nome</Label><Input value={relatorioForm.dados_detalhados.reclamante_nome} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_nome: e.target.value}})} className="h-8 bg-background border-border text-foreground text-xs" /></div>
-                      <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">ID</Label><Input value={relatorioForm.dados_detalhados.reclamante_id} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_id: e.target.value}})} className="h-8 bg-background border-border text-foreground text-xs" /></div>
+                      <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Nome Completo</Label><Input value={relatorioForm.dados_detalhados.reclamante_nome} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_nome: e.target.value}})} className="h-8 bg-background border-border text-foreground text-xs" /></div>
+                      <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Número do ID</Label><Input value={relatorioForm.dados_detalhados.reclamante_id} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_id: e.target.value}})} className="h-8 bg-background border-border text-foreground text-xs" /></div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Telefone</Label><Input value={relatorioForm.dados_detalhados.reclamante_telefone} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_telefone: e.target.value}})} className="h-8 bg-background border-border text-foreground text-xs" /></div>
+                      <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Discord</Label><Input value={relatorioForm.dados_detalhados.reclamante_discord} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_discord: e.target.value}})} className="h-8 bg-background border-border text-foreground text-xs" /></div>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-[9px] uppercase text-muted-foreground">Denúncia Anônima?</Label>
+                      <RadioGroup value={relatorioForm.dados_detalhados.reclamante_anonimo} onValueChange={(v) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_anonimo: v}})} className="flex gap-4 mt-1">
+                        <div className="flex items-center space-x-2"><RadioGroupItem value="Sim" id="edit-anon-sim" className="border-border text-blue-600" /><Label htmlFor="edit-anon-sim" className="text-xs text-foreground font-normal">Sim</Label></div>
+                        <div className="flex items-center space-x-2"><RadioGroupItem value="Não" id="edit-anon-nao" className="border-border text-blue-600" /><Label htmlFor="edit-anon-nao" className="text-xs text-foreground font-normal">Não</Label></div>
+                      </RadioGroup>
                     </div>
                   </div>
 
@@ -3319,35 +3335,250 @@ function Corregedoria() {
                     <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">2. Dados do Policial Denunciado</h4>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Nome do Policial</Label><Input value={relatorioForm.dados_detalhados.denunciado_nome} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, denunciado_nome: e.target.value}})} className="h-8 bg-background border-border text-foreground text-xs" /></div>
-                      <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Badge</Label><Input value={relatorioForm.dados_detalhados.denunciado_badge} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, denunciado_badge: e.target.value}})} className="h-8 bg-background border-border text-foreground text-xs" /></div>
+                      <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Patente / Cargo</Label><Input value={relatorioForm.dados_detalhados.denunciado_patente} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, denunciado_patente: e.target.value}})} className="h-8 bg-background border-border text-foreground text-xs" /></div>
                     </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Badge / Nº de Identificação</Label><Input value={relatorioForm.dados_detalhados.denunciado_badge} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, denunciado_badge: e.target.value}})} className="h-8 bg-background border-border text-foreground text-xs" /></div>
+                      <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Divisão / Unidade</Label><Input value={relatorioForm.dados_detalhados.denunciado_unidade} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, denunciado_unidade: e.target.value}})} className="h-8 bg-background border-border text-foreground text-xs" /></div>
+                    </div>
+                    <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Prefixo / Modelo da Viatura (se houver)</Label><Input value={relatorioForm.dados_detalhados.denunciado_viatura} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, denunciado_viatura: e.target.value}})} className="h-8 bg-background border-border text-foreground text-xs" /></div>
+                  </div>
+
+                  {/* 3. TIPO DE DENÚNCIA */}
+                  <div className="space-y-2 border-l-2 border-zinc-600 pl-4 bg-muted/50 py-2">
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-foreground">3. Tipo de Denúncia</h4>
+                    <div className="grid grid-cols-2 gap-y-2">
+                      {["Uso excessivo da força","Abuso de autoridade","Corrupção","Conduta imprópria","Discriminação / Racismo","Ameaça / Intimidação","Violação de procedimentos","Falsificação de relatório","Assédio","Outro"].map(tipo => (
+                        <div key={tipo} className="flex items-center space-x-2">
+                          <Checkbox id={`edit-tipo-ip-${tipo}`} checked={relatorioForm.dados_detalhados.tipo_denuncia_selecionado === tipo} onCheckedChange={() => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, tipo_denuncia_selecionado: tipo}})} className="border-border data-[state=checked]:bg-amber-600 data-[state=checked]:border-zinc-600" />
+                          <Label htmlFor={`edit-tipo-ip-${tipo}`} className="text-[10px] text-foreground font-normal">{tipo}</Label>
+                        </div>
+                      ))}
+                    </div>
+                    {relatorioForm.dados_detalhados.tipo_denuncia_selecionado === "Outro" && <Input placeholder="Especifique..." value={relatorioForm.dados_detalhados.tipo_denuncia_outro} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, tipo_denuncia_outro: e.target.value}})} className="h-8 bg-background border-border text-foreground text-xs" />}
+                  </div>
+
+                  {/* 4. INFORMAÇÕES DO INCIDENTE */}
+                  <div className="space-y-2 border-l-2 border-zinc-600 pl-4 bg-muted/50 py-2">
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-foreground">4. Informações do Incidente</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Data do Ocorrido</Label><Input value={relatorioForm.dados_detalhados.incidente_data} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, incidente_data: e.target.value}})} type="date" className="h-8 bg-background border-border text-foreground text-xs" /></div>
+                      <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Horário Aproximado</Label><Input value={relatorioForm.dados_detalhados.incidente_horario} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, incidente_horario: e.target.value}})} type="time" className="h-8 bg-background border-border text-foreground text-xs" /></div>
+                    </div>
+                    <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Local do Incidente</Label><Input value={relatorioForm.dados_detalhados.incidente_local} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, incidente_local: e.target.value}})} className="h-8 bg-background border-border text-foreground text-xs" /></div>
+                    <div className="space-y-1">
+                      <Label className="text-[9px] uppercase text-muted-foreground">Havia Testemunhas?</Label>
+                      <RadioGroup value={relatorioForm.dados_detalhados.incidente_testemunhas} onValueChange={(v) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, incidente_testemunhas: v}})} className="flex gap-4 mt-1">
+                        <div className="flex items-center space-x-2"><RadioGroupItem value="Sim" id="edit-test-sim" className="border-border text-violet-600" /><Label htmlFor="edit-test-sim" className="text-xs text-foreground font-normal">Sim</Label></div>
+                        <div className="flex items-center space-x-2"><RadioGroupItem value="Não" id="edit-test-nao" className="border-border text-violet-600" /><Label htmlFor="edit-test-nao" className="text-xs text-foreground font-normal">Não</Label></div>
+                      </RadioGroup>
+                    </div>
+                    {relatorioForm.dados_detalhados.incidente_testemunhas === "Sim" && (
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Nome(s) da(s) Testemunha(s)</Label><Textarea rows={2} value={relatorioForm.dados_detalhados.incidente_testemunhas_nomes} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, incidente_testemunhas_nomes: e.target.value}})} className="bg-background border-border text-foreground text-xs" /></div>
+                        <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Contato(s) da(s) Testemunha(s)</Label><Textarea rows={2} value={relatorioForm.dados_detalhados.incidente_testemunhas_contatos} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, incidente_testemunhas_contatos: e.target.value}})} className="bg-background border-border text-foreground text-xs" /></div>
+                      </div>
+                    )}
                   </div>
 
                   {/* 5. RELATÓRIO DOS FATOS */}
                   <div className="space-y-2">
-                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">5. Relatório dos Fatos</Label>
+                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">5. Relatório dos Fatos Anexado à Denúncia</Label>
                     <Textarea rows={5} className="bg-background border-border text-foreground text-xs leading-relaxed" value={relatorioForm.conteudo} onChange={(e) => setRelatorioForm({ ...relatorioForm, conteudo: e.target.value })} />
+                  </div>
+
+                  {/* 6. PROVAS E EVIDÊNCIAS */}
+                  <div className="space-y-2 border-l-2 border-emerald-600 pl-4 bg-emerald-500/5 py-2">
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-emerald-500">6. Provas e Evidências</h4>
+                    <div className="grid grid-cols-3 gap-y-2">
+                      {["Fotos","Vídeos","Áudios","Documentos","Bodycam / Dashcam","Outro"].map(prova => (
+                        <div key={prova} className="flex items-center space-x-2">
+                          <Checkbox id={`edit-prova-ip-${prova}`} checked={relatorioForm.dados_detalhados.provas_selecionadas?.includes(prova)} onCheckedChange={(checked) => { const c=[...(relatorioForm.dados_detalhados.provas_selecionadas||[])]; if(checked) c.push(prova); else c.splice(c.indexOf(prova),1); setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, provas_selecionadas: c}}); }} className="border-border data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600" />
+                          <Label htmlFor={`edit-prova-ip-${prova}`} className="text-[10px] text-foreground font-normal">{prova}</Label>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="space-y-1 mt-2"><Label className="text-[9px] uppercase text-muted-foreground">Descrição das Provas</Label><Textarea rows={2} value={relatorioForm.dados_detalhados.provas_descricao} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, provas_descricao: e.target.value}})} className="bg-background border-border text-foreground text-xs" /></div>
+                  </div>
+
+                  {/* 7. DOCUMENTOS E VÍNCULOS */}
+                  <div className="pt-2 border-t border-border space-y-3">
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">7. Documentos Anexos e Vínculos</h4>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="space-y-1">
+                        <Label className="text-[9px] text-muted-foreground uppercase">Denúncia</Label>
+                        <Select value={relatorioForm.denuncia_id} onValueChange={(v) => setRelatorioForm({ ...relatorioForm, denuncia_id: v })}>
+                          <SelectTrigger className="bg-background border-border text-foreground h-8 text-[10px] uppercase">
+                            <SelectValue placeholder="Nenhum" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-muted border-border text-foreground">
+                            <SelectItem value="none">Nenhum</SelectItem>
+                            {denuncias.map(d => (
+                              <SelectItem key={d.id} value={d.id} className="text-[10px]">#{d.numero_registro} - {d.titulo}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[9px] text-muted-foreground uppercase">Investigação</Label>
+                        <Select value={relatorioForm.investigacao_id} onValueChange={(v) => setRelatorioForm({ ...relatorioForm, investigacao_id: v })}>
+                          <SelectTrigger className="bg-background border-border text-foreground h-8 text-[10px] uppercase">
+                            <SelectValue placeholder="Nenhum" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-muted border-border text-foreground">
+                            <SelectItem value="none">Nenhum</SelectItem>
+                            {investigacoes.map(i => (
+                              <SelectItem key={i.id} value={i.id} className="text-[10px]">#{i.numero_registro} - {i.titulo}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[9px] text-muted-foreground uppercase">Ato Adm Vinculado</Label>
+                        <Select value={relatorioForm.dados_detalhados.ato_id_vinculado} onValueChange={(v) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_id_vinculado: v}})}>
+                          <SelectTrigger className="bg-background border-border text-foreground h-8 text-[10px] uppercase">
+                            <SelectValue placeholder="Nenhum" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-muted border-border text-foreground">
+                            <SelectItem value="none">Nenhum</SelectItem>
+                            {relatorios.filter(r => r.tipo_denuncia === "Ato Administrativo").map(r => (
+                              <SelectItem key={r.id} value={r.id} className="text-[10px]">#{r.numero_registro} - {r.titulo}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
                   </div>
                 </>
               ) : (
                 <>
-                  {/* ATO ADMINISTRATIVO FIELDS */}
+                  {/* 1. IDENTIFICAÇÃO DO ATO */}
                   <div className="space-y-2 border-l-2 border-red-600 pl-4 bg-red-500/5 py-2">
                     <h4 className="text-[10px] font-bold uppercase tracking-widest text-red-500">1. IDENTIFICAÇÃO DO ATO</h4>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Nº do Inquérito</Label><Input value={relatorioForm.dados_detalhados.ato_numero_inquerito} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_numero_inquerito: e.target.value}})} className="h-8 bg-background border-border text-xs" /></div>
                       <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Número do Ato</Label><Input value={relatorioForm.dados_detalhados.ato_numero} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_numero: e.target.value}})} className="h-8 bg-background border-border text-xs" /></div>
                       <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Data de Emissão</Label><Input type="date" value={relatorioForm.dados_detalhados.ato_data_emissao} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_data_emissao: e.target.value}})} className="h-8 bg-background border-border text-xs" /></div>
                     </div>
+                    <div className="space-y-1">
+                      <Label className="text-[9px] uppercase text-muted-foreground">Tipo de Ato</Label>
+                      <Select value={relatorioForm.dados_detalhados.ato_tipo} onValueChange={(v) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_tipo: v}})}>
+                        <SelectTrigger className="bg-background border-border text-foreground h-8 text-xs">
+                          <SelectValue placeholder="Selecione..." />
+                        </SelectTrigger>
+                        <SelectContent className="bg-muted border-border text-foreground">
+                          {["Portaria","Ofício","Despacho","Parecer","Mandado","Notificação","Intimação","Outro"].map(t => (
+                            <SelectItem key={t} value={t} className="text-[10px]">{t}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {relatorioForm.dados_detalhados.ato_tipo === "Outro" && <Input placeholder="Especifique..." value={relatorioForm.dados_detalhados.ato_tipo_outro} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_tipo_outro: e.target.value}})} className="h-8 bg-background border-border text-xs" />}
                   </div>
 
+                  {/* 2. AUTORIDADE EMISSORA */}
                   <div className="space-y-2 border-l-2 border-zinc-500 pl-4 bg-muted/50 py-2">
                     <h4 className="text-[10px] font-bold uppercase tracking-widest text-foreground">2. AUTORIDADE EMISSORA</h4>
-                    <Input value={relatorioForm.dados_detalhados.ato_autoridade_nome} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_autoridade_nome: e.target.value}})} className="h-8 bg-background border-border text-xs" />
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Nome</Label><Input value={relatorioForm.dados_detalhados.ato_autoridade_nome} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_autoridade_nome: e.target.value}})} className="h-8 bg-background border-border text-xs" /></div>
+                      <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Cargo</Label><Input value={relatorioForm.dados_detalhados.ato_autoridade_cargo} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_autoridade_cargo: e.target.value}})} className="h-8 bg-background border-border text-xs" /></div>
+                      <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Departamento</Label><Input value={relatorioForm.dados_detalhados.ato_autoridade_unidade} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_autoridade_unidade: e.target.value}})} className="h-8 bg-background border-border text-xs" /></div>
+                    </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">5. DECISÃO</Label>
+                  {/* 3. OBJETO DO ATO */}
+                  <div className="space-y-2 border-l-2 border-slate-600 pl-4 bg-slate-500/5 py-2">
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">3. OBJETO DO ATO</h4>
+                    <Textarea value={relatorioForm.dados_detalhados.ato_objeto_descricao} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_objeto_descricao: e.target.value}})} rows={3} className="bg-background border-border text-xs" />
+                  </div>
+
+                  {/* 4. FUNDAMENTAÇÃO */}
+                  <div className="space-y-2 border-l-2 border-zinc-600 pl-4 bg-muted/50 py-2">
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-foreground">4. FUNDAMENTAÇÃO</h4>
+                    <div className="grid grid-cols-2 gap-y-2">
+                      {["Art. 40 da Lei 8.112/90","Art. 143 da Lei 8.112/90","CF Art. 37, §4º","Lei 4.898/65 (Abuso de Autoridade)","Código Penal Militar","Regularmento Disciplinar PMESP","Jurisprudência Corregedoria","Outro"].map(f => (
+                        <div key={f} className="flex items-center space-x-2">
+                          <Checkbox id={`edit-fund-${f}`} checked={relatorioForm.dados_detalhados.ato_fundamentacao_selecionada?.includes(f)} onCheckedChange={(checked) => { const current = [...(relatorioForm.dados_detalhados.ato_fundamentacao_selecionada || [])]; if (checked) current.push(f); else current.splice(current.indexOf(f), 1); setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_fundamentacao_selecionada: current}}); }} className="border-border" />
+                          <Label htmlFor={`edit-fund-${f}`} className="text-[10px] text-foreground font-normal">{f}</Label>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Descrição Complementar</Label><Textarea value={relatorioForm.dados_detalhados.ato_fundamentacao_complementar} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_fundamentacao_complementar: e.target.value}})} rows={2} className="bg-background border-border text-xs" /></div>
+                  </div>
+
+                  {/* 5. DECISÃO */}
+                  <div className="space-y-2 border-l-2 border-zinc-600 pl-4 bg-muted/50 py-2">
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-foreground">5. DECISÃO</h4>
                     <Textarea rows={5} className="bg-background border-border text-foreground text-xs leading-relaxed" value={relatorioForm.dados_detalhados.ato_decisao} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_decisao: e.target.value}})} />
+                  </div>
+
+                  {/* 6. MEDIDAS DETERMINADAS */}
+                  <div className="space-y-2 border-l-2 border-emerald-600 pl-4 bg-emerald-500/5 py-2">
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-emerald-500">6. MEDIDAS DETERMINADAS</h4>
+                    <div className="grid grid-cols-2 gap-y-2">
+                      {["Abertura de IP","Afastamento preventivo","Suspensão","Advertência","Recomendação","Arquivamento","Encaminhamento ao MP","Outro"].map(m => (
+                        <div key={m} className="flex items-center space-x-2">
+                          <Checkbox id={`edit-med-${m}`} checked={relatorioForm.dados_detalhados.ato_medidas_selecionadas?.includes(m)} onCheckedChange={(checked) => { const current = [...(relatorioForm.dados_detalhados.ato_medidas_selecionadas || [])]; if (checked) current.push(m); else current.splice(current.indexOf(m), 1); setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_medidas_selecionadas: current}}); }} className="border-border data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600" />
+                          <Label htmlFor={`edit-med-${m}`} className="text-[10px] text-foreground font-normal">{m}</Label>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Detalhamento das Medidas</Label><Textarea value={relatorioForm.dados_detalhados.ato_medidas_detalhamento} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_medidas_detalhamento: e.target.value}})} rows={3} className="bg-background border-border text-xs" /></div>
+                  </div>
+
+                  {/* 7. CONTEÚDO DETALHADO */}
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">7. Conteúdo Detalhado do Ato</Label>
+                    <Textarea rows={6} className="bg-background border-border text-foreground font-mono text-xs leading-relaxed" value={relatorioForm.conteudo} onChange={(e) => setRelatorioForm({ ...relatorioForm, conteudo: e.target.value })} />
+                  </div>
+
+                  {/* 8. VÍNCULOS */}
+                  <div className="pt-2 border-t border-border space-y-3">
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">8. Documentos Anexos e Vínculos</h4>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="space-y-1">
+                        <Label className="text-[9px] text-muted-foreground uppercase">Denúncia</Label>
+                        <Select value={relatorioForm.denuncia_id} onValueChange={(v) => setRelatorioForm({ ...relatorioForm, denuncia_id: v })}>
+                          <SelectTrigger className="bg-background border-border text-foreground h-8 text-[10px] uppercase">
+                            <SelectValue placeholder="Nenhum" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-muted border-border text-foreground">
+                            <SelectItem value="none">Nenhum</SelectItem>
+                            {denuncias.map(d => (
+                              <SelectItem key={d.id} value={d.id} className="text-[10px]">#{d.numero_registro} - {d.titulo}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[9px] text-muted-foreground uppercase">Investigação</Label>
+                        <Select value={relatorioForm.investigacao_id} onValueChange={(v) => setRelatorioForm({ ...relatorioForm, investigacao_id: v })}>
+                          <SelectTrigger className="bg-background border-border text-foreground h-8 text-[10px] uppercase">
+                            <SelectValue placeholder="Nenhum" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-muted border-border text-foreground">
+                            <SelectItem value="none">Nenhum</SelectItem>
+                            {investigacoes.map(i => (
+                              <SelectItem key={i.id} value={i.id} className="text-[10px]">#{i.numero_registro} - {i.titulo}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[9px] text-muted-foreground uppercase">IP Vinculado</Label>
+                        <Select value={relatorioForm.dados_detalhados.ip_id_vinculado} onValueChange={(v) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ip_id_vinculado: v}})}>
+                          <SelectTrigger className="bg-background border-border text-foreground h-8 text-[10px] uppercase">
+                            <SelectValue placeholder="Nenhum" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-muted border-border text-foreground">
+                            <SelectItem value="none">Nenhum</SelectItem>
+                            {relatorios.filter(r => r.tipo_denuncia === "Inquérito Policial").map(r => (
+                              <SelectItem key={r.id} value={r.id} className="text-[10px]">#{r.numero_registro} - {r.titulo}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
                   </div>
                 </>
               )}
