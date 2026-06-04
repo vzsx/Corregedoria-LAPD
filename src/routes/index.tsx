@@ -134,10 +134,10 @@ function Index() {
                 <Link to="/denuncias">
                   <Button
                     size="lg"
-                    className="bg-badge-gradient shadow-glow relative group-hover:scale-105 group-hover:shadow-[0_0_60px_var(--color-primary)/0.5] transition-all duration-300 font-bold tracking-wide"
+                    className="bg-white text-black hover:bg-[var(--gold)] hover:text-black group-hover:scale-105 transition-all duration-300 font-bold tracking-wide"
                   >
                     Fazer uma Denúncia
-                    <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
+                    <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform duration-300 text-black group-hover:text-black" />
                   </Button>
                 </Link>
               </div>
@@ -145,11 +145,10 @@ function Index() {
               <Link to="/auth">
                 <Button
                   size="lg"
-                  variant="outline"
-                  className="group hover:border-[var(--gold)] hover:text-[var(--gold)] hover:bg-[var(--gold)]/5 hover:shadow-[0_0_30px_var(--gold)/0.2] transition-all duration-300 font-bold tracking-wide"
+                  className="bg-white text-black hover:bg-[var(--gold)] hover:text-black font-bold tracking-wide transition-all duration-300"
                 >
                   Acesso Corregedor
-                  <Lock className="ml-2 h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+                  <Lock className="ml-2 h-4 w-4 text-black group-hover:text-black transition-colors duration-300" />
                 </Button>
               </Link>
             </div>
@@ -222,9 +221,8 @@ function Index() {
               />
 
               {/* Icon */}
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-md bg-badge-gradient relative group-hover:scale-110 transition-transform duration-300">
-                <f.icon className="h-6 w-6 text-primary-foreground" />
-                <div className="absolute inset-0 rounded-md bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-md bg-white relative group-hover:scale-110 transition-transform duration-300">
+                <f.icon className="h-6 w-6 text-black group-hover:text-[var(--gold)] transition-colors duration-300" />
               </div>
 
               <h3 className="font-display text-lg font-bold uppercase tracking-wide group-hover:text-[var(--gold)] transition-colors duration-300">
@@ -235,7 +233,7 @@ function Index() {
               </p>
 
               {/* Corner accent */}
-              <div className="absolute bottom-0 right-0 w-16 h-16 bg-gradient-to-tl from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-tl-3xl" />
+              <div className="absolute bottom-0 right-0 w-16 h-16 bg-gradient-to-tl from-[var(--gold)]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-tl-3xl" />
             </div>
           ))}
         </div>
@@ -253,7 +251,7 @@ function Index() {
 
           <div className="relative z-10">
             <div className="relative inline-block">
-              <FileText className="mx-auto h-12 w-12 text-[var(--gold)] animate-[floatIcon_3s_ease-in-out_infinite]" />
+              <FileText className="mx-auto h-12 w-12 text-white group-hover:text-[var(--gold)] animate-[floatIcon_3s_ease-in-out_infinite] transition-colors duration-300" />
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="w-16 h-16 rounded-full border border-[var(--gold)]/20 animate-ping opacity-30" />
               </div>
@@ -269,10 +267,10 @@ function Index() {
             <Link to="/denuncias" className="mt-8 inline-block">
               <Button
                 size="lg"
-                className="bg-badge-gradient shadow-glow group hover:scale-105 hover:shadow-[0_0_60px_var(--color-primary)/0.5] transition-all duration-300 font-bold tracking-wide"
+                className="bg-white text-black hover:bg-[var(--gold)] hover:text-black hover:scale-105 transition-all duration-300 font-bold tracking-wide"
               >
                 Registrar Denúncia
-                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
+                <ArrowRight className="ml-2 h-4 w-4 text-black group-hover:text-black group-hover:translate-x-1 transition-all duration-300" />
               </Button>
             </Link>
           </div>
