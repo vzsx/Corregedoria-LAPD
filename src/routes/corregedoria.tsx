@@ -247,58 +247,122 @@ const RelatorioCard = ({
 
       {expanded && (
         <div className="border-t border-border/50 bg-muted/50 p-6 space-y-6">
-          <div className="grid gap-6 md:grid-cols-2">
-            {/* Denúncias Vinculadas */}
-            <div className="rounded border border-border bg-muted p-4">
-              <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                <Activity className="h-4 w-4" /> Denúncias Vinculadas
-              </div>
-              {linkedDenuncias.length > 0 ? (
+          {/* Documentos Anexados (IP mostra AAs, AA mostra IPs) */}
+          <div className="rounded border border-border bg-muted p-4">
+            <div className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+              <LinkIcon className="h-4 w-4" /> Documentos Anexados
+            </div>
+            {(() => {
+              const linkedDocIds = relatorio.tipo_denuncia === "Inquérito Policial"
+                ? (relatorio.dados_detalhados?.ato_ids_vinculados || [])
+                : (relatorio.dados_detalhados?.ip_ids_vinculados || []);
+              const linkedDocs = relatorios.filter(r => linkedDocIds.includes(r.id));
+              return linkedDocs.length > 0 ? (
                 <div className="space-y-2 mb-4">
-                  {linkedDenuncias.map((d: any) => (
-                    <div key={d.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
+                  {linkedDocs.map(r => (
+                    <div key={r.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
                       <div className="flex items-center gap-3">
-                        <Activity className="h-4 w-4 text-foreground shrink-0" />
-                        <span className="text-foreground font-bold">{d.titulo}</span>
-                        <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">Denúncia</Badge>
+                        {r.tipo_denuncia === "Inquérito Policial" ? (
+                          <FileSignature className="h-4 w-4 text-foreground" />
+                        ) : (
+                          <FileText className="h-4 w-4 text-emerald-400" />
+                        )}
+                        <span className="text-foreground font-bold">{r.titulo}</span>
+                        <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">
+                          {r.tipo_denuncia}
+                        </Badge>
                       </div>
                       <Button size="sm" variant="ghost" className="h-7 text-xs text-foreground"
-                        onClick={() => { setActiveTab("denuncias"); setExpandedId(d.id); }}>
-                        Ver Denúncia
+                        onClick={() => { setActiveTab(r.tipo_denuncia === "Inquérito Policial" ? "inqueritos" : "atos"); setExpandedId(r.id); }}>
+                        Ver Documento
                       </Button>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-muted-foreground mb-4">Nenhuma denúncia anexada.</p>
-              )}
-            </div>
+                <p className="text-xs text-muted-foreground mb-4">Nenhum documento anexado.</p>
+              );
+            })()}
+          </div>
 
-            {/* Investigações Vinculadas */}
-            <div className="rounded border border-border bg-muted p-4">
-              <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                <Shield className="h-4 w-4" /> Investigações Vinculadas
+          {/* Denúncias Vinculadas */}
+          <div className="rounded border border-border bg-muted p-4">
+            <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+              <Activity className="h-4 w-4" /> Denúncias Vinculadas
+            </div>
+            {linkedDenuncias.length > 0 ? (
+              <div className="space-y-2 mb-4">
+                {linkedDenuncias.map((d: any) => (
+                  <div key={d.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
+                    <div className="flex items-center gap-3">
+                      <Activity className="h-4 w-4 text-foreground shrink-0" />
+                      <span className="text-foreground font-bold">{d.titulo}</span>
+                      <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">Denúncia</Badge>
+                    </div>
+                    <Button size="sm" variant="ghost" className="h-7 text-xs text-foreground"
+                      onClick={() => { setActiveTab("denuncias"); setExpandedId(d.id); }}>
+                      Ver Denúncia
+                    </Button>
+                  </div>
+                ))}
               </div>
-              {linkedInvestigacoes.length > 0 ? (
+            ) : (
+              <p className="text-xs text-muted-foreground mb-4">Nenhuma denúncia anexada.</p>
+            )}
+          </div>
+
+          {/* Investigações Vinculadas */}
+          <div className="rounded border border-border bg-muted p-4">
+            <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+              <Shield className="h-4 w-4" /> Investigações Vinculadas
+            </div>
+            {linkedInvestigacoes.length > 0 ? (
+              <div className="space-y-2 mb-4">
+                {linkedInvestigacoes.map((i: any) => (
+                  <div key={i.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
+                    <div className="flex items-center gap-3">
+                      <Shield className="h-4 w-4 text-foreground shrink-0" />
+                      <span className="text-foreground font-bold">{i.titulo}</span>
+                      <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">Investigação</Badge>
+                    </div>
+                    <Button size="sm" variant="ghost" className="h-7 text-xs text-foreground"
+                      onClick={() => { setActiveTab("investigacoes"); setExpandedId(i.id); }}>
+                      Ver Investigação
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground mb-4">Nenhuma investigação anexada.</p>
+            )}
+          </div>
+
+          {/* Depoimentos Vinculados */}
+          <div className="rounded border border-border bg-muted p-4">
+            <div className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+              <MessageSquare className="h-4 w-4" /> Depoimentos Vinculados
+            </div>
+            {(() => {
+              const depIds = relatorio.dados_detalhados?.depoimento_ids || [];
+              const linkedDeps = depoimentos?.filter(d => depIds.includes(d.id)) || [];
+              return linkedDeps.length > 0 ? (
                 <div className="space-y-2 mb-4">
-                  {linkedInvestigacoes.map((i: any) => (
-                    <div key={i.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
+                  {linkedDeps.map(dep => (
+                    <div key={dep.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
                       <div className="flex items-center gap-3">
-                        <Shield className="h-4 w-4 text-foreground shrink-0" />
-                        <span className="text-foreground font-bold">{i.titulo}</span>
-                        <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">Investigação</Badge>
+                        <MessageSquare className="h-4 w-4 text-foreground shrink-0" />
+                        <span className="text-foreground font-bold">{dep.oficial_nome}</span>
+                        <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">
+                          {format(new Date(dep.data_depoimento), "dd/MM/yyyy")}
+                        </Badge>
                       </div>
-                      <Button size="sm" variant="ghost" className="h-7 text-xs text-foreground"
-                        onClick={() => { setActiveTab("investigacoes"); setExpandedId(i.id); }}>
-                        Ver Investigação
-                      </Button>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-muted-foreground mb-4">Nenhuma investigação anexada.</p>
-              )}
-            </div>
+                <p className="text-xs text-muted-foreground mb-4">Nenhum depoimento anexado.</p>
+              );
+            })()}
           </div>
 
           {relatorio.tipo_denuncia === "Inquérito Policial" && relatorio.dados_detalhados && (
@@ -360,38 +424,6 @@ const RelatorioCard = ({
                   </div>
                 </div>
               </div>
-              
-              {(relatorio.dados_detalhados.ato_ids_vinculados?.length > 0) && (
-                <div className="mt-4 p-3 rounded border border-border bg-muted/50">
-                  <h4 className="text-[9px] font-bold uppercase tracking-widest text-foreground mb-2 flex items-center gap-2">
-                    <LinkIcon className="h-3 w-3" /> Atos Administrativos Vinculados
-                  </h4>
-                  <div className="flex flex-wrap gap-1">
-                    {relatorio.dados_detalhados.ato_ids_vinculados.map((id: string) => (
-                      <Badge key={id} variant="outline" className="bg-muted border-border text-foreground text-[10px]">
-                        {relatorios?.find((r: Relatorio) => r.id === id)?.titulo || "Documento não encontrado"}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {(relatorio.dados_detalhados.depoimento_ids?.length > 0) && (
-                <div className="mt-4 p-3 rounded border border-border bg-muted/50">
-                  <h4 className="text-[9px] font-bold uppercase tracking-widest text-foreground mb-2 flex items-center gap-2">
-                    <MessageSquare className="h-3 w-3" /> Depoimentos Vinculados
-                  </h4>
-                  <div className="flex flex-wrap gap-1">
-                    {relatorio.dados_detalhados.depoimento_ids.map((id: string) => {
-                      const dep = depoimentos?.find((d: Depoimento) => d.id === id);
-                      return (
-                        <Badge key={id} variant="outline" className="bg-muted border-border text-foreground text-[10px]">
-                          {dep?.oficial_nome || "Depoimento não encontrado"}
-                        </Badge>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
             </div>
           )}
 
@@ -460,37 +492,6 @@ const RelatorioCard = ({
                 )}
               </div>
 
-              {(relatorio.dados_detalhados.ip_ids_vinculados?.length > 0) && (
-                <div className="p-3 rounded border border-border bg-muted/50">
-                  <h4 className="text-[9px] font-bold uppercase tracking-widest text-foreground mb-2 flex items-center gap-2">
-                    <LinkIcon className="h-3 w-3" /> IPs Vinculados
-                  </h4>
-                  <div className="flex flex-wrap gap-1">
-                    {relatorio.dados_detalhados.ip_ids_vinculados.map((id: string) => (
-                      <Badge key={id} variant="outline" className="bg-muted border-border text-foreground text-[10px]">
-                        {relatorios?.find((r: Relatorio) => r.id === id)?.titulo || "Documento não encontrado"}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {(relatorio.dados_detalhados.depoimento_ids?.length > 0) && (
-                <div className="p-3 rounded border border-border bg-muted/50">
-                  <h4 className="text-[9px] font-bold uppercase tracking-widest text-foreground mb-2 flex items-center gap-2">
-                    <MessageSquare className="h-3 w-3" /> Depoimentos Vinculados
-                  </h4>
-                  <div className="flex flex-wrap gap-1">
-                    {relatorio.dados_detalhados.depoimento_ids.map((id: string) => {
-                      const dep = depoimentos?.find((d: Depoimento) => d.id === id);
-                      return (
-                        <Badge key={id} variant="outline" className="bg-muted border-border text-foreground text-[10px]">
-                          {dep?.oficial_nome || "Depoimento não encontrado"}
-                        </Badge>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
             </div>
           )}
 
