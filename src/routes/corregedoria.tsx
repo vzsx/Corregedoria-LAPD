@@ -627,6 +627,7 @@ function Corregedoria() {
     denuncia_ids: [] as string[],
     relatorio_ids_ip: [] as string[],
     relatorio_ids_ato: [] as string[],
+    depoimento_ids: [] as string[],
     
     // Novos campos
     tipo_procedimento: "Investigação Administrativa",
@@ -1090,6 +1091,12 @@ function Corregedoria() {
       setInvestigacaoRelatorios(prev => [...prev, { investigacao_id: newInvId, relatorio_id: relId }]);
     }
 
+    // Vincular depoimentos
+    for (const depId of investigacaoForm.depoimento_ids) {
+      await supabase.from("depoimentos").update({ investigacao_id: newInvId }).eq("id", depId);
+    }
+    setDepoimentos(prev => prev.map(d => investigacaoForm.depoimento_ids.includes(d.id) ? { ...d, investigacao_id: newInvId } : d));
+
     toast.success("Investigação iniciada com sucesso!");
     setInvestigacoes([data[0] as Investigacao, ...investigacoes]);
     setIsInvestigacaoDialogOpen(false);
@@ -1105,6 +1112,7 @@ function Corregedoria() {
       denuncia_ids: [], 
       relatorio_ids_ip: [],
       relatorio_ids_ato: [],
+      depoimento_ids: [],
       tipo_procedimento: "Investigação Administrativa",
       autoridade_responsavel: user?.user_metadata?.full_name || "",
       autoridade_patente: "",
@@ -1127,6 +1135,7 @@ function Corregedoria() {
     const linkedRelatorios = investigacaoRelatorios.filter(ir => ir.investigacao_id === inv.id).map(ir => ir.relatorio_id);
     const linkedRelatoriosIP = relatorios.filter(r => linkedRelatorios.includes(r.id) && r.tipo_denuncia === "Inquérito Policial").map(r => r.id);
     const linkedRelatoriosAto = relatorios.filter(r => linkedRelatorios.includes(r.id) && r.tipo_denuncia === "Ato Administrativo").map(r => r.id);
+    const linkedDepoimentoIds = depoimentos.filter(d => d.investigacao_id === inv.id).map(d => d.id);
     setInvestigacaoForm({
       titulo: inv.titulo || "",
       descricao: inv.descricao || "",
@@ -1135,6 +1144,7 @@ function Corregedoria() {
       denuncia_ids: linkedDenunciaIds,
       relatorio_ids_ip: linkedRelatoriosIP,
       relatorio_ids_ato: linkedRelatoriosAto,
+      depoimento_ids: linkedDepoimentoIds,
       tipo_procedimento: inv.tipo_procedimento || "Investigação Administrativa",
       autoridade_responsavel: inv.autoridade_responsavel || "",
       autoridade_patente: inv.autoridade_patente || "",
@@ -1208,6 +1218,24 @@ function Corregedoria() {
     for (const relId of toAddRel) {
       await supabase.from("investigacao_relatorio").insert({ investigacao_id: invId, relatorio_id: relId });
       setInvestigacaoRelatorios(prev => [...prev, { investigacao_id: invId, relatorio_id: relId }]);
+    }
+
+    // Depoimentos - update investigacao_id FK
+    const currentDepIds = depoimentos.filter(d => d.investigacao_id === invId).map(d => d.id);
+    const toRemoveDep = currentDepIds.filter(id => !investigacaoForm.depoimento_ids.includes(id));
+    const toAddDep = investigacaoForm.depoimento_ids.filter(id => !currentDepIds.includes(id));
+    for (const depId of toRemoveDep) {
+      await supabase.from("depoimentos").update({ investigacao_id: null }).eq("id", depId);
+    }
+    for (const depId of toAddDep) {
+      await supabase.from("depoimentos").update({ investigacao_id: invId }).eq("id", depId);
+    }
+    if (toRemoveDep.length > 0 || toAddDep.length > 0) {
+      setDepoimentos(prev => prev.map(d => {
+        if (toRemoveDep.includes(d.id)) return { ...d, investigacao_id: null };
+        if (toAddDep.includes(d.id)) return { ...d, investigacao_id: invId };
+        return d;
+      }));
     }
 
     setInvestigacoes(prev => prev.map(i => i.id === invId ? { 
@@ -2091,6 +2119,26 @@ function Corregedoria() {
                           )}
                           <div className="space-y-4 mt-2">
                             <div className="space-y-1">
+                              <Label className="text-muted-foreground text-[10px] uppercase">Depoimentos Vinculados</Label>
+                              <div className="flex flex-wrap gap-1 mb-1">
+                                {investigacaoForm.depoimento_ids.map((id: string) => {
+                                  const dep = depoimentos.find(x => x.id === id);
+                                  return (
+                                    <Badge key={id} variant="secondary" className="text-[9px] flex items-center gap-1">
+                                      {dep?.oficial_nome || 'N/A'}
+                                      <button type="button" onClick={() => setInvestigacaoForm({...investigacaoForm, depoimento_ids: investigacaoForm.depoimento_ids.filter(x => x !== id)})} className="text-red-400 hover:text-red-300 ml-1">&times;</button>
+                                    </Badge>
+                                  );
+                                })}
+                              </div>
+                              <select className="w-full h-8 bg-background border border-border text-foreground text-[10px] rounded px-2" value="" onChange={(e) => { const v = e.target.value; if (v && !investigacaoForm.depoimento_ids.includes(v)) { setInvestigacaoForm({...investigacaoForm, depoimento_ids: [...investigacaoForm.depoimento_ids, v]}); }}}>
+                                <option value="">Adicionar depoimento...</option>
+                                {depoimentos.filter(d => !investigacaoForm.depoimento_ids.includes(d.id)).map(d => (
+                                  <option key={d.id} value={d.id}>{d.oficial_nome} - {format(new Date(d.data_depoimento), "dd/MM/yyyy")}</option>
+                                ))}
+                              </select>
+                            </div>
+                            <div className="space-y-1">
                               <Label className="text-muted-foreground text-[10px] uppercase">Denúncias Vinculadas</Label>
                               <div className="flex flex-wrap gap-1 mb-1">
                                 {investigacaoForm.denuncia_ids.map((id: string) => {
@@ -2406,6 +2454,32 @@ function Corregedoria() {
                                 ) : (
                                   <p className="text-xs text-muted-foreground mb-4">Nenhuma denúncia anexada.</p>
                                 )}
+                              </div>
+
+                              <div className="rounded border border-border bg-muted p-4">
+                                <div className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                                  <MessageSquare className="h-4 w-4" /> Depoimentos Vinculados
+                                </div>
+                                {(() => {
+                                  const linkedDepoimentos = depoimentos.filter(d => d.investigacao_id === inv.id);
+                                  return linkedDepoimentos.length > 0 ? (
+                                    <div className="space-y-2 mb-4">
+                                      {linkedDepoimentos.map(dep => (
+                                        <div key={dep.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
+                                          <div className="flex items-center gap-3">
+                                            <MessageSquare className="h-4 w-4 text-foreground shrink-0" />
+                                            <span className="text-foreground font-bold">{dep.oficial_nome}</span>
+                                            <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">
+                                              {format(new Date(dep.data_depoimento), "dd/MM/yyyy")}
+                                            </Badge>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  ) : (
+                                    <p className="text-xs text-muted-foreground mb-4">Nenhum depoimento anexado.</p>
+                                  );
+                                })()}
                               </div>
 
                               <div className="grid gap-6 md:grid-cols-2">
