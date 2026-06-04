@@ -3,7 +3,8 @@ import React, { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { 
   Shield, FileText, Loader2, Plus, FileSignature, LayoutDashboard, 
-  Users, UserPlus, LogOut, Activity, Link as LinkIcon, Trash2, Edit
+  Users, UserPlus, LogOut, Activity, Link as LinkIcon, Trash2, Edit,
+  MessageSquare
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,7 +36,7 @@ export const Route = createFileRoute("/corregedoria")({
 });
 
 type Status = "pendente" | "em_analise" | "concluida" | "arquivada";
-type Tab = "dashboard" | "denuncias" | "investigacoes" | "inqueritos" | "atos" | "oficiais" | "solicitacoes";
+type Tab = "dashboard" | "denuncias" | "investigacoes" | "inqueritos" | "atos" | "oficiais" | "solicitacoes" | "depoimentos";
 
 interface Denuncia {
   id: string;
@@ -100,6 +101,21 @@ interface DenunciaRelatorio {
 interface DenunciaInvestigacao {
   denuncia_id: string;
   investigacao_id: string;
+}
+
+interface Depoimento {
+  id: string;
+  numero_registro: number;
+  oficial_nome: string;
+  oficial_patente: string | null;
+  oficial_re: string | null;
+  depoimento: string;
+  data_depoimento: string;
+  oficial_batalhao: string | null;
+  relatorio_id_ip: string | null;
+  relatorio_id_ato: string | null;
+  investigacao_id: string | null;
+  created_at: string;
 }
 
 interface Profile {
@@ -373,7 +389,7 @@ const RelatorioCard = ({
                 </div>
               </div>
               
-              {relatorio.dados_detalhados.ato_id_vinculado && (
+              {relatorio.dados_detalhados.ato_id_vinculado && relatorio.dados_detalhados.ato_id_vinculado !== "none" && (
                 <div className="mt-4 p-3 rounded border border-white/10 bg-muted/50">
                   <h4 className="text-[9px] font-bold uppercase tracking-widest text-foreground mb-2 flex items-center gap-2">
                     <LinkIcon className="h-3 w-3" /> Ato Administrativo Vinculado
@@ -452,6 +468,17 @@ const RelatorioCard = ({
                   </p>
                 )}
               </div>
+
+              {relatorio.dados_detalhados.ip_id_vinculado && relatorio.dados_detalhados.ip_id_vinculado !== "none" && (
+                <div className="p-3 rounded border border-border bg-muted/50">
+                  <h4 className="text-[9px] font-bold uppercase tracking-widest text-foreground mb-2 flex items-center gap-2">
+                    <LinkIcon className="h-3 w-3" /> Inquérito Policial Vinculado
+                  </h4>
+                  <Badge variant="outline" className="bg-muted border-border text-foreground text-[10px]">
+                    {relatorios?.find((r: Relatorio) => r.id === relatorio.dados_detalhados.ip_id_vinculado)?.titulo || "Documento não encontrado"}
+                  </Badge>
+                </div>
+              )}
             </div>
           )}
 
@@ -485,6 +512,7 @@ function Corregedoria() {
   const [denunciaRelatorios, setDenunciaRelatorios] = useState<DenunciaRelatorio[]>([]);
   const [investigacaoRelatorios, setInvestigacaoRelatorios] = useState<InvestigacaoRelatorio[]>([]);
   const [denunciaInvestigacoes, setDenunciaInvestigacoes] = useState<DenunciaInvestigacao[]>([]);
+  const [depoimentos, setDepoimentos] = useState<Depoimento[]>([]);
   const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
   const [oficiais, setOficiais] = useState<Profile[]>([]);
   const [fetching, setFetching] = useState(true);
@@ -548,6 +576,8 @@ function Corregedoria() {
       provas_selecionadas: [] as string[],
       provas_outro: "",
       provas_descricao: "",
+      ato_id_vinculado: "",
+      ip_id_vinculado: "",
 
       // --- CAMPOS ATO ADMINISTRATIVO ---
       ato_numero_inquerito: "",
@@ -599,6 +629,20 @@ function Corregedoria() {
     detalhes_adicionais: ""
   });
 
+  const [isDepoimentoDialogOpen, setIsDepoimentoDialogOpen] = useState(false);
+  const [submittingDepoimento, setSubmittingDepoimento] = useState(false);
+  const [depoimentoForm, setDepoimentoForm] = useState({
+    oficial_nome: "",
+    oficial_patente: "",
+    oficial_re: "",
+    depoimento: "",
+    data_depoimento: format(new Date(), "yyyy-MM-dd"),
+    oficial_batalhao: "",
+    relatorio_id_ip: "",
+    relatorio_id_ato: "",
+    investigacao_id: ""
+  });
+
   const [submitting, setSubmitting] = useState(false);
   
   // Link Relatório State
@@ -622,13 +666,14 @@ function Corregedoria() {
       return;
     }
     const load = async () => {
-      const [denunciasRes, investigacoesRes, relatoriosRes, drRes, irRes, diRes, perfisRes] = await Promise.all([
+      const [denunciasRes, investigacoesRes, relatoriosRes, drRes, irRes, diRes, depoimentosRes, perfisRes] = await Promise.all([
         supabase.from("denuncias").select("*").order("created_at", { ascending: false }),
         supabase.from("investigacoes").select("*").order("created_at", { ascending: false }),
         supabase.from("relatorios").select("*").order("created_at", { ascending: false }),
         supabase.from("denuncia_relatorio").select("*"),
         supabase.from("investigacao_relatorio").select("*"),
         supabase.from("denuncia_investigacao").select("*"),
+        supabase.from("depoimentos").select("*").order("created_at", { ascending: false }),
         supabase.from("profiles").select("*").order("full_name", { ascending: true })
       ]);
       
@@ -638,6 +683,7 @@ function Corregedoria() {
       if (drRes.data) setDenunciaRelatorios(drRes.data as DenunciaRelatorio[]);
       if (irRes.data) setInvestigacaoRelatorios(irRes.data as InvestigacaoRelatorio[]);
       if (diRes.data) setDenunciaInvestigacoes(diRes.data as DenunciaInvestigacao[]);
+      if (depoimentosRes.data) setDepoimentos(depoimentosRes.data as Depoimento[]);
       
       // Filtrar oficiais para mostrar apenas os aprovados (não pendentes)
       if (perfisRes.data) {
@@ -841,6 +887,8 @@ function Corregedoria() {
         provas_selecionadas: [],
         provas_outro: "",
         provas_descricao: "",
+        ato_id_vinculado: "",
+        ip_id_vinculado: "",
         // Ato Adm fields
         ato_numero_inquerito: "",
         ato_numero: "",
@@ -858,6 +906,50 @@ function Corregedoria() {
         ato_medidas_detalhamento: ""
       }
     });
+  };
+
+  const submitDepoimento = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!depoimentoForm.oficial_nome || !depoimentoForm.depoimento) {
+      return toast.error("Preencha nome do oficial e o depoimento");
+    }
+    setSubmittingDepoimento(true);
+    const { data, error } = await supabase.from("depoimentos").insert([{
+      oficial_nome: depoimentoForm.oficial_nome,
+      oficial_patente: depoimentoForm.oficial_patente || null,
+      oficial_re: depoimentoForm.oficial_re || null,
+      depoimento: depoimentoForm.depoimento,
+      data_depoimento: depoimentoForm.data_depoimento,
+      oficial_batalhao: depoimentoForm.oficial_batalhao || null,
+      relatorio_id_ip: depoimentoForm.relatorio_id_ip && depoimentoForm.relatorio_id_ip !== "none" ? depoimentoForm.relatorio_id_ip : null,
+      relatorio_id_ato: depoimentoForm.relatorio_id_ato && depoimentoForm.relatorio_id_ato !== "none" ? depoimentoForm.relatorio_id_ato : null,
+      investigacao_id: depoimentoForm.investigacao_id && depoimentoForm.investigacao_id !== "none" ? depoimentoForm.investigacao_id : null
+    }]).select();
+
+    setSubmittingDepoimento(false);
+    if (error || !data) return toast.error("Erro ao registrar depoimento: " + (error?.message || "Erro desconhecido"));
+
+    toast.success("Depoimento registrado com sucesso!");
+    setDepoimentos(prev => [data[0] as Depoimento, ...prev]);
+    setIsDepoimentoDialogOpen(false);
+    setDepoimentoForm({
+      oficial_nome: "",
+      oficial_patente: "",
+      oficial_re: "",
+      depoimento: "",
+      data_depoimento: format(new Date(), "yyyy-MM-dd"),
+      oficial_batalhao: "",
+      relatorio_id_ip: "",
+      relatorio_id_ato: "",
+      investigacao_id: ""
+    });
+  };
+
+  const deleteDepoimento = async (id: string) => {
+    const { error } = await supabase.from("depoimentos").delete().eq("id", id);
+    if (error) return toast.error("Erro ao excluir depoimento");
+    setDepoimentos(prev => prev.filter(d => d.id !== id));
+    toast.success("Depoimento excluído");
   };
 
   const submitInvestigacao = async (e: React.FormEvent) => {
@@ -1317,6 +1409,12 @@ function Corregedoria() {
             label="Atos Adm." 
           />
           <SidebarItem 
+            active={activeTab === "depoimentos"} 
+            onClick={() => setActiveTab("depoimentos")} 
+            icon={MessageSquare} 
+            label="Depoimentos" 
+          />
+          <SidebarItem 
             active={activeTab === "oficiais"} 
             onClick={() => setActiveTab("oficiais")} 
             icon={Users} 
@@ -1631,6 +1729,14 @@ function Corregedoria() {
                                     {d.dados_detalhados.testemunhas_nomes && <p className="text-xs text-muted-foreground">Nomes: <span className="text-foreground">{d.dados_detalhados.testemunhas_nomes}</span></p>}
                                   </div>
                                 </div>
+
+                                {/* 5. RELATO DOS FATOS */}
+                                {d.dados_detalhados.relato_fatos && (
+                                  <div className="border-l-2 border-amber-500 pl-3 bg-amber-500/5 py-2">
+                                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-amber-600 mb-2">5. RELATO DOS FATOS</h4>
+                                    <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{d.dados_detalhados.relato_fatos}</p>
+                                  </div>
+                                )}
 
                                 <div className="border-l-2 border-purple-500 pl-3 bg-purple-500/5 py-2">
                                   <h4 className="text-[10px] font-bold uppercase tracking-widest text-purple-500 mb-2">7. PROVAS E EVIDÊNCIAS</h4>
@@ -2484,7 +2590,20 @@ function Corregedoria() {
                                   </SelectContent>
                                 </Select>
                               </div>
-
+                              <div className="space-y-1">
+                                <Label className="text-[9px] text-muted-foreground uppercase">Ato Adm Vinculado</Label>
+                                <Select value={relatorioForm.dados_detalhados.ato_id_vinculado} onValueChange={(v) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_id_vinculado: v}})}>
+                                  <SelectTrigger className="bg-background border-border text-foreground h-8 text-[10px] uppercase">
+                                    <SelectValue placeholder="Nenhum" />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-muted border-border text-foreground">
+                                    <SelectItem value="none">Nenhum</SelectItem>
+                                    {relatorios.filter(r => r.tipo_denuncia === "Ato Administrativo").map(r => (
+                                      <SelectItem key={r.id} value={r.id} className="text-[10px]">#{r.numero_registro} - {r.titulo}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
                             </div>
                           </div>
 
@@ -2763,18 +2882,31 @@ function Corregedoria() {
                                       {investigacoes.map(i => (
                                         <SelectItem key={i.id} value={i.id} className="text-[10px]">#{i.numero_registro} - {i.titulo}</SelectItem>
                                       ))}
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-[9px] text-muted-foreground uppercase">Inquérito Policial Vinculado</Label>
+                                <Select value={relatorioForm.dados_detalhados.ip_id_vinculado} onValueChange={(v) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ip_id_vinculado: v}})}>
+                                  <SelectTrigger className="bg-background border-border text-foreground h-8 text-[10px] uppercase">
+                                    <SelectValue placeholder="Nenhum" />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-muted border-border text-foreground">
+                                    <SelectItem value="none">Nenhum</SelectItem>
+                                    {relatorios.filter(r => r.tipo_denuncia === "Inquérito Policial").map(r => (
+                                      <SelectItem key={r.id} value={r.id} className="text-[10px]">#{r.numero_registro} - {r.titulo}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
                               </div>
                             </div>
                           </div>
                         </div>
+                      </div>
 
-                        <div className="pt-4 border-t border-border flex justify-end">
-                          <Button type="submit" disabled={submitting} className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 font-bold tracking-widest text-[10px] uppercase">
-                            {submitting ? "Registrando..." : "REGISTRAR ATO"}
+                      <div className="pt-4 border-t border-border flex justify-end">
+                        <Button type="submit" disabled={submitting} className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 font-bold tracking-widest text-[10px] uppercase">
+                          {submitting ? "Registrando..." : "REGISTRAR ATO"}
                           </Button>
                         </div>
                       </form>
@@ -2856,6 +2988,149 @@ function Corregedoria() {
                   )
                 }
               </div>
+            </div>
+          )}
+
+          {/* DEPOIMENTOS */}
+          {activeTab === "depoimentos" && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="flex items-center justify-between border-b border-border pb-4">
+                <h3 className="text-lg font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5" /> Depoimentos
+                </h3>
+                <Dialog open={isDepoimentoDialogOpen} onOpenChange={setIsDepoimentoDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="bg-zinc-700 hover:bg-zinc-600 text-white text-[10px] uppercase tracking-widest">
+                      <Plus className="h-3 w-3 mr-1" /> Novo Depoimento
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="bg-background border-border max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle className="text-foreground uppercase tracking-wider text-sm">Registrar Depoimento</DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={submitDepoimento} className="space-y-5">
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="space-y-1">
+                          <Label className="text-[9px] uppercase text-muted-foreground">Nome do Oficial *</Label>
+                          <Input value={depoimentoForm.oficial_nome} onChange={(e) => setDepoimentoForm({...depoimentoForm, oficial_nome: e.target.value})} className="h-8 bg-background border-border text-foreground text-xs" placeholder="Nome completo" required />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-[9px] uppercase text-muted-foreground">Patente</Label>
+                          <Input value={depoimentoForm.oficial_patente} onChange={(e) => setDepoimentoForm({...depoimentoForm, oficial_patente: e.target.value})} className="h-8 bg-background border-border text-foreground text-xs" placeholder="Ex: 3º Sargento" />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-[9px] uppercase text-muted-foreground">R.E.</Label>
+                          <Input value={depoimentoForm.oficial_re} onChange={(e) => setDepoimentoForm({...depoimentoForm, oficial_re: e.target.value})} className="h-8 bg-background border-border text-foreground text-xs" placeholder="Nº de registro" />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <Label className="text-[9px] uppercase text-muted-foreground">Data do Depoimento</Label>
+                          <Input type="date" value={depoimentoForm.data_depoimento} onChange={(e) => setDepoimentoForm({...depoimentoForm, data_depoimento: e.target.value})} className="h-8 bg-background border-border text-foreground text-xs" />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-[9px] uppercase text-muted-foreground">Batalhão</Label>
+                          <Input value={depoimentoForm.oficial_batalhao} onChange={(e) => setDepoimentoForm({...depoimentoForm, oficial_batalhao: e.target.value})} className="h-8 bg-background border-border text-foreground text-xs" placeholder="Ex: 1º BPM" />
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[9px] uppercase text-muted-foreground">Depoimento *</Label>
+                        <Textarea rows={6} value={depoimentoForm.depoimento} onChange={(e) => setDepoimentoForm({...depoimentoForm, depoimento: e.target.value})} className="bg-background border-border text-foreground text-xs leading-relaxed" placeholder="Transcreva o depoimento completo..." required />
+                      </div>
+                      <div className="pt-2 border-t border-border space-y-3">
+                        <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Vínculos (Opcional)</h4>
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="space-y-1">
+                            <Label className="text-[9px] text-muted-foreground uppercase">Inquérito Policial</Label>
+                            <Select value={depoimentoForm.relatorio_id_ip} onValueChange={(v) => setDepoimentoForm({...depoimentoForm, relatorio_id_ip: v})}>
+                              <SelectTrigger className="bg-background border-border text-foreground h-8 text-[10px] uppercase">
+                                <SelectValue placeholder="Nenhum" />
+                              </SelectTrigger>
+                              <SelectContent className="bg-muted border-border text-foreground">
+                                <SelectItem value="none">Nenhum</SelectItem>
+                                {relatorios.filter(r => r.tipo_denuncia === "Inquérito Policial").map(r => (
+                                  <SelectItem key={r.id} value={r.id} className="text-[10px]">#{r.numero_registro} - {r.titulo}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-[9px] text-muted-foreground uppercase">Ato Administrativo</Label>
+                            <Select value={depoimentoForm.relatorio_id_ato} onValueChange={(v) => setDepoimentoForm({...depoimentoForm, relatorio_id_ato: v})}>
+                              <SelectTrigger className="bg-background border-border text-foreground h-8 text-[10px] uppercase">
+                                <SelectValue placeholder="Nenhum" />
+                              </SelectTrigger>
+                              <SelectContent className="bg-muted border-border text-foreground">
+                                <SelectItem value="none">Nenhum</SelectItem>
+                                {relatorios.filter(r => r.tipo_denuncia === "Ato Administrativo").map(r => (
+                                  <SelectItem key={r.id} value={r.id} className="text-[10px]">#{r.numero_registro} - {r.titulo}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-[9px] text-muted-foreground uppercase">Investigação</Label>
+                            <Select value={depoimentoForm.investigacao_id} onValueChange={(v) => setDepoimentoForm({...depoimentoForm, investigacao_id: v})}>
+                              <SelectTrigger className="bg-background border-border text-foreground h-8 text-[10px] uppercase">
+                                <SelectValue placeholder="Nenhum" />
+                              </SelectTrigger>
+                              <SelectContent className="bg-muted border-border text-foreground">
+                                <SelectItem value="none">Nenhum</SelectItem>
+                                {investigacoes.map(i => (
+                                  <SelectItem key={i.id} value={i.id} className="text-[10px]">#{i.numero_registro} - {i.titulo || i.tipo_procedimento}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="pt-4 border-t border-border flex justify-end">
+                        <Button type="submit" disabled={submittingDepoimento} className="bg-zinc-700 hover:bg-blue-500 text-white font-bold tracking-widest px-8 uppercase text-[10px]">
+                          {submittingDepoimento ? "Registrando..." : "REGISTRAR DEPOIMENTO"}
+                        </Button>
+                      </div>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+              </div>
+
+              {depoimentos.length === 0 ? (
+                <div className="rounded-lg border border-border border-dashed bg-card/50 p-12 text-center text-muted-foreground">
+                  <MessageSquare className="h-8 w-8 mx-auto mb-3 opacity-40" />
+                  <p className="text-sm">Nenhum depoimento registrado.</p>
+                  <p className="text-[10px] mt-1">Clique em "Novo Depoimento" para começar.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {depoimentos.map(d => (
+                    <div key={d.id} className="rounded-lg border border-border bg-card p-4 hover:border-foreground/20 transition-colors">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-3">
+                          <Badge variant="outline" className="bg-muted border-border text-foreground text-[10px]">#{d.numero_registro}</Badge>
+                          <h4 className="text-sm font-bold text-foreground">{d.oficial_nome}</h4>
+                          {d.oficial_patente && <span className="text-[10px] text-muted-foreground">{d.oficial_patente}</span>}
+                          {d.oficial_re && <span className="text-[10px] text-muted-foreground">RE: {d.oficial_re}</span>}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] text-muted-foreground">{formatDateSafe(d.data_depoimento, "dd/MM/yyyy")}</span>
+                          <Button variant="ghost" size="icon" className="h-6 w-6 text-red-500 hover:text-red-400 hover:bg-red-500/10" onClick={() => deleteDepoimento(d.id)}>
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                      {d.oficial_batalhao && <p className="text-[10px] text-muted-foreground mb-2">Batalhão: {d.oficial_batalhao}</p>}
+                      <p className="text-xs text-foreground/80 whitespace-pre-wrap leading-relaxed bg-muted/30 p-3 rounded border border-border/50">{d.depoimento}</p>
+                      {(d.relatorio_id_ip || d.relatorio_id_ato || d.investigacao_id) && (
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {d.relatorio_id_ip && <Badge variant="outline" className="text-[9px] bg-muted border-border text-foreground">IP: {relatorios.find(r => r.id === d.relatorio_id_ip)?.titulo || "N/A"}</Badge>}
+                          {d.relatorio_id_ato && <Badge variant="outline" className="text-[9px] bg-muted border-border text-foreground">AA: {relatorios.find(r => r.id === d.relatorio_id_ato)?.titulo || "N/A"}</Badge>}
+                          {d.investigacao_id && <Badge variant="outline" className="text-[9px] bg-muted border-border text-foreground">INV: {investigacoes.find(i => i.id === d.investigacao_id)?.titulo || "N/A"}</Badge>}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
