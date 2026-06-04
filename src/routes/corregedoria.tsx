@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { 
   Shield, FileText, Loader2, Plus, FileSignature, LayoutDashboard, 
-  Users, UserPlus, LogOut, Activity, Link as LinkIcon, Trash2, Edit,
+  Users, UserPlus, LogOut, Activity, Link as LinkIcon, Trash2, Edit, Pencil,
   MessageSquare
 } from "lucide-react";
 import { toast } from "sonner";
@@ -54,6 +54,7 @@ interface Denuncia {
 
 interface Relatorio {
   id: string;
+  numero_registro: number;
   titulo: string;
   tipo_denuncia: string;
   oficial: string;
@@ -115,6 +116,7 @@ interface Depoimento {
   relatorio_id_ip: string | null;
   relatorio_id_ato: string | null;
   investigacao_id: string | null;
+  observacao: string | null;
   created_at: string;
 }
 
@@ -196,6 +198,9 @@ const RelatorioCard = ({
           </div>
           <div className="overflow-hidden">
             <div className="flex items-center gap-3 whitespace-nowrap overflow-hidden">
+              <Badge variant="outline" className="bg-muted border-border text-foreground font-mono text-[10px]">
+                #{relatorio.numero_registro?.toString().padStart(4, '0') || '???'}
+              </Badge>
               <h4 className="font-bold uppercase text-foreground tracking-wide truncate max-w-[200px]">{relatorio.titulo}</h4>
               <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground bg-muted/50">
                 {relatorio.tipo_denuncia}
@@ -648,6 +653,8 @@ function Corregedoria() {
 
   const [isDepoimentoDialogOpen, setIsDepoimentoDialogOpen] = useState(false);
   const [submittingDepoimento, setSubmittingDepoimento] = useState(false);
+  const [editingDepoimentoId, setEditingDepoimentoId] = useState<string | null>(null);
+  const [isEditDepoimentoDialogOpen, setIsEditDepoimentoDialogOpen] = useState(false);
   const [depoimentoForm, setDepoimentoForm] = useState({
     oficial_nome: "",
     oficial_patente: "",
@@ -657,7 +664,8 @@ function Corregedoria() {
     oficial_batalhao: "",
     relatorio_id_ip: "",
     relatorio_id_ato: "",
-    investigacao_id: ""
+    investigacao_id: "",
+    observacao: ""
   });
 
   const [submitting, setSubmitting] = useState(false);
@@ -1008,7 +1016,8 @@ function Corregedoria() {
       oficial_batalhao: depoimentoForm.oficial_batalhao || null,
       relatorio_id_ip: depoimentoForm.relatorio_id_ip && depoimentoForm.relatorio_id_ip !== "none" ? depoimentoForm.relatorio_id_ip : null,
       relatorio_id_ato: depoimentoForm.relatorio_id_ato && depoimentoForm.relatorio_id_ato !== "none" ? depoimentoForm.relatorio_id_ato : null,
-      investigacao_id: depoimentoForm.investigacao_id && depoimentoForm.investigacao_id !== "none" ? depoimentoForm.investigacao_id : null
+      investigacao_id: depoimentoForm.investigacao_id && depoimentoForm.investigacao_id !== "none" ? depoimentoForm.investigacao_id : null,
+      observacao: depoimentoForm.observacao || null
     }]).select();
 
     setSubmittingDepoimento(false);
@@ -1026,7 +1035,8 @@ function Corregedoria() {
       oficial_batalhao: "",
       relatorio_id_ip: "",
       relatorio_id_ato: "",
-      investigacao_id: ""
+      investigacao_id: "",
+      observacao: ""
     });
   };
 
@@ -1035,6 +1045,61 @@ function Corregedoria() {
     if (error) return toast.error("Erro ao excluir depoimento");
     setDepoimentos(prev => prev.filter(d => d.id !== id));
     toast.success("Depoimento excluído");
+  };
+
+  const handleEditDepoimento = (dep: Depoimento) => {
+    setDepoimentoForm({
+      oficial_nome: dep.oficial_nome || "",
+      oficial_patente: dep.oficial_patente || "",
+      oficial_re: dep.oficial_re || "",
+      depoimento: dep.depoimento || "",
+      data_depoimento: dep.data_depoimento || format(new Date(), "yyyy-MM-dd"),
+      oficial_batalhao: dep.oficial_batalhao || "",
+      relatorio_id_ip: dep.relatorio_id_ip || "",
+      relatorio_id_ato: dep.relatorio_id_ato || "",
+      investigacao_id: dep.investigacao_id || "",
+      observacao: dep.observacao || ""
+    });
+    setEditingDepoimentoId(dep.id);
+    setIsEditDepoimentoDialogOpen(true);
+  };
+
+  const updateDepoimento = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingDepoimentoId) return;
+    if (!depoimentoForm.depoimento) return toast.error("Preencha o depoimento");
+    setSubmittingDepoimento(true);
+    const { error } = await supabase.from("depoimentos").update({
+      oficial_nome: depoimentoForm.oficial_nome,
+      oficial_patente: depoimentoForm.oficial_patente || null,
+      oficial_re: depoimentoForm.oficial_re || null,
+      depoimento: depoimentoForm.depoimento,
+      data_depoimento: depoimentoForm.data_depoimento,
+      oficial_batalhao: depoimentoForm.oficial_batalhao || null,
+      relatorio_id_ip: depoimentoForm.relatorio_id_ip && depoimentoForm.relatorio_id_ip !== "none" ? depoimentoForm.relatorio_id_ip : null,
+      relatorio_id_ato: depoimentoForm.relatorio_id_ato && depoimentoForm.relatorio_id_ato !== "none" ? depoimentoForm.relatorio_id_ato : null,
+      investigacao_id: depoimentoForm.investigacao_id && depoimentoForm.investigacao_id !== "none" ? depoimentoForm.investigacao_id : null,
+      observacao: depoimentoForm.observacao || null
+    }).eq("id", editingDepoimentoId);
+
+    setSubmittingDepoimento(false);
+    if (error) return toast.error("Erro ao atualizar depoimento: " + error.message);
+
+    toast.success("Depoimento atualizado!");
+    setIsEditDepoimentoDialogOpen(false);
+    setEditingDepoimentoId(null);
+    setDepoimentoForm({
+      oficial_nome: "",
+      oficial_patente: "",
+      oficial_re: "",
+      depoimento: "",
+      data_depoimento: format(new Date(), "yyyy-MM-dd"),
+      oficial_batalhao: "",
+      relatorio_id_ip: "",
+      relatorio_id_ato: "",
+      investigacao_id: "",
+      observacao: ""
+    });
   };
 
   const submitInvestigacao = async (e: React.FormEvent) => {
@@ -2034,8 +2099,8 @@ function Corregedoria() {
                             <Label className="text-muted-foreground text-[10px] uppercase">Corregedor / Investigador Responsável</Label>
                             <Input 
                               value={investigacaoForm.autoridade_responsavel} 
-                              onChange={(e) => setInvestigacaoForm({...investigacaoForm, autoridade_responsavel: e.target.value})}
-                              className="bg-background border-border text-foreground h-8 text-xs" 
+                              disabled
+                              className="bg-background border-border text-muted-foreground h-8 text-xs" 
                             />
                           </div>
                           <div className="grid grid-cols-2 gap-4">
@@ -2588,7 +2653,7 @@ function Corregedoria() {
                   <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
                       <Button 
-                        onClick={() => setRelatorioForm({...relatorioForm, tipo_denuncia: "Inquérito Policial"})}
+                        onClick={() => setRelatorioForm({...relatorioForm, tipo_denuncia: "Inquérito Policial", oficial: user?.user_metadata?.full_name || ""})}
                         className="bg-zinc-700 hover:bg-blue-500 text-white font-bold tracking-wider uppercase text-xs"
                       >
                         <Plus className="h-4 w-4 mr-2" />
@@ -2900,7 +2965,7 @@ function Corregedoria() {
                   <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
                       <Button 
-                        onClick={() => setRelatorioForm({...relatorioForm, tipo_denuncia: "Ato Administrativo"})}
+                        onClick={() => setRelatorioForm({...relatorioForm, tipo_denuncia: "Ato Administrativo", oficial: user?.user_metadata?.full_name || ""})}
                         className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold tracking-wider uppercase text-xs"
                       >
                         <Plus className="h-4 w-4 mr-2" />
@@ -3235,7 +3300,18 @@ function Corregedoria() {
                 </h3>
                 <Dialog open={isDepoimentoDialogOpen} onOpenChange={setIsDepoimentoDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button className="bg-zinc-700 hover:bg-zinc-600 text-white text-[10px] uppercase tracking-widest">
+                    <Button onClick={() => setDepoimentoForm({
+                      oficial_nome: user?.user_metadata?.full_name || "",
+                      oficial_patente: "",
+                      oficial_re: "",
+                      depoimento: "",
+                      data_depoimento: format(new Date(), "yyyy-MM-dd"),
+                      oficial_batalhao: "",
+                      relatorio_id_ip: "",
+                      relatorio_id_ato: "",
+                      investigacao_id: "",
+                      observacao: ""
+                    })} className="bg-zinc-700 hover:bg-zinc-600 text-white text-[10px] uppercase tracking-widest">
                       <Plus className="h-3 w-3 mr-1" /> Novo Depoimento
                     </Button>
                   </DialogTrigger>
@@ -3247,7 +3323,7 @@ function Corregedoria() {
                       <div className="grid grid-cols-3 gap-4">
                         <div className="space-y-1">
                           <Label className="text-[9px] uppercase text-muted-foreground">Nome do Oficial *</Label>
-                          <Input value={depoimentoForm.oficial_nome} onChange={(e) => setDepoimentoForm({...depoimentoForm, oficial_nome: e.target.value})} className="h-8 bg-background border-border text-foreground text-xs" placeholder="Nome completo" required />
+                          <Input value={depoimentoForm.oficial_nome} disabled className="h-8 bg-background border-border text-muted-foreground text-xs" />
                         </div>
                         <div className="space-y-1">
                           <Label className="text-[9px] uppercase text-muted-foreground">Patente</Label>
@@ -3272,56 +3348,187 @@ function Corregedoria() {
                         <Label className="text-[9px] uppercase text-muted-foreground">Depoimento *</Label>
                         <Textarea rows={6} value={depoimentoForm.depoimento} onChange={(e) => setDepoimentoForm({...depoimentoForm, depoimento: e.target.value})} className="bg-background border-border text-foreground text-xs leading-relaxed" placeholder="Transcreva o depoimento completo..." required />
                       </div>
+                      <div className="space-y-1">
+                        <Label className="text-[9px] uppercase text-muted-foreground">Observações (Interno)</Label>
+                        <Textarea rows={3} value={depoimentoForm.observacao} onChange={(e) => setDepoimentoForm({...depoimentoForm, observacao: e.target.value})} className="bg-background border-border text-foreground text-xs leading-relaxed" placeholder="Observações internas sobre o depoimento..." />
+                      </div>
                       <div className="pt-2 border-t border-border space-y-3">
-                        <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Vínculos (Opcional)</h4>
-                        <div className="grid grid-cols-3 gap-4">
-                          <div className="space-y-1">
-                            <Label className="text-[9px] text-muted-foreground uppercase">Inquérito Policial</Label>
-                            <Select value={depoimentoForm.relatorio_id_ip} onValueChange={(v) => setDepoimentoForm({...depoimentoForm, relatorio_id_ip: v})}>
-                              <SelectTrigger className="bg-background border-border text-foreground h-8 text-[10px] uppercase">
-                                <SelectValue placeholder="Nenhum" />
-                              </SelectTrigger>
-                              <SelectContent className="bg-muted border-border text-foreground">
-                                <SelectItem value="none">Nenhum</SelectItem>
-                                {relatorios.filter(r => r.tipo_denuncia === "Inquérito Policial").map(r => (
-                                  <SelectItem key={r.id} value={r.id} className="text-[10px]">#{r.numero_registro} - {r.titulo}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                        <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Documentos Anexados</h4>
+                        <div className="space-y-1">
+                          <Label className="text-[9px] text-muted-foreground uppercase">Inquérito Policial</Label>
+                          <div className="flex flex-wrap gap-1 mb-1">
+                            {depoimentoForm.relatorio_id_ip && depoimentoForm.relatorio_id_ip !== "none" ? (
+                              <Badge variant="secondary" className="text-[9px] flex items-center gap-1">
+                                #{relatorios.find(r => r.id === depoimentoForm.relatorio_id_ip)?.numero_registro || '?'} - {relatorios.find(r => r.id === depoimentoForm.relatorio_id_ip)?.titulo || 'N/A'}
+                                <button type="button" onClick={() => setDepoimentoForm({...depoimentoForm, relatorio_id_ip: "none"})} className="text-red-400 hover:text-red-300 ml-1">&times;</button>
+                              </Badge>
+                            ) : null}
                           </div>
-                          <div className="space-y-1">
-                            <Label className="text-[9px] text-muted-foreground uppercase">Ato Administrativo</Label>
-                            <Select value={depoimentoForm.relatorio_id_ato} onValueChange={(v) => setDepoimentoForm({...depoimentoForm, relatorio_id_ato: v})}>
-                              <SelectTrigger className="bg-background border-border text-foreground h-8 text-[10px] uppercase">
-                                <SelectValue placeholder="Nenhum" />
-                              </SelectTrigger>
-                              <SelectContent className="bg-muted border-border text-foreground">
-                                <SelectItem value="none">Nenhum</SelectItem>
-                                {relatorios.filter(r => r.tipo_denuncia === "Ato Administrativo").map(r => (
-                                  <SelectItem key={r.id} value={r.id} className="text-[10px]">#{r.numero_registro} - {r.titulo}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                          <select className="w-full h-8 bg-background border border-border text-foreground text-[10px] rounded px-2" value={depoimentoForm.relatorio_id_ip || "none"} onChange={(e) => setDepoimentoForm({...depoimentoForm, relatorio_id_ip: e.target.value})}>
+                            <option value="none">Nenhum</option>
+                            {relatorios.filter(r => r.tipo_denuncia === "Inquérito Policial").map(r => (
+                              <option key={r.id} value={r.id}>#{r.numero_registro} - {r.titulo}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-[9px] text-muted-foreground uppercase">Ato Administrativo</Label>
+                          <div className="flex flex-wrap gap-1 mb-1">
+                            {depoimentoForm.relatorio_id_ato && depoimentoForm.relatorio_id_ato !== "none" ? (
+                              <Badge variant="secondary" className="text-[9px] flex items-center gap-1">
+                                #{relatorios.find(r => r.id === depoimentoForm.relatorio_id_ato)?.numero_registro || '?'} - {relatorios.find(r => r.id === depoimentoForm.relatorio_id_ato)?.titulo || 'N/A'}
+                                <button type="button" onClick={() => setDepoimentoForm({...depoimentoForm, relatorio_id_ato: "none"})} className="text-red-400 hover:text-red-300 ml-1">&times;</button>
+                              </Badge>
+                            ) : null}
                           </div>
-                          <div className="space-y-1">
-                            <Label className="text-[9px] text-muted-foreground uppercase">Investigação</Label>
-                            <Select value={depoimentoForm.investigacao_id} onValueChange={(v) => setDepoimentoForm({...depoimentoForm, investigacao_id: v})}>
-                              <SelectTrigger className="bg-background border-border text-foreground h-8 text-[10px] uppercase">
-                                <SelectValue placeholder="Nenhum" />
-                              </SelectTrigger>
-                              <SelectContent className="bg-muted border-border text-foreground">
-                                <SelectItem value="none">Nenhum</SelectItem>
-                                {investigacoes.map(i => (
-                                  <SelectItem key={i.id} value={i.id} className="text-[10px]">#{i.numero_registro} - {i.titulo || i.tipo_procedimento}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                          <select className="w-full h-8 bg-background border border-border text-foreground text-[10px] rounded px-2" value={depoimentoForm.relatorio_id_ato || "none"} onChange={(e) => setDepoimentoForm({...depoimentoForm, relatorio_id_ato: e.target.value})}>
+                            <option value="none">Nenhum</option>
+                            {relatorios.filter(r => r.tipo_denuncia === "Ato Administrativo").map(r => (
+                              <option key={r.id} value={r.id}>#{r.numero_registro} - {r.titulo}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="space-y-1 border-t border-border/30 pt-3">
+                          <Label className="text-[9px] text-muted-foreground uppercase">Investigação Vinculada</Label>
+                          <div className="flex flex-wrap gap-1 mb-1">
+                            {depoimentoForm.investigacao_id && depoimentoForm.investigacao_id !== "none" ? (
+                              <Badge variant="secondary" className="text-[9px] flex items-center gap-1">
+                                #{investigacoes.find(i => i.id === depoimentoForm.investigacao_id)?.numero_registro || '?'} - {investigacoes.find(i => i.id === depoimentoForm.investigacao_id)?.titulo || 'N/A'}
+                                <button type="button" onClick={() => setDepoimentoForm({...depoimentoForm, investigacao_id: "none"})} className="text-red-400 hover:text-red-300 ml-1">&times;</button>
+                              </Badge>
+                            ) : null}
                           </div>
+                          <select className="w-full h-8 bg-background border border-border text-foreground text-[10px] rounded px-2" value={depoimentoForm.investigacao_id || "none"} onChange={(e) => setDepoimentoForm({...depoimentoForm, investigacao_id: e.target.value})}>
+                            <option value="none">Nenhum</option>
+                            {investigacoes.map(i => (
+                              <option key={i.id} value={i.id}>#{i.numero_registro} - {i.titulo || i.tipo_procedimento}</option>
+                            ))}
+                          </select>
                         </div>
                       </div>
                       <div className="pt-4 border-t border-border flex justify-end">
                         <Button type="submit" disabled={submittingDepoimento} className="bg-zinc-700 hover:bg-blue-500 text-white font-bold tracking-widest px-8 uppercase text-[10px]">
                           {submittingDepoimento ? "Registrando..." : "REGISTRAR DEPOIMENTO"}
+                        </Button>
+                      </div>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+
+                {/* Edit Depoimento Dialog */}
+                <Dialog open={isEditDepoimentoDialogOpen} onOpenChange={(open) => {
+                  if (!open) {
+                    setIsEditDepoimentoDialogOpen(false);
+                    setEditingDepoimentoId(null);
+                    setDepoimentoForm({
+                      oficial_nome: "",
+                      oficial_patente: "",
+                      oficial_re: "",
+                      depoimento: "",
+                      data_depoimento: format(new Date(), "yyyy-MM-dd"),
+                      oficial_batalhao: "",
+                      relatorio_id_ip: "",
+                      relatorio_id_ato: "",
+                      investigacao_id: "",
+                      observacao: ""
+                    });
+                  }
+                }}>
+                  <DialogContent className="bg-background border-border max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle className="text-foreground uppercase tracking-wider text-sm">Editar Depoimento</DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={updateDepoimento} className="space-y-5">
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="space-y-1">
+                          <Label className="text-[9px] uppercase text-muted-foreground">Nome do Oficial *</Label>
+                          <Input value={depoimentoForm.oficial_nome} disabled className="h-8 bg-background border-border text-muted-foreground text-xs" />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-[9px] uppercase text-muted-foreground">Patente</Label>
+                          <Input value={depoimentoForm.oficial_patente} onChange={(e) => setDepoimentoForm({...depoimentoForm, oficial_patente: e.target.value})} className="h-8 bg-background border-border text-foreground text-xs" placeholder="Ex: 3º Sargento" />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-[9px] uppercase text-muted-foreground">R.E.</Label>
+                          <Input value={depoimentoForm.oficial_re} onChange={(e) => setDepoimentoForm({...depoimentoForm, oficial_re: e.target.value})} className="h-8 bg-background border-border text-foreground text-xs" placeholder="Nº de registro" />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <Label className="text-[9px] uppercase text-muted-foreground">Data do Depoimento</Label>
+                          <Input type="date" value={depoimentoForm.data_depoimento} onChange={(e) => setDepoimentoForm({...depoimentoForm, data_depoimento: e.target.value})} className="h-8 bg-background border-border text-foreground text-xs" />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-[9px] uppercase text-muted-foreground">Batalhão</Label>
+                          <Input value={depoimentoForm.oficial_batalhao} onChange={(e) => setDepoimentoForm({...depoimentoForm, oficial_batalhao: e.target.value})} className="h-8 bg-background border-border text-foreground text-xs" placeholder="Ex: 1º BPM" />
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[9px] uppercase text-muted-foreground">Depoimento *</Label>
+                        <Textarea rows={6} value={depoimentoForm.depoimento} onChange={(e) => setDepoimentoForm({...depoimentoForm, depoimento: e.target.value})} className="bg-background border-border text-foreground text-xs leading-relaxed" placeholder="Transcreva o depoimento completo..." required />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[9px] uppercase text-muted-foreground">Observações (Interno)</Label>
+                        <Textarea rows={3} value={depoimentoForm.observacao} onChange={(e) => setDepoimentoForm({...depoimentoForm, observacao: e.target.value})} className="bg-background border-border text-foreground text-xs leading-relaxed" placeholder="Observações internas sobre o depoimento..." />
+                      </div>
+                      <div className="pt-2 border-t border-border space-y-3">
+                        <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Documentos Anexados</h4>
+                        <div className="space-y-1">
+                          <Label className="text-[9px] text-muted-foreground uppercase">Inquérito Policial</Label>
+                          <div className="flex flex-wrap gap-1 mb-1">
+                            {depoimentoForm.relatorio_id_ip && depoimentoForm.relatorio_id_ip !== "none" ? (
+                              <Badge variant="secondary" className="text-[9px] flex items-center gap-1">
+                                #{relatorios.find(r => r.id === depoimentoForm.relatorio_id_ip)?.numero_registro || '?'} - {relatorios.find(r => r.id === depoimentoForm.relatorio_id_ip)?.titulo || 'N/A'}
+                                <button type="button" onClick={() => setDepoimentoForm({...depoimentoForm, relatorio_id_ip: "none"})} className="text-red-400 hover:text-red-300 ml-1">&times;</button>
+                              </Badge>
+                            ) : null}
+                          </div>
+                          <select className="w-full h-8 bg-background border border-border text-foreground text-[10px] rounded px-2" value={depoimentoForm.relatorio_id_ip || "none"} onChange={(e) => setDepoimentoForm({...depoimentoForm, relatorio_id_ip: e.target.value})}>
+                            <option value="none">Nenhum</option>
+                            {relatorios.filter(r => r.tipo_denuncia === "Inquérito Policial").map(r => (
+                              <option key={r.id} value={r.id}>#{r.numero_registro} - {r.titulo}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-[9px] text-muted-foreground uppercase">Ato Administrativo</Label>
+                          <div className="flex flex-wrap gap-1 mb-1">
+                            {depoimentoForm.relatorio_id_ato && depoimentoForm.relatorio_id_ato !== "none" ? (
+                              <Badge variant="secondary" className="text-[9px] flex items-center gap-1">
+                                #{relatorios.find(r => r.id === depoimentoForm.relatorio_id_ato)?.numero_registro || '?'} - {relatorios.find(r => r.id === depoimentoForm.relatorio_id_ato)?.titulo || 'N/A'}
+                                <button type="button" onClick={() => setDepoimentoForm({...depoimentoForm, relatorio_id_ato: "none"})} className="text-red-400 hover:text-red-300 ml-1">&times;</button>
+                              </Badge>
+                            ) : null}
+                          </div>
+                          <select className="w-full h-8 bg-background border border-border text-foreground text-[10px] rounded px-2" value={depoimentoForm.relatorio_id_ato || "none"} onChange={(e) => setDepoimentoForm({...depoimentoForm, relatorio_id_ato: e.target.value})}>
+                            <option value="none">Nenhum</option>
+                            {relatorios.filter(r => r.tipo_denuncia === "Ato Administrativo").map(r => (
+                              <option key={r.id} value={r.id}>#{r.numero_registro} - {r.titulo}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="space-y-1 border-t border-border/30 pt-3">
+                          <Label className="text-[9px] text-muted-foreground uppercase">Investigação Vinculada</Label>
+                          <div className="flex flex-wrap gap-1 mb-1">
+                            {depoimentoForm.investigacao_id && depoimentoForm.investigacao_id !== "none" ? (
+                              <Badge variant="secondary" className="text-[9px] flex items-center gap-1">
+                                #{investigacoes.find(i => i.id === depoimentoForm.investigacao_id)?.numero_registro || '?'} - {investigacoes.find(i => i.id === depoimentoForm.investigacao_id)?.titulo || 'N/A'}
+                                <button type="button" onClick={() => setDepoimentoForm({...depoimentoForm, investigacao_id: "none"})} className="text-red-400 hover:text-red-300 ml-1">&times;</button>
+                              </Badge>
+                            ) : null}
+                          </div>
+                          <select className="w-full h-8 bg-background border border-border text-foreground text-[10px] rounded px-2" value={depoimentoForm.investigacao_id || "none"} onChange={(e) => setDepoimentoForm({...depoimentoForm, investigacao_id: e.target.value})}>
+                            <option value="none">Nenhum</option>
+                            {investigacoes.map(i => (
+                              <option key={i.id} value={i.id}>#{i.numero_registro} - {i.titulo || i.tipo_procedimento}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                      <div className="pt-4 border-t border-border flex justify-end gap-2">
+                        <Button type="button" variant="outline" onClick={() => setIsEditDepoimentoDialogOpen(false)} className="text-[10px] uppercase tracking-widest">Cancelar</Button>
+                        <Button type="submit" disabled={submittingDepoimento} className="bg-zinc-700 hover:bg-blue-500 text-white font-bold tracking-widest px-8 uppercase text-[10px]">
+                          {submittingDepoimento ? "Salvando..." : "SALVAR ALTERAÇÕES"}
                         </Button>
                       </div>
                     </form>
@@ -3337,33 +3544,64 @@ function Corregedoria() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {depoimentos.map(d => (
-                    <div key={d.id} className="rounded-lg border border-border bg-card p-4 hover:border-foreground/20 transition-colors">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-3">
-                          <Badge variant="outline" className="bg-muted border-border text-foreground text-[10px]">#{d.numero_registro}</Badge>
-                          <h4 className="text-sm font-bold text-foreground">{d.oficial_nome}</h4>
-                          {d.oficial_patente && <span className="text-[10px] text-muted-foreground">{d.oficial_patente}</span>}
-                          {d.oficial_re && <span className="text-[10px] text-muted-foreground">RE: {d.oficial_re}</span>}
+                  {depoimentos.map(d => {
+                    const depExpanded = expandedId === d.id;
+                    return (
+                      <div key={d.id} className="rounded-lg border border-border bg-card overflow-hidden">
+                        <div
+                          onClick={() => setExpandedId(depExpanded ? null : d.id)}
+                          className="flex w-full items-start justify-between gap-4 p-5 text-left transition-colors hover:bg-muted cursor-pointer"
+                        >
+                          <div className="flex items-center gap-4 flex-1">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-muted/50">
+                              <MessageSquare className="h-5 w-5 text-foreground" />
+                            </div>
+                            <div className="overflow-hidden">
+                              <div className="flex items-center gap-3 whitespace-nowrap overflow-hidden">
+                                <Badge variant="outline" className="bg-muted border-border text-foreground font-mono text-[10px]">#{d.numero_registro}</Badge>
+                                <h4 className="text-sm font-bold text-foreground truncate max-w-[200px]">{d.oficial_nome}</h4>
+                                {d.oficial_patente && <span className="text-[10px] text-muted-foreground">{d.oficial_patente}</span>}
+                                {d.oficial_re && <span className="text-[10px] text-muted-foreground">RE: {d.oficial_re}</span>}
+                              </div>
+                              <div className="mt-1 flex items-center gap-2 text-[10px] text-muted-foreground uppercase tracking-widest">
+                                <span>{formatDateSafe(d.data_depoimento, "dd/MM/yyyy")}</span>
+                                {d.oficial_batalhao && <><span>·</span><span>{d.oficial_batalhao}</span></>}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-500 hover:text-blue-400 hover:bg-blue-500/10" onClick={() => handleEditDepoimento(d)} title="Editar">
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-400 hover:bg-red-500/10" onClick={() => deleteDepoimento(d.id)} title="Excluir">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] text-muted-foreground">{formatDateSafe(d.data_depoimento, "dd/MM/yyyy")}</span>
-                          <Button variant="ghost" size="icon" className="h-6 w-6 text-red-500 hover:text-red-400 hover:bg-red-500/10" onClick={() => deleteDepoimento(d.id)}>
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
+                        {depExpanded && (
+                          <div className="border-t border-border/50 bg-muted/50 p-6 space-y-4">
+                            <p className="text-xs text-foreground/80 whitespace-pre-wrap leading-relaxed bg-muted/30 p-3 rounded border border-border/50">{d.depoimento}</p>
+                            {d.observacao && (
+                              <div className="rounded border border-border bg-muted p-3">
+                                <h5 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Observações</h5>
+                                <p className="text-[11px] text-muted-foreground/80 whitespace-pre-wrap leading-relaxed">{d.observacao}</p>
+                              </div>
+                            )}
+                            {(d.relatorio_id_ip || d.relatorio_id_ato || d.investigacao_id) && (
+                              <div className="rounded border border-border bg-muted p-3">
+                                <h5 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Documentos Anexados</h5>
+                                <div className="flex flex-wrap gap-2">
+                                  {d.relatorio_id_ip && <Badge variant="outline" className="text-[9px] bg-muted border-border text-foreground">IP: {relatorios.find(r => r.id === d.relatorio_id_ip)?.titulo || "N/A"}</Badge>}
+                                  {d.relatorio_id_ato && <Badge variant="outline" className="text-[9px] bg-muted border-border text-foreground">AA: {relatorios.find(r => r.id === d.relatorio_id_ato)?.titulo || "N/A"}</Badge>}
+                                  {d.investigacao_id && <Badge variant="outline" className="text-[9px] bg-muted border-border text-foreground">INV: {investigacoes.find(i => i.id === d.investigacao_id)?.titulo || "N/A"}</Badge>}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
-                      {d.oficial_batalhao && <p className="text-[10px] text-muted-foreground mb-2">Batalhão: {d.oficial_batalhao}</p>}
-                      <p className="text-xs text-foreground/80 whitespace-pre-wrap leading-relaxed bg-muted/30 p-3 rounded border border-border/50">{d.depoimento}</p>
-                      {(d.relatorio_id_ip || d.relatorio_id_ato || d.investigacao_id) && (
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {d.relatorio_id_ip && <Badge variant="outline" className="text-[9px] bg-muted border-border text-foreground">IP: {relatorios.find(r => r.id === d.relatorio_id_ip)?.titulo || "N/A"}</Badge>}
-                          {d.relatorio_id_ato && <Badge variant="outline" className="text-[9px] bg-muted border-border text-foreground">AA: {relatorios.find(r => r.id === d.relatorio_id_ato)?.titulo || "N/A"}</Badge>}
-                          {d.investigacao_id && <Badge variant="outline" className="text-[9px] bg-muted border-border text-foreground">INV: {investigacoes.find(i => i.id === d.investigacao_id)?.titulo || "N/A"}</Badge>}
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
