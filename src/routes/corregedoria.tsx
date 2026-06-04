@@ -146,7 +146,7 @@ const STATUS_LABEL: Record<Status, string> = {
 
 const STATUS_COLOR: Record<Status, string> = {
   pendente: "bg-red-500/10 text-red-700 border-red-500/40",
-  em_analise: "bg-blue-500/10 text-blue-700 border-blue-500/30",
+  em_analise: "bg-primary/10 text-primary border-primary/30",
   concluida: "bg-emerald-500/10 text-emerald-700 border-emerald-500/40",
   arquivada: "bg-muted text-muted-foreground border-border",
 };
@@ -1883,7 +1883,7 @@ function Corregedoria() {
                                   size="sm" 
                                   onClick={() => handleLinkRelatorio(d.id)}
                                   disabled={linking || !linkRelatorioId}
-                                  className="bg-zinc-800 hover:bg-slate-700 text-white"
+                                  className="bg-card hover:bg-slate-700 text-white"
                                 >
                                   {linking ? "Vinculando..." : "Vincular"}
                                 </Button>
@@ -1894,7 +1894,7 @@ function Corregedoria() {
                             {d.dados_detalhados && (
                               <div className="mt-4 space-y-4 animate-in fade-in duration-500">
                                 <div className="grid md:grid-cols-2 gap-4">
-                                  <div className="border-l-2 border-blue-500 pl-3 bg-muted/50 py-2">
+                                  <div className="border-l-2 border-primary pl-3 bg-muted/50 py-2">
                                     <h4 className="text-[10px] font-bold uppercase tracking-widest text-foreground mb-2">1. DADOS DO DENUNCIANTE</h4>
                                     <p className="text-xs text-muted-foreground">Nome: <span className="text-foreground">{d.dados_detalhados.reclamante_nome}</span></p>
                                     <p className="text-xs text-muted-foreground">ID: <span className="text-foreground">{d.dados_detalhados.reclamante_id}</span></p>
@@ -1916,7 +1916,7 @@ function Corregedoria() {
                                       <Badge key={t} variant="outline" className="text-[9px] bg-muted/50 border-border text-foreground uppercase">{t}</Badge>
                                     ))}
                                     {(d.dados_detalhados.tipo_denuncia_outro || d.dados_detalhados.tipo_denuncia_outro) && (
-                                      <Badge variant="outline" className="text-[9px] bg-zinc-800 text-muted-foreground">
+                                      <Badge variant="outline" className="text-[9px] bg-card text-muted-foreground">
                                         {d.dados_detalhados.tipo_denuncia_outro || d.dados_detalhados.tipo_denuncia_outro}
                                       </Badge>
                                     )}
@@ -1951,7 +1951,7 @@ function Corregedoria() {
                                     {d.dados_detalhados.provas_selecionadas?.map((p: string) => (
                                       <Badge key={p} variant="outline" className="text-[9px] bg-purple-500/10 border-purple-500/30 text-purple-400 uppercase">{p}</Badge>
                                     ))}
-                                    {d.dados_detalhados.provas_outro && <Badge variant="outline" className="text-[9px] bg-zinc-800 text-muted-foreground">{d.dados_detalhados.provas_outro}</Badge>}
+                                    {d.dados_detalhados.provas_outro && <Badge variant="outline" className="text-[9px] bg-card text-muted-foreground">{d.dados_detalhados.provas_outro}</Badge>}
                                   </div>
                                   {d.dados_detalhados.provas_descricao && (
                                     <p className="text-xs text-muted-foreground italic bg-muted p-2 rounded border border-purple-500/10 whitespace-pre-wrap">{d.dados_detalhados.provas_descricao}</p>
@@ -1993,7 +1993,7 @@ function Corregedoria() {
                                   <SelectTrigger className="bg-background border-border text-foreground"><SelectValue /></SelectTrigger>
                                   <SelectContent className="bg-muted border-border text-foreground">
                                     {(Object.keys(STATUS_LABEL) as Status[]).map((s) => (
-                                      <SelectItem key={s} value={s} className="hover:bg-zinc-800">{STATUS_LABEL[s]}</SelectItem>
+                                      <SelectItem key={s} value={s} className="hover:bg-muted">{STATUS_LABEL[s]}</SelectItem>
                                     ))}
                                   </SelectContent>
                                 </Select>
@@ -2010,7 +2010,7 @@ function Corregedoria() {
                               />
                               <Button
                                 size="sm"
-                                className="mt-3 bg-zinc-800 hover:bg-slate-700 text-white"
+                                className="mt-3 bg-card hover:bg-slate-700 text-white"
                                 onClick={() => {
                                   const el = document.getElementById(`notas-${d.id}`) as HTMLTextAreaElement;
                                   updateNotas(d.id, el.value);
@@ -2623,7 +2623,7 @@ function Corregedoria() {
                                   />
                                   <Button
                                     size="sm"
-                                    className="mt-3 bg-zinc-800 hover:bg-slate-700 text-white text-xs"
+                                    className="mt-3 bg-card hover:bg-slate-700 text-white text-xs"
                                     onClick={() => {
                                       const el = document.getElementById(`notas-inv-${inv.id}`) as HTMLTextAreaElement;
                                       updateInvestigacaoNotas(inv.id, el.value);
@@ -2654,7 +2654,7 @@ function Corregedoria() {
                     <DialogTrigger asChild>
                       <Button 
                         onClick={() => setRelatorioForm({...relatorioForm, tipo_denuncia: "Inquérito Policial", oficial: user?.user_metadata?.full_name || ""})}
-                        className="bg-zinc-700 hover:bg-blue-500 text-white font-bold tracking-wider uppercase text-xs"
+                        className="bg-primary hover:bg-primary/80 text-white font-bold tracking-wider uppercase text-xs"
                       >
                         <Plus className="h-4 w-4 mr-2" />
                         Novo Inquérito
@@ -2702,8 +2702,8 @@ function Corregedoria() {
                             <div className="space-y-1">
                               <Label className="text-[9px] uppercase text-muted-foreground">Denúncia Anônima?</Label>
                               <RadioGroup value={relatorioForm.dados_detalhados.reclamante_anonimo} onValueChange={(v) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_anonimo: v}})} className="flex gap-4 mt-1">
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="Sim" id="anon-sim" className="border-border text-blue-600" /><Label htmlFor="anon-sim" className="text-xs text-foreground font-normal">Sim</Label></div>
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="Não" id="anon-nao" className="border-border text-blue-600" /><Label htmlFor="anon-nao" className="text-xs text-foreground font-normal">Não</Label></div>
+                                <div className="flex items-center space-x-2"><RadioGroupItem value="Sim" id="anon-sim" className="border-border text-primary" /><Label htmlFor="anon-sim" className="text-xs text-foreground font-normal">Sim</Label></div>
+                                <div className="flex items-center space-x-2"><RadioGroupItem value="Não" id="anon-nao" className="border-border text-primary" /><Label htmlFor="anon-nao" className="text-xs text-foreground font-normal">Não</Label></div>
                               </RadioGroup>
                             </div>
                           </div>
@@ -2867,7 +2867,7 @@ function Corregedoria() {
 
                         </div>
                         <div className="pt-4 border-t border-border flex justify-end">
-                          <Button type="submit" disabled={submitting} className="bg-zinc-700 hover:bg-blue-500 text-white font-bold tracking-widest px-8 uppercase text-[10px]">
+                          <Button type="submit" disabled={submitting} className="bg-primary hover:bg-primary/80 text-white font-bold tracking-widest px-8 uppercase text-[10px]">
                             {submitting ? "Processando..." : "ABRIR INQUÉRITO"}
                           </Button>
                         </div>
@@ -3407,7 +3407,7 @@ function Corregedoria() {
                         </div>
                       </div>
                       <div className="pt-4 border-t border-border flex justify-end">
-                        <Button type="submit" disabled={submittingDepoimento} className="bg-zinc-700 hover:bg-blue-500 text-white font-bold tracking-widest px-8 uppercase text-[10px]">
+                        <Button type="submit" disabled={submittingDepoimento} className="bg-primary hover:bg-primary/80 text-white font-bold tracking-widest px-8 uppercase text-[10px]">
                           {submittingDepoimento ? "Registrando..." : "REGISTRAR DEPOIMENTO"}
                         </Button>
                       </div>
@@ -3527,7 +3527,7 @@ function Corregedoria() {
                       </div>
                       <div className="pt-4 border-t border-border flex justify-end gap-2">
                         <Button type="button" variant="outline" onClick={() => setIsEditDepoimentoDialogOpen(false)} className="text-[10px] uppercase tracking-widest">Cancelar</Button>
-                        <Button type="submit" disabled={submittingDepoimento} className="bg-zinc-700 hover:bg-blue-500 text-white font-bold tracking-widest px-8 uppercase text-[10px]">
+                        <Button type="submit" disabled={submittingDepoimento} className="bg-primary hover:bg-primary/80 text-white font-bold tracking-widest px-8 uppercase text-[10px]">
                           {submittingDepoimento ? "Salvando..." : "SALVAR ALTERAÇÕES"}
                         </Button>
                       </div>
@@ -3570,7 +3570,7 @@ function Corregedoria() {
                             </div>
                           </div>
                           <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-500 hover:text-blue-400 hover:bg-blue-500/10" onClick={() => handleEditDepoimento(d)} title="Editar">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:text-primary/80 hover:bg-primary/10" onClick={() => handleEditDepoimento(d)} title="Editar">
                               <Pencil className="h-4 w-4" />
                             </Button>
                             <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-400 hover:bg-red-500/10" onClick={() => deleteDepoimento(d.id)} title="Excluir">
@@ -3633,7 +3633,7 @@ function Corregedoria() {
                       <div className="flex gap-2">
                         <Button 
                           onClick={() => approveUser(user.role_id, "corregedor")}
-                          className="bg-muted/50 text-foreground hover:bg-blue-500/30 border border-border text-[10px] font-bold uppercase px-3"
+                          className="bg-muted text-foreground hover:bg-primary/20 border border-border text-[10px] font-bold uppercase px-3"
                         >
                           Corregedor
                         </Button>
@@ -3729,7 +3729,7 @@ function Corregedoria() {
                                   const el = document.getElementById(`patente-${oficial.id}`) as HTMLInputElement;
                                   updatePatente(oficial.id, el.value);
                                 }}
-                                className="bg-zinc-800 hover:bg-slate-700 text-white h-9 px-2"
+                                className="bg-card hover:bg-slate-700 text-white h-9 px-2"
                               >
                                 Salvar
                               </Button>
@@ -3797,8 +3797,8 @@ function Corregedoria() {
                     <div className="space-y-1">
                       <Label className="text-[9px] uppercase text-muted-foreground">Denúncia Anônima?</Label>
                       <RadioGroup value={relatorioForm.dados_detalhados.reclamante_anonimo} onValueChange={(v) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_anonimo: v}})} className="flex gap-4 mt-1">
-                        <div className="flex items-center space-x-2"><RadioGroupItem value="Sim" id="edit-anon-sim" className="border-border text-blue-600" /><Label htmlFor="edit-anon-sim" className="text-xs text-foreground font-normal">Sim</Label></div>
-                        <div className="flex items-center space-x-2"><RadioGroupItem value="Não" id="edit-anon-nao" className="border-border text-blue-600" /><Label htmlFor="edit-anon-nao" className="text-xs text-foreground font-normal">Não</Label></div>
+                        <div className="flex items-center space-x-2"><RadioGroupItem value="Sim" id="edit-anon-sim" className="border-border text-primary" /><Label htmlFor="edit-anon-sim" className="text-xs text-foreground font-normal">Sim</Label></div>
+                        <div className="flex items-center space-x-2"><RadioGroupItem value="Não" id="edit-anon-nao" className="border-border text-primary" /><Label htmlFor="edit-anon-nao" className="text-xs text-foreground font-normal">Não</Label></div>
                       </RadioGroup>
                     </div>
                   </div>
@@ -4133,7 +4133,7 @@ function Corregedoria() {
               )}
             </div>
             <div className="pt-4 border-t border-border flex justify-end">
-              <Button type="submit" disabled={submitting} className="bg-zinc-700 hover:bg-blue-500 text-white px-8 font-bold tracking-widest text-[10px] uppercase">
+              <Button type="submit" disabled={submitting} className="bg-primary hover:bg-primary/80 text-white px-8 font-bold tracking-widest text-[10px] uppercase">
                 {submitting ? "Salvando..." : "SALVAR ALTERAÇÕES"}
               </Button>
             </div>
@@ -4173,7 +4173,7 @@ function SidebarItem({
         {label}
       </div>
       {badge !== undefined && (
-        <span className="flex h-5 items-center justify-center rounded-full bg-blue-500 px-2 text-[10px] font-bold text-white">
+        <span className="flex h-5 items-center justify-center rounded-full bg-primary px-2 text-[10px] font-bold text-white">
           {badge}
         </span>
       )}
