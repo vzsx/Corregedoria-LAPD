@@ -256,11 +256,16 @@ const RelatorioCard = ({
               {linkedDenuncias.length > 0 ? (
                 <div className="space-y-2 mb-4">
                   {linkedDenuncias.map((d: any) => (
-                    <div key={d.id} className="flex items-center gap-3 rounded bg-muted px-3 py-2 text-sm border border-border">
-                      <Badge variant="outline" className="bg-background border-border text-foreground font-mono text-[10px]">
-                        #{d.numero_registro?.toString().padStart(4, '0')}
-                      </Badge>
-                      <span className="text-foreground">{d.titulo}</span>
+                    <div key={d.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
+                      <div className="flex items-center gap-3">
+                        <Activity className="h-4 w-4 text-foreground shrink-0" />
+                        <span className="text-foreground font-bold">{d.titulo}</span>
+                        <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">Denúncia</Badge>
+                      </div>
+                      <Button size="sm" variant="ghost" className="h-7 text-xs text-foreground"
+                        onClick={() => { setActiveTab("denuncias"); setExpandedId(d.id); }}>
+                        Ver Denúncia
+                      </Button>
                     </div>
                   ))}
                 </div>
@@ -277,11 +282,16 @@ const RelatorioCard = ({
               {linkedInvestigacoes.length > 0 ? (
                 <div className="space-y-2 mb-4">
                   {linkedInvestigacoes.map((i: any) => (
-                    <div key={i.id} className="flex items-center gap-3 rounded bg-muted px-3 py-2 text-sm border border-border">
-                      <Badge variant="outline" className="bg-background border-border text-foreground font-mono text-[10px]">
-                        #{i.numero_registro.toString().padStart(4, '0')}
-                      </Badge>
-                      <span className="text-foreground">{i.titulo}</span>
+                    <div key={i.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
+                      <div className="flex items-center gap-3">
+                        <Shield className="h-4 w-4 text-foreground shrink-0" />
+                        <span className="text-foreground font-bold">{i.titulo}</span>
+                        <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">Investigação</Badge>
+                      </div>
+                      <Button size="sm" variant="ghost" className="h-7 text-xs text-foreground"
+                        onClick={() => { setActiveTab("investigacoes"); setExpandedId(i.id); }}>
+                        Ver Investigação
+                      </Button>
                     </div>
                   ))}
                 </div>
