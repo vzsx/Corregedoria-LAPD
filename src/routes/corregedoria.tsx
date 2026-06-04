@@ -755,7 +755,7 @@ function Corregedoria() {
     // Real-time subscriptions
     const denunciasSub = supabase.channel('denuncias-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'denuncias' }, (payload) => {
-        if (payload.eventType === 'INSERT') setDenuncias(prev => [payload.new as Denuncia, ...prev]);
+        if (payload.eventType === 'INSERT') setDenuncias(prev => prev.some(d => d.id === payload.new.id) ? prev : [payload.new as Denuncia, ...prev]);
         if (payload.eventType === 'UPDATE') setDenuncias(prev => prev.map(d => d.id === payload.new.id ? payload.new as Denuncia : d));
         if (payload.eventType === 'DELETE') setDenuncias(prev => prev.filter(d => d.id !== payload.old.id));
       })
@@ -763,7 +763,7 @@ function Corregedoria() {
 
     const investigacoesSub = supabase.channel('investigacoes-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'investigacoes' }, (payload) => {
-        if (payload.eventType === 'INSERT') setInvestigacoes(prev => [payload.new as Investigacao, ...prev]);
+        if (payload.eventType === 'INSERT') setInvestigacoes(prev => prev.some(i => i.id === payload.new.id) ? prev : [payload.new as Investigacao, ...prev]);
         if (payload.eventType === 'UPDATE') setInvestigacoes(prev => prev.map(i => i.id === payload.new.id ? payload.new as Investigacao : i));
         if (payload.eventType === 'DELETE') setInvestigacoes(prev => prev.filter(i => i.id !== payload.old.id));
       })
@@ -771,7 +771,7 @@ function Corregedoria() {
 
     const relatoriosSub = supabase.channel('relatorios-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'relatorios' }, (payload) => {
-        if (payload.eventType === 'INSERT') setRelatorios(prev => [payload.new as Relatorio, ...prev]);
+        if (payload.eventType === 'INSERT') setRelatorios(prev => prev.some(r => r.id === payload.new.id) ? prev : [payload.new as Relatorio, ...prev]);
         if (payload.eventType === 'UPDATE') setRelatorios(prev => prev.map(r => r.id === payload.new.id ? payload.new as Relatorio : r));
         if (payload.eventType === 'DELETE') setRelatorios(prev => prev.filter(r => r.id !== payload.old.id));
       })
@@ -779,7 +779,7 @@ function Corregedoria() {
 
     const depoimentosSub = supabase.channel('depoimentos-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'depoimentos' }, (payload) => {
-        if (payload.eventType === 'INSERT') setDepoimentos(prev => [payload.new as Depoimento, ...prev]);
+        if (payload.eventType === 'INSERT') setDepoimentos(prev => prev.some(d => d.id === payload.new.id) ? prev : [payload.new as Depoimento, ...prev]);
         if (payload.eventType === 'UPDATE') setDepoimentos(prev => prev.map(d => d.id === payload.new.id ? payload.new as Depoimento : d));
         if (payload.eventType === 'DELETE') setDepoimentos(prev => prev.filter(d => d.id !== payload.old.id));
       })
