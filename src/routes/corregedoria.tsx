@@ -170,15 +170,11 @@ const RelatorioCard = ({
     .filter((dr: any) => dr.relatorio_id === relatorio.id)
     .map((dr: any) => denuncias.find((d: any) => d.id === dr.denuncia_id))
     .filter(Boolean);
-  
+
   const linkedInvestigacoes = investigacaoRelatorios
     .filter((ir: any) => ir.relatorio_id === relatorio.id)
     .map((ir: any) => investigacoes.find((i: any) => i.id === ir.investigacao_id))
     .filter(Boolean);
-
-  const availableDenuncias = denuncias.filter(
-    (d: any) => !denunciaRelatorios.some((dr: any) => dr.relatorio_id === relatorio.id && dr.denuncia_id === d.id)
-  );
 
   const availableInvestigacoes = investigacoes.filter(
     (i: any) => !investigacaoRelatorios.some((ir: any) => ir.relatorio_id === relatorio.id && ir.investigacao_id === i.id)
@@ -271,23 +267,6 @@ const RelatorioCard = ({
               ) : (
                 <p className="text-xs text-muted-foreground mb-4">Nenhuma denúncia anexada.</p>
               )}
-            <div className="flex gap-2 items-end">
-              <div className="flex-1">
-                <Select value={linkDenunciaId} onValueChange={setLinkDenunciaId}>
-                  <SelectTrigger className="bg-muted border-border text-foreground text-xs h-8">
-                    <SelectValue placeholder="Vincular denúncia..." />
-                  </SelectTrigger>
-                  <SelectContent className="bg-muted border-border text-foreground">
-                    {availableDenuncias.map((d: any) => (
-                      <SelectItem key={d.id} value={d.id}>#{d.numero_registro?.toString().padStart(4, '0')} - {d.titulo}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button size="sm" onClick={() => onLinkDenuncia(relatorio.id)} disabled={linking || !linkDenunciaId} className="h-8 bg-zinc-800 hover:bg-slate-700 text-white text-[10px]">
-                {linking ? "..." : "Link"}
-              </Button>
-            </div>
             </div>
 
             {/* Investigações Vinculadas */}
@@ -309,23 +288,6 @@ const RelatorioCard = ({
               ) : (
                 <p className="text-xs text-muted-foreground mb-4">Nenhuma investigação anexada.</p>
               )}
-            <div className="flex gap-2 items-end">
-              <div className="flex-1">
-                <Select value={linkInvestigacaoId} onValueChange={setLinkInvestigacaoId}>
-                  <SelectTrigger className="bg-muted border-border text-foreground text-xs h-8">
-                    <SelectValue placeholder="Vincular investigação..." />
-                  </SelectTrigger>
-                  <SelectContent className="bg-muted border-border text-foreground">
-                    {availableInvestigacoes.map((i: any) => (
-                      <SelectItem key={i.id} value={i.id}>#{i.numero_registro.toString().padStart(4, '0')} - {i.titulo}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button size="sm" onClick={() => onLinkInvestigacao(relatorio.id)} disabled={linking || !linkInvestigacaoId} className="h-8 bg-zinc-800 hover:bg-slate-700 text-white text-[10px]">
-                {linking ? "..." : "Link"}
-              </Button>
-            </div>
             </div>
           </div>
 
