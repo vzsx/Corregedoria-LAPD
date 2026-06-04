@@ -78,6 +78,7 @@
   }
   body {
     background-color: var(--color-background);
+    background-image: radial-gradient(ellipse at center, oklch(1 0 0 / 0.04) 0%, transparent 70%);
     color: var(--color-foreground);
     font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
   }
