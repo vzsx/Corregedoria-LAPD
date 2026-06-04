@@ -164,7 +164,7 @@ const RelatorioCard = ({
   relatorio, expanded, onToggle, isAdmin, onApprove, onEdit, onDelete, onUpdateStatus,
   denuncias, investigacoes, relatorios, denunciaRelatorios, investigacaoRelatorios,
   onLinkDenuncia, onLinkInvestigacao, linking, linkDenunciaId, setLinkDenunciaId,
-  linkInvestigacaoId, setLinkInvestigacaoId
+  linkInvestigacaoId, setLinkInvestigacaoId, depoimentos
 }: any) => {
   const linkedDenuncias = denunciaRelatorios
     .filter((dr: any) => dr.relatorio_id === relatorio.id)
@@ -2841,6 +2841,7 @@ function Corregedoria() {
                           setLinkDenunciaId={setLinkDenunciaId}
                           linkInvestigacaoId={linkInvestigacaoId}
                           setLinkInvestigacaoId={setLinkInvestigacaoId}
+                          depoimentos={depoimentos}
                         />
                       ))
                   )
@@ -3176,6 +3177,7 @@ function Corregedoria() {
                           setLinkDenunciaId={setLinkDenunciaId}
                           linkInvestigacaoId={linkInvestigacaoId}
                           setLinkInvestigacaoId={setLinkInvestigacaoId}
+                          depoimentos={depoimentos}
                         />
                       ))
                   )
