@@ -127,10 +127,10 @@ const STATUS_LABEL: Record<Status, string> = {
 };
 
 const STATUS_COLOR: Record<Status, string> = {
-  pendente: "bg-red-500/20 text-zinc-300 border-red-500/40",
-  em_analise: "bg-white/15 text-white border-white/30",
-  concluida: "bg-emerald-500/20 text-emerald-400 border-emerald-500/40",
-  arquivada: "bg-slate-700/50 text-slate-400 border-border",
+  pendente: "bg-red-500/10 text-red-700 border-red-500/40",
+  em_analise: "bg-blue-500/10 text-blue-700 border-blue-500/30",
+  concluida: "bg-emerald-500/10 text-emerald-700 border-emerald-500/40",
+  arquivada: "bg-muted text-muted-foreground border-border",
 };
 
 const formatDateSafe = (dateStr: any, formatStr: string) => {
@@ -171,28 +171,28 @@ const RelatorioCard = ({
   return (
     <div className="rounded-lg border border-border bg-card overflow-hidden">
       <div 
-        className="flex w-full items-center justify-between gap-4 p-5 text-left transition-colors hover:bg-zinc-800/50 cursor-pointer"
+        className="flex w-full items-center justify-between gap-4 p-5 text-left transition-colors hover:bg-muted cursor-pointer"
         onClick={onToggle}
       >
         <div className="flex items-center gap-4 flex-1">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-white/10">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-muted/50">
             {relatorio.tipo_denuncia === "Inquérito Policial" ? (
-              <FileSignature className="h-5 w-5 text-white" />
+              <FileSignature className="h-5 w-5 text-foreground" />
             ) : (
               <FileText className="h-5 w-5 text-emerald-400" />
             )}
           </div>
           <div className="overflow-hidden">
             <div className="flex items-center gap-3 whitespace-nowrap overflow-hidden">
-              <h4 className="font-bold uppercase text-white tracking-wide truncate max-w-[200px]">{relatorio.titulo}</h4>
-              <Badge variant="outline" className="text-[9px] uppercase border-border text-slate-400 bg-zinc-900/50">
+              <h4 className="font-bold uppercase text-foreground tracking-wide truncate max-w-[200px]">{relatorio.titulo}</h4>
+              <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground bg-muted/50">
                 {relatorio.tipo_denuncia}
               </Badge>
               <Badge className={(STATUS_COLOR[relatorio.status as Status] || STATUS_COLOR.pendente) + " text-[9px] uppercase border"}>
                 {(STATUS_LABEL[relatorio.status as Status] || "Pendente")}
               </Badge>
             </div>
-            <div className="mt-1 flex items-center gap-2 text-[10px] text-slate-500 uppercase tracking-widest">
+            <div className="mt-1 flex items-center gap-2 text-[10px] text-muted-foreground uppercase tracking-widest">
               <span>{format(new Date(relatorio.created_at), "dd/MM/yy HH:mm")}</span>
               <span>·</span>
               <span>Oficial: {relatorio.oficial}</span>
@@ -202,10 +202,10 @@ const RelatorioCard = ({
         <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
           <div className="flex gap-1 ml-4">
             <Select value={relatorio.status} onValueChange={(v: Status) => onUpdateStatus(relatorio.id, v)}>
-              <SelectTrigger className="h-8 bg-zinc-900 border-border text-[10px] text-slate-400 uppercase tracking-widest w-[140px]">
+              <SelectTrigger className="h-8 bg-muted border-border text-[10px] text-muted-foreground uppercase tracking-widest w-[140px]">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-zinc-900 border-border text-white">
+              <SelectContent className="bg-muted border-border text-foreground">
                 {Object.entries(STATUS_LABEL).map(([val, lab]) => (
                   <SelectItem key={val} value={val} className="text-[10px] uppercase">{lab}</SelectItem>
                 ))}
@@ -214,7 +214,7 @@ const RelatorioCard = ({
             <Button 
               size="sm" 
               variant="ghost" 
-              className="h-8 w-8 p-0 text-white hover:text-white hover:bg-white/10"
+              className="h-8 w-8 p-0 text-foreground hover:text-foreground hover:bg-muted/50"
               onClick={() => onEdit(relatorio)}
               title="Editar"
             >
@@ -234,34 +234,34 @@ const RelatorioCard = ({
       </div>
 
       {expanded && (
-        <div className="border-t border-border/50 bg-zinc-900/30 p-6 space-y-6">
+        <div className="border-t border-border/50 bg-muted/50 p-6 space-y-6">
           <div className="grid gap-6 md:grid-cols-2">
             {/* Denúncias Vinculadas */}
-            <div className="rounded border border-border bg-black/50 p-4">
-              <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400">
+            <div className="rounded border border-border bg-muted p-4">
+              <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
                 <Activity className="h-4 w-4" /> Denúncias Vinculadas
               </div>
               {linkedDenuncias.length > 0 ? (
                 <div className="space-y-2 mb-4">
                   {linkedDenuncias.map((d: any) => (
-                    <div key={d.id} className="flex items-center gap-3 rounded bg-zinc-900 px-3 py-2 text-sm border border-border">
-                      <Badge variant="outline" className="bg-black border-white/20 text-white font-mono text-[10px]">
+                    <div key={d.id} className="flex items-center gap-3 rounded bg-muted px-3 py-2 text-sm border border-border">
+                      <Badge variant="outline" className="bg-background border-border text-foreground font-mono text-[10px]">
                         #{d.numero_registro?.toString().padStart(4, '0')}
                       </Badge>
-                      <span className="text-slate-300">{d.titulo}</span>
+                      <span className="text-foreground">{d.titulo}</span>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-slate-500 mb-4">Nenhuma denúncia anexada.</p>
+                <p className="text-xs text-muted-foreground mb-4">Nenhuma denúncia anexada.</p>
               )}
             <div className="flex gap-2 items-end">
               <div className="flex-1">
                 <Select value={linkDenunciaId} onValueChange={setLinkDenunciaId}>
-                  <SelectTrigger className="bg-zinc-900 border-border text-slate-300 text-xs h-8">
+                  <SelectTrigger className="bg-muted border-border text-foreground text-xs h-8">
                     <SelectValue placeholder="Vincular denúncia..." />
                   </SelectTrigger>
-                  <SelectContent className="bg-zinc-900 border-border text-slate-300">
+                  <SelectContent className="bg-muted border-border text-foreground">
                     {availableDenuncias.map((d: any) => (
                       <SelectItem key={d.id} value={d.id}>#{d.numero_registro?.toString().padStart(4, '0')} - {d.titulo}</SelectItem>
                     ))}
@@ -275,38 +275,38 @@ const RelatorioCard = ({
             </div>
 
             {/* Investigações Vinculadas */}
-            <div className="rounded border border-border bg-black/50 p-4">
-              <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400">
+            <div className="rounded border border-border bg-muted p-4">
+              <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
                 <Shield className="h-4 w-4" /> Investigações Vinculadas
               </div>
               {linkedInvestigacoes.length > 0 ? (
                 <div className="space-y-2 mb-4">
                   {linkedInvestigacoes.map((i: any) => (
-                    <div key={i.id} className="flex items-center gap-3 rounded bg-zinc-900 px-3 py-2 text-sm border border-border">
-                      <Badge variant="outline" className="bg-black border-zinc-700 text-zinc-300 font-mono text-[10px]">
+                    <div key={i.id} className="flex items-center gap-3 rounded bg-muted px-3 py-2 text-sm border border-border">
+                      <Badge variant="outline" className="bg-background border-border text-foreground font-mono text-[10px]">
                         #{i.numero_registro.toString().padStart(4, '0')}
                       </Badge>
-                      <span className="text-slate-300">{i.titulo}</span>
+                      <span className="text-foreground">{i.titulo}</span>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-slate-500 mb-4">Nenhuma investigação anexada.</p>
+                <p className="text-xs text-muted-foreground mb-4">Nenhuma investigação anexada.</p>
               )}
             <div className="flex gap-2 items-end">
               <div className="flex-1">
                 <Select value={linkInvestigacaoId} onValueChange={setLinkInvestigacaoId}>
-                  <SelectTrigger className="bg-zinc-900 border-border text-slate-300 text-xs h-8">
+                  <SelectTrigger className="bg-muted border-border text-foreground text-xs h-8">
                     <SelectValue placeholder="Vincular investigação..." />
                   </SelectTrigger>
-                  <SelectContent className="bg-zinc-900 border-border text-slate-300">
+                  <SelectContent className="bg-muted border-border text-foreground">
                     {availableInvestigacoes.map((i: any) => (
                       <SelectItem key={i.id} value={i.id}>#{i.numero_registro.toString().padStart(4, '0')} - {i.titulo}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-              <Button size="sm" onClick={() => onLinkInvestigacao(relatorio.id)} disabled={linking || !linkInvestigacaoId} className="h-8 bg-zinc-800 hover:bg-slate-700 text-zinc-300 text-[10px]">
+              <Button size="sm" onClick={() => onLinkInvestigacao(relatorio.id)} disabled={linking || !linkInvestigacaoId} className="h-8 bg-zinc-800 hover:bg-slate-700 text-white text-[10px]">
                 {linking ? "..." : "Link"}
               </Button>
             </div>
@@ -320,46 +320,46 @@ const RelatorioCard = ({
                   <div className="border-l-2 border-red-600 pl-3 bg-red-500/5 py-2">
                     <h4 className="text-[10px] font-bold uppercase tracking-widest text-red-500 mb-2">0. DADOS DO CORREGEDOR</h4>
                     <div className="grid grid-cols-2 gap-2">
-                      <p className="text-[10px] text-slate-400">Caso: <span className="text-white">{relatorio.dados_detalhados.numero_caso}</span></p>
-                      <p className="text-[10px] text-slate-400">Abertura: <span className="text-white">{formatDateSafe(relatorio.dados_detalhados.data_abertura, "dd/MM/yyyy")}</span></p>
-                      <p className="text-[10px] text-slate-400">Patente: <span className="text-white">{relatorio.dados_detalhados.corregedor_patente}</span></p>
-                      <p className="text-[10px] text-slate-400">Recebimento: <span className="text-white">{formatDateSafe(relatorio.dados_detalhados.data_recebimento, "dd/MM/yyyy")}</span></p>
+                      <p className="text-[10px] text-muted-foreground">Caso: <span className="text-foreground">{relatorio.dados_detalhados.numero_caso}</span></p>
+                      <p className="text-[10px] text-muted-foreground">Abertura: <span className="text-foreground">{formatDateSafe(relatorio.dados_detalhados.data_abertura, "dd/MM/yyyy")}</span></p>
+                      <p className="text-[10px] text-muted-foreground">Patente: <span className="text-foreground">{relatorio.dados_detalhados.corregedor_patente}</span></p>
+                      <p className="text-[10px] text-muted-foreground">Recebimento: <span className="text-foreground">{formatDateSafe(relatorio.dados_detalhados.data_recebimento, "dd/MM/yyyy")}</span></p>
                     </div>
                   </div>
-                  <div className="border-l-2 border-zinc-500 pl-3 bg-white/5 py-2">
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-white mb-2">1. DADOS DO RECLAMANTE</h4>
+                  <div className="border-l-2 border-zinc-500 pl-3 bg-muted/50 py-2">
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-foreground mb-2">1. DADOS DO RECLAMANTE</h4>
                     <div className="grid grid-cols-2 gap-2">
-                      <p className="text-[10px] text-slate-400">Nome: <span className="text-white">{relatorio.dados_detalhados.reclamante_nome}</span></p>
-                      <p className="text-[10px] text-slate-400">ID: <span className="text-white">{relatorio.dados_detalhados.reclamante_id}</span></p>
-                      <p className="text-[10px] text-slate-400">Discord: <span className="text-white">{relatorio.dados_detalhados.reclamante_discord || "N/A"}</span></p>
-                      <p className="text-[10px] text-slate-400">Anônimo: <span className="text-white font-bold">{relatorio.dados_detalhados.reclamante_anonimo}</span></p>
+                      <p className="text-[10px] text-muted-foreground">Nome: <span className="text-foreground">{relatorio.dados_detalhados.reclamante_nome}</span></p>
+                      <p className="text-[10px] text-muted-foreground">ID: <span className="text-foreground">{relatorio.dados_detalhados.reclamante_id}</span></p>
+                      <p className="text-[10px] text-muted-foreground">Discord: <span className="text-foreground">{relatorio.dados_detalhados.reclamante_discord || "N/A"}</span></p>
+                      <p className="text-[10px] text-muted-foreground">Anônimo: <span className="text-foreground font-bold">{relatorio.dados_detalhados.reclamante_anonimo}</span></p>
                     </div>
                   </div>
                   <div className="border-l-2 border-slate-600 pl-3 bg-slate-500/5 py-2">
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">2. POLICIAL DENUNCIADO</h4>
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">2. POLICIAL DENUNCIADO</h4>
                     <div className="grid grid-cols-2 gap-2">
-                      <p className="text-[10px] text-slate-400">Nome: <span className="text-white">{relatorio.dados_detalhados.denunciado_nome}</span></p>
-                      <p className="text-[10px] text-slate-400">Badge: <span className="text-white">#{relatorio.dados_detalhados.denunciado_badge}</span></p>
-                      <p className="text-[10px] text-slate-400">Patente: <span className="text-white">{relatorio.dados_detalhados.denunciado_patente}</span></p>
-                      <p className="text-[10px] text-slate-400">Viatura: <span className="text-white">{relatorio.dados_detalhados.denunciado_viatura || "N/A"}</span></p>
+                      <p className="text-[10px] text-muted-foreground">Nome: <span className="text-foreground">{relatorio.dados_detalhados.denunciado_nome}</span></p>
+                      <p className="text-[10px] text-muted-foreground">Badge: <span className="text-foreground">#{relatorio.dados_detalhados.denunciado_badge}</span></p>
+                      <p className="text-[10px] text-muted-foreground">Patente: <span className="text-foreground">{relatorio.dados_detalhados.denunciado_patente}</span></p>
+                      <p className="text-[10px] text-muted-foreground">Viatura: <span className="text-foreground">{relatorio.dados_detalhados.denunciado_viatura || "N/A"}</span></p>
                     </div>
                   </div>
                 </div>
                 <div className="space-y-4">
-                  <div className="border-l-2 border-zinc-600 pl-3 bg-white/5 py-2">
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-300 mb-2">3. TIPO DE DENÚNCIA</h4>
-                    <Badge variant="outline" className="bg-white/10 border-white/30 text-zinc-300 text-[10px] uppercase">
+                  <div className="border-l-2 border-zinc-600 pl-3 bg-muted/50 py-2">
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-foreground mb-2">3. TIPO DE DENÚNCIA</h4>
+                    <Badge variant="outline" className="bg-muted/50 border-border text-foreground text-[10px] uppercase">
                       {relatorio.dados_detalhados.tipo_denuncia_selecionado}
                     </Badge>
                   </div>
-                  <div className="border-l-2 border-zinc-600 pl-3 bg-white/5 py-2">
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-300 mb-2">4. INFORMAÇÕES DO INCIDENTE</h4>
+                  <div className="border-l-2 border-zinc-600 pl-3 bg-muted/50 py-2">
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-foreground mb-2">4. INFORMAÇÕES DO INCIDENTE</h4>
                     <div className="grid grid-cols-2 gap-2 mb-2">
-                      <p className="text-[10px] text-slate-400">Data: <span className="text-white">{formatDateSafe(relatorio.dados_detalhados.incidente_data, "dd/MM/yyyy")}</span></p>
-                      <p className="text-[10px] text-slate-400">Horário: <span className="text-white">{relatorio.dados_detalhados.incidente_horario}</span></p>
+                      <p className="text-[10px] text-muted-foreground">Data: <span className="text-foreground">{formatDateSafe(relatorio.dados_detalhados.incidente_data, "dd/MM/yyyy")}</span></p>
+                      <p className="text-[10px] text-muted-foreground">Horário: <span className="text-foreground">{relatorio.dados_detalhados.incidente_horario}</span></p>
                     </div>
-                    <p className="text-[10px] text-slate-400 mb-1">Local: <span className="text-white">{relatorio.dados_detalhados.incidente_local}</span></p>
-                    <p className="text-[10px] text-slate-400">Testemunhas: <span className="text-white">{relatorio.dados_detalhados.incidente_testemunhas}</span></p>
+                    <p className="text-[10px] text-muted-foreground mb-1">Local: <span className="text-foreground">{relatorio.dados_detalhados.incidente_local}</span></p>
+                    <p className="text-[10px] text-muted-foreground">Testemunhas: <span className="text-foreground">{relatorio.dados_detalhados.incidente_testemunhas}</span></p>
                   </div>
                   <div className="border-l-2 border-emerald-600 pl-3 bg-emerald-500/5 py-2">
                     <h4 className="text-[10px] font-bold uppercase tracking-widest text-emerald-500 mb-2">6. PROVAS E EVIDÊNCIAS</h4>
@@ -368,18 +368,18 @@ const RelatorioCard = ({
                         <Badge key={p} variant="outline" className="bg-emerald-500/10 border-emerald-500/30 text-emerald-400 text-[9px] uppercase">{p}</Badge>
                       ))}
                     </div>
-                    <p className="text-[10px] text-slate-400 italic bg-black/40 p-1.5 rounded border border-emerald-500/10">{relatorio.dados_detalhados.provas_descricao || "Nenhuma descrição adicional."}</p>
+                    <p className="text-[10px] text-muted-foreground italic bg-background/40 p-1.5 rounded border border-emerald-500/10">{relatorio.dados_detalhados.provas_descricao || "Nenhuma descrição adicional."}</p>
                   </div>
                 </div>
               </div>
               
               {relatorio.dados_detalhados.ato_id_vinculado && (
-                <div className="mt-4 p-3 rounded border border-white/10 bg-white/5">
-                  <h4 className="text-[9px] font-bold uppercase tracking-widest text-white mb-2 flex items-center gap-2">
+                <div className="mt-4 p-3 rounded border border-white/10 bg-muted/50">
+                  <h4 className="text-[9px] font-bold uppercase tracking-widest text-foreground mb-2 flex items-center gap-2">
                     <LinkIcon className="h-3 w-3" /> Ato Administrativo Vinculado
                   </h4>
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="bg-zinc-900 border-white/30 text-zinc-300 text-[10px]">
+                    <Badge variant="outline" className="bg-muted border-border text-foreground text-[10px]">
                       {relatorios?.find((r: Relatorio) => r.id === relatorio.dados_detalhados.ato_id_vinculado)?.titulo || "Documento não encontrado"}
                     </Badge>
                   </div>
@@ -394,48 +394,48 @@ const RelatorioCard = ({
               <div className="border-l-2 border-red-600 pl-4 bg-red-500/5 py-3">
                 <h4 className="text-[10px] font-bold uppercase tracking-widest text-red-500 mb-2">1. IDENTIFICAÇÃO DO ATO</h4>
                 <div className="grid md:grid-cols-3 gap-4">
-                  <p className="text-xs text-slate-400">Inquérito: <span className="text-white">{relatorio.dados_detalhados.ato_numero_inquerito || "N/A"}</span></p>
-                  <p className="text-xs text-slate-400">Ato: <span className="text-white">#{relatorio.dados_detalhados.ato_numero}</span></p>
-                  <p className="text-xs text-slate-400">Emissão: <span className="text-white">{formatDateSafe(relatorio.dados_detalhados.ato_data_emissao, "dd/MM/yyyy")}</span></p>
+                  <p className="text-xs text-muted-foreground">Inquérito: <span className="text-foreground">{relatorio.dados_detalhados.ato_numero_inquerito || "N/A"}</span></p>
+                  <p className="text-xs text-muted-foreground">Ato: <span className="text-foreground">#{relatorio.dados_detalhados.ato_numero}</span></p>
+                  <p className="text-xs text-muted-foreground">Emissão: <span className="text-foreground">{formatDateSafe(relatorio.dados_detalhados.ato_data_emissao, "dd/MM/yyyy")}</span></p>
                 </div>
-                <p className="text-xs text-slate-400 mt-2">Tipo: <Badge variant="outline" className="ml-1 text-[9px] bg-red-500/10 text-zinc-300 border-red-500/30">{relatorio.dados_detalhados.ato_tipo === "Outro" ? relatorio.dados_detalhados.ato_tipo_outro : relatorio.dados_detalhados.ato_tipo}</Badge></p>
+                <p className="text-xs text-muted-foreground mt-2">Tipo: <Badge variant="outline" className="ml-1 text-[9px] bg-red-500/10 text-foreground border-red-500/30">{relatorio.dados_detalhados.ato_tipo === "Outro" ? relatorio.dados_detalhados.ato_tipo_outro : relatorio.dados_detalhados.ato_tipo}</Badge></p>
               </div>
 
               {/* 2. AUTORIDADE */}
-              <div className="border-l-2 border-zinc-500 pl-4 bg-white/5 py-3">
-                <h4 className="text-[10px] font-bold uppercase tracking-widest text-white mb-2">2. AUTORIDADE EMISSORA</h4>
+              <div className="border-l-2 border-zinc-500 pl-4 bg-muted/50 py-3">
+                <h4 className="text-[10px] font-bold uppercase tracking-widest text-foreground mb-2">2. AUTORIDADE EMISSORA</h4>
                 <div className="grid md:grid-cols-3 gap-4">
-                  <p className="text-xs text-slate-400">Corregedor: <span className="text-white">{relatorio.dados_detalhados.ato_autoridade_nome}</span></p>
-                  <p className="text-xs text-slate-400">Cargo: <span className="text-white">{relatorio.dados_detalhados.ato_autoridade_cargo}</span></p>
-                  <p className="text-xs text-slate-400">Unidade: <span className="text-white">{relatorio.dados_detalhados.ato_autoridade_unidade}</span></p>
+                  <p className="text-xs text-muted-foreground">Corregedor: <span className="text-foreground">{relatorio.dados_detalhados.ato_autoridade_nome}</span></p>
+                  <p className="text-xs text-muted-foreground">Cargo: <span className="text-foreground">{relatorio.dados_detalhados.ato_autoridade_cargo}</span></p>
+                  <p className="text-xs text-muted-foreground">Unidade: <span className="text-foreground">{relatorio.dados_detalhados.ato_autoridade_unidade}</span></p>
                 </div>
               </div>
 
               {/* 3. OBJETO */}
               <div className="border-l-2 border-slate-600 pl-4 bg-slate-500/5 py-3">
-                <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">3. OBJETO DO ATO</h4>
-                <p className="text-sm text-slate-300 italic leading-relaxed">"{relatorio.dados_detalhados.ato_objeto_descricao}"</p>
+                <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">3. OBJETO DO ATO</h4>
+                <p className="text-sm text-foreground italic leading-relaxed">"{relatorio.dados_detalhados.ato_objeto_descricao}"</p>
               </div>
 
               {/* 4. FUNDAMENTAÇÃO */}
-              <div className="border-l-2 border-zinc-600 pl-4 bg-white/5 py-3">
-                <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-300 mb-2">4. FUNDAMENTAÇÃO</h4>
+              <div className="border-l-2 border-zinc-600 pl-4 bg-muted/50 py-3">
+                <h4 className="text-[10px] font-bold uppercase tracking-widest text-foreground mb-2">4. FUNDAMENTAÇÃO</h4>
                 <div className="flex flex-wrap gap-1 mb-3">
                   {relatorio.dados_detalhados.ato_fundamentacao_selecionada?.map((f: string) => (
-                    <Badge key={f} variant="outline" className="text-[9px] bg-white/5 border-white/20 text-zinc-300/70">{f}</Badge>
+                    <Badge key={f} variant="outline" className="text-[9px] bg-muted/50 border-border text-foreground/70">{f}</Badge>
                   ))}
                 </div>
                 {relatorio.dados_detalhados.ato_fundamentacao_complementar && (
-                  <p className="text-xs text-slate-400 bg-black/30 p-2 rounded border border-white/10 italic">
+                  <p className="text-xs text-muted-foreground bg-background/30 p-2 rounded border border-white/10 italic">
                     {relatorio.dados_detalhados.ato_fundamentacao_complementar}
                   </p>
                 )}
               </div>
 
               {/* 5. DECISÃO */}
-              <div className="border-l-2 border-zinc-600 pl-4 bg-white/5 py-3">
-                <h4 className="text-[10px] font-bold uppercase tracking-widest text-white mb-2">5. DECISÃO</h4>
-                <p className="text-sm text-white whitespace-pre-wrap">{relatorio.dados_detalhados.ato_decisao}</p>
+              <div className="border-l-2 border-zinc-600 pl-4 bg-muted/50 py-3">
+                <h4 className="text-[10px] font-bold uppercase tracking-widest text-foreground mb-2">5. DECISÃO</h4>
+                <p className="text-sm text-foreground whitespace-pre-wrap">{relatorio.dados_detalhados.ato_decisao}</p>
               </div>
 
               {/* 6. MEDIDAS */}
@@ -447,7 +447,7 @@ const RelatorioCard = ({
                   ))}
                 </div>
                 {relatorio.dados_detalhados.ato_medidas_detalhamento && (
-                   <p className="text-xs text-slate-400 bg-black/30 p-2 rounded border border-emerald-500/10 whitespace-pre-wrap">
+                   <p className="text-xs text-muted-foreground bg-background/30 p-2 rounded border border-emerald-500/10 whitespace-pre-wrap">
                     {relatorio.dados_detalhados.ato_medidas_detalhamento}
                   </p>
                 )}
@@ -456,8 +456,8 @@ const RelatorioCard = ({
           )}
 
           <div className="pt-2">
-            <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2 border-b border-border pb-1">Conteúdo do Documento</p>
-            <p className="text-sm whitespace-pre-wrap text-slate-300 leading-relaxed font-mono mt-4">{relatorio.conteudo}</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2 border-b border-border pb-1">Conteúdo do Documento</p>
+            <p className="text-sm whitespace-pre-wrap text-foreground leading-relaxed font-mono mt-4">{relatorio.conteudo}</p>
           </div>
         </div>
       )}
@@ -1235,24 +1235,24 @@ function Corregedoria() {
 
   if (loading || fetching) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0a0f16]">
-        <Loader2 className="h-8 w-8 animate-spin text-white" />
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-foreground" />
       </div>
     );
   }
 
   if (!isCorregedor && roles.includes("pending")) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0a0f16] p-6 text-center text-slate-300">
-        <div className="max-w-md rounded-lg border border-border bg-card p-8 shadow-2xl">
-          <Shield className="mx-auto h-16 w-16 text-white/50" />
-          <h1 className="mt-6 text-2xl font-bold uppercase tracking-widest text-white shadow-blue-500/20 drop-shadow-md">
+      <div className="flex min-h-screen items-center justify-center bg-background p-6 text-center text-muted-foreground">
+        <div className="max-w-md rounded-lg border border-border bg-card p-8 shadow-sm">
+          <Shield className="mx-auto h-16 w-16 text-muted-foreground" />
+          <h1 className="mt-6 text-2xl font-bold uppercase tracking-widest text-foreground">
             Acesso Pendente
           </h1>
-          <p className="mt-4 text-slate-400">
+          <p className="mt-4 text-muted-foreground">
             Sua conta de oficial está aguardando aprovação administrativa para acessar o terminal seguro.
           </p>
-          <Button onClick={handleLogout} variant="outline" className="mt-8 border-border bg-transparent text-slate-300 hover:bg-zinc-800 hover:text-white">
+          <Button onClick={handleLogout} variant="outline" className="mt-8 border-border bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground">
             Voltar para o Login
           </Button>
         </div>
@@ -1263,28 +1263,28 @@ function Corregedoria() {
   // Se não for corregedor e não for pendente, e também não for cidadão (ainda carregando ou erro), mostra loader ou redireciona
   if (!isCorregedor) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0a0f16]">
-        <Loader2 className="h-8 w-8 animate-spin text-white" />
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-foreground" />
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#0a0f16] text-slate-300 font-mono">
+    <div className="flex h-screen w-full overflow-hidden bg-background text-foreground font-mono">
       {/* SIDEBAR */}
       <aside className="flex w-64 flex-col border-r border-border bg-card">
         <div className="flex items-center gap-3 border-b border-border p-6">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-white/15">
-            <Shield className="h-6 w-6 text-white" />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-muted">
+            <Shield className="h-6 w-6 text-foreground" />
           </div>
           <div>
-            <h1 className="text-sm font-bold uppercase tracking-widest text-white">MDT Policial</h1>
-            <p className="text-[10px] text-white/70 tracking-widest">SECURE TERMINAL</p>
+            <h1 className="text-sm font-bold uppercase tracking-widest text-foreground">MDT Policial</h1>
+            <p className="text-[10px] text-muted-foreground tracking-widest">SECURE TERMINAL</p>
           </div>
         </div>
 
         <nav className="flex-1 space-y-1 overflow-y-auto p-4">
-          <p className="px-4 text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 mt-4">Operações</p>
+          <p className="px-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2 mt-4">Operações</p>
           
           <SidebarItem 
             active={activeTab === "dashboard"} 
@@ -1325,7 +1325,7 @@ function Corregedoria() {
 
           {isAdmin && (
             <>
-              <p className="px-4 text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 mt-8">Administrativo</p>
+              <p className="px-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2 mt-8">Administrativo</p>
               <SidebarItem 
                 active={activeTab === "solicitacoes"} 
                 onClick={() => setActiveTab("solicitacoes")} 
@@ -1340,12 +1340,12 @@ function Corregedoria() {
         <div className="border-t border-border p-4">
           <button 
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-md px-4 py-2 text-sm text-slate-400 transition-colors hover:bg-red-500/10 hover:text-zinc-300"
+            className="flex w-full items-center gap-3 rounded-md px-4 py-2 text-sm text-muted-foreground transition-colors hover:bg-red-500/10 hover:text-foreground"
           >
             <LogOut className="h-4 w-4" />
             Desconectar
           </button>
-          <div className="mt-4 px-4 text-[10px] text-slate-600">
+          <div className="mt-4 px-4 text-[10px] text-muted-foreground">
             MDT v1.0 · CONFIDENCIAL
           </div>
         </div>
@@ -1354,16 +1354,16 @@ function Corregedoria() {
       {/* MAIN CONTENT */}
       <main className="flex-1 flex flex-col overflow-hidden relative">
         {/* Header / Top Bar */}
-        <header className="flex h-20 shrink-0 items-center justify-between border-b border-border bg-[#0a0f16]/80 px-8 backdrop-blur-sm z-10">
+        <header className="flex h-20 shrink-0 items-center justify-between border-b border-border bg-card/80 px-8 backdrop-blur-sm z-10">
           <div className="flex flex-col">
-            <span className="text-xs font-medium tracking-widest text-slate-500 uppercase">Sistema Operacional</span>
-            <h2 className="text-2xl font-bold uppercase tracking-wider text-white" style={{ textShadow: '0 0 10px rgba(59, 130, 246, 0.5)'}}>
+            <span className="text-xs font-medium tracking-widest text-muted-foreground uppercase">Sistema Operacional</span>
+            <h2 className="text-2xl font-bold uppercase tracking-wider text-foreground">
               Bem-Vindo, {user?.user_metadata?.full_name || "Oficial"}
             </h2>
           </div>
           <div className="text-right">
-            <div className="text-sm font-bold text-white">{user?.user_metadata?.full_name}</div>
-            <div className="text-xs text-slate-500">Badge #{user?.user_metadata?.badge_number || "000"}</div>
+            <div className="text-sm font-bold text-foreground">{user?.user_metadata?.full_name}</div>
+            <div className="text-xs text-muted-foreground">Badge #{user?.user_metadata?.badge_number || "000"}</div>
           </div>
         </header>
 
@@ -1375,41 +1375,41 @@ function Corregedoria() {
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
               {/* Stat Cards */}
               <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
-                <StatCard 
+                  <StatCard 
                   title="Total de Denúncias" 
                   value={denuncias.length.toString()} 
                   icon={Activity} 
-                  color="text-white" 
+                  color="text-foreground" 
                 />
                 <StatCard 
                   title="Investigações Ativas" 
                   value={investigacoes.filter(i => i.status !== "concluida" && i.status !== "arquivada").length.toString()} 
                   icon={Shield} 
-                  color="text-zinc-300" 
+                  color="text-muted-foreground" 
                 />
                 <StatCard 
                   title="Inquéritos Policiais" 
                   value={relatorios.filter(r => r.tipo_denuncia === "Inquérito Policial").length.toString()} 
                   icon={FileSignature} 
-                  color="text-white" 
+                  color="text-foreground" 
                 />
                 <StatCard 
                   title="Atos Administrativos" 
                   value={relatorios.filter(r => r.tipo_denuncia === "Ato Administrativo").length.toString()} 
                   icon={FileText} 
-                  color="text-emerald-400" 
+                  color="text-emerald-600" 
                 />
                 <StatCard 
                   title="Aguardando Revisão" 
                   value={relatorios.filter(r => r.status === "pendente").length.toString()} 
                   icon={Shield} 
-                  color="text-zinc-300" 
+                  color="text-muted-foreground" 
                 />
               </div>
 
               {/* Recent Records */}
               <div>
-                <div className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-white">
+                <div className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-foreground">
                   <Shield className="h-4 w-4" />
                   Registros Recentes
                 </div>
@@ -1420,25 +1420,25 @@ function Corregedoria() {
                     .slice(0, 5)
                     .map((item) => {
                       return (
-                        <div key={item.id} className="flex flex-col gap-1 rounded-lg border border-border bg-card p-5">
-                          <div className="flex items-center justify-between">
-                            <h4 className="font-bold uppercase text-white tracking-wide">
-                              Denúncia #{item.numero_registro?.toString().padStart(4, '0')} - {item.titulo}
-                            </h4>
-                            <span className="text-xs text-slate-500">
-                              {format(new Date(item.created_at), "dd/MM/yy HH:mm")}
-                            </span>
+                          <div key={item.id} className="flex flex-col gap-1 rounded-lg border border-border bg-card p-5">
+                            <div className="flex items-center justify-between">
+                              <h4 className="font-bold uppercase text-foreground tracking-wide">
+                                Denúncia #{item.numero_registro?.toString().padStart(4, '0')} - {item.titulo}
+                              </h4>
+                              <span className="text-xs text-muted-foreground">
+                                {format(new Date(item.created_at), "dd/MM/yy HH:mm")}
+                              </span>
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              Status: {item.status.toUpperCase()}
+                            </p>
                           </div>
-                          <p className="text-sm text-slate-400">
-                            Status: {item.status.toUpperCase()}
-                          </p>
-                        </div>
-                      );
-                    })}
-                  {denuncias.filter(d => d.status === "pendente").length === 0 && (
-                    <div className="rounded-lg border border-border border-dashed bg-card/50 p-8 text-center text-slate-500">
-                      Nenhuma denúncia pendente no momento.
-                    </div>
+                        );
+                      })}
+                    {denuncias.filter(d => d.status === "pendente").length === 0 && (
+                      <div className="rounded-lg border border-border border-dashed bg-card/50 p-8 text-center text-muted-foreground">
+                        Nenhuma denúncia pendente no momento.
+                      </div>
                   )}
                 </div>
               </div>
@@ -1449,14 +1449,14 @@ function Corregedoria() {
           {activeTab === "denuncias" && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="flex flex-col gap-4 border-b border-border pb-4">
-                <h3 className="text-lg font-bold uppercase tracking-wider text-white">Registro de Denúncias</h3>
+                <h3 className="text-lg font-bold uppercase tracking-wider text-foreground">Registro de Denúncias</h3>
                 
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-bold uppercase tracking-widest text-slate-500 mr-2">Filtro:</span>
+                  <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground mr-2">Filtro:</span>
                   <Button 
                     size="sm" 
                     variant="outline"
-                    className={`font-mono text-xs h-8 ${denunciaFilter === "todas" ? "bg-slate-700 text-white border-slate-600" : "bg-transparent text-slate-400 border-border hover:text-white"}`}
+                    className={`font-mono text-xs h-8 ${denunciaFilter === "todas" ? "bg-slate-700 text-white border-slate-600" : "bg-transparent text-muted-foreground border-border hover:text-foreground"}`}
                     onClick={() => setDenunciaFilter("todas")}
                   >
                     TODAS
@@ -1466,7 +1466,7 @@ function Corregedoria() {
                       key={status}
                       size="sm" 
                       variant="outline"
-                      className={`font-mono text-xs h-8 ${denunciaFilter === status ? STATUS_COLOR[status].split(" ")[0] + " text-white border-transparent" : "bg-transparent text-slate-400 border-border hover:text-white"}`}
+                      className={`font-mono text-xs h-8 ${denunciaFilter === status ? STATUS_COLOR[status].split(" ")[0] + " text-foreground border-transparent" : "bg-transparent text-muted-foreground border-border hover:text-foreground"}`}
                       onClick={() => setDenunciaFilter(status)}
                     >
                       {STATUS_LABEL[status].toUpperCase()}
@@ -1476,7 +1476,7 @@ function Corregedoria() {
               </div>
 
               {denuncias.filter(d => denunciaFilter === "todas" || d.status === denunciaFilter).length === 0 ? (
-                <div className="rounded-lg border border-border border-dashed bg-card/50 p-12 text-center text-slate-500">
+                <div className="rounded-lg border border-border border-dashed bg-card/50 p-12 text-center text-muted-foreground">
                   Nenhuma denúncia encontrada com o status atual.
                 </div>
               ) : (
@@ -1498,21 +1498,21 @@ function Corregedoria() {
                       <div key={d.id} className="rounded-lg border border-border bg-card overflow-hidden">
                         <button
                           onClick={() => setExpandedId(expanded ? null : d.id)}
-                          className="flex w-full items-start justify-between gap-4 p-5 text-left transition-colors hover:bg-zinc-800/50"
+                          className="flex w-full items-start justify-between gap-4 p-5 text-left transition-colors hover:bg-muted"
                         >
                           <div className="flex-1 min-w-0">
                             <div className="flex flex-wrap items-center gap-3 mb-2">
-                              <Badge variant="outline" className="bg-zinc-900 border-white/20 text-white font-mono">
+                              <Badge variant="outline" className="bg-muted border-border text-foreground font-mono">
                                 #{d.numero_registro?.toString().padStart(4, '0')}
                               </Badge>
-                              <h3 className="font-bold uppercase text-white tracking-wide">
+                              <h3 className="font-bold uppercase text-foreground tracking-wide">
                                 {d.titulo}
                               </h3>
                               <Badge variant="outline" className={`font-mono text-xs ${STATUS_COLOR[d.status]}`}>
                                 {STATUS_LABEL[d.status]}
                               </Badge>
                             </div>
-                            <p className="text-xs text-slate-500">
+                            <p className="text-xs text-muted-foreground">
                               {format(new Date(d.created_at), "dd/MM/yyyy 'às' HH:mm")}
                               {d.policial_denunciado && ` · Acusado: ${d.policial_denunciado}`}
                             </p>
@@ -1520,33 +1520,33 @@ function Corregedoria() {
                         </button>
 
                         {expanded && (
-                          <div className="space-y-6 border-t border-border bg-zinc-900/30 p-6">
+                          <div className="space-y-6 border-t border-border bg-muted/50 p-6">
                             
                             {/* Anexos de Relatório */}
-                            <div className="rounded border border-border bg-black/50 p-4">
-                              <div className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400">
+                            <div className="rounded border border-border bg-muted p-4">
+                              <div className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
                                 <LinkIcon className="h-4 w-4" /> Documentos Anexados
                               </div>
                               
                                {linkedRelatorios.length > 0 ? (
                                  <div className="space-y-2 mb-4">
                                    {linkedRelatorios.map(r => (
-                                     <div key={r.id} className="flex items-center justify-between rounded bg-zinc-900 px-3 py-2 text-sm border border-border">
+                                     <div key={r.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
                                        <div className="flex items-center gap-3">
                                          {r.tipo_denuncia === "Inquérito Policial" ? (
-                                           <FileSignature className="h-4 w-4 text-white" />
+                                           <FileSignature className="h-4 w-4 text-foreground" />
                                          ) : (
                                            <FileText className="h-4 w-4 text-emerald-400" />
                                          )}
-                                         <span className="text-slate-300 font-bold">{r.titulo}</span>
-                                         <Badge variant="outline" className="text-[9px] uppercase border-border text-slate-500">
+                                         <span className="text-foreground font-bold">{r.titulo}</span>
+                                         <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">
                                            {r.tipo_denuncia}
                                          </Badge>
                                        </div>
                                        <Button 
                                          size="sm" 
                                          variant="ghost" 
-                                         className="h-7 text-xs text-white hover:text-zinc-300 hover:bg-white/10"
+                                         className="h-7 text-xs text-foreground hover:text-foreground hover:bg-muted/50"
                                          onClick={() => {
                                            setActiveTab(r.tipo_denuncia === "Inquérito Policial" ? "inqueritos" : "atos");
                                            setExpandedId(r.id);
@@ -1558,16 +1558,16 @@ function Corregedoria() {
                                    ))}
                                  </div>
                               ) : (
-                                <p className="text-xs text-slate-500 mb-4">Nenhum documento anexado a esta denúncia.</p>
+                                <p className="text-xs text-muted-foreground mb-4">Nenhum documento anexado a esta denúncia.</p>
                               )}
 
                               <div className="flex gap-2 items-end">
                                 <div className="flex-1">
                                   <Select value={linkRelatorioId} onValueChange={setLinkRelatorioId}>
-                                    <SelectTrigger className="bg-zinc-900 border-border text-slate-300 text-xs">
+                                    <SelectTrigger className="bg-muted border-border text-foreground text-xs">
                                       <SelectValue placeholder="Selecione um documento para vincular..." />
                                     </SelectTrigger>
-                                    <SelectContent className="bg-zinc-900 border-border text-slate-300">
+                                    <SelectContent className="bg-muted border-border text-foreground">
                                       {availableRelatorios.map(r => (
                                         <SelectItem key={r.id} value={r.id}>{r.titulo} - {r.oficial}</SelectItem>
                                       ))}
@@ -1589,29 +1589,29 @@ function Corregedoria() {
                             {d.dados_detalhados && (
                               <div className="mt-4 space-y-4 animate-in fade-in duration-500">
                                 <div className="grid md:grid-cols-2 gap-4">
-                                  <div className="border-l-2 border-blue-500 pl-3 bg-white/5 py-2">
-                                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-white mb-2">1. DADOS DO DENUNCIANTE</h4>
-                                    <p className="text-xs text-slate-400">Nome: <span className="text-white">{d.dados_detalhados.reclamante_nome}</span></p>
-                                    <p className="text-xs text-slate-400">ID: <span className="text-white">{d.dados_detalhados.reclamante_id}</span></p>
-                                    <p className="text-xs text-slate-400">Contato: <span className="text-white">{d.dados_detalhados.reclamante_contato}</span></p>
-                                    <p className="text-xs text-slate-400">Anônimo: <span className="text-white">{d.dados_detalhados.reclamante_anonimo}</span></p>
+                                  <div className="border-l-2 border-blue-500 pl-3 bg-muted/50 py-2">
+                                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-foreground mb-2">1. DADOS DO DENUNCIANTE</h4>
+                                    <p className="text-xs text-muted-foreground">Nome: <span className="text-foreground">{d.dados_detalhados.reclamante_nome}</span></p>
+                                    <p className="text-xs text-muted-foreground">ID: <span className="text-foreground">{d.dados_detalhados.reclamante_id}</span></p>
+                                    <p className="text-xs text-muted-foreground">Contato: <span className="text-foreground">{d.dados_detalhados.reclamante_contato}</span></p>
+                                    <p className="text-xs text-muted-foreground">Anônimo: <span className="text-foreground">{d.dados_detalhados.reclamante_anonimo}</span></p>
                                   </div>
                                   <div className="border-l-2 border-red-500 pl-3 bg-red-500/5 py-2">
                                     <h4 className="text-[10px] font-bold uppercase tracking-widest text-red-500 mb-2">2. DADOS DO POLICIAL</h4>
-                                    <p className="text-xs text-slate-400">Nome: <span className="text-white">{d.dados_detalhados.denunciado_nome}</span></p>
-                                    <p className="text-xs text-slate-400">Patente: <span className="text-white">{d.dados_detalhados.denunciado_patente}</span></p>
-                                    <p className="text-xs text-slate-400">Badge: <span className="text-white">{d.dados_detalhados.denunciado_badge}</span></p>
+                                    <p className="text-xs text-muted-foreground">Nome: <span className="text-foreground">{d.dados_detalhados.denunciado_nome}</span></p>
+                                    <p className="text-xs text-muted-foreground">Patente: <span className="text-foreground">{d.dados_detalhados.denunciado_patente}</span></p>
+                                    <p className="text-xs text-muted-foreground">Badge: <span className="text-foreground">{d.dados_detalhados.denunciado_badge}</span></p>
                                   </div>
                                 </div>
 
-                                <div className="border-l-2 border-amber-500 pl-3 bg-white/5 py-2">
-                                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-300 mb-2">3. TIPOS DE VIOLAÇÃO</h4>
+                                <div className="border-l-2 border-amber-500 pl-3 bg-muted/50 py-2">
+                                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-foreground mb-2">3. TIPOS DE VIOLAÇÃO</h4>
                                   <div className="flex flex-wrap gap-1">
                                     {(d.dados_detalhados.tipo_denuncia || d.dados_detalhados.tipo_denuncia)?.map((t: string) => (
-                                      <Badge key={t} variant="outline" className="text-[9px] bg-white/10 border-white/30 text-zinc-300 uppercase">{t}</Badge>
+                                      <Badge key={t} variant="outline" className="text-[9px] bg-muted/50 border-border text-foreground uppercase">{t}</Badge>
                                     ))}
                                     {(d.dados_detalhados.tipo_denuncia_outro || d.dados_detalhados.tipo_denuncia_outro) && (
-                                      <Badge variant="outline" className="text-[9px] bg-zinc-800 text-slate-400">
+                                      <Badge variant="outline" className="text-[9px] bg-zinc-800 text-muted-foreground">
                                         {d.dados_detalhados.tipo_denuncia_outro || d.dados_detalhados.tipo_denuncia_outro}
                                       </Badge>
                                     )}
@@ -1619,16 +1619,16 @@ function Corregedoria() {
                                 </div>
 
                                 <div className="grid md:grid-cols-2 gap-4">
-                                  <div className="border-l-2 border-indigo-500 pl-3 bg-white/5 py-2">
-                                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-white mb-2">4. INF. OCORRIDO</h4>
-                                    <p className="text-xs text-slate-400">Data: <span className="text-white">{d.dados_detalhados.incidente_data}</span></p>
-                                    <p className="text-xs text-slate-400">Hora: <span className="text-white">{d.dados_detalhados.incidente_horario}</span></p>
-                                    <p className="text-xs text-slate-400">Local: <span className="text-white">{d.dados_detalhados.incidente_local}</span></p>
+                                  <div className="border-l-2 border-indigo-500 pl-3 bg-muted/50 py-2">
+                                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-foreground mb-2">4. INF. OCORRIDO</h4>
+                                    <p className="text-xs text-muted-foreground">Data: <span className="text-foreground">{d.dados_detalhados.incidente_data}</span></p>
+                                    <p className="text-xs text-muted-foreground">Hora: <span className="text-foreground">{d.dados_detalhados.incidente_horario}</span></p>
+                                    <p className="text-xs text-muted-foreground">Local: <span className="text-foreground">{d.dados_detalhados.incidente_local}</span></p>
                                   </div>
                                   <div className="border-l-2 border-emerald-500 pl-3 bg-emerald-500/5 py-2">
                                     <h4 className="text-[10px] font-bold uppercase tracking-widest text-emerald-500 mb-2">6. TESTEMUNHAS</h4>
-                                    <p className="text-xs text-slate-400">Presença: <span className="text-white">{d.dados_detalhados.testemunhas_tem}</span></p>
-                                    {d.dados_detalhados.testemunhas_nomes && <p className="text-xs text-slate-400">Nomes: <span className="text-white">{d.dados_detalhados.testemunhas_nomes}</span></p>}
+                                    <p className="text-xs text-muted-foreground">Presença: <span className="text-foreground">{d.dados_detalhados.testemunhas_tem}</span></p>
+                                    {d.dados_detalhados.testemunhas_nomes && <p className="text-xs text-muted-foreground">Nomes: <span className="text-foreground">{d.dados_detalhados.testemunhas_nomes}</span></p>}
                                   </div>
                                 </div>
 
@@ -1638,16 +1638,16 @@ function Corregedoria() {
                                     {d.dados_detalhados.provas_selecionadas?.map((p: string) => (
                                       <Badge key={p} variant="outline" className="text-[9px] bg-purple-500/10 border-purple-500/30 text-purple-400 uppercase">{p}</Badge>
                                     ))}
-                                    {d.dados_detalhados.provas_outro && <Badge variant="outline" className="text-[9px] bg-zinc-800 text-slate-400">{d.dados_detalhados.provas_outro}</Badge>}
+                                    {d.dados_detalhados.provas_outro && <Badge variant="outline" className="text-[9px] bg-zinc-800 text-muted-foreground">{d.dados_detalhados.provas_outro}</Badge>}
                                   </div>
                                   {d.dados_detalhados.provas_descricao && (
-                                    <p className="text-xs text-slate-400 italic bg-black/50 p-2 rounded border border-purple-500/10 whitespace-pre-wrap">{d.dados_detalhados.provas_descricao}</p>
+                                    <p className="text-xs text-muted-foreground italic bg-muted p-2 rounded border border-purple-500/10 whitespace-pre-wrap">{d.dados_detalhados.provas_descricao}</p>
                                   )}
                                 </div>
 
                                 <div className="border-l-2 border-red-800 pl-3 bg-red-950/10 py-2">
                                   <h4 className="text-[10px] font-bold uppercase tracking-widest text-red-700 mb-1">8. ASSINATURA DIGITAL</h4>
-                                  <p className="text-sm font-serif italic text-white">{d.dados_detalhados.declaracao_assinatura}</p>
+                                  <p className="text-sm font-serif italic text-foreground">{d.dados_detalhados.declaracao_assinatura}</p>
                                 </div>
                               </div>
                             )}
@@ -1656,16 +1656,16 @@ function Corregedoria() {
                              {!d.dados_detalhados && (
                               <>
                                 <Field label="Descrição">
-                                  <p className="whitespace-pre-wrap text-sm text-slate-300 leading-relaxed">{d.descricao}</p>
+                                  <p className="whitespace-pre-wrap text-sm text-foreground leading-relaxed">{d.descricao}</p>
                                 </Field>
                                 {d.data_ocorrido && (
                                   <Field label="Quando ocorreu">
-                                    <p className="text-sm text-slate-300">{d.data_ocorrido}</p>
+                                    <p className="text-sm text-foreground">{d.data_ocorrido}</p>
                                   </Field>
                                 )}
                                 {d.contato_opcional && (
                                   <Field label="Contato do denunciante">
-                                    <p className="text-sm text-slate-300">{d.contato_opcional}</p>
+                                    <p className="text-sm text-foreground">{d.contato_opcional}</p>
                                   </Field>
                                 )}
                               </>
@@ -1677,8 +1677,8 @@ function Corregedoria() {
                                   defaultValue={d.status}
                                   onValueChange={(v) => updateStatus(d.id, v as Status)}
                                 >
-                                  <SelectTrigger className="bg-black border-border text-slate-300"><SelectValue /></SelectTrigger>
-                                  <SelectContent className="bg-zinc-900 border-border text-slate-300">
+                                  <SelectTrigger className="bg-background border-border text-foreground"><SelectValue /></SelectTrigger>
+                                  <SelectContent className="bg-muted border-border text-foreground">
                                     {(Object.keys(STATUS_LABEL) as Status[]).map((s) => (
                                       <SelectItem key={s} value={s} className="hover:bg-zinc-800">{STATUS_LABEL[s]}</SelectItem>
                                     ))}
@@ -1692,7 +1692,7 @@ function Corregedoria() {
                                 defaultValue={d.notas_internas ?? ""}
                                 rows={4}
                                 id={`notas-${d.id}`}
-                                className="bg-black border-border text-slate-300 placeholder:text-slate-700"
+                                className="bg-background border-border text-foreground placeholder:text-slate-700"
                                 placeholder="Observações da investigação..."
                               />
                               <Button
@@ -1720,7 +1720,7 @@ function Corregedoria() {
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="flex flex-col gap-4 border-b border-border pb-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-bold uppercase tracking-wider text-white">Investigações Internas</h3>
+                  <h3 className="text-lg font-bold uppercase tracking-wider text-foreground">Investigações Internas</h3>
                   
                   <Dialog open={isInvestigacaoDialogOpen || isInvestigacaoEditDialogOpen} onOpenChange={(open) => {
                      if (!open) resetInvestigacaoForm();
@@ -1733,9 +1733,9 @@ function Corregedoria() {
                         Iniciar Investigação
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[600px] bg-card border-border text-slate-300">
+                    <DialogContent className="sm:max-w-[600px] bg-card border-border text-foreground">
                       <DialogHeader>
-                        <DialogTitle className="text-white uppercase tracking-wider">
+                        <DialogTitle className="text-foreground uppercase tracking-wider">
                           {editingInvestigacaoId ? "Editar Investigação Interna" : "Nova Investigação Interna"}
                         </DialogTitle>
                       </DialogHeader>
@@ -1744,26 +1744,26 @@ function Corregedoria() {
                         <div className="space-y-4 border-l-2 border-red-600 pl-4 bg-red-500/5 py-2">
                           <h4 className="text-xs font-bold uppercase tracking-widest text-red-500">1. IDENTIFICAÇÃO DO PROCEDIMENTO</h4>
                           <div className="space-y-2">
-                            <Label className="text-slate-400 text-[10px] uppercase">Título da Investigação (Opcional)</Label>
+                            <Label className="text-muted-foreground text-[10px] uppercase">Título da Investigação (Opcional)</Label>
                             <Input 
                               value={investigacaoForm.titulo} 
                               onChange={(e) => setInvestigacaoForm({...investigacaoForm, titulo: e.target.value})}
                               placeholder="Ex: Operação Limpeza"
-                              className="bg-black border-border text-white h-8 text-xs" 
+                              className="bg-background border-border text-foreground h-8 text-xs" 
                             />
                           </div>
                           <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                              <Label className="text-slate-400 text-[10px] uppercase">Número do Inquérito</Label>
-                              <Input disabled value="AUTO-GERADO" className="bg-black border-border text-slate-500 h-8 text-xs" />
+                              <Label className="text-muted-foreground text-[10px] uppercase">Número do Inquérito</Label>
+                              <Input disabled value="AUTO-GERADO" className="bg-background border-border text-muted-foreground h-8 text-xs" />
                             </div>
                             <div className="space-y-2">
-                              <Label className="text-slate-400 text-[10px] uppercase">Data de Abertura</Label>
-                              <Input disabled value={format(new Date(), "dd/MM/yyyy")} className="bg-black border-border text-slate-500 h-8 text-xs" />
+                              <Label className="text-muted-foreground text-[10px] uppercase">Data de Abertura</Label>
+                              <Input disabled value={format(new Date(), "dd/MM/yyyy")} className="bg-background border-border text-muted-foreground h-8 text-xs" />
                             </div>
                           </div>
                           <div className="space-y-2">
-                            <Label className="text-slate-400 text-[10px] uppercase">Tipo de Procedimento</Label>
+                            <Label className="text-muted-foreground text-[10px] uppercase">Tipo de Procedimento</Label>
                             <RadioGroup 
                               value={investigacaoForm.tipo_procedimento} 
                               onValueChange={(v) => setInvestigacaoForm({...investigacaoForm, tipo_procedimento: v})}
@@ -1772,7 +1772,7 @@ function Corregedoria() {
                               {["Investigação Administrativa", "Investigação Disciplinar", "Investigação Criminal Interna"].map(tipo => (
                                 <div key={tipo} className="flex items-center space-x-2">
                                   <RadioGroupItem value={tipo} id={tipo} className="border-border text-red-600" />
-                                  <Label htmlFor={tipo} className="text-xs text-slate-300 font-normal">{tipo}</Label>
+                                  <Label htmlFor={tipo} className="text-xs text-foreground font-normal">{tipo}</Label>
                                 </div>
                               ))}
                             </RadioGroup>
@@ -1780,76 +1780,76 @@ function Corregedoria() {
                         </div>
 
                         {/* 2. AUTORIDADE RESPONSÁVEL */}
-                        <div className="space-y-4 border-l-2 border-zinc-500 pl-4 bg-white/5 py-2">
-                          <h4 className="text-xs font-bold uppercase tracking-widest text-white">2. AUTORIDADE RESPONSÁVEL</h4>
+                        <div className="space-y-4 border-l-2 border-zinc-500 pl-4 bg-muted/50 py-2">
+                          <h4 className="text-xs font-bold uppercase tracking-widest text-foreground">2. AUTORIDADE RESPONSÁVEL</h4>
                           <div className="space-y-2">
-                            <Label className="text-slate-400 text-[10px] uppercase">Corregedor / Investigador Responsável</Label>
+                            <Label className="text-muted-foreground text-[10px] uppercase">Corregedor / Investigador Responsável</Label>
                             <Input 
                               value={investigacaoForm.autoridade_responsavel} 
                               onChange={(e) => setInvestigacaoForm({...investigacaoForm, autoridade_responsavel: e.target.value})}
-                              className="bg-black border-border text-white h-8 text-xs" 
+                              className="bg-background border-border text-foreground h-8 text-xs" 
                             />
                           </div>
                           <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                              <Label className="text-slate-400 text-[10px] uppercase">Patente</Label>
+                              <Label className="text-muted-foreground text-[10px] uppercase">Patente</Label>
                               <Input 
                                 value={investigacaoForm.autoridade_patente} 
                                 onChange={(e) => setInvestigacaoForm({...investigacaoForm, autoridade_patente: e.target.value})}
-                                className="bg-black border-border text-white h-8 text-xs" 
+                                className="bg-background border-border text-foreground h-8 text-xs" 
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label className="text-slate-400 text-[10px] uppercase">Departamento</Label>
-                              <Input disabled value="Corregedoria Geral (PMESP)" className="bg-black border-border text-slate-500 h-8 text-xs" />
+                              <Label className="text-muted-foreground text-[10px] uppercase">Departamento</Label>
+                              <Input disabled value="Corregedoria Geral (PMESP)" className="bg-background border-border text-muted-foreground h-8 text-xs" />
                             </div>
                           </div>
                         </div>
 
                         {/* 3. IDENTIFICAÇÃO DO POLICIAL INVESTIGADO */}
                         <div className="space-y-4 border-l-2 border-slate-600 pl-4 bg-slate-500/5 py-2">
-                          <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400">3. IDENTIFICAÇÃO DO POLICIAL INVESTIGADO</h4>
+                          <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">3. IDENTIFICAÇÃO DO POLICIAL INVESTIGADO</h4>
                           <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                              <Label className="text-slate-400 text-[10px] uppercase">Nome do Policial</Label>
+                              <Label className="text-muted-foreground text-[10px] uppercase">Nome do Policial</Label>
                               <Input 
                                 value={investigacaoForm.investigado} 
                                 onChange={(e) => setInvestigacaoForm({...investigacaoForm, investigado: e.target.value})}
-                                className="bg-black border-border text-white h-8 text-xs" 
+                                className="bg-background border-border text-foreground h-8 text-xs" 
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label className="text-slate-400 text-[10px] uppercase">Badge Number</Label>
+                              <Label className="text-muted-foreground text-[10px] uppercase">Badge Number</Label>
                               <Input 
                                 value={investigacaoForm.investigado_badge} 
                                 onChange={(e) => setInvestigacaoForm({...investigacaoForm, investigado_badge: e.target.value})}
-                                className="bg-black border-border text-white h-8 text-xs" 
+                                className="bg-background border-border text-foreground h-8 text-xs" 
                               />
                             </div>
                           </div>
                           <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                              <Label className="text-slate-400 text-[10px] uppercase">Patente/Cargo</Label>
+                              <Label className="text-muted-foreground text-[10px] uppercase">Patente/Cargo</Label>
                               <Input 
                                 value={investigacaoForm.investigado_patente} 
                                 onChange={(e) => setInvestigacaoForm({...investigacaoForm, investigado_patente: e.target.value})}
-                                className="bg-black border-border text-white h-8 text-xs" 
+                                className="bg-background border-border text-foreground h-8 text-xs" 
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label className="text-slate-400 text-[10px] uppercase">Divisão/Unidade</Label>
+                              <Label className="text-muted-foreground text-[10px] uppercase">Divisão/Unidade</Label>
                               <Input 
                                 value={investigacaoForm.investigado_unidade} 
                                 onChange={(e) => setInvestigacaoForm({...investigacaoForm, investigado_unidade: e.target.value})}
-                                className="bg-black border-border text-white h-8 text-xs" 
+                                className="bg-background border-border text-foreground h-8 text-xs" 
                               />
                             </div>
                           </div>
                         </div>
 
                         {/* 4. ORIGEM DA INVESTIGAÇÃO */}
-                        <div className="space-y-4 border-l-2 border-zinc-600 pl-4 bg-white/5 py-2">
-                          <h4 className="text-xs font-bold uppercase tracking-widest text-zinc-300">4. ORIGEM DA INVESTIGAÇÃO</h4>
+                        <div className="space-y-4 border-l-2 border-zinc-600 pl-4 bg-muted/50 py-2">
+                          <h4 className="text-xs font-bold uppercase tracking-widest text-foreground">4. ORIGEM DA INVESTIGAÇÃO</h4>
                           <RadioGroup 
                             value={investigacaoForm.origem_caso} 
                             onValueChange={(v) => setInvestigacaoForm({...investigacaoForm, origem_caso: v})}
@@ -1858,7 +1858,7 @@ function Corregedoria() {
                             {["Denúncia de civil", "Denúncia interna", "Auditoria interna", "Supervisão superior", "Análise de bodycam / evidências", "Outro"].map(origem => (
                               <div key={origem} className="flex items-center space-x-2">
                                 <RadioGroupItem value={origem} id={`origem-${origem}`} className="border-border text-amber-600" />
-                                <Label htmlFor={`origem-${origem}`} className="text-xs text-slate-300 font-normal">{origem}</Label>
+                                <Label htmlFor={`origem-${origem}`} className="text-xs text-foreground font-normal">{origem}</Label>
                               </div>
                             ))}
                           </RadioGroup>
@@ -1867,35 +1867,35 @@ function Corregedoria() {
                               placeholder="Especifique a origem..." 
                               value={investigacaoForm.origem_outro}
                               onChange={(e) => setInvestigacaoForm({...investigacaoForm, origem_outro: e.target.value})}
-                              className="bg-black border-border text-white h-8 text-xs" 
+                              className="bg-background border-border text-foreground h-8 text-xs" 
                             />
                           )}
                           <div className="grid grid-cols-2 gap-4 mt-2">
                             <div className="space-y-2">
-                              <Label className="text-slate-400 text-[10px] uppercase">Vincular Denúncia</Label>
+                              <Label className="text-muted-foreground text-[10px] uppercase">Vincular Denúncia</Label>
                               <Select value={investigacaoForm.denuncia_id} onValueChange={(v) => setInvestigacaoForm({...investigacaoForm, denuncia_id: v})}>
-                                <SelectTrigger className="bg-black border-border text-white h-8 text-xs"><SelectValue placeholder="Selecione..." /></SelectTrigger>
-                                <SelectContent className="bg-zinc-900 border-border text-white">
+                                <SelectTrigger className="bg-background border-border text-foreground h-8 text-xs"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                                <SelectContent className="bg-muted border-border text-foreground">
                                   {denuncias.map(d => <SelectItem key={d.id} value={d.id}>#{d.numero_registro} - {d.titulo}</SelectItem>)}
                                 </SelectContent>
                               </Select>
                             </div>
                             <div className="space-y-2">
-                              <Label className="text-slate-400 text-[10px] uppercase">Vincular Inquérito (Opcional)</Label>
+                              <Label className="text-muted-foreground text-[10px] uppercase">Vincular Inquérito (Opcional)</Label>
                               <Select value={investigacaoForm.relatorio_id_ip} onValueChange={(v) => setInvestigacaoForm({...investigacaoForm, relatorio_id_ip: v})}>
-                                <SelectTrigger className="bg-black border-border text-white h-8 text-xs"><SelectValue placeholder="Selecione..." /></SelectTrigger>
-                                <SelectContent className="bg-zinc-900 border-border text-white">
-                                  <SelectItem value="none" className="text-slate-500 italic">Nenhum</SelectItem>
+                                <SelectTrigger className="bg-background border-border text-foreground h-8 text-xs"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                                <SelectContent className="bg-muted border-border text-foreground">
+                                  <SelectItem value="none" className="text-muted-foreground italic">Nenhum</SelectItem>
                                   {relatorios.filter(r => r.tipo_denuncia === "Inquérito Policial").map(r => <SelectItem key={r.id} value={r.id}>{r.titulo}</SelectItem>)}
                                 </SelectContent>
                               </Select>
                             </div>
                             <div className="space-y-2">
-                              <Label className="text-slate-400 text-[10px] uppercase">Vincular Ato Adm. (Opcional)</Label>
+                              <Label className="text-muted-foreground text-[10px] uppercase">Vincular Ato Adm. (Opcional)</Label>
                               <Select value={investigacaoForm.relatorio_id_ato} onValueChange={(v) => setInvestigacaoForm({...investigacaoForm, relatorio_id_ato: v})}>
-                                <SelectTrigger className="bg-black border-border text-white h-8 text-xs"><SelectValue placeholder="Selecione..." /></SelectTrigger>
-                                <SelectContent className="bg-zinc-900 border-border text-white">
-                                  <SelectItem value="none" className="text-slate-500 italic">Nenhum</SelectItem>
+                                <SelectTrigger className="bg-background border-border text-foreground h-8 text-xs"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                                <SelectContent className="bg-muted border-border text-foreground">
+                                  <SelectItem value="none" className="text-muted-foreground italic">Nenhum</SelectItem>
                                   {relatorios.filter(r => r.tipo_denuncia === "Ato Administrativo").map(r => <SelectItem key={r.id} value={r.id}>{r.titulo}</SelectItem>)}
                                 </SelectContent>
                               </Select>
@@ -1905,24 +1905,24 @@ function Corregedoria() {
 
                         {/* 5. DESCRIÇÃO SUMÁRIA DOS FATOS */}
                         <div className="space-y-2">
-                          <Label className="text-xs font-bold uppercase tracking-widest text-slate-400">5. DESCRIÇÃO SUMÁRIA DOS FATOS</Label>
+                          <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">5. DESCRIÇÃO SUMÁRIA DOS FATOS</Label>
                           <Textarea 
                             rows={4} 
                             value={investigacaoForm.descricao}
                             onChange={(e) => setInvestigacaoForm({...investigacaoForm, descricao: e.target.value})}
-                            className="bg-black border-border text-white text-xs" 
+                            className="bg-background border-border text-foreground text-xs" 
                             placeholder="Descreva o que aconteceu..."
                           />
                         </div>
 
                         {/* 6. FUNDAMENTAÇÃO PARA ABERTURA */}
                         <div className="space-y-2">
-                          <Label className="text-xs font-bold uppercase tracking-widest text-slate-400">6. FUNDAMENTAÇÃO PARA ABERTURA</Label>
+                          <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">6. FUNDAMENTAÇÃO PARA ABERTURA</Label>
                           <Textarea 
                             rows={3} 
                             value={investigacaoForm.fundamentacao}
                             onChange={(e) => setInvestigacaoForm({...investigacaoForm, fundamentacao: e.target.value})}
-                            className="bg-black border-border text-white text-xs" 
+                            className="bg-background border-border text-foreground text-xs" 
                             placeholder="Motivo que justifica a abertura..."
                           />
                         </div>
@@ -1954,7 +1954,7 @@ function Corregedoria() {
                                   }}
                                   className="border-border data-[state=checked]:bg-emerald-600" 
                                 />
-                                <Label htmlFor={`medida-${medida}`} className="text-xs text-slate-300 font-normal">{medida}</Label>
+                                <Label htmlFor={`medida-${medida}`} className="text-xs text-foreground font-normal">{medida}</Label>
                               </div>
                             ))}
                           </div>
@@ -1963,26 +1963,26 @@ function Corregedoria() {
                               placeholder="Especifique a medida..." 
                               value={investigacaoForm.medidas_outro}
                               onChange={(e) => setInvestigacaoForm({...investigacaoForm, medidas_outro: e.target.value})}
-                              className="bg-black border-border text-white h-8 text-xs" 
+                              className="bg-background border-border text-foreground h-8 text-xs" 
                             />
                           )}
                           <div className="space-y-2 mt-2">
-                            <Label className="text-[10px] text-slate-400 uppercase">Detalhes adicionais</Label>
+                            <Label className="text-[10px] text-muted-foreground uppercase">Detalhes adicionais</Label>
                             <Textarea 
                               rows={2} 
                               value={investigacaoForm.detalhes_adicionais}
                               onChange={(e) => setInvestigacaoForm({...investigacaoForm, detalhes_adicionais: e.target.value})}
-                              className="bg-black border-border text-white text-xs" 
+                              className="bg-background border-border text-foreground text-xs" 
                             />
                           </div>
                         </div>
 
                         <div className="pt-4 flex justify-between items-center border-t border-border">
                           <div className="space-y-1">
-                            <Label className="text-[10px] text-slate-500 uppercase">Status Inicial</Label>
+                            <Label className="text-[10px] text-muted-foreground uppercase">Status Inicial</Label>
                             <Select value={investigacaoForm.status} onValueChange={(v: Status) => setInvestigacaoForm({...investigacaoForm, status: v})}>
-                              <SelectTrigger className="bg-black border-border text-white h-8 text-xs w-32"><SelectValue /></SelectTrigger>
-                              <SelectContent className="bg-zinc-900 border-border text-white">
+                              <SelectTrigger className="bg-background border-border text-foreground h-8 text-xs w-32"><SelectValue /></SelectTrigger>
+                              <SelectContent className="bg-muted border-border text-foreground">
                                 {Object.entries(STATUS_LABEL).map(([val, lab]) => <SelectItem key={val} value={val}>{lab}</SelectItem>)}
                               </SelectContent>
                             </Select>
@@ -1997,11 +1997,11 @@ function Corregedoria() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-bold uppercase tracking-widest text-slate-500 mr-2">Filtro:</span>
+                  <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground mr-2">Filtro:</span>
                   <Button 
                     size="sm" 
                     variant="outline"
-                    className={`font-mono text-xs h-8 ${investigacaoFilter === "todas" ? "bg-slate-700 text-white border-slate-600" : "bg-transparent text-slate-400 border-border hover:text-white"}`}
+                    className={`font-mono text-xs h-8 ${investigacaoFilter === "todas" ? "bg-slate-700 text-white border-slate-600" : "bg-transparent text-muted-foreground border-border hover:text-foreground"}`}
                     onClick={() => setInvestigacaoFilter("todas")}
                   >
                     TODAS
@@ -2011,7 +2011,7 @@ function Corregedoria() {
                       key={status}
                       size="sm" 
                       variant="outline"
-                      className={`font-mono text-xs h-8 ${investigacaoFilter === status ? STATUS_COLOR[status].split(" ")[0] + " text-white border-transparent" : "bg-transparent text-slate-400 border-border hover:text-white"}`}
+                      className={`font-mono text-xs h-8 ${investigacaoFilter === status ? STATUS_COLOR[status].split(" ")[0] + " text-foreground border-transparent" : "bg-transparent text-muted-foreground border-border hover:text-foreground"}`}
                       onClick={() => setInvestigacaoFilter(status)}
                     >
                       {STATUS_LABEL[status].toUpperCase()}
@@ -2021,7 +2021,7 @@ function Corregedoria() {
               </div>
 
               {investigacoes.filter(i => investigacaoFilter === "todas" || i.status === investigacaoFilter).length === 0 ? (
-                <div className="rounded-lg border border-border border-dashed bg-card/50 p-12 text-center text-slate-500">
+                <div className="rounded-lg border border-border border-dashed bg-card/50 p-12 text-center text-muted-foreground">
                   Nenhuma investigação encontrada com o status atual.
                 </div>
               ) : (
@@ -2048,19 +2048,19 @@ function Corregedoria() {
                         <div key={inv.id} className="rounded-lg border border-border bg-card overflow-hidden">
                           <button 
                             onClick={() => setExpandedId(expanded ? null : inv.id)}
-                            className="flex w-full items-start justify-between gap-4 p-5 text-left transition-colors hover:bg-zinc-800/50"
+                            className="flex w-full items-start justify-between gap-4 p-5 text-left transition-colors hover:bg-muted"
                           >
                             <div className="flex-1">
                               <div className="flex flex-wrap items-center gap-3 mb-2">
-                                <Badge variant="outline" className="bg-zinc-900 border-zinc-700 text-zinc-300 font-mono">
+                                <Badge variant="outline" className="bg-muted border-border text-foreground font-mono">
                                   #{inv.numero_registro.toString().padStart(4, '0')}
                                 </Badge>
-                                <h3 className="font-bold uppercase text-white tracking-wide">{inv.titulo}</h3>
+                                <h3 className="font-bold uppercase text-foreground tracking-wide">{inv.titulo}</h3>
                                 <Badge variant="outline" className={`font-mono text-xs ${STATUS_COLOR[inv.status]}`}>
                                   {STATUS_LABEL[inv.status]}
                                 </Badge>
                               </div>
-                              <p className="text-xs text-slate-500">
+                              <p className="text-xs text-muted-foreground">
                                 {format(new Date(inv.created_at), "dd/MM/yyyy")} · Investigado: {inv.investigado || "Não informado"}
                               </p>
                             </div>
@@ -2069,7 +2069,7 @@ function Corregedoria() {
                                 <Button 
                                   size="icon" 
                                   variant="ghost" 
-                                  className="h-8 w-8 text-white hover:text-white hover:bg-white/10"
+                                  className="h-8 w-8 text-foreground hover:text-foreground hover:bg-muted/50"
                                   onClick={() => handleEditInvestigacao(inv)}
                                 >
                                   <Edit className="h-4 w-4" />
@@ -2087,31 +2087,31 @@ function Corregedoria() {
                           </button>
 
                           {expanded && (
-                            <div className="space-y-6 border-t border-border bg-zinc-900/30 p-6">
-                              <div className="rounded border border-border bg-black/50 p-4">
-                                <div className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400">
+                            <div className="space-y-6 border-t border-border bg-muted/50 p-6">
+                              <div className="rounded border border-border bg-muted p-4">
+                                <div className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
                                   <LinkIcon className="h-4 w-4" /> Documentos Anexados
                                 </div>
                                 
                                 {linkedRelatorios.length > 0 ? (
                                   <div className="space-y-2 mb-4">
                                     {linkedRelatorios.map(r => (
-                                      <div key={r.id} className="flex items-center justify-between rounded bg-zinc-900 px-3 py-2 text-sm border border-border">
+                                      <div key={r.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
                                         <div className="flex items-center gap-3">
                                           {r.tipo_denuncia === "Inquérito Policial" ? (
-                                            <FileSignature className="h-4 w-4 text-white" />
+                                            <FileSignature className="h-4 w-4 text-foreground" />
                                           ) : (
                                             <FileText className="h-4 w-4 text-emerald-400" />
                                           )}
-                                          <span className="text-slate-300 font-bold">{r.titulo}</span>
-                                          <Badge variant="outline" className="text-[9px] uppercase border-border text-slate-500">
+                                          <span className="text-foreground font-bold">{r.titulo}</span>
+                                          <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">
                                             {r.tipo_denuncia}
                                           </Badge>
                                         </div>
                                         <Button 
                                           size="sm" 
                                           variant="ghost" 
-                                          className="h-7 text-xs text-white"
+                                          className="h-7 text-xs text-foreground"
                                           onClick={() => { 
                                             setActiveTab(r.tipo_denuncia === "Inquérito Policial" ? "inqueritos" : "atos"); 
                                             setExpandedId(r.id); 
@@ -2123,16 +2123,16 @@ function Corregedoria() {
                                     ))}
                                   </div>
                                 ) : (
-                                  <p className="text-xs text-slate-500 mb-4">Nenhum documento anexado.</p>
+                                  <p className="text-xs text-muted-foreground mb-4">Nenhum documento anexado.</p>
                                 )}
 
                                 <div className="flex gap-2 items-end">
                                   <div className="flex-1">
                                     <Select value={linkRelatorioId} onValueChange={setLinkRelatorioId}>
-                                      <SelectTrigger className="bg-zinc-900 border-border text-slate-300 text-xs">
+                                      <SelectTrigger className="bg-muted border-border text-foreground text-xs">
                                         <SelectValue placeholder="Selecione um documento..." />
                                       </SelectTrigger>
-                                      <SelectContent className="bg-zinc-900 border-border text-slate-300">
+                                      <SelectContent className="bg-muted border-border text-foreground">
                                       {availableRelatorios.map(r => (
                                         <SelectItem key={r.id} value={r.id}>
                                           <div className="flex items-center justify-between w-full">
@@ -2155,25 +2155,25 @@ function Corregedoria() {
                                 </div>
                               </div>
 
-                              <div className="rounded border border-border bg-black/50 p-4">
-                                <div className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400">
+                              <div className="rounded border border-border bg-muted p-4">
+                                <div className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
                                   <Activity className="h-4 w-4" /> Denúncias Vinculadas
                                 </div>
                                 
                                 {linkedDenuncias.length > 0 ? (
                                   <div className="space-y-2 mb-4">
                                     {linkedDenuncias.map(d => (
-                                      <div key={d.id} className="flex items-center justify-between rounded bg-zinc-900 px-3 py-2 text-sm border border-border">
+                                      <div key={d.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
                                         <div className="flex items-center gap-3">
-                                          <Badge variant="outline" className="bg-black border-white/20 text-white font-mono text-[10px]">
+                                          <Badge variant="outline" className="bg-background border-border text-foreground font-mono text-[10px]">
                                             #{d.numero_registro?.toString().padStart(4, '0')}
                                           </Badge>
-                                          <span className="text-slate-300 font-bold">{d.titulo}</span>
+                                          <span className="text-foreground font-bold">{d.titulo}</span>
                                         </div>
                                         <Button 
                                           size="sm" 
                                           variant="ghost" 
-                                          className="h-7 text-xs text-white"
+                                          className="h-7 text-xs text-foreground"
                                           onClick={() => { setActiveTab("denuncias"); setExpandedId(d.id); }}
                                         >
                                           Ver Denúncia
@@ -2182,16 +2182,16 @@ function Corregedoria() {
                                     ))}
                                   </div>
                                 ) : (
-                                  <p className="text-xs text-slate-500 mb-4">Nenhuma denúncia anexada.</p>
+                                  <p className="text-xs text-muted-foreground mb-4">Nenhuma denúncia anexada.</p>
                                 )}
 
                                 <div className="flex gap-2 items-end">
                                   <div className="flex-1">
                                     <Select value={linkDenunciaId} onValueChange={setLinkDenunciaId}>
-                                      <SelectTrigger className="bg-zinc-900 border-border text-slate-300 text-xs">
+                                      <SelectTrigger className="bg-muted border-border text-foreground text-xs">
                                         <SelectValue placeholder="Vincular denúncia..." />
                                       </SelectTrigger>
-                                      <SelectContent className="bg-zinc-900 border-border text-slate-300">
+                                      <SelectContent className="bg-muted border-border text-foreground">
                                         {denuncias.filter(d => !denunciaInvestigacoes.some(di => di.investigacao_id === inv.id && di.denuncia_id === d.id)).map(d => (
                                           <SelectItem key={d.id} value={d.id}>#{d.numero_registro?.toString().padStart(4, '0')} - {d.titulo}</SelectItem>
                                         ))}
@@ -2226,30 +2226,30 @@ function Corregedoria() {
                                 <div className="space-y-4">
                                   <div className="border-l-2 border-red-600 pl-3 bg-red-500/5 py-2">
                                     <h4 className="text-[10px] font-bold uppercase tracking-widest text-red-500 mb-2">1. PROCEDIMENTO</h4>
-                                    <p className="text-xs text-slate-400">Tipo: <span className="text-white">{inv.tipo_procedimento}</span></p>
-                                    <p className="text-xs text-slate-400">Abertura: <span className="text-white">{format(new Date(inv.created_at), "dd/MM/yyyy")}</span></p>
+                                    <p className="text-xs text-muted-foreground">Tipo: <span className="text-foreground">{inv.tipo_procedimento}</span></p>
+                                    <p className="text-xs text-muted-foreground">Abertura: <span className="text-foreground">{format(new Date(inv.created_at), "dd/MM/yyyy")}</span></p>
                                   </div>
 
-                                  <div className="border-l-2 border-zinc-500 pl-3 bg-white/5 py-2">
-                                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-white mb-2">2. AUTORIDADE</h4>
-                                    <p className="text-xs text-slate-400">Resp: <span className="text-white">{inv.autoridade_responsavel}</span></p>
-                                    <p className="text-xs text-slate-400">Patente: <span className="text-white">{inv.autoridade_patente}</span></p>
-                                    <p className="text-xs text-slate-400">Dept: <span className="text-white">{inv.autoridade_departamento}</span></p>
+                                  <div className="border-l-2 border-zinc-500 pl-3 bg-muted/50 py-2">
+                                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-foreground mb-2">2. AUTORIDADE</h4>
+                                    <p className="text-xs text-muted-foreground">Resp: <span className="text-foreground">{inv.autoridade_responsavel}</span></p>
+                                    <p className="text-xs text-muted-foreground">Patente: <span className="text-foreground">{inv.autoridade_patente}</span></p>
+                                    <p className="text-xs text-muted-foreground">Dept: <span className="text-foreground">{inv.autoridade_departamento}</span></p>
                                   </div>
 
                                   <div className="border-l-2 border-slate-600 pl-3 bg-slate-500/5 py-2">
-                                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">3. INVESTIGADO</h4>
-                                    <p className="text-xs text-slate-400">Nome: <span className="text-white">{inv.investigado}</span></p>
-                                    <p className="text-xs text-slate-400">Badge: <span className="text-white">{inv.investigado_badge}</span></p>
-                                    <p className="text-xs text-slate-400">Patente: <span className="text-white">{inv.investigado_patente}</span></p>
-                                    <p className="text-xs text-slate-400">Unidade: <span className="text-white">{inv.investigado_unidade}</span></p>
+                                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">3. INVESTIGADO</h4>
+                                    <p className="text-xs text-muted-foreground">Nome: <span className="text-foreground">{inv.investigado}</span></p>
+                                    <p className="text-xs text-muted-foreground">Badge: <span className="text-foreground">{inv.investigado_badge}</span></p>
+                                    <p className="text-xs text-muted-foreground">Patente: <span className="text-foreground">{inv.investigado_patente}</span></p>
+                                    <p className="text-xs text-muted-foreground">Unidade: <span className="text-foreground">{inv.investigado_unidade}</span></p>
                                   </div>
                                 </div>
 
                                 <div className="space-y-4">
-                                  <div className="border-l-2 border-zinc-600 pl-3 bg-white/5 py-2">
-                                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-300 mb-2">4. ORIGEM</h4>
-                                    <p className="text-xs text-slate-400">Caso: <span className="text-white">{inv.origem_caso === "Outro" ? inv.origem_outro : inv.origem_caso}</span></p>
+                                  <div className="border-l-2 border-zinc-600 pl-3 bg-muted/50 py-2">
+                                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-foreground mb-2">4. ORIGEM</h4>
+                                    <p className="text-xs text-muted-foreground">Caso: <span className="text-foreground">{inv.origem_caso === "Outro" ? inv.origem_outro : inv.origem_caso}</span></p>
                                   </div>
 
                                   <div className="border-l-2 border-emerald-600 pl-3 bg-emerald-500/5 py-2">
@@ -2261,14 +2261,14 @@ function Corregedoria() {
                                       {inv.medidas_outro && <Badge variant="outline" className="text-[9px] bg-emerald-500/10 border-emerald-500/30 text-emerald-400">{inv.medidas_outro}</Badge>}
                                     </div>
                                     {inv.detalhes_adicionais && (
-                                      <p className="text-[10px] text-slate-500 mt-2 italic">{inv.detalhes_adicionais}</p>
+                                      <p className="text-[10px] text-muted-foreground mt-2 italic">{inv.detalhes_adicionais}</p>
                                     )}
                                   </div>
 
                                   <Field label="Status da Investigação">
                                     <Select defaultValue={inv.status} onValueChange={(v) => updateInvestigacaoStatus(inv.id, v as Status)}>
-                                      <SelectTrigger className="bg-black border-border text-slate-300 h-8 text-xs"><SelectValue /></SelectTrigger>
-                                      <SelectContent className="bg-zinc-900 border-border text-slate-300">
+                                      <SelectTrigger className="bg-background border-border text-foreground h-8 text-xs"><SelectValue /></SelectTrigger>
+                                      <SelectContent className="bg-muted border-border text-foreground">
                                         {Object.entries(STATUS_LABEL).map(([s, l]) => (
                                           <SelectItem key={s} value={s}>{l}</SelectItem>
                                         ))}
@@ -2280,11 +2280,11 @@ function Corregedoria() {
 
                               <div className="space-y-4">
                                 <Field label="5. DESCRIÇÃO SUMÁRIA DOS FATOS">
-                                  <p className="whitespace-pre-wrap text-sm text-slate-300 leading-relaxed bg-black/50 p-3 rounded border border-border">{inv.descricao}</p>
+                                  <p className="whitespace-pre-wrap text-sm text-foreground leading-relaxed bg-muted p-3 rounded border border-border">{inv.descricao}</p>
                                 </Field>
 
                                 <Field label="6. FUNDAMENTAÇÃO PARA ABERTURA">
-                                  <p className="whitespace-pre-wrap text-sm text-slate-300 leading-relaxed bg-black/50 p-3 rounded border border-border">{inv.fundamentacao}</p>
+                                  <p className="whitespace-pre-wrap text-sm text-foreground leading-relaxed bg-muted p-3 rounded border border-border">{inv.fundamentacao}</p>
                                 </Field>
 
                                 <Field label="Notas da Corregedoria">
@@ -2292,7 +2292,7 @@ function Corregedoria() {
                                     defaultValue={inv.notas_internas || ""}
                                     rows={4}
                                     id={`notas-inv-${inv.id}`}
-                                    className="bg-black border-border text-slate-300 text-xs"
+                                    className="bg-background border-border text-foreground text-xs"
                                     placeholder="Anotações internas restritas..."
                                   />
                                   <Button
@@ -2322,7 +2322,7 @@ function Corregedoria() {
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="flex flex-col gap-4 border-b border-border pb-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-bold uppercase tracking-wider text-white">Inquéritos Policiais</h3>
+                  <h3 className="text-lg font-bold uppercase tracking-wider text-foreground">Inquéritos Policiais</h3>
                   
                   <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
@@ -2334,109 +2334,109 @@ function Corregedoria() {
                         Novo Inquérito
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[600px] bg-card border-border text-slate-300">
+                    <DialogContent className="sm:max-w-[600px] bg-card border-border text-foreground">
                       <DialogHeader>
                         <div className="text-center pb-2 border-b border-border">
-                          <p className="text-[9px] font-bold uppercase tracking-widest text-white mb-1">Corregedoria Geral (PMESP)</p>
-                          <DialogTitle className="text-white uppercase tracking-wider text-sm">Formulário Oficial de Abertura de Inquérito</DialogTitle>
+                          <p className="text-[9px] font-bold uppercase tracking-widest text-foreground mb-1">Corregedoria Geral (PMESP)</p>
+                          <DialogTitle className="text-foreground uppercase tracking-wider text-sm">Formulário Oficial de Abertura de Inquérito</DialogTitle>
                         </div>
                       </DialogHeader>
                       <form onSubmit={submitRelatorio} className="space-y-4 mt-2">
                         <div className="max-h-[70vh] overflow-y-auto pr-2 space-y-5 custom-scrollbar">
                           <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-1"><Label className="text-[10px] uppercase text-slate-500">Título / Número do Caso</Label><Input className="bg-black border-border text-white h-8 text-xs" value={relatorioForm.titulo} onChange={(e) => setRelatorioForm({ ...relatorioForm, titulo: e.target.value })} placeholder="EX: IP-001/26" /></div>
-                            <div className="space-y-1"><Label className="text-[10px] uppercase text-slate-500">Status Inicial</Label><Select value={relatorioForm.status} onValueChange={(v: Status) => setRelatorioForm({ ...relatorioForm, status: v })}><SelectTrigger className="bg-black border-border text-white h-8 text-xs"><SelectValue /></SelectTrigger><SelectContent className="bg-zinc-900 border-border text-white">{Object.entries(STATUS_LABEL).map(([val, lab]) => <SelectItem key={val} value={val}>{lab}</SelectItem>)}</SelectContent></Select></div>
+                            <div className="space-y-1"><Label className="text-[10px] uppercase text-muted-foreground">Título / Número do Caso</Label><Input className="bg-background border-border text-foreground h-8 text-xs" value={relatorioForm.titulo} onChange={(e) => setRelatorioForm({ ...relatorioForm, titulo: e.target.value })} placeholder="EX: IP-001/26" /></div>
+                            <div className="space-y-1"><Label className="text-[10px] uppercase text-muted-foreground">Status Inicial</Label><Select value={relatorioForm.status} onValueChange={(v: Status) => setRelatorioForm({ ...relatorioForm, status: v })}><SelectTrigger className="bg-background border-border text-foreground h-8 text-xs"><SelectValue /></SelectTrigger><SelectContent className="bg-muted border-border text-foreground">{Object.entries(STATUS_LABEL).map(([val, lab]) => <SelectItem key={val} value={val}>{lab}</SelectItem>)}</SelectContent></Select></div>
                           </div>
 
                           {/* 0. DADOS DO CORREGEDOR */}
                           <div className="space-y-2 border-l-2 border-red-600 pl-4 bg-red-500/5 py-2">
                             <h4 className="text-[10px] font-bold uppercase tracking-widest text-red-500">0. Dados do Corregedor</h4>
                             <div className="grid grid-cols-2 gap-3">
-                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Número do Caso (IP-Nº)</Label><Input value={relatorioForm.dados_detalhados.numero_caso} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, numero_caso: e.target.value}})} placeholder="IP-Nº000" className="h-8 bg-black border-border text-white text-xs" /></div>
-                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Data de Abertura</Label><Input value={relatorioForm.dados_detalhados.data_abertura} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, data_abertura: e.target.value}})} type="date" className="h-8 bg-black border-border text-white text-xs" /></div>
+                              <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Número do Caso (IP-Nº)</Label><Input value={relatorioForm.dados_detalhados.numero_caso} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, numero_caso: e.target.value}})} placeholder="IP-Nº000" className="h-8 bg-background border-border text-foreground text-xs" /></div>
+                              <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Data de Abertura</Label><Input value={relatorioForm.dados_detalhados.data_abertura} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, data_abertura: e.target.value}})} type="date" className="h-8 bg-background border-border text-foreground text-xs" /></div>
                             </div>
                             <div className="grid grid-cols-2 gap-3">
-                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Corregedor Responsável</Label><Input value={relatorioForm.oficial} disabled className="h-8 bg-black border-border text-slate-500 text-xs" /></div>
-                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Patente do Corregedor</Label><Input value={relatorioForm.dados_detalhados.corregedor_patente} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, corregedor_patente: e.target.value}})} className="h-8 bg-black border-border text-white text-xs" /></div>
+                              <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Corregedor Responsável</Label><Input value={relatorioForm.oficial} disabled className="h-8 bg-background border-border text-muted-foreground text-xs" /></div>
+                              <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Patente do Corregedor</Label><Input value={relatorioForm.dados_detalhados.corregedor_patente} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, corregedor_patente: e.target.value}})} className="h-8 bg-background border-border text-foreground text-xs" /></div>
                             </div>
-                            <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Data de Recebimento</Label><Input value={relatorioForm.dados_detalhados.data_recebimento} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, data_recebimento: e.target.value}})} type="date" className="h-8 bg-black border-border text-white text-xs" /></div>
+                            <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Data de Recebimento</Label><Input value={relatorioForm.dados_detalhados.data_recebimento} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, data_recebimento: e.target.value}})} type="date" className="h-8 bg-background border-border text-foreground text-xs" /></div>
                           </div>
 
                           {/* 1. DADOS DO RECLAMANTE */}
-                          <div className="space-y-2 border-l-2 border-zinc-500 pl-4 bg-white/5 py-2">
-                            <h4 className="text-[10px] font-bold uppercase tracking-widest text-white">1. Dados do Reclamante / Denunciante</h4>
+                          <div className="space-y-2 border-l-2 border-zinc-500 pl-4 bg-muted/50 py-2">
+                            <h4 className="text-[10px] font-bold uppercase tracking-widest text-foreground">1. Dados do Reclamante / Denunciante</h4>
                             <div className="grid grid-cols-2 gap-3">
-                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Nome Completo</Label><Input value={relatorioForm.dados_detalhados.reclamante_nome} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_nome: e.target.value}})} className="h-8 bg-black border-border text-white text-xs" /></div>
-                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Número do ID</Label><Input value={relatorioForm.dados_detalhados.reclamante_id} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_id: e.target.value}})} className="h-8 bg-black border-border text-white text-xs" /></div>
+                              <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Nome Completo</Label><Input value={relatorioForm.dados_detalhados.reclamante_nome} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_nome: e.target.value}})} className="h-8 bg-background border-border text-foreground text-xs" /></div>
+                              <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Número do ID</Label><Input value={relatorioForm.dados_detalhados.reclamante_id} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_id: e.target.value}})} className="h-8 bg-background border-border text-foreground text-xs" /></div>
                             </div>
                             <div className="grid grid-cols-2 gap-3">
-                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Telefone</Label><Input value={relatorioForm.dados_detalhados.reclamante_telefone} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_telefone: e.target.value}})} className="h-8 bg-black border-border text-white text-xs" /></div>
-                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Discord</Label><Input value={relatorioForm.dados_detalhados.reclamante_discord} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_discord: e.target.value}})} className="h-8 bg-black border-border text-white text-xs" /></div>
+                              <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Telefone</Label><Input value={relatorioForm.dados_detalhados.reclamante_telefone} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_telefone: e.target.value}})} className="h-8 bg-background border-border text-foreground text-xs" /></div>
+                              <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Discord</Label><Input value={relatorioForm.dados_detalhados.reclamante_discord} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_discord: e.target.value}})} className="h-8 bg-background border-border text-foreground text-xs" /></div>
                             </div>
                             <div className="space-y-1">
-                              <Label className="text-[9px] uppercase text-slate-500">Denúncia Anônima?</Label>
+                              <Label className="text-[9px] uppercase text-muted-foreground">Denúncia Anônima?</Label>
                               <RadioGroup value={relatorioForm.dados_detalhados.reclamante_anonimo} onValueChange={(v) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_anonimo: v}})} className="flex gap-4 mt-1">
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="Sim" id="anon-sim" className="border-border text-blue-600" /><Label htmlFor="anon-sim" className="text-xs text-slate-300 font-normal">Sim</Label></div>
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="Não" id="anon-nao" className="border-border text-blue-600" /><Label htmlFor="anon-nao" className="text-xs text-slate-300 font-normal">Não</Label></div>
+                                <div className="flex items-center space-x-2"><RadioGroupItem value="Sim" id="anon-sim" className="border-border text-blue-600" /><Label htmlFor="anon-sim" className="text-xs text-foreground font-normal">Sim</Label></div>
+                                <div className="flex items-center space-x-2"><RadioGroupItem value="Não" id="anon-nao" className="border-border text-blue-600" /><Label htmlFor="anon-nao" className="text-xs text-foreground font-normal">Não</Label></div>
                               </RadioGroup>
                             </div>
                           </div>
 
                           {/* 2. DADOS DO POLICIAL DENUNCIADO */}
                           <div className="space-y-2 border-l-2 border-slate-600 pl-4 bg-slate-500/5 py-2">
-                            <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">2. Dados do Policial Denunciado</h4>
+                            <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">2. Dados do Policial Denunciado</h4>
                             <div className="grid grid-cols-2 gap-3">
-                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Nome do Policial</Label><Input value={relatorioForm.dados_detalhados.denunciado_nome} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, denunciado_nome: e.target.value}})} className="h-8 bg-black border-border text-white text-xs" /></div>
-                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Patente / Cargo</Label><Input value={relatorioForm.dados_detalhados.denunciado_patente} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, denunciado_patente: e.target.value}})} className="h-8 bg-black border-border text-white text-xs" /></div>
+                              <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Nome do Policial</Label><Input value={relatorioForm.dados_detalhados.denunciado_nome} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, denunciado_nome: e.target.value}})} className="h-8 bg-background border-border text-foreground text-xs" /></div>
+                              <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Patente / Cargo</Label><Input value={relatorioForm.dados_detalhados.denunciado_patente} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, denunciado_patente: e.target.value}})} className="h-8 bg-background border-border text-foreground text-xs" /></div>
                             </div>
                             <div className="grid grid-cols-2 gap-3">
-                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Badge / Nº de Identificação</Label><Input value={relatorioForm.dados_detalhados.denunciado_badge} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, denunciado_badge: e.target.value}})} className="h-8 bg-black border-border text-white text-xs" /></div>
-                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Divisão / Unidade</Label><Input value={relatorioForm.dados_detalhados.denunciado_unidade} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, denunciado_unidade: e.target.value}})} className="h-8 bg-black border-border text-white text-xs" /></div>
+                              <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Badge / Nº de Identificação</Label><Input value={relatorioForm.dados_detalhados.denunciado_badge} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, denunciado_badge: e.target.value}})} className="h-8 bg-background border-border text-foreground text-xs" /></div>
+                              <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Divisão / Unidade</Label><Input value={relatorioForm.dados_detalhados.denunciado_unidade} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, denunciado_unidade: e.target.value}})} className="h-8 bg-background border-border text-foreground text-xs" /></div>
                             </div>
-                            <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Prefixo / Modelo da Viatura (se houver)</Label><Input value={relatorioForm.dados_detalhados.denunciado_viatura} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, denunciado_viatura: e.target.value}})} placeholder="Ex: Adam-12 / Charger" className="h-8 bg-black border-border text-white text-xs" /></div>
+                            <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Prefixo / Modelo da Viatura (se houver)</Label><Input value={relatorioForm.dados_detalhados.denunciado_viatura} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, denunciado_viatura: e.target.value}})} placeholder="Ex: Adam-12 / Charger" className="h-8 bg-background border-border text-foreground text-xs" /></div>
                           </div>
 
                           {/* 3. TIPO DE DENÚNCIA */}
-                          <div className="space-y-2 border-l-2 border-zinc-600 pl-4 bg-white/5 py-2">
-                            <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-300">3. Tipo de Denúncia</h4>
+                          <div className="space-y-2 border-l-2 border-zinc-600 pl-4 bg-muted/50 py-2">
+                            <h4 className="text-[10px] font-bold uppercase tracking-widest text-foreground">3. Tipo de Denúncia</h4>
                             <div className="grid grid-cols-2 gap-y-2">
                               {["Uso excessivo da força","Abuso de autoridade","Corrupção","Conduta imprópria","Discriminação / Racismo","Ameaça / Intimidação","Violação de procedimentos","Falsificação de relatório","Assédio","Outro"].map(tipo => (
                                 <div key={tipo} className="flex items-center space-x-2">
                                   <Checkbox id={`tipo-ip-${tipo}`} checked={relatorioForm.dados_detalhados.tipo_denuncia_selecionado === tipo} onCheckedChange={() => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, tipo_denuncia_selecionado: tipo}})} className="border-border data-[state=checked]:bg-amber-600 data-[state=checked]:border-zinc-600" />
-                                  <Label htmlFor={`tipo-ip-${tipo}`} className="text-[10px] text-slate-300 font-normal">{tipo}</Label>
+                                  <Label htmlFor={`tipo-ip-${tipo}`} className="text-[10px] text-foreground font-normal">{tipo}</Label>
                                 </div>
                               ))}
                             </div>
-                            {relatorioForm.dados_detalhados.tipo_denuncia_selecionado === "Outro" && <Input placeholder="Especifique..." value={relatorioForm.dados_detalhados.tipo_denuncia_outro} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, tipo_denuncia_outro: e.target.value}})} className="h-8 bg-black border-border text-white text-xs" />}
+                            {relatorioForm.dados_detalhados.tipo_denuncia_selecionado === "Outro" && <Input placeholder="Especifique..." value={relatorioForm.dados_detalhados.tipo_denuncia_outro} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, tipo_denuncia_outro: e.target.value}})} className="h-8 bg-background border-border text-foreground text-xs" />}
                           </div>
 
                           {/* 4. INFORMAÇÕES DO INCIDENTE */}
-                          <div className="space-y-2 border-l-2 border-zinc-600 pl-4 bg-white/5 py-2">
-                            <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-300">4. Informações do Incidente</h4>
+                          <div className="space-y-2 border-l-2 border-zinc-600 pl-4 bg-muted/50 py-2">
+                            <h4 className="text-[10px] font-bold uppercase tracking-widest text-foreground">4. Informações do Incidente</h4>
                             <div className="grid grid-cols-2 gap-3">
-                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Data do Ocorrido</Label><Input value={relatorioForm.dados_detalhados.incidente_data} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, incidente_data: e.target.value}})} type="date" className="h-8 bg-black border-border text-white text-xs" /></div>
-                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Horário Aproximado</Label><Input value={relatorioForm.dados_detalhados.incidente_horario} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, incidente_horario: e.target.value}})} type="time" className="h-8 bg-black border-border text-white text-xs" /></div>
+                              <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Data do Ocorrido</Label><Input value={relatorioForm.dados_detalhados.incidente_data} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, incidente_data: e.target.value}})} type="date" className="h-8 bg-background border-border text-foreground text-xs" /></div>
+                              <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Horário Aproximado</Label><Input value={relatorioForm.dados_detalhados.incidente_horario} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, incidente_horario: e.target.value}})} type="time" className="h-8 bg-background border-border text-foreground text-xs" /></div>
                             </div>
-                            <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Local do Incidente</Label><Input value={relatorioForm.dados_detalhados.incidente_local} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, incidente_local: e.target.value}})} className="h-8 bg-black border-border text-white text-xs" /></div>
+                            <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Local do Incidente</Label><Input value={relatorioForm.dados_detalhados.incidente_local} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, incidente_local: e.target.value}})} className="h-8 bg-background border-border text-foreground text-xs" /></div>
                             <div className="space-y-1">
-                              <Label className="text-[9px] uppercase text-slate-500">Havia Testemunhas?</Label>
+                              <Label className="text-[9px] uppercase text-muted-foreground">Havia Testemunhas?</Label>
                               <RadioGroup value={relatorioForm.dados_detalhados.incidente_testemunhas} onValueChange={(v) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, incidente_testemunhas: v}})} className="flex gap-4 mt-1">
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="Sim" id="test-sim" className="border-border text-violet-600" /><Label htmlFor="test-sim" className="text-xs text-slate-300 font-normal">Sim</Label></div>
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="Não" id="test-nao" className="border-border text-violet-600" /><Label htmlFor="test-nao" className="text-xs text-slate-300 font-normal">Não</Label></div>
+                                <div className="flex items-center space-x-2"><RadioGroupItem value="Sim" id="test-sim" className="border-border text-violet-600" /><Label htmlFor="test-sim" className="text-xs text-foreground font-normal">Sim</Label></div>
+                                <div className="flex items-center space-x-2"><RadioGroupItem value="Não" id="test-nao" className="border-border text-violet-600" /><Label htmlFor="test-nao" className="text-xs text-foreground font-normal">Não</Label></div>
                               </RadioGroup>
                             </div>
                             {relatorioForm.dados_detalhados.incidente_testemunhas === "Sim" && (
                               <div className="grid grid-cols-2 gap-3">
-                                <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Nome(s) da(s) Testemunha(s)</Label><Textarea rows={2} value={relatorioForm.dados_detalhados.incidente_testemunhas_nomes} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, incidente_testemunhas_nomes: e.target.value}})} className="bg-black border-border text-white text-xs" /></div>
-                                <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Contato(s) da(s) Testemunha(s)</Label><Textarea rows={2} value={relatorioForm.dados_detalhados.incidente_testemunhas_contatos} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, incidente_testemunhas_contatos: e.target.value}})} className="bg-black border-border text-white text-xs" /></div>
+                                <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Nome(s) da(s) Testemunha(s)</Label><Textarea rows={2} value={relatorioForm.dados_detalhados.incidente_testemunhas_nomes} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, incidente_testemunhas_nomes: e.target.value}})} className="bg-background border-border text-foreground text-xs" /></div>
+                                <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Contato(s) da(s) Testemunha(s)</Label><Textarea rows={2} value={relatorioForm.dados_detalhados.incidente_testemunhas_contatos} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, incidente_testemunhas_contatos: e.target.value}})} className="bg-background border-border text-foreground text-xs" /></div>
                               </div>
                             )}
                           </div>
 
                           {/* 5. RELATÓRIO DOS FATOS */}
                           <div className="space-y-2">
-                            <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">5. Relatório dos Fatos Anexado à Denúncia</Label>
-                            <Textarea rows={5} className="bg-black border-border text-white text-xs leading-relaxed" value={relatorioForm.conteudo} onChange={(e) => setRelatorioForm({ ...relatorioForm, conteudo: e.target.value })} placeholder="Descreva os fatos em detalhes..." />
+                            <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">5. Relatório dos Fatos Anexado à Denúncia</Label>
+                            <Textarea rows={5} className="bg-background border-border text-foreground text-xs leading-relaxed" value={relatorioForm.conteudo} onChange={(e) => setRelatorioForm({ ...relatorioForm, conteudo: e.target.value })} placeholder="Descreva os fatos em detalhes..." />
                           </div>
 
                           {/* 6. PROVAS E EVIDÊNCIAS */}
@@ -2446,23 +2446,23 @@ function Corregedoria() {
                               {["Fotos","Vídeos","Áudios","Documentos","Bodycam / Dashcam","Outro"].map(prova => (
                                 <div key={prova} className="flex items-center space-x-2">
                                   <Checkbox id={`prova-ip-${prova}`} checked={relatorioForm.dados_detalhados.provas_selecionadas?.includes(prova)} onCheckedChange={(checked) => { const c=[...(relatorioForm.dados_detalhados.provas_selecionadas||[])]; if(checked) c.push(prova); else c.splice(c.indexOf(prova),1); setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, provas_selecionadas: c}}); }} className="border-border data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600" />
-                                  <Label htmlFor={`prova-ip-${prova}`} className="text-[10px] text-slate-300 font-normal">{prova}</Label>
+                                  <Label htmlFor={`prova-ip-${prova}`} className="text-[10px] text-foreground font-normal">{prova}</Label>
                                 </div>
                               ))}
                             </div>
-                            <div className="space-y-1 mt-2"><Label className="text-[9px] uppercase text-slate-500">Descrição das Provas</Label><Textarea rows={2} value={relatorioForm.dados_detalhados.provas_descricao} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, provas_descricao: e.target.value}})} className="bg-black border-border text-white text-xs" placeholder="Descreva as provas..." /></div>
+                            <div className="space-y-1 mt-2"><Label className="text-[9px] uppercase text-muted-foreground">Descrição das Provas</Label><Textarea rows={2} value={relatorioForm.dados_detalhados.provas_descricao} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, provas_descricao: e.target.value}})} className="bg-background border-border text-foreground text-xs" placeholder="Descreva as provas..." /></div>
                           </div>
 
                           <div className="pt-4 border-t border-border space-y-4">
-                            <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Documentos Anexos (Opcional)</h4>
+                            <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Documentos Anexos (Opcional)</h4>
                             <div className="grid grid-cols-3 gap-4">
                               <div className="space-y-1">
-                                <Label className="text-[9px] text-slate-500 uppercase">Denúncia</Label>
+                                <Label className="text-[9px] text-muted-foreground uppercase">Denúncia</Label>
                                 <Select value={relatorioForm.denuncia_id} onValueChange={(v) => setRelatorioForm({ ...relatorioForm, denuncia_id: v })}>
-                                  <SelectTrigger className="bg-black border-border text-white h-8 text-[10px] uppercase">
+                                  <SelectTrigger className="bg-background border-border text-foreground h-8 text-[10px] uppercase">
                                     <SelectValue placeholder="Nenhum" />
                                   </SelectTrigger>
-                                  <SelectContent className="bg-zinc-900 border-border text-white">
+                                  <SelectContent className="bg-muted border-border text-foreground">
                                     <SelectItem value="none">Nenhum</SelectItem>
                                     {denuncias.map(d => (
                                       <SelectItem key={d.id} value={d.id} className="text-[10px]">#{d.numero_registro} - {d.titulo}</SelectItem>
@@ -2471,12 +2471,12 @@ function Corregedoria() {
                                 </Select>
                               </div>
                               <div className="space-y-1">
-                                <Label className="text-[9px] text-slate-500 uppercase">Investigação</Label>
+                                <Label className="text-[9px] text-muted-foreground uppercase">Investigação</Label>
                                 <Select value={relatorioForm.investigacao_id} onValueChange={(v) => setRelatorioForm({ ...relatorioForm, investigacao_id: v })}>
-                                  <SelectTrigger className="bg-black border-border text-white h-8 text-[10px] uppercase">
+                                  <SelectTrigger className="bg-background border-border text-foreground h-8 text-[10px] uppercase">
                                     <SelectValue placeholder="Nenhum" />
                                   </SelectTrigger>
-                                  <SelectContent className="bg-zinc-900 border-border text-white">
+                                  <SelectContent className="bg-muted border-border text-foreground">
                                     <SelectItem value="none">Nenhum</SelectItem>
                                     {investigacoes.map(i => (
                                       <SelectItem key={i.id} value={i.id} className="text-[10px]">#{i.numero_registro} - {i.titulo}</SelectItem>
@@ -2500,10 +2500,10 @@ function Corregedoria() {
                 </div>
                 
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-bold uppercase tracking-widest text-slate-500 mr-2">Filtrar por Status:</span>
+                  <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground mr-2">Filtrar por Status:</span>
                   <Button 
                     size="sm" variant="outline"
-                    className={`font-mono text-[10px] h-7 ${inqueritoFilter === "todas" ? "bg-slate-700 text-white" : "text-slate-400 border-border"}`}
+                    className={`font-mono text-[10px] h-7 ${inqueritoFilter === "todas" ? "bg-slate-700 text-foreground" : "text-muted-foreground border-border"}`}
                     onClick={() => setInqueritoFilter("todas")}
                   >
                     TODOS
@@ -2512,7 +2512,7 @@ function Corregedoria() {
                     <Button 
                       key={val}
                       size="sm" variant="outline"
-                      className={`font-mono text-[10px] h-7 ${inqueritoFilter === val ? "bg-slate-700 text-white border-slate-600" : "text-slate-400 border-border"}`}
+                      className={`font-mono text-[10px] h-7 ${inqueritoFilter === val ? "bg-slate-700 text-white border-slate-600" : "text-muted-foreground border-border"}`}
                       onClick={() => setInqueritoFilter(val as Status)}
                     >
                       {lab.toUpperCase()}
@@ -2525,7 +2525,7 @@ function Corregedoria() {
                 {relatorios
                   .filter(r => r.tipo_denuncia === "Inquérito Policial" && (inqueritoFilter === "todas" || r.status === inqueritoFilter))
                   .length === 0 ? (
-                    <div className="rounded-lg border border-border border-dashed bg-card/50 p-12 text-center text-slate-500">
+                    <div className="rounded-lg border border-border border-dashed bg-card/50 p-12 text-center text-muted-foreground">
                       Nenhum inquérito encontrado com este filtro.
                     </div>
                   ) : (
@@ -2581,7 +2581,7 @@ function Corregedoria() {
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="flex flex-col gap-4 border-b border-border pb-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-bold uppercase tracking-wider text-white">Atos Administrativos</h3>
+                  <h3 className="text-lg font-bold uppercase tracking-wider text-foreground">Atos Administrativos</h3>
                   
                   <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
@@ -2593,28 +2593,28 @@ function Corregedoria() {
                         Novo Ato
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[600px] bg-card border-border text-slate-300">
+                    <DialogContent className="sm:max-w-[600px] bg-card border-border text-foreground">
                       <DialogHeader>
-                        <DialogTitle className="text-white uppercase tracking-wider">Registrar Ato Administrativo</DialogTitle>
+                        <DialogTitle className="text-foreground uppercase tracking-wider">Registrar Ato Administrativo</DialogTitle>
                       </DialogHeader>
                       <form onSubmit={submitRelatorio} className="space-y-5 mt-4">
                         <div className="max-h-[70vh] overflow-y-auto pr-2 space-y-6 custom-scrollbar">
                           <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                              <Label htmlFor="titulo-ato" className="text-slate-400 text-xs uppercase tracking-wider">Título do Ato</Label>
+                              <Label htmlFor="titulo-ato" className="text-muted-foreground text-xs uppercase tracking-wider">Título do Ato</Label>
                               <Input
                                 id="titulo-ato"
-                                className="bg-black border-border text-white"
+                                className="bg-background border-border text-foreground"
                                 value={relatorioForm.titulo}
                                 onChange={(e) => setRelatorioForm({ ...relatorioForm, titulo: e.target.value })}
                                 placeholder="EX: ATO-001/26 - SUSPENSÃO"
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label className="text-slate-400 text-xs uppercase tracking-wider">Status do Ato</Label>
+                              <Label className="text-muted-foreground text-xs uppercase tracking-wider">Status do Ato</Label>
                               <Select value={relatorioForm.status} onValueChange={(v: Status) => setRelatorioForm({ ...relatorioForm, status: v })}>
-                                <SelectTrigger className="bg-black border-border text-white h-10"><SelectValue /></SelectTrigger>
-                                <SelectContent className="bg-zinc-900 border-border text-white">
+                                <SelectTrigger className="bg-background border-border text-foreground h-10"><SelectValue /></SelectTrigger>
+                                <SelectContent className="bg-muted border-border text-foreground">
                                   {Object.entries(STATUS_LABEL).map(([val, lab]) => <SelectItem key={val} value={val}>{lab}</SelectItem>)}
                                 </SelectContent>
                               </Select>
@@ -2628,24 +2628,24 @@ function Corregedoria() {
                               <h4 className="text-[10px] font-bold uppercase tracking-widest text-red-500">1. IDENTIFICAÇÃO DO ATO</h4>
                               <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1">
-                                  <Label className="text-[9px] uppercase text-slate-500">Número do Inquérito</Label>
-                                  <Input value={relatorioForm.dados_detalhados.ato_numero_inquerito} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_numero_inquerito: e.target.value}})} placeholder="Nº000" className="h-8 bg-black border-border text-xs" />
+                                  <Label className="text-[9px] uppercase text-muted-foreground">Número do Inquérito</Label>
+                                  <Input value={relatorioForm.dados_detalhados.ato_numero_inquerito} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_numero_inquerito: e.target.value}})} placeholder="Nº000" className="h-8 bg-background border-border text-xs" />
                                 </div>
                                 <div className="space-y-1">
-                                  <Label className="text-[9px] uppercase text-slate-500">Número do Ato Administrativo</Label>
-                                  <Input value={relatorioForm.dados_detalhados.ato_numero} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_numero: e.target.value}})} placeholder="Nº000" className="h-8 bg-black border-border text-xs" />
+                                  <Label className="text-[9px] uppercase text-muted-foreground">Número do Ato Administrativo</Label>
+                                  <Input value={relatorioForm.dados_detalhados.ato_numero} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_numero: e.target.value}})} placeholder="Nº000" className="h-8 bg-background border-border text-xs" />
                                 </div>
                               </div>
                               <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1">
-                                  <Label className="text-[9px] uppercase text-slate-500">Data de Emissão</Label>
-                                  <Input type="date" value={relatorioForm.dados_detalhados.ato_data_emissao} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_data_emissao: e.target.value}})} className="h-8 bg-black border-border text-xs" />
+                                  <Label className="text-[9px] uppercase text-muted-foreground">Data de Emissão</Label>
+                                  <Input type="date" value={relatorioForm.dados_detalhados.ato_data_emissao} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_data_emissao: e.target.value}})} className="h-8 bg-background border-border text-xs" />
                                 </div>
                                 <div className="space-y-1">
-                                  <Label className="text-[9px] uppercase text-slate-500">Tipo de Ato</Label>
+                                  <Label className="text-[9px] uppercase text-muted-foreground">Tipo de Ato</Label>
                                   <Select value={relatorioForm.dados_detalhados.ato_tipo} onValueChange={(v) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_tipo: v}})}>
-                                    <SelectTrigger className="h-8 bg-black border-border text-xs"><SelectValue placeholder="Selecione..." /></SelectTrigger>
-                                    <SelectContent className="bg-zinc-900 border-border text-white">
+                                    <SelectTrigger className="h-8 bg-background border-border text-xs"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                                    <SelectContent className="bg-muted border-border text-foreground">
                                       <SelectItem value="Aplicação de Medida Disciplinar">Aplicação de Medida Disciplinar</SelectItem>
                                       <SelectItem value="Suspensão Preventiva">Suspensão Preventiva</SelectItem>
                                       <SelectItem value="Arquivamento">Arquivamento</SelectItem>
@@ -2654,36 +2654,36 @@ function Corregedoria() {
                                   </Select>
                                 </div>
                               </div>
-                              {relatorioForm.dados_detalhados.ato_tipo === "Outro" && <Input placeholder="Especifique..." value={relatorioForm.dados_detalhados.ato_tipo_outro} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_tipo_outro: e.target.value}})} className="h-8 bg-black border-border text-xs mt-1" />}
+                              {relatorioForm.dados_detalhados.ato_tipo === "Outro" && <Input placeholder="Especifique..." value={relatorioForm.dados_detalhados.ato_tipo_outro} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_tipo_outro: e.target.value}})} className="h-8 bg-background border-border text-xs mt-1" />}
                             </div>
 
                             {/* 2. AUTORIDADE EMISSORA */}
-                            <div className="space-y-2 border-l-2 border-zinc-500 pl-4 bg-white/5 py-2">
-                              <h4 className="text-[10px] font-bold uppercase tracking-widest text-white">2. AUTORIDADE EMISSORA</h4>
+                            <div className="space-y-2 border-l-2 border-zinc-500 pl-4 bg-muted/50 py-2">
+                              <h4 className="text-[10px] font-bold uppercase tracking-widest text-foreground">2. AUTORIDADE EMISSORA</h4>
                               <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1">
-                                  <Label className="text-[9px] uppercase text-slate-500">Nome do Corregedor</Label>
-                                  <Input value={relatorioForm.dados_detalhados.ato_autoridade_nome} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_autoridade_nome: e.target.value}})} className="h-8 bg-black border-border text-xs" />
+                                  <Label className="text-[9px] uppercase text-muted-foreground">Nome do Corregedor</Label>
+                                  <Input value={relatorioForm.dados_detalhados.ato_autoridade_nome} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_autoridade_nome: e.target.value}})} className="h-8 bg-background border-border text-xs" />
                                 </div>
                                 <div className="space-y-1">
-                                  <Label className="text-[9px] uppercase text-slate-500">Cargo/Patente</Label>
-                                  <Input value={relatorioForm.dados_detalhados.ato_autoridade_cargo} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_autoridade_cargo: e.target.value}})} className="h-8 bg-black border-border text-xs" />
+                                  <Label className="text-[9px] uppercase text-muted-foreground">Cargo/Patente</Label>
+                                  <Input value={relatorioForm.dados_detalhados.ato_autoridade_cargo} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_autoridade_cargo: e.target.value}})} className="h-8 bg-background border-border text-xs" />
                                 </div>
                               </div>
-                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Departamento / Unidade</Label><Input value={relatorioForm.dados_detalhados.ato_autoridade_unidade} disabled className="h-8 bg-black border-border text-slate-500 text-xs" /></div>
+                              <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Departamento / Unidade</Label><Input value={relatorioForm.dados_detalhados.ato_autoridade_unidade} disabled className="h-8 bg-background border-border text-muted-foreground text-xs" /></div>
                             </div>
 
                             {/* 3. OBJETO DO ATO */}
                             <div className="space-y-2 border-l-2 border-slate-600 pl-4 bg-slate-500/5 py-3">
-                              <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">3. OBJETO DO ATO</h4>
-                              <Label className="text-[9px] uppercase text-slate-500">Descrição Resumida</Label>
-                              <Textarea value={relatorioForm.dados_detalhados.ato_objeto_descricao} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_objeto_descricao: e.target.value}})} rows={2} className="bg-black border-border text-xs" placeholder="Descreva o objeto..." />
+                              <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">3. OBJETO DO ATO</h4>
+                              <Label className="text-[9px] uppercase text-muted-foreground">Descrição Resumida</Label>
+                              <Textarea value={relatorioForm.dados_detalhados.ato_objeto_descricao} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_objeto_descricao: e.target.value}})} rows={2} className="bg-background border-border text-xs" placeholder="Descreva o objeto..." />
                             </div>
 
                             {/* 4. FUNDAMENTAÇÃO */}
-                            <div className="space-y-2 border-l-2 border-zinc-600 pl-4 bg-white/5 py-2">
-                              <h4 className="text-[10px] font-bold uppercase tracking-widest text-zinc-300">4. FUNDAMENTAÇÃO</h4>
-                              <Label className="text-[9px] uppercase text-slate-500">Base do Ato Administrativo</Label>
+                            <div className="space-y-2 border-l-2 border-zinc-600 pl-4 bg-muted/50 py-2">
+                              <h4 className="text-[10px] font-bold uppercase tracking-widest text-foreground">4. FUNDAMENTAÇÃO</h4>
+                              <Label className="text-[9px] uppercase text-muted-foreground">Base do Ato Administrativo</Label>
                               <div className="grid grid-cols-2 gap-2">
                                 {["Relatório interno", "Denúncia formal", "Evidências coletadas", "Ordem superior", "Auditoria interna", "Outro"].map(f => (
                                   <div key={f} className="flex items-center space-x-2">
@@ -2692,21 +2692,21 @@ function Corregedoria() {
                                   </div>
                                 ))}
                               </div>
-                              <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Descrição Complementar</Label><Textarea value={relatorioForm.dados_detalhados.ato_fundamentacao_complementar} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_fundamentacao_complementar: e.target.value}})} rows={2} className="bg-black border-border text-xs mt-2" placeholder="Descreva a fundamentação..." /></div>
+                              <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Descrição Complementar</Label><Textarea value={relatorioForm.dados_detalhados.ato_fundamentacao_complementar} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_fundamentacao_complementar: e.target.value}})} rows={2} className="bg-background border-border text-xs mt-2" placeholder="Descreva a fundamentação..." /></div>
                             </div>
 
                             {/* 5. DECISÃO */}
                             <div className="space-y-2 border-l-2 border-emerald-600 pl-4 bg-emerald-500/5 py-2">
                               <h4 className="text-[10px] font-bold uppercase tracking-widest text-emerald-500">5. DECISÃO</h4>
                               <div className="space-y-1">
-                                <Label className="text-[9px] uppercase text-slate-500">Deliberação da Autoridade</Label>
-                                <Textarea value={relatorioForm.dados_detalhados.ato_decisao} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_decisao: e.target.value}})} rows={2} className="bg-black border-border text-xs" placeholder="Deliberação..." />
+                                <Label className="text-[9px] uppercase text-muted-foreground">Deliberação da Autoridade</Label>
+                                <Textarea value={relatorioForm.dados_detalhados.ato_decisao} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_decisao: e.target.value}})} rows={2} className="bg-background border-border text-xs" placeholder="Deliberação..." />
                               </div>
                             </div>
 
                             {/* 6. MEDIDAS DETERMINADAS */}
-                            <div className="space-y-2 border-l-2 border-zinc-600 pl-4 bg-white/5 py-2">
-                              <h4 className="text-[10px] font-bold uppercase tracking-widest text-white">6. MEDIDAS DETERMINADAS</h4>
+                            <div className="space-y-2 border-l-2 border-zinc-600 pl-4 bg-muted/50 py-2">
+                              <h4 className="text-[10px] font-bold uppercase tracking-widest text-foreground">6. MEDIDAS DETERMINADAS</h4>
                               <div className="grid grid-cols-1 gap-2">
                                 {[
                                   "Abertura de inquérito administrativo", 
@@ -2725,26 +2725,26 @@ function Corregedoria() {
                                 ))}
                               </div>
                               <div className="space-y-1">
-                                <Label className="text-[9px] uppercase text-slate-500">Detalhamento das medidas</Label>
-                                <Textarea value={relatorioForm.dados_detalhados.ato_medidas_detalhamento} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_medidas_detalhamento: e.target.value}})} rows={3} className="bg-black border-border text-xs mt-2" placeholder="Detalhes das medidas..." />
+                                <Label className="text-[9px] uppercase text-muted-foreground">Detalhamento das medidas</Label>
+                                <Textarea value={relatorioForm.dados_detalhados.ato_medidas_detalhamento} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_medidas_detalhamento: e.target.value}})} rows={3} className="bg-background border-border text-xs mt-2" placeholder="Detalhes das medidas..." />
                               </div>
                             </div>
 
                             <div className="space-y-2">
-                              <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Conteúdo Detalhado do Ato</Label>
-                              <Textarea rows={6} className="bg-black border-border text-white font-mono text-xs leading-relaxed" value={relatorioForm.conteudo} onChange={(e) => setRelatorioForm({ ...relatorioForm, conteudo: e.target.value })} placeholder="Texto integral do ato administrativo..." />
+                              <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Conteúdo Detalhado do Ato</Label>
+                              <Textarea rows={6} className="bg-background border-border text-foreground font-mono text-xs leading-relaxed" value={relatorioForm.conteudo} onChange={(e) => setRelatorioForm({ ...relatorioForm, conteudo: e.target.value })} placeholder="Texto integral do ato administrativo..." />
                             </div>
 
                             <div className="pt-4 border-t border-border space-y-4">
-                              <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Documentos Anexos (Opcional)</h4>
+                              <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Documentos Anexos (Opcional)</h4>
                               <div className="grid grid-cols-3 gap-4">
                                 <div className="space-y-1">
-                                  <Label className="text-[9px] text-slate-500 uppercase">Denúncia</Label>
+                                  <Label className="text-[9px] text-muted-foreground uppercase">Denúncia</Label>
                                   <Select value={relatorioForm.denuncia_id} onValueChange={(v) => setRelatorioForm({ ...relatorioForm, denuncia_id: v })}>
-                                    <SelectTrigger className="bg-black border-border text-white h-8 text-[10px] uppercase">
+                                    <SelectTrigger className="bg-background border-border text-foreground h-8 text-[10px] uppercase">
                                       <SelectValue placeholder="Nenhum" />
                                     </SelectTrigger>
-                                    <SelectContent className="bg-zinc-900 border-border text-white">
+                                    <SelectContent className="bg-muted border-border text-foreground">
                                       <SelectItem value="none">Nenhum</SelectItem>
                                       {denuncias.map(d => (
                                         <SelectItem key={d.id} value={d.id} className="text-[10px]">#{d.numero_registro} - {d.titulo}</SelectItem>
@@ -2753,12 +2753,12 @@ function Corregedoria() {
                                   </Select>
                                 </div>
                                 <div className="space-y-1">
-                                  <Label className="text-[9px] text-slate-500 uppercase">Investigação</Label>
+                                  <Label className="text-[9px] text-muted-foreground uppercase">Investigação</Label>
                                   <Select value={relatorioForm.investigacao_id} onValueChange={(v) => setRelatorioForm({ ...relatorioForm, investigacao_id: v })}>
-                                    <SelectTrigger className="bg-black border-border text-white h-8 text-[10px] uppercase">
+                                    <SelectTrigger className="bg-background border-border text-foreground h-8 text-[10px] uppercase">
                                       <SelectValue placeholder="Nenhum" />
                                     </SelectTrigger>
-                                    <SelectContent className="bg-zinc-900 border-border text-white">
+                                    <SelectContent className="bg-muted border-border text-foreground">
                                       <SelectItem value="none">Nenhum</SelectItem>
                                       {investigacoes.map(i => (
                                         <SelectItem key={i.id} value={i.id} className="text-[10px]">#{i.numero_registro} - {i.titulo}</SelectItem>
@@ -2783,10 +2783,10 @@ function Corregedoria() {
                 </div>
                 
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-bold uppercase tracking-widest text-slate-500 mr-2">Filtrar por Status:</span>
+                  <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground mr-2">Filtrar por Status:</span>
                   <Button 
                     size="sm" variant="outline"
-                    className={`font-mono text-[10px] h-7 ${atoFilter === "todas" ? "bg-slate-700 text-white" : "text-slate-400 border-border"}`}
+                    className={`font-mono text-[10px] h-7 ${atoFilter === "todas" ? "bg-slate-700 text-foreground" : "text-muted-foreground border-border"}`}
                     onClick={() => setAtoFilter("todas")}
                   >
                     TODOS
@@ -2795,7 +2795,7 @@ function Corregedoria() {
                     <Button 
                       key={val}
                       size="sm" variant="outline"
-                      className={`font-mono text-[10px] h-7 ${atoFilter === val ? "bg-slate-700 text-white border-slate-600" : "text-slate-400 border-border"}`}
+                      className={`font-mono text-[10px] h-7 ${atoFilter === val ? "bg-slate-700 text-white border-slate-600" : "text-muted-foreground border-border"}`}
                       onClick={() => setAtoFilter(val as Status)}
                     >
                       {lab.toUpperCase()}
@@ -2808,7 +2808,7 @@ function Corregedoria() {
                 {relatorios
                   .filter(r => r.tipo_denuncia === "Ato Administrativo" && (atoFilter === "todas" || r.status === atoFilter))
                   .length === 0 ? (
-                    <div className="rounded-lg border border-border border-dashed bg-card/50 p-12 text-center text-slate-500">
+                    <div className="rounded-lg border border-border border-dashed bg-card/50 p-12 text-center text-muted-foreground">
                       Nenhum ato administrativo encontrado com este filtro.
                     </div>
                   ) : (
@@ -2863,12 +2863,12 @@ function Corregedoria() {
           {activeTab === "solicitacoes" && isAdmin && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="flex items-center justify-between border-b border-border pb-4">
-                <h3 className="text-lg font-bold uppercase tracking-wider text-white">Solicitações de Acesso</h3>
-                <span className="text-sm text-slate-400">{pendingUsers.length} pendentes</span>
+                <h3 className="text-lg font-bold uppercase tracking-wider text-foreground">Solicitações de Acesso</h3>
+                <span className="text-sm text-muted-foreground">{pendingUsers.length} pendentes</span>
               </div>
               
               {pendingUsers.length === 0 ? (
-                <div className="rounded-lg border border-border border-dashed bg-card/50 p-12 text-center text-slate-500">
+                <div className="rounded-lg border border-border border-dashed bg-card/50 p-12 text-center text-muted-foreground">
                   Nenhuma solicitação pendente no momento.
                 </div>
               ) : (
@@ -2876,8 +2876,8 @@ function Corregedoria() {
                   {pendingUsers.map(user => (
                     <div key={user.user_id} className="flex items-center justify-between rounded-lg border border-border bg-card p-5">
                       <div>
-                        <h4 className="font-bold text-white uppercase">{user.full_name}</h4>
-                        <div className="mt-1 flex items-center gap-4 text-sm text-slate-400">
+                        <h4 className="font-bold text-foreground uppercase">{user.full_name}</h4>
+                        <div className="mt-1 flex items-center gap-4 text-sm text-muted-foreground">
                           <span>Placa: #{user.badge_number}</span>
                           <span>Cadastrado em: {format(new Date(user.created_at), "dd/MM/yyyy HH:mm")}</span>
                         </div>
@@ -2885,13 +2885,13 @@ function Corregedoria() {
                       <div className="flex gap-2">
                         <Button 
                           onClick={() => approveUser(user.role_id, "corregedor")}
-                          className="bg-white/15 text-white hover:bg-blue-500/30 border border-white/30 text-[10px] font-bold uppercase px-3"
+                          className="bg-muted/50 text-foreground hover:bg-blue-500/30 border border-border text-[10px] font-bold uppercase px-3"
                         >
                           Corregedor
                         </Button>
                         <Button 
                           onClick={() => approveUser(user.role_id, "admin")}
-                          className="bg-amber-500/20 text-zinc-300 hover:bg-amber-500/30 border border-white/30 text-[10px] font-bold uppercase px-3"
+                          className="bg-amber-500/20 text-foreground hover:bg-amber-500/30 border border-border text-[10px] font-bold uppercase px-3"
                         >
                           Admin
                         </Button>
@@ -2912,8 +2912,8 @@ function Corregedoria() {
           {activeTab === "oficiais" && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="flex items-center justify-between border-b border-border pb-4">
-                <h3 className="text-lg font-bold uppercase tracking-wider text-white">Diretório de Oficiais</h3>
-                <span className="text-sm text-slate-400">{oficiais.length} oficiais registrados</span>
+                <h3 className="text-lg font-bold uppercase tracking-wider text-foreground">Diretório de Oficiais</h3>
+                <span className="text-sm text-muted-foreground">{oficiais.length} oficiais registrados</span>
               </div>
               
               <div className="grid gap-4 md:grid-cols-2">
@@ -2921,12 +2921,12 @@ function Corregedoria() {
                   <div key={oficial.id} className="flex flex-col rounded-lg border border-border bg-card p-5">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-4">
-                        <div className="flex h-12 w-12 items-center justify-center rounded bg-white/10 text-white">
+                        <div className="flex h-12 w-12 items-center justify-center rounded bg-muted/50 text-foreground">
                           <Users className="h-6 w-6" />
                         </div>
                         <div>
-                          <h4 className="font-bold text-white uppercase tracking-wider">{oficial.full_name}</h4>
-                          <span className="text-xs text-slate-500 font-mono">DISTINTIVO: #{oficial.badge_number}</span>
+                          <h4 className="font-bold text-foreground uppercase tracking-wider">{oficial.full_name}</h4>
+                          <span className="text-xs text-muted-foreground font-mono">DISTINTIVO: #{oficial.badge_number}</span>
                         </div>
                       </div>
                       {isAdmin && (
@@ -2945,35 +2945,35 @@ function Corregedoria() {
                     <div className="flex flex-col gap-4 border-t border-border pt-4 mt-auto">
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
-                          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Permissão</p>
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Permissão</p>
                           {isAdmin ? (
                             <Select 
                               defaultValue={oficial.role} 
                               onValueChange={(v: any) => changeUserRole(oficial.id, v)}
                             >
-                              <SelectTrigger className="bg-black border-border text-zinc-300 font-bold text-[10px] uppercase h-9">
+                              <SelectTrigger className="bg-background border-border text-foreground font-bold text-[10px] uppercase h-9">
                                 <SelectValue />
                               </SelectTrigger>
-                              <SelectContent className="bg-zinc-900 border-border text-white">
+                              <SelectContent className="bg-muted border-border text-foreground">
                                 <SelectItem value="corregedor">Corregedor</SelectItem>
                                 <SelectItem value="admin">Administrador</SelectItem>
                               </SelectContent>
                             </Select>
                           ) : (
-                            <div className="flex items-center h-9 px-3 rounded-md bg-black border border-border text-zinc-300 font-bold text-[10px] uppercase">
+                            <div className="flex items-center h-9 px-3 rounded-md bg-background border border-border text-foreground font-bold text-[10px] uppercase">
                               {oficial.role}
                             </div>
                           )}
                         </div>
 
                         <div className="space-y-1">
-                          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Patente / Cargo</p>
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Patente / Cargo</p>
                           {isAdmin ? (
                             <div className="flex gap-1">
                               <Input 
                                 defaultValue={oficial.patente || "Oficial"}
                                 id={`patente-${oficial.id}`}
-                                className="bg-black border-border text-white font-mono text-[10px] uppercase h-9 flex-1"
+                                className="bg-background border-border text-foreground font-mono text-[10px] uppercase h-9 flex-1"
                               />
                               <Button 
                                 size="sm"
@@ -2987,7 +2987,7 @@ function Corregedoria() {
                               </Button>
                             </div>
                           ) : (
-                            <div className="flex items-center h-9 px-3 rounded-md bg-black border border-border text-white font-mono text-[10px] uppercase">
+                            <div className="flex items-center h-9 px-3 rounded-md bg-background border border-border text-foreground font-mono text-[10px] uppercase">
                               {oficial.patente || "Oficial"}
                             </div>
                           )}
@@ -3005,18 +3005,18 @@ function Corregedoria() {
 
       {/* DIALOG DE EDIÇÃO DE RELATÓRIO */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[600px] bg-card border-border text-slate-300">
+        <DialogContent className="sm:max-w-[600px] bg-card border-border text-foreground">
           <DialogHeader>
             <div className="text-center pb-2 border-b border-border">
-              <p className="text-[9px] font-bold uppercase tracking-widest text-white mb-1">Corregedoria Geral (PMESP)</p>
-              <DialogTitle className="text-white uppercase tracking-wider text-sm">Editar {relatorioForm.tipo_denuncia}</DialogTitle>
+              <p className="text-[9px] font-bold uppercase tracking-widest text-foreground mb-1">Corregedoria Geral (PMESP)</p>
+              <DialogTitle className="text-foreground uppercase tracking-wider text-sm">Editar {relatorioForm.tipo_denuncia}</DialogTitle>
             </div>
           </DialogHeader>
           <form onSubmit={updateRelatorio} className="space-y-4 mt-2">
             <div className="max-h-[70vh] overflow-y-auto pr-2 space-y-5 custom-scrollbar">
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1"><Label className="text-[10px] uppercase text-slate-500">Título / Número do Caso</Label><Input className="bg-black border-border text-white h-8 text-xs" value={relatorioForm.titulo} onChange={(e) => setRelatorioForm({ ...relatorioForm, titulo: e.target.value })} /></div>
-                <div className="space-y-1"><Label className="text-[10px] uppercase text-slate-500">Status</Label><Select value={relatorioForm.status} onValueChange={(v: Status) => setRelatorioForm({ ...relatorioForm, status: v })}><SelectTrigger className="bg-black border-border text-white h-8 text-xs"><SelectValue /></SelectTrigger><SelectContent className="bg-zinc-900 border-border text-white">{Object.entries(STATUS_LABEL).map(([val, lab]) => <SelectItem key={val} value={val}>{lab}</SelectItem>)}</SelectContent></Select></div>
+                <div className="space-y-1"><Label className="text-[10px] uppercase text-muted-foreground">Título / Número do Caso</Label><Input className="bg-background border-border text-foreground h-8 text-xs" value={relatorioForm.titulo} onChange={(e) => setRelatorioForm({ ...relatorioForm, titulo: e.target.value })} /></div>
+                <div className="space-y-1"><Label className="text-[10px] uppercase text-muted-foreground">Status</Label><Select value={relatorioForm.status} onValueChange={(v: Status) => setRelatorioForm({ ...relatorioForm, status: v })}><SelectTrigger className="bg-background border-border text-foreground h-8 text-xs"><SelectValue /></SelectTrigger><SelectContent className="bg-muted border-border text-foreground">{Object.entries(STATUS_LABEL).map(([val, lab]) => <SelectItem key={val} value={val}>{lab}</SelectItem>)}</SelectContent></Select></div>
               </div>
 
               {relatorioForm.tipo_denuncia === "Inquérito Policial" ? (
@@ -3025,33 +3025,33 @@ function Corregedoria() {
                   <div className="space-y-2 border-l-2 border-red-600 pl-4 bg-red-500/5 py-2">
                     <h4 className="text-[10px] font-bold uppercase tracking-widest text-red-500">0. Dados do Corregedor</h4>
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Número do Caso</Label><Input value={relatorioForm.dados_detalhados.numero_caso} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, numero_caso: e.target.value}})} className="h-8 bg-black border-border text-white text-xs" /></div>
-                      <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Data de Abertura</Label><Input value={relatorioForm.dados_detalhados.data_abertura} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, data_abertura: e.target.value}})} type="date" className="h-8 bg-black border-border text-white text-xs" /></div>
+                      <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Número do Caso</Label><Input value={relatorioForm.dados_detalhados.numero_caso} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, numero_caso: e.target.value}})} className="h-8 bg-background border-border text-foreground text-xs" /></div>
+                      <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Data de Abertura</Label><Input value={relatorioForm.dados_detalhados.data_abertura} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, data_abertura: e.target.value}})} type="date" className="h-8 bg-background border-border text-foreground text-xs" /></div>
                     </div>
                   </div>
 
                   {/* 1. DADOS DO RECLAMANTE */}
-                  <div className="space-y-2 border-l-2 border-zinc-500 pl-4 bg-white/5 py-2">
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-white">1. Dados do Reclamante</h4>
+                  <div className="space-y-2 border-l-2 border-zinc-500 pl-4 bg-muted/50 py-2">
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-foreground">1. Dados do Reclamante</h4>
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Nome</Label><Input value={relatorioForm.dados_detalhados.reclamante_nome} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_nome: e.target.value}})} className="h-8 bg-black border-border text-white text-xs" /></div>
-                      <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">ID</Label><Input value={relatorioForm.dados_detalhados.reclamante_id} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_id: e.target.value}})} className="h-8 bg-black border-border text-white text-xs" /></div>
+                      <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Nome</Label><Input value={relatorioForm.dados_detalhados.reclamante_nome} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_nome: e.target.value}})} className="h-8 bg-background border-border text-foreground text-xs" /></div>
+                      <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">ID</Label><Input value={relatorioForm.dados_detalhados.reclamante_id} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, reclamante_id: e.target.value}})} className="h-8 bg-background border-border text-foreground text-xs" /></div>
                     </div>
                   </div>
 
                   {/* 2. DADOS DO POLICIAL DENUNCIADO */}
                   <div className="space-y-2 border-l-2 border-slate-600 pl-4 bg-slate-500/5 py-2">
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">2. Dados do Policial Denunciado</h4>
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">2. Dados do Policial Denunciado</h4>
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Nome do Policial</Label><Input value={relatorioForm.dados_detalhados.denunciado_nome} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, denunciado_nome: e.target.value}})} className="h-8 bg-black border-border text-white text-xs" /></div>
-                      <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Badge</Label><Input value={relatorioForm.dados_detalhados.denunciado_badge} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, denunciado_badge: e.target.value}})} className="h-8 bg-black border-border text-white text-xs" /></div>
+                      <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Nome do Policial</Label><Input value={relatorioForm.dados_detalhados.denunciado_nome} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, denunciado_nome: e.target.value}})} className="h-8 bg-background border-border text-foreground text-xs" /></div>
+                      <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Badge</Label><Input value={relatorioForm.dados_detalhados.denunciado_badge} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, denunciado_badge: e.target.value}})} className="h-8 bg-background border-border text-foreground text-xs" /></div>
                     </div>
                   </div>
 
                   {/* 5. RELATÓRIO DOS FATOS */}
                   <div className="space-y-2">
-                    <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">5. Relatório dos Fatos</Label>
-                    <Textarea rows={5} className="bg-black border-border text-white text-xs leading-relaxed" value={relatorioForm.conteudo} onChange={(e) => setRelatorioForm({ ...relatorioForm, conteudo: e.target.value })} />
+                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">5. Relatório dos Fatos</Label>
+                    <Textarea rows={5} className="bg-background border-border text-foreground text-xs leading-relaxed" value={relatorioForm.conteudo} onChange={(e) => setRelatorioForm({ ...relatorioForm, conteudo: e.target.value })} />
                   </div>
                 </>
               ) : (
@@ -3060,19 +3060,19 @@ function Corregedoria() {
                   <div className="space-y-2 border-l-2 border-red-600 pl-4 bg-red-500/5 py-2">
                     <h4 className="text-[10px] font-bold uppercase tracking-widest text-red-500">1. IDENTIFICAÇÃO DO ATO</h4>
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Número do Ato</Label><Input value={relatorioForm.dados_detalhados.ato_numero} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_numero: e.target.value}})} className="h-8 bg-black border-border text-xs" /></div>
-                      <div className="space-y-1"><Label className="text-[9px] uppercase text-slate-500">Data de Emissão</Label><Input type="date" value={relatorioForm.dados_detalhados.ato_data_emissao} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_data_emissao: e.target.value}})} className="h-8 bg-black border-border text-xs" /></div>
+                      <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Número do Ato</Label><Input value={relatorioForm.dados_detalhados.ato_numero} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_numero: e.target.value}})} className="h-8 bg-background border-border text-xs" /></div>
+                      <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Data de Emissão</Label><Input type="date" value={relatorioForm.dados_detalhados.ato_data_emissao} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_data_emissao: e.target.value}})} className="h-8 bg-background border-border text-xs" /></div>
                     </div>
                   </div>
 
-                  <div className="space-y-2 border-l-2 border-zinc-500 pl-4 bg-white/5 py-2">
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-white">2. AUTORIDADE EMISSORA</h4>
-                    <Input value={relatorioForm.dados_detalhados.ato_autoridade_nome} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_autoridade_nome: e.target.value}})} className="h-8 bg-black border-border text-xs" />
+                  <div className="space-y-2 border-l-2 border-zinc-500 pl-4 bg-muted/50 py-2">
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-foreground">2. AUTORIDADE EMISSORA</h4>
+                    <Input value={relatorioForm.dados_detalhados.ato_autoridade_nome} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_autoridade_nome: e.target.value}})} className="h-8 bg-background border-border text-xs" />
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">5. DECISÃO</Label>
-                    <Textarea rows={5} className="bg-black border-border text-white text-xs leading-relaxed" value={relatorioForm.dados_detalhados.ato_decisao} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_decisao: e.target.value}})} />
+                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">5. DECISÃO</Label>
+                    <Textarea rows={5} className="bg-background border-border text-foreground text-xs leading-relaxed" value={relatorioForm.dados_detalhados.ato_decisao} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_decisao: e.target.value}})} />
                   </div>
                 </>
               )}
@@ -3109,8 +3109,8 @@ function SidebarItem({
       onClick={onClick}
       className={`flex w-full items-center justify-between rounded-md px-4 py-3 text-sm font-medium transition-all ${
         active 
-          ? "bg-white/10 text-white shadow-[inset_2px_0_0_0_rgba(59,130,246,1)]" 
-          : "text-slate-400 hover:bg-zinc-800 hover:text-slate-200"
+          ? "bg-muted text-foreground shadow-[inset_2px_0_0_0_rgba(59,130,246,1)]" 
+          : "text-muted-foreground hover:bg-muted hover:text-foreground"
       }`}
     >
       <div className="flex items-center gap-3">
@@ -3130,10 +3130,10 @@ function StatCard({ title, value, icon: Icon, color }: { title: string, value: s
   return (
     <div className="flex flex-col gap-2 rounded-lg border border-border bg-card p-6">
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{title}</span>
+        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{title}</span>
         <Icon className={`h-5 w-5 ${color}`} />
       </div>
-      <div className="text-4xl font-bold text-white tracking-wider">{value}</div>
+      <div className="text-4xl font-bold text-foreground tracking-wider">{value}</div>
     </div>
   );
 }
@@ -3141,7 +3141,7 @@ function StatCard({ title, value, icon: Icon, color }: { title: string, value: s
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">{label}</p>
+      <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{label}</p>
       {children}
     </div>
   );

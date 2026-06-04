@@ -117,28 +117,28 @@ function AuthPage() {
     <div className="flex min-h-screen items-center justify-center bg-background p-6 font-mono">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full overflow-hidden bg-card border border-border shadow-glow">
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full overflow-hidden bg-card border border-border shadow-sm">
             <img src="/corregedoria-logo.png" alt="Brasão Corregedoria PMESP" className="h-full w-full object-cover" />
           </div>
-          <h1 className="mt-6 font-display text-2xl font-black uppercase tracking-widest text-white">
+          <h1 className="mt-6 font-display text-2xl font-black uppercase tracking-widest text-foreground">
             Terminal Corregedoria
           </h1>
-          <p className="mt-2 text-xs font-medium uppercase tracking-[0.2em] text-slate-500">
+          <p className="mt-2 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
             Corregedoria Geral · PMESP
           </p>
         </div>
 
-        <div className="rounded-xl border border-border bg-card p-8 shadow-2xl">
+        <div className="rounded-xl border border-border bg-card p-8 shadow-sm">
           <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="mb-8 grid w-full grid-cols-2 bg-black border border-border p-1">
-              <TabsTrigger value="signin" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-white cursor-pointer">ENTRAR</TabsTrigger>
-              <TabsTrigger value="signup" className="data-[state=active]:bg-zinc-800 data-[state=active]:text-white cursor-pointer">CADASTRAR</TabsTrigger>
+            <TabsList className="mb-8 grid w-full grid-cols-2 bg-background border border-border p-1">
+              <TabsTrigger value="signin" className="data-[state=active]:bg-muted data-[state=active]:text-foreground cursor-pointer">ENTRAR</TabsTrigger>
+              <TabsTrigger value="signup" className="data-[state=active]:bg-muted data-[state=active]:text-foreground cursor-pointer">CADASTRAR</TabsTrigger>
             </TabsList>
 
             <TabsContent value="signin">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="login-name" className="text-xs uppercase tracking-wider text-slate-400">Nome</Label>
+                  <Label htmlFor="login-name" className="text-xs uppercase tracking-wider text-muted-foreground">Nome</Label>
                   <Input
                     id="login-name"
                     placeholder="Ex: João Silva"
@@ -146,11 +146,11 @@ function AuthPage() {
                     onChange={(e) => setLoginName(e.target.value)}
                     required
                     autoComplete="username"
-                    className="bg-black border-border focus:ring-1 focus:ring-white/40 focus:border-white/50 text-white"
+                    className="bg-background border-input focus:ring-1 focus:ring-ring focus:border-ring text-foreground"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-xs uppercase tracking-wider text-slate-400">Senha de Acesso</Label>
+                  <Label htmlFor="password" className="text-xs uppercase tracking-wider text-muted-foreground">Senha de Acesso</Label>
                   <Input
                     id="password"
                     type="password"
@@ -158,10 +158,10 @@ function AuthPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     autoComplete="current-password"
-                    className="bg-black border-border focus:ring-1 focus:ring-white/40 focus:border-white/50 text-white"
+                    className="bg-background border-input focus:ring-1 focus:ring-ring focus:border-ring text-foreground"
                   />
                 </div>
-                <Button type="submit" disabled={loading} className="w-full bg-white text-black hover:bg-zinc-200 hover:scale-[1.02] active:scale-[0.98] transition-all font-bold uppercase tracking-widest mt-4">
+                <Button type="submit" disabled={loading} className="w-full bg-foreground text-background hover:bg-foreground/80 hover:scale-[1.02] active:scale-[0.98] transition-all font-bold uppercase tracking-widest mt-4">
                   {loading ? "Processando..." : "Autenticar"}
                 </Button>
               </form>
@@ -170,7 +170,7 @@ function AuthPage() {
             <TabsContent value="signup">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name" className="text-xs uppercase tracking-wider text-slate-400">Nome Completo</Label>
+                  <Label htmlFor="name" className="text-xs uppercase tracking-wider text-muted-foreground">Nome Completo</Label>
                   <Input
                     id="name"
                     placeholder="Ex: João Silva"
@@ -178,11 +178,11 @@ function AuthPage() {
                     onChange={(e) => setFullName(e.target.value)}
                     required
                     autoComplete="name"
-                    className="bg-black border-border focus:ring-1 focus:ring-white/40 focus:border-white/50 text-white"
+                    className="bg-background border-input focus:ring-1 focus:ring-ring focus:border-ring text-foreground"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-password" className="text-xs uppercase tracking-wider text-slate-400">Senha</Label>
+                  <Label htmlFor="signup-password" className="text-xs uppercase tracking-wider text-muted-foreground">Senha</Label>
                   <Input
                     id="signup-password"
                     type="password"
@@ -190,11 +190,11 @@ function AuthPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     autoComplete="new-password"
-                    className="bg-black border-border focus:ring-1 focus:ring-white/40 focus:border-white/50 text-white"
+                    className="bg-background border-input focus:ring-1 focus:ring-ring focus:border-ring text-foreground"
                   />
                 </div>
-                <p className="text-[10px] text-slate-500 pt-1">Seu nome será usado como identificador de acesso ao sistema.</p>
-                <Button type="submit" disabled={loading} className="w-full bg-white text-black hover:bg-zinc-200 hover:scale-[1.02] active:scale-[0.98] transition-all font-bold uppercase tracking-widest mt-2">
+                <p className="text-[10px] text-muted-foreground pt-1">Seu nome será usado como identificador de acesso ao sistema.</p>
+                <Button type="submit" disabled={loading} className="w-full bg-foreground text-background hover:bg-foreground/80 hover:scale-[1.02] active:scale-[0.98] transition-all font-bold uppercase tracking-widest mt-2">
                   {loading ? "Enviando solicitação..." : "Solicitar Acesso"}
                 </Button>
               </form>
@@ -202,7 +202,7 @@ function AuthPage() {
           </Tabs>
         </div>
 
-        <div className="flex items-center justify-center gap-2 text-[10px] uppercase tracking-[0.2em] text-slate-600 text-center">
+        <div className="flex items-center justify-center gap-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground text-center">
           <BadgeCheck className="h-3 w-3 flex-shrink-0" />
           <span>Sistema de Uso Restrito da Polícia Militar de São Paulo</span>
         </div>

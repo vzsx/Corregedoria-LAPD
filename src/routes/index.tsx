@@ -76,7 +76,7 @@ function Index() {
                 mounted ? "opacity-100 scale-100" : "opacity-0 scale-90"
               }`}
             >
-              <img src="/pmesp-logo.png" alt="Logo PMESP" className="h-full w-full object-contain drop-shadow-[0_0_12px_rgba(255,255,255,0.25)]" style={{mixBlendMode: "screen"}} />
+              <img src="/pmesp-logo.png" alt="Logo PMESP" className="h-full w-full object-contain" />
             </div>
 
             {/* Badge pill */}

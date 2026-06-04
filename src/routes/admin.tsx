@@ -103,14 +103,14 @@ function AdminPage() {
       <section className="container mx-auto px-6 py-12">
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="font-display text-3xl font-bold uppercase tracking-tight">
+                <h1 className="font-display text-3xl font-bold uppercase tracking-tight text-foreground">
               Administração de Acesso
             </h1>
             <p className="text-sm text-muted-foreground">
               Aprove policiais como corregedores ou administradores.
             </p>
           </div>
-          <ShieldCheck className="h-10 w-10 text-gold" />
+          <ShieldCheck className="h-10 w-10 text-foreground" />
         </div>
 
         <div className="space-y-3">
