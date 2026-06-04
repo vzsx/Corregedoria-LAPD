@@ -529,6 +529,7 @@ function Corregedoria() {
     conteudo: string;
     denuncia_id: string;
     investigacao_id: string;
+    investigacao_ids: string[];
     status: Status;
     dados_detalhados: any;
   }>({
@@ -538,6 +539,7 @@ function Corregedoria() {
     conteudo: "",
     denuncia_id: "",
     investigacao_id: "",
+    investigacao_ids: [],
     status: "pendente",
     dados_detalhados: {
       // 0. DADOS DO CORREGEDOR
@@ -578,6 +580,7 @@ function Corregedoria() {
       provas_descricao: "",
       ato_id_vinculado: "",
       ip_id_vinculado: "",
+      depoimento_ids: [] as string[],
 
       // --- CAMPOS ATO ADMINISTRATIVO ---
       ato_numero_inquerito: "",
@@ -905,12 +908,14 @@ function Corregedoria() {
       setDenunciaRelatorios(prev => [...prev, { denuncia_id: relatorioForm.denuncia_id, relatorio_id: data[0].id }]);
     }
 
-    if (relatorioForm.investigacao_id && relatorioForm.investigacao_id !== "none") {
-      await supabase.from("investigacao_relatorio").insert({
-        investigacao_id: relatorioForm.investigacao_id,
-        relatorio_id: data[0].id
-      });
-      setInvestigacaoRelatorios(prev => [...prev, { investigacao_id: relatorioForm.investigacao_id, relatorio_id: data[0].id }]);
+    if (relatorioForm.investigacao_ids?.length) {
+      for (const invId of relatorioForm.investigacao_ids) {
+        await supabase.from("investigacao_relatorio").insert({
+          investigacao_id: invId,
+          relatorio_id: data[0].id
+        });
+      }
+      setInvestigacaoRelatorios(prev => [...prev, ...relatorioForm.investigacao_ids.map(invId => ({ investigacao_id: invId, relatorio_id: data[0].id }))]);
     }
 
     setSubmitting(false);
@@ -922,8 +927,9 @@ function Corregedoria() {
       tipo_denuncia: "Inquérito Policial", 
       oficial: user?.user_metadata?.full_name || "", 
       conteudo: "", 
-      denuncia_id: "", 
-      investigacao_id: "", 
+      denuncia_id: "",
+      investigacao_id: "",
+      investigacao_ids: [],
       status: "pendente",
       dados_detalhados: {
         data_abertura: format(new Date(), "yyyy-MM-dd"),
@@ -953,6 +959,7 @@ function Corregedoria() {
         provas_descricao: "",
         ato_id_vinculado: "",
         ip_id_vinculado: "",
+        depoimento_ids: [],
         // Ato Adm fields
         ato_numero_inquerito: "",
         ato_numero: "",
@@ -1216,8 +1223,9 @@ function Corregedoria() {
       tipo_denuncia: "Inquérito Policial", 
       oficial: user?.user_metadata?.full_name || "", 
       conteudo: "", 
-      denuncia_id: "", 
-      investigacao_id: "", 
+      denuncia_id: "",
+      investigacao_id: "",
+      investigacao_ids: [],
       status: "pendente",
       dados_detalhados: {
         data_abertura: format(new Date(), "yyyy-MM-dd"),
@@ -1245,6 +1253,9 @@ function Corregedoria() {
         provas_selecionadas: [],
         provas_outro: "",
         provas_descricao: "",
+        ato_id_vinculado: "",
+        ip_id_vinculado: "",
+        depoimento_ids: [],
         ato_numero_inquerito: "",
         ato_numero: "",
         ato_data_emissao: format(new Date(), "yyyy-MM-dd"),
@@ -2641,32 +2652,70 @@ function Corregedoria() {
                                 </Select>
                               </div>
                               <div className="space-y-1">
-                                <Label className="text-[9px] text-muted-foreground uppercase">Investigação</Label>
-                                <Select value={relatorioForm.investigacao_id} onValueChange={(v) => setRelatorioForm({ ...relatorioForm, investigacao_id: v })}>
-                                  <SelectTrigger className="bg-background border-border text-foreground h-8 text-[10px] uppercase">
-                                    <SelectValue placeholder="Nenhum" />
-                                  </SelectTrigger>
-                                  <SelectContent className="bg-muted border-border text-foreground">
-                                    <SelectItem value="none">Nenhum</SelectItem>
-                                    {investigacoes.map(i => (
-                                      <SelectItem key={i.id} value={i.id} className="text-[10px]">#{i.numero_registro} - {i.titulo}</SelectItem>
+                                <Label className="text-[9px] text-muted-foreground uppercase">Investigações Vinculadas</Label>
+                                <div className="flex flex-wrap gap-1 mb-1">
+                                  {relatorioForm.investigacao_ids.map(id => {
+                                    const inv = investigacoes.find(i => i.id === id);
+                                    return (
+                                      <Badge key={id} variant="secondary" className="text-[9px] flex items-center gap-1">
+                                        #{inv?.numero_registro || '?'} - {inv?.titulo || 'N/A'}
+                                        <button type="button" onClick={() => setRelatorioForm({...relatorioForm, investigacao_ids: relatorioForm.investigacao_ids.filter(x => x !== id)})} className="text-red-400 hover:text-red-300 ml-1">&times;</button>
+                                      </Badge>
+                                    );
+                                  })}
+                                </div>
+                                <div className="flex gap-2">
+                                  <select className="flex-1 h-8 bg-background border border-border text-foreground text-[10px] rounded px-2" value="" onChange={(e) => { const v = e.target.value; if (v && !relatorioForm.investigacao_ids.includes(v)) setRelatorioForm({...relatorioForm, investigacao_ids: [...relatorioForm.investigacao_ids, v]}); }}>
+                                    <option value="">Adicionar investigação...</option>
+                                    {investigacoes.filter(i => !relatorioForm.investigacao_ids.includes(i.id)).map(i => (
+                                      <option key={i.id} value={i.id}>#{i.numero_registro} - {i.titulo}</option>
                                     ))}
-                                  </SelectContent>
-                                </Select>
+                                  </select>
+                                </div>
                               </div>
                               <div className="space-y-1">
-                                <Label className="text-[9px] text-muted-foreground uppercase">Ato Adm Vinculado</Label>
-                                <Select value={relatorioForm.dados_detalhados.ato_id_vinculado} onValueChange={(v) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_id_vinculado: v}})}>
-                                  <SelectTrigger className="bg-background border-border text-foreground h-8 text-[10px] uppercase">
-                                    <SelectValue placeholder="Nenhum" />
-                                  </SelectTrigger>
-                                  <SelectContent className="bg-muted border-border text-foreground">
-                                    <SelectItem value="none">Nenhum</SelectItem>
-                                    {relatorios.filter(r => r.tipo_denuncia === "Ato Administrativo").map(r => (
-                                      <SelectItem key={r.id} value={r.id} className="text-[10px]">#{r.numero_registro} - {r.titulo}</SelectItem>
+                                <Label className="text-[9px] text-muted-foreground uppercase">Atos Adm Vinculados</Label>
+                                <div className="flex flex-wrap gap-1 mb-1">
+                                  {(relatorioForm.dados_detalhados.ato_ids_vinculados || []).map((id: string) => {
+                                    const r = relatorios.find(x => x.id === id);
+                                    return (
+                                      <Badge key={id} variant="secondary" className="text-[9px] flex items-center gap-1">
+                                        #{r?.numero_registro || '?'} - {r?.titulo || 'N/A'}
+                                        <button type="button" onClick={() => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_ids_vinculados: (relatorioForm.dados_detalhados.ato_ids_vinculados || []).filter((x: string) => x !== id)}})} className="text-red-400 hover:text-red-300 ml-1">&times;</button>
+                                      </Badge>
+                                    );
+                                  })}
+                                </div>
+                                <div className="flex gap-2">
+                                  <select className="flex-1 h-8 bg-background border border-border text-foreground text-[10px] rounded px-2" value="" onChange={(e) => { const v = e.target.value; if (v) { const arr = [...(relatorioForm.dados_detalhados.ato_ids_vinculados || [])]; if (!arr.includes(v)) arr.push(v); setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_ids_vinculados: arr}}); }}}>
+                                    <option value="">Adicionar ato adm...</option>
+                                    {relatorios.filter(r => r.tipo_denuncia === "Ato Administrativo").filter(r => !(relatorioForm.dados_detalhados.ato_ids_vinculados || []).includes(r.id)).map(r => (
+                                      <option key={r.id} value={r.id}>#{r.numero_registro} - {r.titulo}</option>
                                     ))}
-                                  </SelectContent>
-                                </Select>
+                                  </select>
+                                </div>
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-[9px] text-muted-foreground uppercase">Depoimentos Vinculados</Label>
+                                <div className="flex flex-wrap gap-1 mb-1">
+                                  {(relatorioForm.dados_detalhados.depoimento_ids || []).map((id: string) => {
+                                    const dep = depoimentos.find(d => d.id === id);
+                                    return (
+                                      <Badge key={id} variant="secondary" className="text-[9px] flex items-center gap-1">
+                                        {dep?.oficial_nome || 'N/A'}
+                                        <button type="button" onClick={() => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, depoimento_ids: (relatorioForm.dados_detalhados.depoimento_ids || []).filter((x: string) => x !== id)}})} className="text-red-400 hover:text-red-300 ml-1">&times;</button>
+                                      </Badge>
+                                    );
+                                  })}
+                                </div>
+                                <div className="flex gap-2">
+                                  <select className="flex-1 h-8 bg-background border border-border text-foreground text-[10px] rounded px-2" value="" onChange={(e) => { const v = e.target.value; if (v) { const arr = [...(relatorioForm.dados_detalhados.depoimento_ids || [])]; if (!arr.includes(v)) arr.push(v); setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, depoimento_ids: arr}}); }}}>
+                                    <option value="">Adicionar depoimento...</option>
+                                    {depoimentos.filter(d => !(relatorioForm.dados_detalhados.depoimento_ids || []).includes(d.id)).map(d => (
+                                      <option key={d.id} value={d.id}>{d.oficial_nome} - {d.data_depoimento}</option>
+                                    ))}
+                                  </select>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -2725,6 +2774,7 @@ function Corregedoria() {
                           relatorios={relatorios}
                           onEdit={(rel: any) => {
                             setEditingRelatorioId(rel.id);
+                            const linkedInvIds = investigacaoRelatorios.filter(ir => ir.relatorio_id === rel.id).map(ir => ir.investigacao_id);
                             setRelatorioForm({
                               titulo: rel.titulo || "",
                               tipo_denuncia: rel.tipo_denuncia || "Inquérito Policial",
@@ -2732,7 +2782,7 @@ function Corregedoria() {
                               conteudo: rel.conteudo || "",
                               denuncia_id: "",
                               investigacao_id: "",
-                              
+                              investigacao_ids: linkedInvIds,
                               status: rel.status || "pendente",
                               dados_detalhados: { ...relatorioForm.dados_detalhados, ...(rel.dados_detalhados || {}) }
                             });
@@ -2936,33 +2986,71 @@ function Corregedoria() {
                                   </Select>
                                 </div>
                                 <div className="space-y-1">
-                                  <Label className="text-[9px] text-muted-foreground uppercase">Investigação</Label>
-                                  <Select value={relatorioForm.investigacao_id} onValueChange={(v) => setRelatorioForm({ ...relatorioForm, investigacao_id: v })}>
-                                    <SelectTrigger className="bg-background border-border text-foreground h-8 text-[10px] uppercase">
-                                      <SelectValue placeholder="Nenhum" />
-                                    </SelectTrigger>
-                                    <SelectContent className="bg-muted border-border text-foreground">
-                                      <SelectItem value="none">Nenhum</SelectItem>
-                                      {investigacoes.map(i => (
-                                        <SelectItem key={i.id} value={i.id} className="text-[10px]">#{i.numero_registro} - {i.titulo}</SelectItem>
+                                  <Label className="text-[9px] text-muted-foreground uppercase">Investigações Vinculadas</Label>
+                                  <div className="flex flex-wrap gap-1 mb-1">
+                                    {relatorioForm.investigacao_ids.map(id => {
+                                      const inv = investigacoes.find(i => i.id === id);
+                                      return (
+                                        <Badge key={id} variant="secondary" className="text-[9px] flex items-center gap-1">
+                                          #{inv?.numero_registro || '?'} - {inv?.titulo || 'N/A'}
+                                          <button type="button" onClick={() => setRelatorioForm({...relatorioForm, investigacao_ids: relatorioForm.investigacao_ids.filter(x => x !== id)})} className="text-red-400 hover:text-red-300 ml-1">&times;</button>
+                                        </Badge>
+                                      );
+                                    })}
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <select className="flex-1 h-8 bg-background border border-border text-foreground text-[10px] rounded px-2" value="" onChange={(e) => { const v = e.target.value; if (v && !relatorioForm.investigacao_ids.includes(v)) setRelatorioForm({...relatorioForm, investigacao_ids: [...relatorioForm.investigacao_ids, v]}); }}>
+                                      <option value="">Adicionar investigação...</option>
+                                      {investigacoes.filter(i => !relatorioForm.investigacao_ids.includes(i.id)).map(i => (
+                                        <option key={i.id} value={i.id}>#{i.numero_registro} - {i.titulo}</option>
                                       ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                              <div className="space-y-1">
-                                <Label className="text-[9px] text-muted-foreground uppercase">Inquérito Policial Vinculado</Label>
-                                <Select value={relatorioForm.dados_detalhados.ip_id_vinculado} onValueChange={(v) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ip_id_vinculado: v}})}>
-                                  <SelectTrigger className="bg-background border-border text-foreground h-8 text-[10px] uppercase">
-                                    <SelectValue placeholder="Nenhum" />
-                                  </SelectTrigger>
-                                  <SelectContent className="bg-muted border-border text-foreground">
-                                    <SelectItem value="none">Nenhum</SelectItem>
-                                    {relatorios.filter(r => r.tipo_denuncia === "Inquérito Policial").map(r => (
-                                      <SelectItem key={r.id} value={r.id} className="text-[10px]">#{r.numero_registro} - {r.titulo}</SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
+                                    </select>
+                                  </div>
+                                </div>
+                                <div className="space-y-1">
+                                  <Label className="text-[9px] text-muted-foreground uppercase">IPs Vinculados</Label>
+                                  <div className="flex flex-wrap gap-1 mb-1">
+                                    {(relatorioForm.dados_detalhados.ip_ids_vinculados || []).map((id: string) => {
+                                      const r = relatorios.find(x => x.id === id);
+                                      return (
+                                        <Badge key={id} variant="secondary" className="text-[9px] flex items-center gap-1">
+                                          #{r?.numero_registro || '?'} - {r?.titulo || 'N/A'}
+                                          <button type="button" onClick={() => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ip_ids_vinculados: (relatorioForm.dados_detalhados.ip_ids_vinculados || []).filter((x: string) => x !== id)}})} className="text-red-400 hover:text-red-300 ml-1">&times;</button>
+                                        </Badge>
+                                      );
+                                    })}
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <select className="flex-1 h-8 bg-background border border-border text-foreground text-[10px] rounded px-2" value="" onChange={(e) => { const v = e.target.value; if (v) { const arr = [...(relatorioForm.dados_detalhados.ip_ids_vinculados || [])]; if (!arr.includes(v)) arr.push(v); setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ip_ids_vinculados: arr}}); }}}>
+                                      <option value="">Adicionar IP...</option>
+                                      {relatorios.filter(r => r.tipo_denuncia === "Inquérito Policial").filter(r => !(relatorioForm.dados_detalhados.ip_ids_vinculados || []).includes(r.id)).map(r => (
+                                        <option key={r.id} value={r.id}>#{r.numero_registro} - {r.titulo}</option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                </div>
+                                <div className="space-y-1">
+                                  <Label className="text-[9px] text-muted-foreground uppercase">Depoimentos Vinculados</Label>
+                                  <div className="flex flex-wrap gap-1 mb-1">
+                                    {(relatorioForm.dados_detalhados.depoimento_ids || []).map((id: string) => {
+                                      const dep = depoimentos.find(d => d.id === id);
+                                      return (
+                                        <Badge key={id} variant="secondary" className="text-[9px] flex items-center gap-1">
+                                          {dep?.oficial_nome || 'N/A'}
+                                          <button type="button" onClick={() => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, depoimento_ids: (relatorioForm.dados_detalhados.depoimento_ids || []).filter((x: string) => x !== id)}})} className="text-red-400 hover:text-red-300 ml-1">&times;</button>
+                                        </Badge>
+                                      );
+                                    })}
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <select className="flex-1 h-8 bg-background border border-border text-foreground text-[10px] rounded px-2" value="" onChange={(e) => { const v = e.target.value; if (v) { const arr = [...(relatorioForm.dados_detalhados.depoimento_ids || [])]; if (!arr.includes(v)) arr.push(v); setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, depoimento_ids: arr}}); }}}>
+                                      <option value="">Adicionar depoimento...</option>
+                                      {depoimentos.filter(d => !(relatorioForm.dados_detalhados.depoimento_ids || []).includes(d.id)).map(d => (
+                                        <option key={d.id} value={d.id}>{d.oficial_nome} - {d.data_depoimento}</option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                </div>
                             </div>
                           </div>
                         </div>
@@ -3021,6 +3109,7 @@ function Corregedoria() {
                           relatorios={relatorios}
                           onEdit={(rel: any) => {
                             setEditingRelatorioId(rel.id);
+                            const linkedInvIds = investigacaoRelatorios.filter(ir => ir.relatorio_id === rel.id).map(ir => ir.investigacao_id);
                             setRelatorioForm({
                               titulo: rel.titulo || "",
                               tipo_denuncia: rel.tipo_denuncia || "Ato Administrativo",
@@ -3028,7 +3117,7 @@ function Corregedoria() {
                               conteudo: rel.conteudo || "",
                               denuncia_id: "",
                               investigacao_id: "",
-                              
+                              investigacao_ids: linkedInvIds,
                               status: rel.status || "pendente",
                               dados_detalhados: { ...relatorioForm.dados_detalhados, ...(rel.dados_detalhados || {}) }
                             });
@@ -3527,6 +3616,28 @@ function Corregedoria() {
                           </select>
                         </div>
                       </div>
+                      <div className="space-y-1">
+                        <Label className="text-[9px] text-muted-foreground uppercase">Depoimentos Vinculados</Label>
+                        <div className="flex flex-wrap gap-1 mb-1">
+                          {(relatorioForm.dados_detalhados.depoimento_ids || []).map((id: string) => {
+                            const dep = depoimentos.find(d => d.id === id);
+                            return (
+                              <Badge key={id} variant="secondary" className="text-[9px] flex items-center gap-1">
+                                {dep?.oficial_nome || 'N/A'}
+                                <button type="button" onClick={() => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, depoimento_ids: (relatorioForm.dados_detalhados.depoimento_ids || []).filter((x: string) => x !== id)}})} className="text-red-400 hover:text-red-300 ml-1">&times;</button>
+                              </Badge>
+                            );
+                          })}
+                        </div>
+                        <div className="flex gap-2">
+                          <select className="flex-1 h-8 bg-background border border-border text-foreground text-[10px] rounded px-2" value="" onChange={(e) => { const v = e.target.value; if (v) { const arr = [...(relatorioForm.dados_detalhados.depoimento_ids || [])]; if (!arr.includes(v)) arr.push(v); setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, depoimento_ids: arr}}); }}}>
+                            <option value="">Adicionar depoimento...</option>
+                            {depoimentos.filter(d => !(relatorioForm.dados_detalhados.depoimento_ids || []).includes(d.id)).map(d => (
+                              <option key={d.id} value={d.id}>{d.oficial_nome} - {d.data_depoimento}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </>
@@ -3670,6 +3781,28 @@ function Corregedoria() {
                             <option value="">Adicionar IP...</option>
                             {relatorios.filter(r => r.tipo_denuncia === "Inquérito Policial").filter(r => !(relatorioForm.dados_detalhados.ip_ids_vinculados || []).includes(r.id)).map(r => (
                               <option key={r.id} value={r.id}>#{r.numero_registro} - {r.titulo}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[9px] text-muted-foreground uppercase">Depoimentos Vinculados</Label>
+                        <div className="flex flex-wrap gap-1 mb-1">
+                          {(relatorioForm.dados_detalhados.depoimento_ids || []).map((id: string) => {
+                            const dep = depoimentos.find(d => d.id === id);
+                            return (
+                              <Badge key={id} variant="secondary" className="text-[9px] flex items-center gap-1">
+                                {dep?.oficial_nome || 'N/A'}
+                                <button type="button" onClick={() => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, depoimento_ids: (relatorioForm.dados_detalhados.depoimento_ids || []).filter((x: string) => x !== id)}})} className="text-red-400 hover:text-red-300 ml-1">&times;</button>
+                              </Badge>
+                            );
+                          })}
+                        </div>
+                        <div className="flex gap-2">
+                          <select className="flex-1 h-8 bg-background border border-border text-foreground text-[10px] rounded px-2" value="" onChange={(e) => { const v = e.target.value; if (v) { const arr = [...(relatorioForm.dados_detalhados.depoimento_ids || [])]; if (!arr.includes(v)) arr.push(v); setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, depoimento_ids: arr}}); }}}>
+                            <option value="">Adicionar depoimento...</option>
+                            {depoimentos.filter(d => !(relatorioForm.dados_detalhados.depoimento_ids || []).includes(d.id)).map(d => (
+                              <option key={d.id} value={d.id}>{d.oficial_nome} - {d.data_depoimento}</option>
                             ))}
                           </select>
                         </div>
