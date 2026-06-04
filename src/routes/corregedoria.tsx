@@ -389,15 +389,34 @@ const RelatorioCard = ({
                 </div>
               </div>
               
-              {relatorio.dados_detalhados.ato_id_vinculado && relatorio.dados_detalhados.ato_id_vinculado !== "none" && (
-                <div className="mt-4 p-3 rounded border border-white/10 bg-muted/50">
+              {(relatorio.dados_detalhados.ato_ids_vinculados?.length > 0) && (
+                <div className="mt-4 p-3 rounded border border-border bg-muted/50">
                   <h4 className="text-[9px] font-bold uppercase tracking-widest text-foreground mb-2 flex items-center gap-2">
-                    <LinkIcon className="h-3 w-3" /> Ato Administrativo Vinculado
+                    <LinkIcon className="h-3 w-3" /> Atos Administrativos Vinculados
                   </h4>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="bg-muted border-border text-foreground text-[10px]">
-                      {relatorios?.find((r: Relatorio) => r.id === relatorio.dados_detalhados.ato_id_vinculado)?.titulo || "Documento não encontrado"}
-                    </Badge>
+                  <div className="flex flex-wrap gap-1">
+                    {relatorio.dados_detalhados.ato_ids_vinculados.map((id: string) => (
+                      <Badge key={id} variant="outline" className="bg-muted border-border text-foreground text-[10px]">
+                        {relatorios?.find((r: Relatorio) => r.id === id)?.titulo || "Documento não encontrado"}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {(relatorio.dados_detalhados.depoimento_ids?.length > 0) && (
+                <div className="mt-4 p-3 rounded border border-border bg-muted/50">
+                  <h4 className="text-[9px] font-bold uppercase tracking-widest text-foreground mb-2 flex items-center gap-2">
+                    <MessageSquare className="h-3 w-3" /> Depoimentos Vinculados
+                  </h4>
+                  <div className="flex flex-wrap gap-1">
+                    {relatorio.dados_detalhados.depoimento_ids.map((id: string) => {
+                      const dep = depoimentos?.find((d: Depoimento) => d.id === id);
+                      return (
+                        <Badge key={id} variant="outline" className="bg-muted border-border text-foreground text-[10px]">
+                          {dep?.oficial_nome || "Depoimento não encontrado"}
+                        </Badge>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -469,14 +488,35 @@ const RelatorioCard = ({
                 )}
               </div>
 
-              {relatorio.dados_detalhados.ip_id_vinculado && relatorio.dados_detalhados.ip_id_vinculado !== "none" && (
+              {(relatorio.dados_detalhados.ip_ids_vinculados?.length > 0) && (
                 <div className="p-3 rounded border border-border bg-muted/50">
                   <h4 className="text-[9px] font-bold uppercase tracking-widest text-foreground mb-2 flex items-center gap-2">
-                    <LinkIcon className="h-3 w-3" /> Inquérito Policial Vinculado
+                    <LinkIcon className="h-3 w-3" /> IPs Vinculados
                   </h4>
-                  <Badge variant="outline" className="bg-muted border-border text-foreground text-[10px]">
-                    {relatorios?.find((r: Relatorio) => r.id === relatorio.dados_detalhados.ip_id_vinculado)?.titulo || "Documento não encontrado"}
-                  </Badge>
+                  <div className="flex flex-wrap gap-1">
+                    {relatorio.dados_detalhados.ip_ids_vinculados.map((id: string) => (
+                      <Badge key={id} variant="outline" className="bg-muted border-border text-foreground text-[10px]">
+                        {relatorios?.find((r: Relatorio) => r.id === id)?.titulo || "Documento não encontrado"}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {(relatorio.dados_detalhados.depoimento_ids?.length > 0) && (
+                <div className="p-3 rounded border border-border bg-muted/50">
+                  <h4 className="text-[9px] font-bold uppercase tracking-widest text-foreground mb-2 flex items-center gap-2">
+                    <MessageSquare className="h-3 w-3" /> Depoimentos Vinculados
+                  </h4>
+                  <div className="flex flex-wrap gap-1">
+                    {relatorio.dados_detalhados.depoimento_ids.map((id: string) => {
+                      const dep = depoimentos?.find((d: Depoimento) => d.id === id);
+                      return (
+                        <Badge key={id} variant="outline" className="bg-muted border-border text-foreground text-[10px]">
+                          {dep?.oficial_nome || "Depoimento não encontrado"}
+                        </Badge>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </div>
