@@ -652,9 +652,9 @@ function Corregedoria() {
     descricao: "",
     investigado: "",
     status: "pendente" as Status,
-    denuncia_id: "",
-    relatorio_id_ip: "",
-    relatorio_id_ato: "",
+    denuncia_ids: [] as string[],
+    relatorio_ids_ip: [] as string[],
+    relatorio_ids_ato: [] as string[],
     
     // Novos campos
     tipo_procedimento: "Investigação Administrativa",
@@ -1100,30 +1100,22 @@ function Corregedoria() {
 
     const newInvId = data[0].id;
 
-    // Vincular denúncia se selecionada
-    if (investigacaoForm.denuncia_id) {
+    // Vincular denúncias
+    for (const denId of investigacaoForm.denuncia_ids) {
       await supabase.from("denuncia_investigacao").insert({
-        denuncia_id: investigacaoForm.denuncia_id,
+        denuncia_id: denId,
         investigacao_id: newInvId
       });
-      setDenunciaInvestigacoes(prev => [...prev, { denuncia_id: investigacaoForm.denuncia_id, investigacao_id: newInvId }]);
+      setDenunciaInvestigacoes(prev => [...prev, { denuncia_id: denId, investigacao_id: newInvId }]);
     }
 
-    // Vincular documentos se selecionados
-    if (investigacaoForm.relatorio_id_ip && investigacaoForm.relatorio_id_ip !== "none") {
+    // Vincular documentos
+    for (const relId of [...investigacaoForm.relatorio_ids_ip, ...investigacaoForm.relatorio_ids_ato]) {
       await supabase.from("investigacao_relatorio").insert({
         investigacao_id: newInvId,
-        relatorio_id: investigacaoForm.relatorio_id_ip
+        relatorio_id: relId
       });
-      setInvestigacaoRelatorios(prev => [...prev, { investigacao_id: newInvId, relatorio_id: investigacaoForm.relatorio_id_ip }]);
-    }
-    
-    if (investigacaoForm.relatorio_id_ato && investigacaoForm.relatorio_id_ato !== "none") {
-      await supabase.from("investigacao_relatorio").insert({
-        investigacao_id: newInvId,
-        relatorio_id: investigacaoForm.relatorio_id_ato
-      });
-      setInvestigacaoRelatorios(prev => [...prev, { investigacao_id: newInvId, relatorio_id: investigacaoForm.relatorio_id_ato }]);
+      setInvestigacaoRelatorios(prev => [...prev, { investigacao_id: newInvId, relatorio_id: relId }]);
     }
 
     toast.success("Investigação iniciada com sucesso!");
@@ -1138,9 +1130,9 @@ function Corregedoria() {
       descricao: "", 
       investigado: "", 
       status: "pendente" as Status, 
-      denuncia_id: "", 
-      relatorio_id_ip: "",
-      relatorio_id_ato: "",
+      denuncia_ids: [], 
+      relatorio_ids_ip: [],
+      relatorio_ids_ato: [],
       tipo_procedimento: "Investigação Administrativa",
       autoridade_responsavel: user?.user_metadata?.full_name || "",
       autoridade_patente: "",
@@ -1159,14 +1151,18 @@ function Corregedoria() {
   };
 
   const handleEditInvestigacao = (inv: Investigacao) => {
+    const linkedDenunciaIds = denunciaInvestigacoes.filter(di => di.investigacao_id === inv.id).map(di => di.denuncia_id);
+    const linkedRelatorios = investigacaoRelatorios.filter(ir => ir.investigacao_id === inv.id).map(ir => ir.relatorio_id);
+    const linkedRelatoriosIP = relatorios.filter(r => linkedRelatorios.includes(r.id) && r.tipo_denuncia === "Inquérito Policial").map(r => r.id);
+    const linkedRelatoriosAto = relatorios.filter(r => linkedRelatorios.includes(r.id) && r.tipo_denuncia === "Ato Administrativo").map(r => r.id);
     setInvestigacaoForm({
       titulo: inv.titulo || "",
       descricao: inv.descricao || "",
       investigado: inv.investigado || "",
       status: inv.status || "pendente",
-      denuncia_id: "", 
-      relatorio_id_ip: "",
-      relatorio_id_ato: "",
+      denuncia_ids: linkedDenunciaIds,
+      relatorio_ids_ip: linkedRelatoriosIP,
+      relatorio_ids_ato: linkedRelatoriosAto,
       tipo_procedimento: inv.tipo_procedimento || "Investigação Administrativa",
       autoridade_responsavel: inv.autoridade_responsavel || "",
       autoridade_patente: inv.autoridade_patente || "",
@@ -1212,7 +1208,37 @@ function Corregedoria() {
     setSubmitting(false);
     if (error) return toast.error("Erro ao atualizar investigação");
 
-    setInvestigacoes(prev => prev.map(i => i.id === editingInvestigacaoId ? { 
+    // Sincronizar junction tables
+    const invId = editingInvestigacaoId;
+
+    // Denúncias
+    const currentDenIds = denunciaInvestigacoes.filter(di => di.investigacao_id === invId).map(di => di.denuncia_id);
+    const toRemoveDen = currentDenIds.filter(id => !investigacaoForm.denuncia_ids.includes(id));
+    const toAddDen = investigacaoForm.denuncia_ids.filter(id => !currentDenIds.includes(id));
+    for (const denId of toRemoveDen) {
+      await supabase.from("denuncia_investigacao").delete().eq("investigacao_id", invId).eq("denuncia_id", denId);
+      setDenunciaInvestigacoes(prev => prev.filter(di => !(di.investigacao_id === invId && di.denuncia_id === denId)));
+    }
+    for (const denId of toAddDen) {
+      await supabase.from("denuncia_investigacao").insert({ denuncia_id: denId, investigacao_id: invId });
+      setDenunciaInvestigacoes(prev => [...prev, { denuncia_id: denId, investigacao_id: invId }]);
+    }
+
+    // Relatórios (IP + Ato)
+    const currentRelIds = investigacaoRelatorios.filter(ir => ir.investigacao_id === invId).map(ir => ir.relatorio_id);
+    const newRelIds = [...investigacaoForm.relatorio_ids_ip, ...investigacaoForm.relatorio_ids_ato];
+    const toRemoveRel = currentRelIds.filter(id => !newRelIds.includes(id));
+    const toAddRel = newRelIds.filter(id => !currentRelIds.includes(id));
+    for (const relId of toRemoveRel) {
+      await supabase.from("investigacao_relatorio").delete().eq("investigacao_id", invId).eq("relatorio_id", relId);
+      setInvestigacaoRelatorios(prev => prev.filter(ir => !(ir.investigacao_id === invId && ir.relatorio_id === relId)));
+    }
+    for (const relId of toAddRel) {
+      await supabase.from("investigacao_relatorio").insert({ investigacao_id: invId, relatorio_id: relId });
+      setInvestigacaoRelatorios(prev => [...prev, { investigacao_id: invId, relatorio_id: relId }]);
+    }
+
+    setInvestigacoes(prev => prev.map(i => i.id === invId ? { 
       ...i, 
       ...investigacaoForm
     } : i));
@@ -2091,35 +2117,66 @@ function Corregedoria() {
                               className="bg-background border-border text-foreground h-8 text-xs" 
                             />
                           )}
-                          <div className="grid grid-cols-2 gap-4 mt-2">
-                            <div className="space-y-2">
-                              <Label className="text-muted-foreground text-[10px] uppercase">Vincular Denúncia</Label>
-                              <Select value={investigacaoForm.denuncia_id} onValueChange={(v) => setInvestigacaoForm({...investigacaoForm, denuncia_id: v})}>
-                                <SelectTrigger className="bg-background border-border text-foreground h-8 text-xs"><SelectValue placeholder="Selecione..." /></SelectTrigger>
-                                <SelectContent className="bg-muted border-border text-foreground">
-                                  {denuncias.map(d => <SelectItem key={d.id} value={d.id}>#{d.numero_registro} - {d.titulo}</SelectItem>)}
-                                </SelectContent>
-                              </Select>
+                          <div className="space-y-4 mt-2">
+                            <div className="space-y-1">
+                              <Label className="text-muted-foreground text-[10px] uppercase">Denúncias Vinculadas</Label>
+                              <div className="flex flex-wrap gap-1 mb-1">
+                                {investigacaoForm.denuncia_ids.map((id: string) => {
+                                  const d = denuncias.find(x => x.id === id);
+                                  return (
+                                    <Badge key={id} variant="secondary" className="text-[9px] flex items-center gap-1">
+                                      #{d?.numero_registro || '?'} - {d?.titulo || 'N/A'}
+                                      <button type="button" onClick={() => setInvestigacaoForm({...investigacaoForm, denuncia_ids: investigacaoForm.denuncia_ids.filter(x => x !== id)})} className="text-red-400 hover:text-red-300 ml-1">&times;</button>
+                                    </Badge>
+                                  );
+                                })}
+                              </div>
+                              <select className="w-full h-8 bg-background border border-border text-foreground text-[10px] rounded px-2" value="" onChange={(e) => { const v = e.target.value; if (v && !investigacaoForm.denuncia_ids.includes(v)) { setInvestigacaoForm({...investigacaoForm, denuncia_ids: [...investigacaoForm.denuncia_ids, v]}); }}}>
+                                <option value="">Adicionar denúncia...</option>
+                                {denuncias.filter(d => !investigacaoForm.denuncia_ids.includes(d.id)).map(d => (
+                                  <option key={d.id} value={d.id}>#{d.numero_registro} - {d.titulo}</option>
+                                ))}
+                              </select>
                             </div>
-                            <div className="space-y-2">
-                              <Label className="text-muted-foreground text-[10px] uppercase">Vincular Inquérito (Opcional)</Label>
-                              <Select value={investigacaoForm.relatorio_id_ip} onValueChange={(v) => setInvestigacaoForm({...investigacaoForm, relatorio_id_ip: v})}>
-                                <SelectTrigger className="bg-background border-border text-foreground h-8 text-xs"><SelectValue placeholder="Selecione..." /></SelectTrigger>
-                                <SelectContent className="bg-muted border-border text-foreground">
-                                  <SelectItem value="none" className="text-muted-foreground italic">Nenhum</SelectItem>
-                                  {relatorios.filter(r => r.tipo_denuncia === "Inquérito Policial").map(r => <SelectItem key={r.id} value={r.id}>{r.titulo}</SelectItem>)}
-                                </SelectContent>
-                              </Select>
+                            <div className="space-y-1">
+                              <Label className="text-muted-foreground text-[10px] uppercase">Inquéritos Vinculados</Label>
+                              <div className="flex flex-wrap gap-1 mb-1">
+                                {investigacaoForm.relatorio_ids_ip.map((id: string) => {
+                                  const r = relatorios.find(x => x.id === id);
+                                  return (
+                                    <Badge key={id} variant="secondary" className="text-[9px] flex items-center gap-1">
+                                      #{r?.numero_registro || '?'} - {r?.titulo || 'N/A'}
+                                      <button type="button" onClick={() => setInvestigacaoForm({...investigacaoForm, relatorio_ids_ip: investigacaoForm.relatorio_ids_ip.filter(x => x !== id)})} className="text-red-400 hover:text-red-300 ml-1">&times;</button>
+                                    </Badge>
+                                  );
+                                })}
+                              </div>
+                              <select className="w-full h-8 bg-background border border-border text-foreground text-[10px] rounded px-2" value="" onChange={(e) => { const v = e.target.value; if (v && !investigacaoForm.relatorio_ids_ip.includes(v)) { setInvestigacaoForm({...investigacaoForm, relatorio_ids_ip: [...investigacaoForm.relatorio_ids_ip, v]}); }}}>
+                                <option value="">Adicionar inquérito...</option>
+                                {relatorios.filter(r => r.tipo_denuncia === "Inquérito Policial").filter(r => !investigacaoForm.relatorio_ids_ip.includes(r.id)).map(r => (
+                                  <option key={r.id} value={r.id}>#{r.numero_registro} - {r.titulo}</option>
+                                ))}
+                              </select>
                             </div>
-                            <div className="space-y-2">
-                              <Label className="text-muted-foreground text-[10px] uppercase">Vincular Ato Adm. (Opcional)</Label>
-                              <Select value={investigacaoForm.relatorio_id_ato} onValueChange={(v) => setInvestigacaoForm({...investigacaoForm, relatorio_id_ato: v})}>
-                                <SelectTrigger className="bg-background border-border text-foreground h-8 text-xs"><SelectValue placeholder="Selecione..." /></SelectTrigger>
-                                <SelectContent className="bg-muted border-border text-foreground">
-                                  <SelectItem value="none" className="text-muted-foreground italic">Nenhum</SelectItem>
-                                  {relatorios.filter(r => r.tipo_denuncia === "Ato Administrativo").map(r => <SelectItem key={r.id} value={r.id}>{r.titulo}</SelectItem>)}
-                                </SelectContent>
-                              </Select>
+                            <div className="space-y-1">
+                              <Label className="text-muted-foreground text-[10px] uppercase">Atos Adm Vinculados</Label>
+                              <div className="flex flex-wrap gap-1 mb-1">
+                                {investigacaoForm.relatorio_ids_ato.map((id: string) => {
+                                  const r = relatorios.find(x => x.id === id);
+                                  return (
+                                    <Badge key={id} variant="secondary" className="text-[9px] flex items-center gap-1">
+                                      #{r?.numero_registro || '?'} - {r?.titulo || 'N/A'}
+                                      <button type="button" onClick={() => setInvestigacaoForm({...investigacaoForm, relatorio_ids_ato: investigacaoForm.relatorio_ids_ato.filter(x => x !== id)})} className="text-red-400 hover:text-red-300 ml-1">&times;</button>
+                                    </Badge>
+                                  );
+                                })}
+                              </div>
+                              <select className="w-full h-8 bg-background border border-border text-foreground text-[10px] rounded px-2" value="" onChange={(e) => { const v = e.target.value; if (v && !investigacaoForm.relatorio_ids_ato.includes(v)) { setInvestigacaoForm({...investigacaoForm, relatorio_ids_ato: [...investigacaoForm.relatorio_ids_ato, v]}); }}}>
+                                <option value="">Adicionar ato adm...</option>
+                                {relatorios.filter(r => r.tipo_denuncia === "Ato Administrativo").filter(r => !investigacaoForm.relatorio_ids_ato.includes(r.id)).map(r => (
+                                  <option key={r.id} value={r.id}>#{r.numero_registro} - {r.titulo}</option>
+                                ))}
+                              </select>
                             </div>
                           </div>
                         </div>
@@ -2346,34 +2403,6 @@ function Corregedoria() {
                                 ) : (
                                   <p className="text-xs text-muted-foreground mb-4">Nenhum documento anexado.</p>
                                 )}
-
-                                <div className="flex gap-2 items-end">
-                                  <div className="flex-1">
-                                    <Select value={linkRelatorioId} onValueChange={setLinkRelatorioId}>
-                                      <SelectTrigger className="bg-muted border-border text-foreground text-xs">
-                                        <SelectValue placeholder="Selecione um documento..." />
-                                      </SelectTrigger>
-                                      <SelectContent className="bg-muted border-border text-foreground">
-                                      {availableRelatorios.map(r => (
-                                        <SelectItem key={r.id} value={r.id}>
-                                          <div className="flex items-center justify-between w-full">
-                                            <span>{r.titulo}</span>
-                                            <span className="text-[9px] opacity-50 ml-2 uppercase">({r.tipo_denuncia})</span>
-                                          </div>
-                                        </SelectItem>
-                                      ))}
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
-                                  <Button 
-                                    size="sm" 
-                                    onClick={() => handleLinkInvestigacaoRelatorio(inv.id)}
-                                    disabled={linking || !linkRelatorioId}
-                                    className="bg-zinc-800 text-white"
-                                  >
-                                    {linking ? "..." : "Vincular"}
-                                  </Button>
-                                </div>
                               </div>
 
                               <div className="rounded border border-border bg-muted p-4">
@@ -2405,42 +2434,6 @@ function Corregedoria() {
                                 ) : (
                                   <p className="text-xs text-muted-foreground mb-4">Nenhuma denúncia anexada.</p>
                                 )}
-
-                                <div className="flex gap-2 items-end">
-                                  <div className="flex-1">
-                                    <Select value={linkDenunciaId} onValueChange={setLinkDenunciaId}>
-                                      <SelectTrigger className="bg-muted border-border text-foreground text-xs">
-                                        <SelectValue placeholder="Vincular denúncia..." />
-                                      </SelectTrigger>
-                                      <SelectContent className="bg-muted border-border text-foreground">
-                                        {denuncias.filter(d => !denunciaInvestigacoes.some(di => di.investigacao_id === inv.id && di.denuncia_id === d.id)).map(d => (
-                                          <SelectItem key={d.id} value={d.id}>#{d.numero_registro?.toString().padStart(4, '0')} - {d.titulo}</SelectItem>
-                                        ))}
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
-                                  <Button 
-                                    size="sm" 
-                                    onClick={() => {
-                                      if (!linkDenunciaId) return toast.error("Selecione uma denúncia");
-                                      setLinking(true);
-                                      supabase.from("denuncia_investigacao").insert({
-                                        denuncia_id: linkDenunciaId,
-                                        investigacao_id: inv.id
-                                      }).then(({ error }) => {
-                                        setLinking(false);
-                                        if (error) return toast.error("Erro ao vincular");
-                                        setDenunciaInvestigacoes(prev => [...prev, { denuncia_id: linkDenunciaId, investigacao_id: inv.id }]);
-                                        setLinkDenunciaId("");
-                                        toast.success("Denúncia vinculada!");
-                                      });
-                                    }}
-                                    disabled={linking || !linkDenunciaId}
-                                    className="bg-zinc-800 text-white"
-                                  >
-                                    {linking ? "..." : "Vincular"}
-                                  </Button>
-                                </div>
                               </div>
 
                               <div className="grid gap-6 md:grid-cols-2">
