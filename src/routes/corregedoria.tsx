@@ -708,6 +708,70 @@ function Corregedoria() {
       setFetching(false);
     };
     load();
+
+    // Real-time subscriptions
+    const denunciasSub = supabase.channel('denuncias-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'denuncias' }, (payload) => {
+        if (payload.eventType === 'INSERT') setDenuncias(prev => [payload.new as Denuncia, ...prev]);
+        if (payload.eventType === 'UPDATE') setDenuncias(prev => prev.map(d => d.id === payload.new.id ? payload.new as Denuncia : d));
+        if (payload.eventType === 'DELETE') setDenuncias(prev => prev.filter(d => d.id !== payload.old.id));
+      })
+      .subscribe();
+
+    const investigacoesSub = supabase.channel('investigacoes-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'investigacoes' }, (payload) => {
+        if (payload.eventType === 'INSERT') setInvestigacoes(prev => [payload.new as Investigacao, ...prev]);
+        if (payload.eventType === 'UPDATE') setInvestigacoes(prev => prev.map(i => i.id === payload.new.id ? payload.new as Investigacao : i));
+        if (payload.eventType === 'DELETE') setInvestigacoes(prev => prev.filter(i => i.id !== payload.old.id));
+      })
+      .subscribe();
+
+    const relatoriosSub = supabase.channel('relatorios-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'relatorios' }, (payload) => {
+        if (payload.eventType === 'INSERT') setRelatorios(prev => [payload.new as Relatorio, ...prev]);
+        if (payload.eventType === 'UPDATE') setRelatorios(prev => prev.map(r => r.id === payload.new.id ? payload.new as Relatorio : r));
+        if (payload.eventType === 'DELETE') setRelatorios(prev => prev.filter(r => r.id !== payload.old.id));
+      })
+      .subscribe();
+
+    const depoimentosSub = supabase.channel('depoimentos-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'depoimentos' }, (payload) => {
+        if (payload.eventType === 'INSERT') setDepoimentos(prev => [payload.new as Depoimento, ...prev]);
+        if (payload.eventType === 'UPDATE') setDepoimentos(prev => prev.map(d => d.id === payload.new.id ? payload.new as Depoimento : d));
+        if (payload.eventType === 'DELETE') setDepoimentos(prev => prev.filter(d => d.id !== payload.old.id));
+      })
+      .subscribe();
+
+    const drSub = supabase.channel('denuncia-relatorio-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'denuncia_relatorio' }, (payload) => {
+        if (payload.eventType === 'INSERT') setDenunciaRelatorios(prev => [...prev, payload.new as DenunciaRelatorio]);
+        if (payload.eventType === 'DELETE') setDenunciaRelatorios(prev => prev.filter(dr => !(dr.denuncia_id === payload.old.denuncia_id && dr.relatorio_id === payload.old.relatorio_id)));
+      })
+      .subscribe();
+
+    const irSub = supabase.channel('investigacao-relatorio-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'investigacao_relatorio' }, (payload) => {
+        if (payload.eventType === 'INSERT') setInvestigacaoRelatorios(prev => [...prev, payload.new as InvestigacaoRelatorio]);
+        if (payload.eventType === 'DELETE') setInvestigacaoRelatorios(prev => prev.filter(ir => !(ir.investigacao_id === payload.old.investigacao_id && ir.relatorio_id === payload.old.relatorio_id)));
+      })
+      .subscribe();
+
+    const diSub = supabase.channel('denuncia-investigacao-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'denuncia_investigacao' }, (payload) => {
+        if (payload.eventType === 'INSERT') setDenunciaInvestigacoes(prev => [...prev, payload.new as DenunciaInvestigacao]);
+        if (payload.eventType === 'DELETE') setDenunciaInvestigacoes(prev => prev.filter(di => !(di.denuncia_id === payload.old.denuncia_id && di.investigacao_id === payload.old.investigacao_id)));
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(denunciasSub);
+      supabase.removeChannel(investigacoesSub);
+      supabase.removeChannel(relatoriosSub);
+      supabase.removeChannel(depoimentosSub);
+      supabase.removeChannel(drSub);
+      supabase.removeChannel(irSub);
+      supabase.removeChannel(diSub);
+    };
   }, [isCorregedor, isAdmin]);
 
   const loadPendingUsers = async () => {
