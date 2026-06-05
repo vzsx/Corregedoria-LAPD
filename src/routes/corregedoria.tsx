@@ -271,7 +271,7 @@ const RelatorioCard = ({
   relatorio, expanded, onToggle, isAdmin, onApprove, onEdit, onDelete, onUpdateStatus,
   denuncias, investigacoes, relatorios, denunciaRelatorios, investigacaoRelatorios,
   onLinkDenuncia, onLinkInvestigacao, linking, linkDenunciaId, setLinkDenunciaId,
-  linkInvestigacaoId, setLinkInvestigacaoId, depoimentos
+  linkInvestigacaoId, setLinkInvestigacaoId, depoimentos, onPrint
 }: any) => {
   const linkedDenuncias = denunciaRelatorios
     .filter((dr: any) => dr.relatorio_id === relatorio.id)
@@ -355,7 +355,7 @@ const RelatorioCard = ({
               size="sm" 
               variant="ghost" 
               className="h-8 w-8 p-0 text-foreground hover:text-foreground hover:bg-muted/50"
-              onClick={(e) => { e.stopPropagation(); printRelatorio(relatorio); }}
+              onClick={(e) => { e.stopPropagation(); onPrint(relatorio); }}
               title="Imprimir / Exportar PDF"
             >
               <Printer className="h-4 w-4" />
@@ -3156,15 +3156,14 @@ function Corregedoria() {
                           linkInvestigacaoId={linkInvestigacaoId}
                           setLinkInvestigacaoId={setLinkInvestigacaoId}
                           depoimentos={depoimentos}
+                          onPrint={printRelatorio}
                         />
                       ))
                   )
                 }
               </div>
-            </div>
-          )}
 
-          {/* ATOS ADMINISTRATIVOS TAB */}
+              {/* ATOS ADMINISTRATIVOS TAB */}
           {activeTab === "atos" && (
             <div className="space-y-6 animate-fade-in">
               <div className="flex flex-col gap-4 border-b border-border pb-4">
@@ -3478,7 +3477,7 @@ function Corregedoria() {
                             });
                             setIsEditDialogOpen(true);
                           }}
-                          onDelete={deleteDocumento}
+                           onDelete={confirmDeleteDocumento}
                           onUpdateStatus={updateRelatorioStatus}
                           denuncias={denuncias}
                           investigacoes={investigacoes}
@@ -3492,6 +3491,7 @@ function Corregedoria() {
                           linkInvestigacaoId={linkInvestigacaoId}
                           setLinkInvestigacaoId={setLinkInvestigacaoId}
                           depoimentos={depoimentos}
+                          onPrint={printRelatorio}
                         />
                       ))
                   )
