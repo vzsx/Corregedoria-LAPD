@@ -54,7 +54,7 @@ function AcompanharPage() {
     const { data, error: err } = await supabase
       .from("denuncias")
       .select("*")
-      .filter("dados_detalhados->>reclamante_nome", "ilike", `%${name.trim()}%`)
+      .or(`dados_detalhados->>reclamante_nome.ilike.%${name.trim()}%`)
       .order("created_at", { ascending: false });
 
     setLoading(false);
