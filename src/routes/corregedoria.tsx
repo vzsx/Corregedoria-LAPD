@@ -887,6 +887,7 @@ function Corregedoria() {
   const [linkRelatorioId, setLinkRelatorioId] = useState<string>("");
   const [linkDenunciaId, setLinkDenunciaId] = useState<string>("");
   const [linkInvestigacaoId, setLinkInvestigacaoId] = useState<string>("");
+  const [linkInvestigacaoDenunciaId, setLinkInvestigacaoDenunciaId] = useState<string>("");
   const [linking, setLinking] = useState(false);
 
   useEffect(() => {
@@ -2275,6 +2276,131 @@ function Corregedoria() {
                                   </Button>
                                 )}
                               </div>
+                            </div>
+
+                            {/* Investigações Vinculadas */}
+                            <div className="rounded border border-border bg-muted p-4">
+                              <div className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                                <Shield className="h-4 w-4" /> Investigações Vinculadas
+                              </div>
+
+                              {(() => {
+                                const linkedInvestigacoes = denunciaInvestigacoes
+                                  .filter(di => di.denuncia_id === d.id)
+                                  .map(di => investigacoes.find(inv => inv.id === di.investigacao_id))
+                                  .filter(Boolean) as Investigacao[];
+
+                                const availableInvestigacoes = investigacoes.filter(
+                                  inv => !denunciaInvestigacoes.some(di => di.denuncia_id === d.id && di.investigacao_id === inv.id)
+                                );
+
+                                return (
+                                  <>
+                                    {linkedInvestigacoes.length > 0 ? (
+                                      <div className="space-y-2 mb-4">
+                                        {linkedInvestigacoes.map(inv => (
+                                          <div key={inv.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
+                                            <div className="flex items-center gap-3">
+                                              <Shield className="h-4 w-4 text-foreground" />
+                                              <span className="text-foreground font-bold">{inv.titulo}</span>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                              <Button size="sm" variant="ghost" className="h-7 text-xs text-foreground"
+                                                onClick={() => { setActiveTab("investigacoes"); setExpandedId(inv.id); }}>
+                                                Ver Investigação
+                                              </Button>
+                                              <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-950/30"
+                                                onClick={async () => {
+                                                  setLinking(true);
+                                                  await supabase.from("denuncia_investigacao").delete().match({ denuncia_id: d.id, investigacao_id: inv.id });
+                                                  setLinking(false);
+                                                  setDenunciaInvestigacoes(prev => prev.filter(di => !(di.denuncia_id === d.id && di.investigacao_id === inv.id)));
+                                                  toast.success("Investigação desanexada!");
+                                                }}
+                                                title="Desanexar"
+                                              >
+                                                <X className="h-3.5 w-3.5" />
+                                              </Button>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    ) : (
+                                      <p className="text-xs text-muted-foreground mb-4">Nenhuma investigação vinculada a esta denúncia.</p>
+                                    )}
+
+                                    <div className="flex gap-2 items-end">
+                                      <div className="flex-1">
+                                        <select
+                                          value={linkInvestigacaoDenunciaId}
+                                          onChange={(e) => setLinkInvestigacaoDenunciaId(e.target.value)}
+                                          className="w-full h-9 bg-muted border border-border text-foreground text-xs rounded px-2"
+                                        >
+                                          <option value="">Selecione uma investigação...</option>
+                                          {availableInvestigacoes.map(inv => (
+                                            <option key={inv.id} value={inv.id}>{inv.titulo}</option>
+                                          ))}
+                                        </select>
+                                      </div>
+                                      <Button
+                                        size="sm"
+                                        onClick={async () => {
+                                          if (!linkInvestigacaoDenunciaId) return toast.error("Selecione uma investigação");
+                                          setLinking(true);
+                                          const { error } = await supabase.from("denuncia_investigacao").insert({
+                                            denuncia_id: d.id,
+                                            investigacao_id: linkInvestigacaoDenunciaId
+                                          });
+                                          setLinking(false);
+                                          if (error) return toast.error("Erro ao vincular investigação");
+                                          toast.success("Investigação anexada!");
+                                          setDenunciaInvestigacoes(prev =>
+                                            prev.some(di => di.denuncia_id === d.id && di.investigacao_id === linkInvestigacaoDenunciaId)
+                                              ? prev
+                                              : [...prev, { denuncia_id: d.id, investigacao_id: linkInvestigacaoDenunciaId }]
+                                          );
+                                          setLinkInvestigacaoDenunciaId("");
+                                        }}
+                                        disabled={linking || !linkInvestigacaoDenunciaId}
+                                        className="bg-card hover:bg-slate-700 text-white text-xs h-9"
+                                      >
+                                        {linking ? "Vinculando..." : "Vincular"}
+                                      </Button>
+                                      {availableInvestigacoes.length > 0 && (
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          onClick={async () => {
+                                            setLinking(true);
+                                            const inserts = availableInvestigacoes.map(inv => ({
+                                              denuncia_id: d.id,
+                                              investigacao_id: inv.id
+                                            }));
+                                            const { error } = await supabase.from("denuncia_investigacao").insert(inserts);
+                                            setLinking(false);
+                                            if (error) return toast.error("Erro ao vincular investigações");
+                                            toast.success(`${inserts.length} investigação(ões) anexada(s)!`);
+                                            setDenunciaInvestigacoes(prev => {
+                                              const existing = prev.filter(di => di.denuncia_id === d.id);
+                                              const newOnes = inserts.filter(
+                                                ins => !existing.some(ex => ex.investigacao_id === ins.investigacao_id)
+                                              );
+                                              return [...prev, ...newOnes] as DenunciaInvestigacao[];
+                                            });
+                                          }}
+                                          disabled={linking}
+                                          className="border-border text-muted-foreground hover:text-foreground text-xs h-9"
+                                        >
+                                          {linking ? "Vinculando..." : "Vincular Todas"}
+                                        </Button>
+                                      )}
+                                    </div>
+                                  </>
+                                );
+                              })()}
                             </div>
 
                             {/* DADOS DETALHADOS (SE EXISTIREM) */}
