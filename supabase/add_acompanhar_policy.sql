@@ -23,4 +23,32 @@ DO $$ BEGIN
       TO anon
       USING (true);
   END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Anyone can view denuncia_investigacao for tracking' AND tablename = 'denuncia_investigacao') THEN
+    CREATE POLICY "Anyone can view denuncia_investigacao for tracking"
+      ON public.denuncia_investigacao FOR SELECT
+      TO anon
+      USING (true);
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Anyone can view investigacoes for tracking' AND tablename = 'investigacoes') THEN
+    CREATE POLICY "Anyone can view investigacoes for tracking"
+      ON public.investigacoes FOR SELECT
+      TO anon
+      USING (true);
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Anyone can view denuncia_depoimento for tracking' AND tablename = 'denuncia_depoimento') THEN
+    CREATE POLICY "Anyone can view denuncia_depoimento for tracking"
+      ON public.denuncia_depoimento FOR SELECT
+      TO anon
+      USING (true);
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Anyone can view depoimentos for tracking' AND tablename = 'depoimentos') THEN
+    CREATE POLICY "Anyone can view depoimentos for tracking"
+      ON public.depoimentos FOR SELECT
+      TO anon
+      USING (true);
+  END IF;
 END $$;

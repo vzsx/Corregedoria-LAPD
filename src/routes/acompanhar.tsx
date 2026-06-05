@@ -53,7 +53,7 @@ function AcompanharPage() {
 
     const { data, error: err } = await supabase
       .from("denuncias")
-      .select("*, denuncia_relatorio(*, relatorios(titulo, tipo_denuncia))")
+      .select("*, denuncia_relatorio(*, relatorios(titulo, tipo_denuncia)), denuncia_investigacao(investigacao_id), denuncia_depoimento(depoimento_id)")
       .or(`dados_detalhados->>reclamante_nome.ilike.%${name.trim()}%`)
       .order("created_at", { ascending: false });
 
@@ -242,6 +242,26 @@ function AcompanharPage() {
                         </div>
                       </div>
                     ) : null}
+
+                    {/* Investigações e Depoimentos counts */}
+                    <div className="flex gap-3 mt-3">
+                      {denuncia.denuncia_investigacao?.length > 0 && (
+                        <div className="flex items-center gap-2 rounded-lg bg-muted/30 border border-border/50 px-3 py-2">
+                          <Shield className="h-4 w-4 text-primary/60 shrink-0" />
+                          <span className="text-xs text-muted-foreground">
+                            {denuncia.denuncia_investigacao.length} investigação(ões) vinculada(s)
+                          </span>
+                        </div>
+                      )}
+                      {denuncia.denuncia_depoimento?.length > 0 && (
+                        <div className="flex items-center gap-2 rounded-lg bg-muted/30 border border-border/50 px-3 py-2">
+                          <MessageSquare className="h-4 w-4 text-primary/60 shrink-0" />
+                          <span className="text-xs text-muted-foreground">
+                            {denuncia.denuncia_depoimento.length} depoimento(s) vinculado(s)
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
