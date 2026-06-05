@@ -3162,8 +3162,9 @@ function Corregedoria() {
                   )
                 }
               </div>
+          )}
 
-              {/* ATOS ADMINISTRATIVOS TAB */}
+          {/* ATOS ADMINISTRATIVOS TAB */}
           {activeTab === "atos" && (
             <div className="space-y-6 animate-fade-in">
               <div className="flex flex-col gap-4 border-b border-border pb-4">
