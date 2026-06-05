@@ -46,7 +46,7 @@ const RelatorioCard = ({
   linkInvestigacaoId, setLinkInvestigacaoId, depoimentos, onPrint,
   relatorioGeralVinculos,
   linkRelatorioGeralId, setLinkRelatorioGeralId, onLinkRelatorioGeral,
-  setActiveTab, onUnlinkRelatorioGeralVinculo, onUnlinkDepoimento
+  setActiveTab, onUnlinkRelatorioGeralVinculo, onUnlinkDepoimento, onUnlinkDocumentoAnexado
 }: any) => {
   const linkedDenuncias = denunciaRelatorios
     .filter((dr: any) => dr.relatorio_id === relatorio.id)
@@ -170,10 +170,16 @@ const RelatorioCard = ({
                           {r.tipo_denuncia}
                         </Badge>
                       </div>
-                      <Button size="sm" variant="ghost" className="h-7 text-xs text-foreground"
-                        onClick={() => { setActiveTab(r.tipo_denuncia === "Inquérito Policial" ? "inqueritos" : "atos"); setExpandedId(r.id); }}>
-                        Ver Documento
-                      </Button>
+                      <div className="flex items-center gap-1">
+                        <Button size="sm" variant="ghost" className="h-7 text-xs text-foreground"
+                          onClick={() => { setActiveTab(r.tipo_denuncia === "Inquérito Policial" ? "inqueritos" : "atos"); setExpandedId(r.id); }}>
+                          Ver Documento
+                        </Button>
+                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-950/30"
+                          onClick={() => onUnlinkDocumentoAnexado?.(relatorio.id, r.id)} title="Desanexar">
+                          <X className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -1843,6 +1849,19 @@ function Corregedoria() {
     if (error) return toast.error("Erro ao desanexar depoimento");
     setDepoimentos(prev => prev.map(d => d.id === depoimentoId ? { ...d, investigacao_id: null } as Depoimento : d));
     toast.success("Depoimento desanexado!");
+  };
+
+  const handleUnlinkDocumentoRelatorio = async (relatorioId: string, targetRelatorioId: string) => {
+    setLinking(true);
+    const { data: rel } = await supabase.from("relatorios").select("tipo_denuncia, dados_detalhados").eq("id", relatorioId).single();
+    if (!rel) { setLinking(false); return; }
+    const campo = rel.tipo_denuncia === "Inquérito Policial" ? "ato_ids_vinculados" : "ip_ids_vinculados";
+    const current = (rel.dados_detalhados as any)?.[campo] || [];
+    const updated = { ...(rel.dados_detalhados as any), [campo]: current.filter((id: string) => id !== targetRelatorioId) };
+    await supabase.from("relatorios").update({ dados_detalhados: updated }).eq("id", relatorioId);
+    setLinking(false);
+    setRelatorios(prev => prev.map(r => r.id === relatorioId ? { ...r, dados_detalhados: updated } as Relatorio : r));
+    toast.success("Documento desanexado!");
   };
 
   const handleUnlinkDocumentoDepoimento = async (depoimentoId: string, campo: string) => {
@@ -3770,6 +3789,7 @@ function Corregedoria() {
                           setActiveTab={setActiveTab}
                           onUnlinkRelatorioGeralVinculo={deleteRelatorioGeralVinculo}
                           onUnlinkDepoimento={handleUnlinkDepoimentoRelatorio}
+                          onUnlinkDocumentoAnexado={handleUnlinkDocumentoRelatorio}
                         />
                       ))
                   )
@@ -4116,6 +4136,7 @@ function Corregedoria() {
                           setActiveTab={setActiveTab}
                           onUnlinkRelatorioGeralVinculo={deleteRelatorioGeralVinculo}
                           onUnlinkDepoimento={handleUnlinkDepoimentoRelatorio}
+                          onUnlinkDocumentoAnexado={handleUnlinkDocumentoRelatorio}
                         />
                       ))
                   )
