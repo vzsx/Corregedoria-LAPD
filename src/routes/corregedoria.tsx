@@ -30,6 +30,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 export const Route = createFileRoute("/corregedoria")({
   component: Corregedoria,
@@ -668,6 +669,15 @@ function Corregedoria() {
     observacao: ""
   });
 
+  // Confirm Dialog State
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    title: string;
+    description: string;
+    onConfirm: () => void;
+    loading?: boolean;
+  }>({ open: false, title: "", description: "", onConfirm: () => {} });
+
   const [submitting, setSubmitting] = useState(false);
   
   // Link Relatório State
@@ -1040,11 +1050,20 @@ function Corregedoria() {
     });
   };
 
-  const deleteDepoimento = async (id: string) => {
-    const { error } = await supabase.from("depoimentos").delete().eq("id", id);
-    if (error) return toast.error("Erro ao excluir depoimento");
-    setDepoimentos(prev => prev.filter(d => d.id !== id));
-    toast.success("Depoimento excluído");
+  const confirmDeleteDepoimento = (id: string) => {
+    setConfirmDialog({
+      open: true,
+      title: "Excluir Depoimento",
+      description: "Tem certeza que deseja excluir este depoimento permanentemente? Esta ação não pode ser desfeita.",
+      onConfirm: async () => {
+        setConfirmDialog(prev => ({ ...prev, loading: true }));
+        const { error } = await supabase.from("depoimentos").delete().eq("id", id);
+        setConfirmDialog(prev => ({ ...prev, open: false, loading: false }));
+        if (error) return toast.error("Erro ao excluir depoimento");
+        setDepoimentos(prev => prev.filter(d => d.id !== id));
+        toast.success("Depoimento excluído");
+      },
+    });
   };
 
   const handleEditDepoimento = (dep: Depoimento) => {
@@ -1406,20 +1425,36 @@ function Corregedoria() {
     });
   };
 
-  const deleteDocumento = async (id: string) => {
-    if (!confirm("Tem certeza que deseja excluir este documento permanentemente?")) return;
-    const { error } = await supabase.from("relatorios").delete().eq("id", id);
-    if (error) return toast.error("Erro ao excluir documento");
-    setRelatorios(prev => prev.filter(r => r.id !== id));
-    toast.success("Documento excluído com sucesso");
+  const confirmDeleteDocumento = (id: string) => {
+    setConfirmDialog({
+      open: true,
+      title: "Excluir Documento",
+      description: "Tem certeza que deseja excluir este documento permanentemente? Esta ação não pode ser desfeita.",
+      onConfirm: async () => {
+        setConfirmDialog(prev => ({ ...prev, loading: true }));
+        const { error } = await supabase.from("relatorios").delete().eq("id", id);
+        setConfirmDialog(prev => ({ ...prev, open: false, loading: false }));
+        if (error) return toast.error("Erro ao excluir documento");
+        setRelatorios(prev => prev.filter(r => r.id !== id));
+        toast.success("Documento excluído com sucesso");
+      },
+    });
   };
 
-  const deleteInvestigacao = async (id: string) => {
-    if (!confirm("Tem certeza que deseja excluir esta investigação e todos os seus vínculos?")) return;
-    const { error } = await supabase.from("investigacoes").delete().eq("id", id);
-    if (error) return toast.error("Erro ao excluir investigação");
-    setInvestigacoes(prev => prev.filter(i => i.id !== id));
-    toast.success("Investigação excluída com sucesso");
+  const confirmDeleteInvestigacao = (id: string) => {
+    setConfirmDialog({
+      open: true,
+      title: "Excluir Investigação",
+      description: "Tem certeza que deseja excluir esta investigação e todos os seus vínculos? Esta ação não pode ser desfeita.",
+      onConfirm: async () => {
+        setConfirmDialog(prev => ({ ...prev, loading: true }));
+        const { error } = await supabase.from("investigacoes").delete().eq("id", id);
+        setConfirmDialog(prev => ({ ...prev, open: false, loading: false }));
+        if (error) return toast.error("Erro ao excluir investigação");
+        setInvestigacoes(prev => prev.filter(i => i.id !== id));
+        toast.success("Investigação excluída com sucesso");
+      },
+    });
   };
 
   const handleLinkRelatorio = async (denunciaId: string) => {
@@ -1494,18 +1529,24 @@ function Corregedoria() {
     }
   };
 
-  const deleteOficial = async (userId: string) => {
-    if (!confirm("Tem certeza que deseja REMOVER o acesso deste oficial permanentemente?")) return;
-    
-    const { error } = await supabase.from("user_roles").delete().eq("user_id", userId);
-    
-    if (error) {
-      console.error("Erro ao remover oficial:", error);
-      toast.error("Erro ao remover acesso");
-    } else {
-      toast.success("Acesso removido com sucesso");
-      setOficiais(prev => prev.filter(o => o.id !== userId));
-    }
+  const confirmDeleteOficial = (userId: string) => {
+    setConfirmDialog({
+      open: true,
+      title: "Remover Acesso",
+      description: "Tem certeza que deseja REMOVER o acesso deste oficial permanentemente? Ele não poderá mais acessar o sistema.",
+      onConfirm: async () => {
+        setConfirmDialog(prev => ({ ...prev, loading: true }));
+        const { error } = await supabase.from("user_roles").delete().eq("user_id", userId);
+        setConfirmDialog(prev => ({ ...prev, open: false, loading: false }));
+        if (error) {
+          console.error("Erro ao remover oficial:", error);
+          toast.error("Erro ao remover acesso");
+        } else {
+          toast.success("Acesso removido com sucesso");
+          setOficiais(prev => prev.filter(o => o.id !== userId));
+        }
+      },
+    });
   };
 
   const changeUserRole = async (userId: string, newRole: "corregedor" | "admin") => {
@@ -2442,7 +2483,7 @@ function Corregedoria() {
                                   size="icon" 
                                   variant="ghost" 
                                   className="h-8 w-8 text-red-500 hover:text-red-400 hover:bg-red-500/10"
-                                  onClick={() => deleteInvestigacao(inv.id)}
+                                  onClick={() => confirmDeleteInvestigacao(inv.id)}
                                 >
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
@@ -2933,7 +2974,7 @@ function Corregedoria() {
                             });
                             setIsEditDialogOpen(true);
                           }}
-                          onDelete={deleteDocumento}
+                          onDelete={confirmDeleteDocumento}
                           onUpdateStatus={updateRelatorioStatus}
                           denuncias={denuncias}
                           investigacoes={investigacoes}
@@ -3573,7 +3614,7 @@ function Corregedoria() {
                             <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:text-primary/80 hover:bg-primary/10" onClick={() => handleEditDepoimento(d)} title="Editar">
                               <Pencil className="h-4 w-4" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-400 hover:bg-red-500/10" onClick={() => deleteDepoimento(d.id)} title="Excluir">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-400 hover:bg-red-500/10" onClick={() => confirmDeleteDepoimento(d.id)} title="Excluir">
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
@@ -3682,7 +3723,7 @@ function Corregedoria() {
                           size="icon" 
                           variant="ghost" 
                           className="h-8 w-8 text-red-500 hover:text-red-400 hover:bg-red-500/10"
-                          onClick={() => deleteOficial(oficial.id)}
+                          onClick={() => confirmDeleteOficial(oficial.id)}
                           title="Remover Acesso"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -4140,6 +4181,15 @@ function Corregedoria() {
           </form>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={confirmDialog.open}
+        onOpenChange={(open) => setConfirmDialog(prev => ({ ...prev, open }))}
+        onConfirm={confirmDialog.onConfirm}
+        title={confirmDialog.title}
+        description={confirmDialog.description}
+        loading={confirmDialog.loading}
+      />
     </div>
   );
 }
