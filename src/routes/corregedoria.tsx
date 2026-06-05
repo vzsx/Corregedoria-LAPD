@@ -3301,7 +3301,7 @@ function Corregedoria() {
                 <Dialog open={isDepoimentoDialogOpen} onOpenChange={setIsDepoimentoDialogOpen}>
                   <DialogTrigger asChild>
                     <Button onClick={() => setDepoimentoForm({
-                      oficial_nome: user?.user_metadata?.full_name || "",
+                      oficial_nome: "",
                       oficial_patente: "",
                       oficial_re: "",
                       depoimento: "",
@@ -3323,7 +3323,7 @@ function Corregedoria() {
                       <div className="grid grid-cols-3 gap-4">
                         <div className="space-y-1">
                           <Label className="text-[9px] uppercase text-muted-foreground">Nome do Oficial *</Label>
-                          <Input value={depoimentoForm.oficial_nome} disabled className="h-8 bg-background border-border text-muted-foreground text-xs" />
+                          <Input value={depoimentoForm.oficial_nome} onChange={(e) => setDepoimentoForm({...depoimentoForm, oficial_nome: e.target.value})} className="h-8 bg-background border-border text-foreground text-xs" placeholder="Nome do oficial" />
                         </div>
                         <div className="space-y-1">
                           <Label className="text-[9px] uppercase text-muted-foreground">Patente</Label>
@@ -3442,7 +3442,7 @@ function Corregedoria() {
                       <div className="grid grid-cols-3 gap-4">
                         <div className="space-y-1">
                           <Label className="text-[9px] uppercase text-muted-foreground">Nome do Oficial *</Label>
-                          <Input value={depoimentoForm.oficial_nome} disabled className="h-8 bg-background border-border text-muted-foreground text-xs" />
+                          <Input value={depoimentoForm.oficial_nome} onChange={(e) => setDepoimentoForm({...depoimentoForm, oficial_nome: e.target.value})} className="h-8 bg-background border-border text-foreground text-xs" placeholder="Nome do oficial" />
                         </div>
                         <div className="space-y-1">
                           <Label className="text-[9px] uppercase text-muted-foreground">Patente</Label>
