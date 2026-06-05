@@ -1,10 +1,16 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Shield, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 
 export function SiteHeader() {
   const { user, isCorregedor, isAdmin, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate({ to: "/" });
+  };
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
@@ -49,7 +55,7 @@ export function SiteHeader() {
                   </Button>
                 </Link>
               )}
-              <Button variant="ghost" size="sm" onClick={signOut}>
+              <Button variant="ghost" size="sm" onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" /> Sair
               </Button>
             </div>

@@ -1529,7 +1529,7 @@ function Corregedoria() {
 
   const handleLogout = async () => {
     await signOut();
-    navigate({ to: "/auth" });
+    navigate({ to: "/" });
   };
 
   if (loading || fetching) {
