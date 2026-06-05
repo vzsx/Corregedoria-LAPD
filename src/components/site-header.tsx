@@ -58,6 +58,13 @@ export function SiteHeader() {
           >
             Fazer Denúncia
           </Link>
+          <Link
+            to="/acompanhar"
+            className="relative px-4 py-2 text-sm font-medium text-muted-foreground transition-all duration-300 hover:text-foreground after:absolute after:bottom-0 after:left-1/2 after:h-[2px] after:w-0 after:bg-primary after:transition-all after:duration-300 after:-translate-x-1/2 hover:after:w-3/4"
+            activeProps={{ className: "px-4 py-2 text-sm font-medium text-foreground after:w-3/4" }}
+          >
+            Acompanhar
+          </Link>
         </nav>
 
         <div className="flex items-center gap-2">

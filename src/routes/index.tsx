@@ -153,6 +153,17 @@ function Index() {
               </Link>
             </div>
 
+            {/* Acompanhar Denúncia */}
+            <div
+              className={`mt-4 transition-all duration-700 delay-700 ${
+                mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+              }`}
+            >
+              <Link to="/acompanhar" className="text-xs text-muted-foreground hover:text-primary underline underline-offset-4 transition-colors">
+                Já fez uma denúncia? Acompanhe o andamento
+              </Link>
+            </div>
+
             {/* Scroll indicator */}
             <div
               className={`mt-16 flex flex-col items-center gap-1 text-muted-foreground/50 transition-all duration-700 delay-700 ${
