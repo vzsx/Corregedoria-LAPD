@@ -29,7 +29,7 @@ function AdminPage() {
   const [fetching, setFetching] = useState(true);
 
   useEffect(() => {
-    if (!loading && !user) navigate({ to: "/auth" });
+    if (!loading && !user) navigate({ to: "/" });
   }, [user, loading, navigate]);
 
   const load = useCallback(async () => {

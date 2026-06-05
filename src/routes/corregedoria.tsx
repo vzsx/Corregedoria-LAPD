@@ -515,7 +515,7 @@ function Corregedoria() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && !user) navigate({ to: "/auth" });
+    if (!loading && !user) navigate({ to: "/" });
   }, [user, loading, navigate]);
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
   const [denunciaFilter, setDenunciaFilter] = useState<Status | "todas">("todas");
