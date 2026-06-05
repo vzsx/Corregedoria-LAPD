@@ -31,6 +31,8 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { Skeleton, SkeletonTable } from "@/components/skeleton";
+import { logAudit } from "@/lib/audit-log";
 
 export const Route = createFileRoute("/corregedoria")({
   component: Corregedoria,
@@ -679,6 +681,9 @@ function Corregedoria() {
   }>({ open: false, title: "", description: "", onConfirm: () => {} });
 
   const [submitting, setSubmitting] = useState(false);
+  const [denunciaPage, setDenunciaPage] = useState(1);
+  const [investigacaoPage, setInvestigacaoPage] = useState(1);
+  const PAGE_SIZE = 10;
   
   // Link Relatório State
   const [linkRelatorioId, setLinkRelatorioId] = useState<string>("");
@@ -1036,6 +1041,14 @@ function Corregedoria() {
     toast.success("Depoimento registrado com sucesso!");
     setDepoimentos(prev => [data[0] as Depoimento, ...prev]);
     setIsDepoimentoDialogOpen(false);
+    logAudit({
+      user_id: user?.id,
+      user_name: user?.user_metadata?.full_name,
+      action: "create",
+      entity_type: "depoimento",
+      entity_id: data[0].id,
+      details: { oficial_nome: depoimentoForm.oficial_nome }
+    });
     setDepoimentoForm({
       oficial_nome: "",
       oficial_patente: "",
@@ -1061,6 +1074,13 @@ function Corregedoria() {
         setConfirmDialog(prev => ({ ...prev, open: false, loading: false }));
         if (error) return toast.error("Erro ao excluir depoimento");
         setDepoimentos(prev => prev.filter(d => d.id !== id));
+        logAudit({
+          user_id: user?.id,
+          user_name: user?.user_metadata?.full_name,
+          action: "delete",
+          entity_type: "depoimento",
+          entity_id: id,
+        });
         toast.success("Depoimento excluído");
       },
     });
@@ -1575,8 +1595,22 @@ function Corregedoria() {
 
   if (loading || fetching) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-foreground" />
+      <div className="flex min-h-screen items-center justify-center bg-background p-6">
+        <div className="w-full max-w-4xl space-y-6">
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-12 w-12 rounded-md" />
+            <div className="space-y-2">
+              <Skeleton className="h-5 w-48" />
+              <Skeleton className="h-3 w-24" />
+            </div>
+          </div>
+          <div className="grid grid-cols-4 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-24 rounded-lg" />
+            ))}
+          </div>
+          <SkeletonTable rows={6} />
+        </div>
       </div>
     );
   }
