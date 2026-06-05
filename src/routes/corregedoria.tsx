@@ -11,20 +11,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Badge } from "@/components/ui/badge";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,210 +25,18 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Skeleton, SkeletonTable } from "@/components/skeleton";
 import { logAudit } from "@/lib/audit-log";
+import { SidebarItem } from "@/components/corregedoria/SidebarItem";
+import { StatCard } from "@/components/corregedoria/StatCard";
+import { Field } from "@/components/corregedoria/Field";
+import { STATUS_LABEL, STATUS_COLOR } from "@/lib/corregedoria/constants";
+import { formatDateSafe, printRelatorio, printDepoimento } from "@/lib/corregedoria/utils";
+import type { Status, Tab, Denuncia, Relatorio, Investigacao, InvestigacaoRelatorio, DenunciaRelatorio, DenunciaInvestigacao, DenunciaDepoimento, Depoimento, RelatorioGeralVinculo, Profile, PendingUser } from "@/lib/corregedoria/types";
 
 export const Route = createFileRoute("/corregedoria")({
   component: Corregedoria,
 });
 
-type Status = "pendente" | "em_analise" | "concluida" | "arquivada";
-type Tab = "dashboard" | "denuncias" | "investigacoes" | "inqueritos" | "atos" | "oficiais" | "solicitacoes" | "depoimentos" | "relatorios_gerais";
-
-interface Denuncia {
-  id: string;
-  numero_registro: number;
-  titulo: string;
-  descricao: string;
-  policial_denunciado: string | null;
-  data_ocorrido: string | null;
-  contato_opcional: string | null;
-  status: Status;
-  notas_internas: string | null;
-  created_at: string;
-  dados_detalhados?: any;
-}
-
-interface Relatorio {
-  id: string;
-  numero_registro: number;
-  titulo: string;
-  tipo_denuncia: string;
-  oficial: string;
-  conteudo: string;
-  status: Status;
-  created_at: string;
-  dados_detalhados?: any;
-}
-
-interface Investigacao {
-  id: string;
-  numero_registro: number;
-  titulo: string;
-  descricao: string | null;
-  investigado: string | null;
-  status: Status;
-  notas_internas: string | null;
-  created_at: string;
-  
-  tipo_procedimento: string | null;
-  autoridade_responsavel: string | null;
-  autoridade_patente: string | null;
-  autoridade_departamento: string | null;
-  investigado_badge: string | null;
-  investigado_patente: string | null;
-  investigado_unidade: string | null;
-  origem_caso: string | null;
-  origem_outro: string | null;
-  fundamentacao: string | null;
-  medidas_iniciais: any;
-  medidas_outro: string | null;
-  detalhes_adicionais: string | null;
-}
-
-interface InvestigacaoRelatorio {
-  investigacao_id: string;
-  relatorio_id: string;
-}
-
-interface DenunciaRelatorio {
-  denuncia_id: string;
-  relatorio_id: string;
-}
-
-interface DenunciaInvestigacao {
-  denuncia_id: string;
-  investigacao_id: string;
-}
-
-interface DenunciaDepoimento {
-  denuncia_id: string;
-  depoimento_id: string;
-}
-
-interface Depoimento {
-  id: string;
-  numero_registro: number;
-  oficial_nome: string;
-  oficial_patente: string | null;
-  oficial_re: string | null;
-  depoimento: string;
-  data_depoimento: string;
-  oficial_batalhao: string | null;
-  relatorio_id_ip: string | null;
-  relatorio_id_ato: string | null;
-  investigacao_id: string | null;
-  observacao: string | null;
-  created_at: string;
-}
-
-interface RelatorioGeralVinculo {
-  id: string;
-  relatorio_id: string;
-  entidade_id: string;
-  entidade_tipo: "denuncia" | "investigacao" | "depoimento" | "inquerito" | "ato";
-  created_at: string;
-}
-
-interface Profile {
-  id: string;
-  full_name: string;
-  badge_number: string;
-  patente: string | null;
-  created_at: string;
-  role?: "corregedor" | "admin" | "pending";
-}
-
-interface PendingUser {
-  user_id: string;
-  role_id: string;
-  full_name: string;
-  badge_number: string;
-  created_at: string;
-}
-
-const STATUS_LABEL: Record<Status, string> = {
-  pendente: "Pendente",
-  em_analise: "Em análise",
-  concluida: "Concluída",
-  arquivada: "Arquivada",
-};
-
-const STATUS_COLOR: Record<Status, string> = {
-  pendente: "bg-red-500/10 text-red-700 border-red-500/40",
-  em_analise: "bg-primary/10 text-primary border-primary/30",
-  concluida: "bg-emerald-500/10 text-emerald-700 border-emerald-500/40",
-  arquivada: "bg-muted text-muted-foreground border-border",
-};
-
-const formatDateSafe = (dateStr: any, formatStr: string) => {
-  if (!dateStr) return "-";
-  try {
-    const date = new Date(dateStr);
-    if (isNaN(date.getTime())) return "-";
-    return format(date, formatStr);
-  } catch (e) {
-    return "-";
-  }
-};
-
-const printDepoimento = (depoimento: Depoimento) => {
-  const w = window.open("", "_blank");
-  if (!w) return;
-  w.document.write(`
-    <html>
-    <head>
-      <title>Depoimento - ${depoimento.oficial_nome}</title>
-      <style>
-        @page { margin: 20mm 15mm; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-          font-family: 'Courier New', monospace;
-          font-size: 11px;
-          color: #1a1a1a;
-          line-height: 1.6;
-          padding: 20px;
-        }
-        .header { text-align: center; border-bottom: 2px solid #C9A03A; padding-bottom: 15px; margin-bottom: 20px; }
-        .header h1 { font-size: 16px; text-transform: uppercase; letter-spacing: 2px; color: #C9A03A; }
-        .header p { font-size: 10px; color: #666; margin-top: 4px; }
-        .badge { display: inline-block; padding: 2px 8px; border: 1px solid #ccc; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; margin: 2px; }
-        .section { margin-bottom: 15px; }
-        .section h3 { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; border-left: 3px solid #C9A03A; padding-left: 8px; margin-bottom: 8px; color: #333; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .field { margin-bottom: 4px; }
-        .field label { font-size: 9px; text-transform: uppercase; color: #999; letter-spacing: 1px; display: block; }
-        .field span { font-size: 11px; color: #1a1a1a; }
-        .content-block { border: 1px solid #ddd; padding: 12px; border-radius: 4px; margin-top: 8px; white-space: pre-wrap; font-size: 11px; line-height: 1.8; }
-        .footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; font-size: 9px; color: #999; text-transform: uppercase; letter-spacing: 1px; }
-        @media print { body { padding: 0; } }
-      </style>
-    </head>
-    <body>
-      <div class="header">
-        <h1>Depoimento</h1>
-        <p>PMESP · Corregedoria Geral · #${depoimento.numero_registro?.toString().padStart(4, '0') || '???'}</p>
-      </div>
-      <div class="section">
-        <h3>Dados do Declarante</h3>
-        <div class="grid">
-          <div class="field"><label>Nome</label><span>${depoimento.oficial_nome}</span></div>
-          <div class="field"><label>Patente</label><span>${depoimento.oficial_patente || "-"}</span></div>
-          <div class="field"><label>R.E.</label><span>${depoimento.oficial_re || "-"}</span></div>
-          <div class="field"><label>Data</label><span>${formatDateSafe(depoimento.data_depoimento, "dd/MM/yyyy")}</span></div>
-          <div class="field"><label>Batalhão</label><span>${depoimento.oficial_batalhao || "-"}</span></div>
-        </div>
-      </div>
-      <div class="section">
-        <h3>Depoimento Prestado</h3>
-        <div class="content-block">${depoimento.depoimento}</div>
-      </div>
-      ${depoimento.observacao ? `<div class="section"><h3>Observações</h3><div class="content-block">${depoimento.observacao}</div></div>` : ""}
-      <div class="footer">PMESP · Corregedoria Geral · Documento Oficial · ${format(new Date(), "dd/MM/yyyy HH:mm")}</div>
-      <script>window.print();window.close();<\u002fscript>
-    </body>
-    </html>
-  `);
-  w.document.close();
-};
+// Types, constants and utils moved to src/lib/corregedoria/
 
 const printRelatorio = (relatorio: any) => {
   const w = window.open("", "_blank");
@@ -634,6 +434,38 @@ const RelatorioCard = ({
                 </div>
               ) : (
                 <p className="text-xs text-muted-foreground mb-4">Nenhum depoimento anexado.</p>
+              );
+            })()}
+          </div>
+
+          {/* Relatórios Gerais Vinculados */}
+          <div className="rounded border border-border bg-muted p-4">
+            <div className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+              <FileSignature className="h-4 w-4" /> Relatórios Gerais Vinculados
+            </div>
+            {(() => {
+              const linkedRg = relatorioGeralVinculos
+                .filter(v => v.entidade_id === relatorio.id && (v.entidade_tipo === "inquerito" || v.entidade_tipo === "ato"))
+                .map(v => relatorios.find(r => r.id === v.relatorio_id))
+                .filter(Boolean) as Relatorio[];
+              return linkedRg.length > 0 ? (
+                <div className="space-y-2 mb-4">
+                  {linkedRg.map(rg => (
+                    <div key={rg.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
+                      <div className="flex items-center gap-3">
+                        <FileSignature className="h-4 w-4 text-foreground shrink-0" />
+                        <span className="text-foreground font-bold">{rg.titulo}</span>
+                        <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">Rel. Geral</Badge>
+                      </div>
+                      <Button size="sm" variant="ghost" className="h-7 text-xs text-foreground"
+                        onClick={() => { setActiveTab("relatorios_gerais"); setExpandedId(rg.id); }}>
+                        Ver
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground mb-4">Nenhum Relatório Geral vinculado.</p>
               );
             })()}
           </div>
@@ -2732,6 +2564,38 @@ function Corregedoria() {
                               })()}
                             </div>
 
+                            {/* Relatórios Gerais Vinculados */}
+                            <div className="rounded border border-border bg-muted p-4">
+                              <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                                <FileSignature className="h-4 w-4" /> Relatórios Gerais Vinculados
+                              </div>
+                              {(() => {
+                                const linkedRg = relatorioGeralVinculos
+                                  .filter(v => v.entidade_id === d.id && v.entidade_tipo === "denuncia")
+                                  .map(v => relatorios.find(r => r.id === v.relatorio_id))
+                                  .filter(Boolean) as Relatorio[];
+                                return linkedRg.length > 0 ? (
+                                  <div className="space-y-2 mb-4">
+                                    {linkedRg.map(rg => (
+                                      <div key={rg.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
+                                        <div className="flex items-center gap-3">
+                                          <FileSignature className="h-4 w-4 text-foreground shrink-0" />
+                                          <span className="text-foreground font-bold">{rg.titulo}</span>
+                                          <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">Rel. Geral</Badge>
+                                        </div>
+                                        <Button size="sm" variant="ghost" className="h-7 text-xs text-foreground"
+                                          onClick={() => { setActiveTab("relatorios_gerais"); setExpandedId(rg.id); }}>
+                                          Ver
+                                        </Button>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <p className="text-xs text-muted-foreground mb-4">Nenhum Relatório Geral vinculado.</p>
+                                );
+                              })()}
+                            </div>
+
                             {/* DADOS DETALHADOS (SE EXISTIREM) */}
                             {d.dados_detalhados && (
                               <div className="mt-4 space-y-4 animate-in fade-in duration-500">
@@ -3386,6 +3250,38 @@ function Corregedoria() {
                                     </div>
                                   ) : (
                                     <p className="text-xs text-muted-foreground mb-4">Nenhum depoimento anexado.</p>
+                                  );
+                                })()}
+                              </div>
+
+                              {/* Relatórios Gerais Vinculados */}
+                              <div className="rounded border border-border bg-muted p-4">
+                                <div className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                                  <FileSignature className="h-4 w-4" /> Relatórios Gerais Vinculados
+                                </div>
+                                {(() => {
+                                  const linkedRg = relatorioGeralVinculos
+                                    .filter(v => v.entidade_id === inv.id && v.entidade_tipo === "investigacao")
+                                    .map(v => relatorios.find(r => r.id === v.relatorio_id))
+                                    .filter(Boolean) as Relatorio[];
+                                  return linkedRg.length > 0 ? (
+                                    <div className="space-y-2 mb-4">
+                                      {linkedRg.map(rg => (
+                                        <div key={rg.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
+                                          <div className="flex items-center gap-3">
+                                            <FileSignature className="h-4 w-4 text-foreground shrink-0" />
+                                            <span className="text-foreground font-bold">{rg.titulo}</span>
+                                            <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">Rel. Geral</Badge>
+                                          </div>
+                                          <Button size="sm" variant="ghost" className="h-7 text-xs text-foreground"
+                                            onClick={() => { setActiveTab("relatorios_gerais"); setExpandedId(rg.id); }}>
+                                            Ver
+                                          </Button>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  ) : (
+                                    <p className="text-xs text-muted-foreground mb-4">Nenhum Relatório Geral vinculado.</p>
                                   );
                                 })()}
                               </div>
@@ -5364,64 +5260,6 @@ function Corregedoria() {
       />
     </div>
     </>
-  );
-}
-
-// --- Componentes Menores ---
-
-function SidebarItem({ 
-  active, 
-  onClick, 
-  icon: Icon, 
-  label, 
-  badge 
-}: { 
-  active: boolean; 
-  onClick: () => void; 
-  icon: React.ElementType; 
-  label: string;
-  badge?: number;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex w-full items-center justify-between rounded-md px-4 py-3 text-sm font-medium transition-all ${
-        active 
-          ? "bg-muted text-foreground shadow-[inset_2px_0_0_0_rgba(59,130,246,1)]" 
-          : "text-muted-foreground hover:bg-muted hover:text-foreground"
-      }`}
-    >
-      <div className="flex items-center gap-3">
-        <Icon className="h-4 w-4" />
-        {label}
-      </div>
-      {badge !== undefined && (
-        <span className="flex h-5 items-center justify-center rounded-full bg-primary px-2 text-[10px] font-bold text-white">
-          {badge}
-        </span>
-      )}
-    </button>
-  );
-}
-
-function StatCard({ title, value, icon: Icon, color }: { title: string, value: string, icon: React.ElementType, color: string }) {
-  return (
-    <div className="flex flex-col gap-2 rounded-lg border border-border bg-card p-6">
-      <div className="flex items-center justify-between">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{title}</span>
-        <Icon className={`h-5 w-5 ${color}`} />
-      </div>
-      <div className="text-4xl font-bold text-foreground tracking-wider">{value}</div>
-    </div>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{label}</p>
-      {children}
-    </div>
   );
 }
 
