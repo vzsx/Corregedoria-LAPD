@@ -53,7 +53,7 @@ function AcompanharPage() {
 
     const { data, error: err } = await supabase
       .from("denuncias")
-      .select("*")
+      .select("*, denuncia_relatorio(*, relatorios(titulo, tipo_denuncia))")
       .or(`dados_detalhados->>reclamante_nome.ilike.%${name.trim()}%`)
       .order("created_at", { ascending: false });
 
@@ -81,6 +81,13 @@ function AcompanharPage() {
     if (dd.provas_descricao) count++;
     if (dd.relato) count++;
     return count;
+  };
+
+  const getLinkedDocs = (denuncia: any) => {
+    if (!denuncia.denuncia_relatorio) return [];
+    return denuncia.denuncia_relatorio
+      .filter((dr: any) => dr.relatorios)
+      .map((dr: any) => dr.relatorios);
   };
 
   return (
@@ -199,38 +206,42 @@ function AcompanharPage() {
                         Documentos Anexados
                       </h3>
                     </div>
+
+                    {/* Linked relatorios (documents created by corregedoria) */}
+                    {getLinkedDocs(denuncia).length > 0 && (
+                      <div className="space-y-2 mb-3">
+                        {getLinkedDocs(denuncia).map((doc: any) => (
+                          <div key={doc.id} className="flex items-center gap-3 rounded-lg bg-muted/50 p-3 border border-border/50">
+                            <FileSignature className="h-5 w-5 text-primary/60 shrink-0" />
+                            <div>
+                              <p className="text-sm font-semibold text-foreground">{doc.titulo}</p>
+                              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{doc.tipo_denuncia}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Evidence types (from the complaint form) */}
                     {getDocCount(denuncia) > 0 ? (
                       <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
                         <FileSignature className="h-6 w-6 text-primary/60 shrink-0" />
                         <div>
                           <p className="text-sm font-semibold text-foreground">
-                            {getDocCount(denuncia)} documento(s) anexado(s)
+                            {getDocCount(denuncia)} prova(s) anexada(s) pelo denunciante
                           </p>
-                          <p className="text-[11px] text-muted-foreground mt-0.5">
-                            {denuncia.status === "concluida" || denuncia.status === "em_analise"
-                              ? "Os documentos estão em análise pela Corregedoria."
-                              : "Os documentos serão analisados pela Corregedoria."}
-                          </p>
+                          {denuncia.dados_detalhados?.provas_selecionadas?.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 mt-2">
+                              {denuncia.dados_detalhados.provas_selecionadas.map((p: string) => (
+                                <span key={p} className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/30 px-2.5 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
+                                  {p}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       </div>
-                    ) : (
-                      <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
-                        <FileText className="h-6 w-6 text-muted-foreground/30 shrink-0" />
-                        <p className="text-sm text-muted-foreground">
-                          Nenhum documento anexado a esta denúncia.
-                        </p>
-                      </div>
-                    )}
-
-                    {denuncia.dados_detalhados?.provas_selecionadas?.length > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        {denuncia.dados_detalhados.provas_selecionadas.map((p: string) => (
-                          <span key={p} className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/30 px-3 py-1 text-[10px] uppercase tracking-wider text-muted-foreground">
-                            {p}
-                          </span>
-                        ))}
-                      </div>
-                    )}
+                    ) : null}
                   </div>
                 </div>
               </div>
