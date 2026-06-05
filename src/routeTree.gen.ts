@@ -9,18 +9,13 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AcompanharRouteImport } from './routes/acompanhar'
 import { Route as DenunciasRouteImport } from './routes/denuncias'
 import { Route as CorregedoriaRouteImport } from './routes/corregedoria'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AcompanharRouteImport } from './routes/acompanhar'
 import { Route as IndexRouteImport } from './routes/index'
 
-const AcompanharRoute = AcompanharRouteImport.update({
-  id: '/acompanhar',
-  path: '/acompanhar',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const DenunciasRoute = DenunciasRouteImport.update({
   id: '/denuncias',
   path: '/denuncias',
@@ -39,6 +34,11 @@ const AuthRoute = AuthRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AcompanharRoute = AcompanharRouteImport.update({
+  id: '/acompanhar',
+  path: '/acompanhar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -74,10 +74,23 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/acompanhar' | '/admin' | '/auth' | '/corregedoria' | '/denuncias'
+  fullPaths:
+    | '/'
+    | '/acompanhar'
+    | '/admin'
+    | '/auth'
+    | '/corregedoria'
+    | '/denuncias'
   fileRoutesByTo: FileRoutesByTo
   to: '/' | '/acompanhar' | '/admin' | '/auth' | '/corregedoria' | '/denuncias'
-  id: '__root__' | '/' | '/acompanhar' | '/admin' | '/auth' | '/corregedoria' | '/denuncias'
+  id:
+    | '__root__'
+    | '/'
+    | '/acompanhar'
+    | '/admin'
+    | '/auth'
+    | '/corregedoria'
+    | '/denuncias'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -91,13 +104,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/acompanhar': {
-      id: '/acompanhar'
-      path: '/acompanhar'
-      fullPath: '/acompanhar'
-      preLoaderRoute: typeof AcompanharRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/denuncias': {
       id: '/denuncias'
       path: '/denuncias'
@@ -124,6 +130,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/acompanhar': {
+      id: '/acompanhar'
+      path: '/acompanhar'
+      fullPath: '/acompanhar'
+      preLoaderRoute: typeof AcompanharRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {

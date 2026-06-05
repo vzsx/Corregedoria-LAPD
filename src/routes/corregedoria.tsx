@@ -270,7 +270,8 @@ const printRelatorio = (relatorio: any) => {
 const RelatorioCard = ({ 
   relatorio, expanded, onToggle, isAdmin, onApprove, onEdit, onDelete, onUpdateStatus,
   denuncias, investigacoes, relatorios, denunciaRelatorios, investigacaoRelatorios,
-  onLinkDenuncia, onLinkInvestigacao, linking, linkDenunciaId, setLinkDenunciaId,
+  onLinkDenuncia, onUnlinkDenuncia, onLinkInvestigacao, onUnlinkInvestigacaoRelatorio,
+  linking, linkDenunciaId, setLinkDenunciaId,
   linkInvestigacaoId, setLinkInvestigacaoId, depoimentos, onPrint
 }: any) => {
   const linkedDenuncias = denunciaRelatorios
@@ -282,6 +283,10 @@ const RelatorioCard = ({
     .filter((ir: any) => ir.relatorio_id === relatorio.id)
     .map((ir: any) => investigacoes.find((i: any) => i.id === ir.investigacao_id))
     .filter(Boolean);
+
+  const availableDenuncias = denuncias.filter(
+    (d: any) => !denunciaRelatorios.some((dr: any) => dr.relatorio_id === relatorio.id && dr.denuncia_id === d.id)
+  );
 
   const availableInvestigacoes = investigacoes.filter(
     (i: any) => !investigacaoRelatorios.some((ir: any) => ir.relatorio_id === relatorio.id && ir.investigacao_id === i.id)
@@ -418,16 +423,59 @@ const RelatorioCard = ({
                       <span className="text-foreground font-bold">{d.titulo}</span>
                       <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">Denúncia</Badge>
                     </div>
-                    <Button size="sm" variant="ghost" className="h-7 text-xs text-foreground"
-                      onClick={() => { setActiveTab("denuncias"); setExpandedId(d.id); }}>
-                      Ver Denúncia
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button size="sm" variant="ghost" className="h-7 text-xs text-foreground"
+                        onClick={() => { setActiveTab("denuncias"); setExpandedId(d.id); }}>
+                        Ver Denúncia
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-950/30"
+                        onClick={() => onUnlinkDenuncia?.(d.id, relatorio.id)}
+                        title="Desanexar"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
             ) : (
               <p className="text-xs text-muted-foreground mb-4">Nenhuma denúncia anexada.</p>
             )}
+            <div className="flex gap-2 items-end">
+              <div className="flex-1">
+                <Select value={linkDenunciaId} onValueChange={setLinkDenunciaId}>
+                  <SelectTrigger className="bg-muted border-border text-foreground text-xs">
+                    <SelectValue placeholder="Selecione uma denúncia para vincular..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-muted border-border text-foreground">
+                    {availableDenuncias.map((d: any) => (
+                      <SelectItem key={d.id} value={d.id}>{d.titulo}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button
+                size="sm"
+                onClick={() => onLinkDenuncia?.(relatorio.id)}
+                disabled={linking || !linkDenunciaId}
+                className="bg-card hover:bg-slate-700 text-white text-xs"
+              >
+                {linking ? "Vinculando..." : "Vincular"}
+              </Button>
+              {availableDenuncias.length > 0 && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={linking}
+                  className="border-border text-muted-foreground hover:text-foreground text-xs"
+                >
+                  {linking ? "Vinculando..." : "Vincular Todos"}
+                </Button>
+              )}
+            </div>
           </div>
 
           {/* Investigações Vinculadas */}
@@ -444,16 +492,49 @@ const RelatorioCard = ({
                       <span className="text-foreground font-bold">{i.titulo}</span>
                       <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">Investigação</Badge>
                     </div>
-                    <Button size="sm" variant="ghost" className="h-7 text-xs text-foreground"
-                      onClick={() => { setActiveTab("investigacoes"); setExpandedId(i.id); }}>
-                      Ver Investigação
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button size="sm" variant="ghost" className="h-7 text-xs text-foreground"
+                        onClick={() => { setActiveTab("investigacoes"); setExpandedId(i.id); }}>
+                        Ver Investigação
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-950/30"
+                        onClick={() => onUnlinkInvestigacaoRelatorio?.(i.id, relatorio.id)}
+                        title="Desanexar"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
             ) : (
               <p className="text-xs text-muted-foreground mb-4">Nenhuma investigação anexada.</p>
             )}
+            <div className="flex gap-2 items-end">
+              <div className="flex-1">
+                <Select value={linkInvestigacaoId} onValueChange={setLinkInvestigacaoId}>
+                  <SelectTrigger className="bg-muted border-border text-foreground text-xs">
+                    <SelectValue placeholder="Selecione uma investigação para vincular..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-muted border-border text-foreground">
+                    {availableInvestigacoes.map((i: any) => (
+                      <SelectItem key={i.id} value={i.id}>{i.titulo}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button
+                size="sm"
+                onClick={() => onLinkInvestigacao?.(relatorio.id)}
+                disabled={linking || !linkInvestigacaoId}
+                className="bg-card hover:bg-slate-700 text-white text-xs"
+              >
+                {linking ? "Vinculando..." : "Vincular"}
+              </Button>
+            </div>
           </div>
 
           {/* Depoimentos Vinculados */}
@@ -901,21 +982,33 @@ function Corregedoria() {
 
     const drSub = supabase.channel('denuncia-relatorio-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'denuncia_relatorio' }, (payload) => {
-        if (payload.eventType === 'INSERT') setDenunciaRelatorios(prev => [...prev, payload.new as DenunciaRelatorio]);
+        if (payload.eventType === 'INSERT') setDenunciaRelatorios(prev => 
+          prev.some(dr => dr.denuncia_id === payload.new.denuncia_id && dr.relatorio_id === payload.new.relatorio_id)
+            ? prev
+            : [...prev, payload.new as DenunciaRelatorio]
+        );
         if (payload.eventType === 'DELETE') setDenunciaRelatorios(prev => prev.filter(dr => !(dr.denuncia_id === payload.old.denuncia_id && dr.relatorio_id === payload.old.relatorio_id)));
       })
       .subscribe();
 
     const irSub = supabase.channel('investigacao-relatorio-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'investigacao_relatorio' }, (payload) => {
-        if (payload.eventType === 'INSERT') setInvestigacaoRelatorios(prev => [...prev, payload.new as InvestigacaoRelatorio]);
+        if (payload.eventType === 'INSERT') setInvestigacaoRelatorios(prev =>
+          prev.some(ir => ir.investigacao_id === payload.new.investigacao_id && ir.relatorio_id === payload.new.relatorio_id)
+            ? prev
+            : [...prev, payload.new as InvestigacaoRelatorio]
+        );
         if (payload.eventType === 'DELETE') setInvestigacaoRelatorios(prev => prev.filter(ir => !(ir.investigacao_id === payload.old.investigacao_id && ir.relatorio_id === payload.old.relatorio_id)));
       })
       .subscribe();
 
     const diSub = supabase.channel('denuncia-investigacao-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'denuncia_investigacao' }, (payload) => {
-        if (payload.eventType === 'INSERT') setDenunciaInvestigacoes(prev => [...prev, payload.new as DenunciaInvestigacao]);
+        if (payload.eventType === 'INSERT') setDenunciaInvestigacoes(prev =>
+          prev.some(di => di.denuncia_id === payload.new.denuncia_id && di.investigacao_id === payload.new.investigacao_id)
+            ? prev
+            : [...prev, payload.new as DenunciaInvestigacao]
+        );
         if (payload.eventType === 'DELETE') setDenunciaInvestigacoes(prev => prev.filter(di => !(di.denuncia_id === payload.old.denuncia_id && di.investigacao_id === payload.old.investigacao_id)));
       })
       .subscribe();
@@ -1607,9 +1700,39 @@ function Corregedoria() {
       toast.error("Erro ao vincular");
     } else {
       toast.success("Documento anexado à ocorrência!");
-      setDenunciaRelatorios([...denunciaRelatorios, { denuncia_id: denunciaId, relatorio_id: linkRelatorioId }]);
+      setDenunciaRelatorios(prev => 
+        prev.some(dr => dr.denuncia_id === denunciaId && dr.relatorio_id === linkRelatorioId)
+          ? prev
+          : [...prev, { denuncia_id: denunciaId, relatorio_id: linkRelatorioId }]
+      );
       setLinkRelatorioId("");
     }
+  };
+
+  const handleUnlinkRelatorio = async (denunciaId: string, relatorioId: string) => {
+    setLinking(true);
+    const { error } = await supabase.from("denuncia_relatorio").delete().match({
+      denuncia_id: denunciaId,
+      relatorio_id: relatorioId
+    });
+    setLinking(false);
+    if (error) return toast.error("Erro ao desanexar");
+    setDenunciaRelatorios(prev => prev.filter(dr => !(dr.denuncia_id === denunciaId && dr.relatorio_id === relatorioId)));
+    toast.success("Documento desanexado!");
+  };
+
+  const handleLinkAllRelatorios = async (denunciaId: string, relatorioIds: string[]) => {
+    if (relatorioIds.length === 0) return toast.error("Nenhum documento disponível");
+    setLinking(true);
+    const inserts = relatorioIds.map(relatorio_id => ({
+      denuncia_id: denunciaId,
+      relatorio_id
+    }));
+    const { error } = await supabase.from("denuncia_relatorio").insert(inserts);
+    setLinking(false);
+    if (error) return toast.error("Erro ao vincular documentos");
+    toast.success(`${relatorioIds.length} documento(s) anexado(s)!`);
+    setLinkRelatorioId("");
   };
 
   const handleLinkInvestigacaoRelatorio = async (investigacaoId: string) => {
@@ -1643,9 +1766,25 @@ function Corregedoria() {
       toast.error("Erro ao vincular");
     } else {
       toast.success("Denúncia anexada ao documento!");
-      setDenunciaRelatorios([...denunciaRelatorios, { denuncia_id: linkDenunciaId, relatorio_id: relatorioId }]);
+      setDenunciaRelatorios(prev =>
+        prev.some(dr => dr.denuncia_id === linkDenunciaId && dr.relatorio_id === relatorioId)
+          ? prev
+          : [...prev, { denuncia_id: linkDenunciaId, relatorio_id: relatorioId }]
+      );
       setLinkDenunciaId("");
     }
+  };
+
+  const handleUnlinkDenuncia = async (denunciaId: string, relatorioId: string) => {
+    setLinking(true);
+    const { error } = await supabase.from("denuncia_relatorio").delete().match({
+      denuncia_id: denunciaId,
+      relatorio_id: relatorioId
+    });
+    setLinking(false);
+    if (error) return toast.error("Erro ao desanexar denúncia");
+    setDenunciaRelatorios(prev => prev.filter(dr => !(dr.denuncia_id === denunciaId && dr.relatorio_id === relatorioId)));
+    toast.success("Denúncia desanexada!");
   };
 
   const handleLinkInvestigacao = async (relatorioId: string) => {
@@ -1661,9 +1800,25 @@ function Corregedoria() {
       toast.error("Erro ao vincular");
     } else {
       toast.success("Investigação anexada ao documento!");
-      setInvestigacaoRelatorios([...investigacaoRelatorios, { investigacao_id: linkInvestigacaoId, relatorio_id: relatorioId }]);
+      setInvestigacaoRelatorios(prev =>
+        prev.some(ir => ir.investigacao_id === linkInvestigacaoId && ir.relatorio_id === relatorioId)
+          ? prev
+          : [...prev, { investigacao_id: linkInvestigacaoId, relatorio_id: relatorioId }]
+      );
       setLinkInvestigacaoId("");
     }
+  };
+
+  const handleUnlinkInvestigacaoRelatorio = async (investigacaoId: string, relatorioId: string) => {
+    setLinking(true);
+    const { error } = await supabase.from("investigacao_relatorio").delete().match({
+      investigacao_id: investigacaoId,
+      relatorio_id: relatorioId
+    });
+    setLinking(false);
+    if (error) return toast.error("Erro ao desanexar investigação");
+    setInvestigacaoRelatorios(prev => prev.filter(ir => !(ir.investigacao_id === investigacaoId && ir.relatorio_id === relatorioId)));
+    toast.success("Investigação desanexada!");
   };
 
   const confirmDeleteOficial = (userId: string) => {
@@ -2046,30 +2201,41 @@ function Corregedoria() {
                                {linkedRelatorios.length > 0 ? (
                                  <div className="space-y-2 mb-4">
                                    {linkedRelatorios.map(r => (
-                                     <div key={r.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
-                                       <div className="flex items-center gap-3">
-                                         {r.tipo_denuncia === "Inquérito Policial" ? (
-                                           <FileSignature className="h-4 w-4 text-foreground" />
-                                         ) : (
-                                           <FileText className="h-4 w-4 text-emerald-400" />
-                                         )}
-                                         <span className="text-foreground font-bold">{r.titulo}</span>
-                                         <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">
-                                           {r.tipo_denuncia}
-                                         </Badge>
-                                       </div>
-                                       <Button 
-                                         size="sm" 
-                                         variant="ghost" 
-                                         className="h-7 text-xs text-foreground hover:text-foreground hover:bg-muted/50"
-                                         onClick={() => {
-                                           setActiveTab(r.tipo_denuncia === "Inquérito Policial" ? "inqueritos" : "atos");
-                                           setExpandedId(r.id);
-                                         }}
-                                       >
-                                         Ver Documento
-                                       </Button>
-                                     </div>
+                                      <div key={r.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
+                                        <div className="flex items-center gap-3">
+                                          {r.tipo_denuncia === "Inquérito Policial" ? (
+                                            <FileSignature className="h-4 w-4 text-foreground" />
+                                          ) : (
+                                            <FileText className="h-4 w-4 text-emerald-400" />
+                                          )}
+                                          <span className="text-foreground font-bold">{r.titulo}</span>
+                                          <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">
+                                            {r.tipo_denuncia}
+                                          </Badge>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                          <Button 
+                                            size="sm" 
+                                            variant="ghost" 
+                                            className="h-7 text-xs text-foreground hover:text-foreground hover:bg-muted/50"
+                                            onClick={() => {
+                                              setActiveTab(r.tipo_denuncia === "Inquérito Policial" ? "inqueritos" : "atos");
+                                              setExpandedId(r.id);
+                                            }}
+                                          >
+                                            Ver Documento
+                                          </Button>
+                                          <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-950/30"
+                                            onClick={() => handleUnlinkRelatorio(d.id, r.id)}
+                                            title="Desanexar"
+                                          >
+                                            <X className="h-3.5 w-3.5" />
+                                          </Button>
+                                        </div>
+                                      </div>
                                    ))}
                                  </div>
                               ) : (
@@ -2097,6 +2263,17 @@ function Corregedoria() {
                                 >
                                   {linking ? "Vinculando..." : "Vincular"}
                                 </Button>
+                                {availableRelatorios.length > 0 && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleLinkAllRelatorios(d.id, availableRelatorios.map(r => r.id))}
+                                    disabled={linking}
+                                    className="border-border text-muted-foreground hover:text-foreground text-xs"
+                                  >
+                                    {linking ? "Vinculando..." : "Vincular Todos"}
+                                  </Button>
+                                )}
                               </div>
                             </div>
 
@@ -3150,7 +3327,9 @@ function Corregedoria() {
                           denunciaRelatorios={denunciaRelatorios}
                           investigacaoRelatorios={investigacaoRelatorios}
                           onLinkDenuncia={handleLinkDenuncia}
+                          onUnlinkDenuncia={handleUnlinkDenuncia}
                           onLinkInvestigacao={handleLinkInvestigacao}
+                          onUnlinkInvestigacaoRelatorio={handleUnlinkInvestigacaoRelatorio}
                           linking={linking}
                           linkDenunciaId={linkDenunciaId}
                           setLinkDenunciaId={setLinkDenunciaId}
@@ -3487,7 +3666,9 @@ function Corregedoria() {
                           denunciaRelatorios={denunciaRelatorios}
                           investigacaoRelatorios={investigacaoRelatorios}
                           onLinkDenuncia={handleLinkDenuncia}
+                          onUnlinkDenuncia={handleUnlinkDenuncia}
                           onLinkInvestigacao={handleLinkInvestigacao}
+                          onUnlinkInvestigacaoRelatorio={handleUnlinkInvestigacaoRelatorio}
                           linking={linking}
                           linkDenunciaId={linkDenunciaId}
                           setLinkDenunciaId={setLinkDenunciaId}
