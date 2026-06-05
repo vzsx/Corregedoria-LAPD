@@ -44,7 +44,8 @@ const RelatorioCard = ({
   onLinkDenuncia, onUnlinkDenuncia, onLinkInvestigacao, onUnlinkInvestigacaoRelatorio,
   linking, linkDenunciaId, setLinkDenunciaId,
   linkInvestigacaoId, setLinkInvestigacaoId, depoimentos, onPrint,
-  relatorioGeralVinculos
+  relatorioGeralVinculos,
+  linkRelatorioGeralId, setLinkRelatorioGeralId, onLinkRelatorioGeral
 }: any) => {
   const linkedDenuncias = denunciaRelatorios
     .filter((dr: any) => dr.relatorio_id === relatorio.id)
@@ -367,6 +368,34 @@ const RelatorioCard = ({
                 <p className="text-xs text-muted-foreground mb-4">Nenhum Relatório Geral vinculado.</p>
               );
             })()}
+            <div className="flex gap-2 items-end">
+              <div className="flex-1">
+                <Select value={linkRelatorioGeralId} onValueChange={setLinkRelatorioGeralId}>
+                  <SelectTrigger className="bg-muted border-border text-foreground text-xs">
+                    <SelectValue placeholder="Selecione um Relatório Geral para vincular..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-muted border-border text-foreground">
+                    {relatorios
+                      .filter(r => r.tipo_denuncia === "Relatório Geral" && !relatorioGeralVinculos.some(v => v.relatorio_id === r.id && v.entidade_id === relatorio.id && (v.entidade_tipo === "inquerito" || v.entidade_tipo === "ato")))
+                      .map(rg => (
+                        <SelectItem key={rg.id} value={rg.id}>{rg.titulo}</SelectItem>
+                      ))
+                    }
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button
+                size="sm"
+                onClick={() => {
+                  const tipo = relatorio.tipo_denuncia === "Inquérito Policial" ? "inquerito" : "ato";
+                  onLinkRelatorioGeral?.(relatorio.id, tipo);
+                }}
+                disabled={linking || !linkRelatorioGeralId}
+                className="bg-card hover:bg-slate-700 text-white text-xs"
+              >
+                {linking ? "Vinculando..." : "Vincular"}
+              </Button>
+            </div>
           </div>
 
           {relatorio.tipo_denuncia === "Inquérito Policial" && relatorio.dados_detalhados && (
@@ -706,6 +735,7 @@ function Corregedoria() {
   const [linkRelatorioId, setLinkRelatorioId] = useState<string>("");
   const [linkDenunciaId, setLinkDenunciaId] = useState<string>("");
   const [linkInvestigacaoId, setLinkInvestigacaoId] = useState<string>("");
+  const [linkRelatorioGeralId, setLinkRelatorioGeralId] = useState<string>("");
   const [linkInvestigacaoDenunciaId, setLinkInvestigacaoDenunciaId] = useState<string>("");
   const [linkDepoimentoDenunciaId, setLinkDepoimentoDenunciaId] = useState<string>("");
   const [linking, setLinking] = useState(false);
@@ -1742,6 +1772,30 @@ function Corregedoria() {
     }
   };
 
+  const handleLinkRelatorioGeral = async (entidadeId: string, entidadeTipo: string) => {
+    if (!linkRelatorioGeralId) return toast.error("Selecione um Relatório Geral");
+    setLinking(true);
+    const { error } = await supabase.from("relatorio_geral_vinculos").insert({
+      relatorio_id: linkRelatorioGeralId,
+      entidade_id: entidadeId,
+      entidade_tipo: entidadeTipo
+    });
+    setLinking(false);
+    if (error) {
+      toast.error("Erro ao vincular Relatório Geral");
+    } else {
+      toast.success("Relatório Geral anexado!");
+      setRelatorioGeralVinculos(prev => [...prev, {
+        id: crypto.randomUUID(),
+        relatorio_id: linkRelatorioGeralId,
+        entidade_id: entidadeId,
+        entidade_tipo: entidadeTipo,
+        created_at: new Date().toISOString()
+      } as RelatorioGeralVinculo]);
+      setLinkRelatorioGeralId("");
+    }
+  };
+
   const handleUnlinkInvestigacaoRelatorio = async (investigacaoId: string, relatorioId: string) => {
     setLinking(true);
     const { error } = await supabase.from("investigacao_relatorio").delete().match({
@@ -2492,7 +2546,32 @@ function Corregedoria() {
                                 ) : (
                                   <p className="text-xs text-muted-foreground mb-4">Nenhum Relatório Geral vinculado.</p>
                                 );
-                              })()}
+                                })()}
+                              <div className="flex gap-2 items-end">
+                                <div className="flex-1">
+                                  <Select value={linkRelatorioGeralId} onValueChange={setLinkRelatorioGeralId}>
+                                    <SelectTrigger className="bg-muted border-border text-foreground text-xs">
+                                      <SelectValue placeholder="Selecione um Relatório Geral para vincular..." />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-muted border-border text-foreground">
+                                      {relatorios
+                                        .filter(r => r.tipo_denuncia === "Relatório Geral" && !relatorioGeralVinculos.some(v => v.relatorio_id === r.id && v.entidade_id === d.id && v.entidade_tipo === "denuncia"))
+                                        .map(rg => (
+                                          <SelectItem key={rg.id} value={rg.id}>{rg.titulo}</SelectItem>
+                                        ))
+                                      }
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleLinkRelatorioGeral(d.id, "denuncia")}
+                                  disabled={linking || !linkRelatorioGeralId}
+                                  className="bg-card hover:bg-slate-700 text-white text-xs"
+                                >
+                                  {linking ? "Vinculando..." : "Vincular"}
+                                </Button>
+                              </div>
                             </div>
 
                             {/* DADOS DETALHADOS (SE EXISTIREM) */}
@@ -3183,15 +3262,40 @@ function Corregedoria() {
                                     <p className="text-xs text-muted-foreground mb-4">Nenhum Relatório Geral vinculado.</p>
                                   );
                                 })()}
+                              <div className="flex gap-2 items-end">
+                                <div className="flex-1">
+                                  <Select value={linkRelatorioGeralId} onValueChange={setLinkRelatorioGeralId}>
+                                    <SelectTrigger className="bg-muted border-border text-foreground text-xs">
+                                      <SelectValue placeholder="Selecione um Relatório Geral para vincular..." />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-muted border-border text-foreground">
+                                      {relatorios
+                                        .filter(r => r.tipo_denuncia === "Relatório Geral" && !relatorioGeralVinculos.some(v => v.relatorio_id === r.id && v.entidade_id === inv.id && v.entidade_tipo === "investigacao"))
+                                        .map(rg => (
+                                          <SelectItem key={rg.id} value={rg.id}>{rg.titulo}</SelectItem>
+                                        ))
+                                      }
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleLinkRelatorioGeral(inv.id, "investigacao")}
+                                  disabled={linking || !linkRelatorioGeralId}
+                                  className="bg-card hover:bg-slate-700 text-white text-xs"
+                                >
+                                  {linking ? "Vinculando..." : "Vincular"}
+                                </Button>
                               </div>
+                            </div>
 
-                              <div className="grid gap-6 md:grid-cols-2">
-                                <div className="space-y-4">
-                                  <div className="border-l-2 border-red-600 pl-3 bg-red-500/5 py-2">
-                                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-red-500 mb-2">1. PROCEDIMENTO</h4>
-                                    <p className="text-xs text-muted-foreground">Tipo: <span className="text-foreground">{inv.tipo_procedimento}</span></p>
-                                    <p className="text-xs text-muted-foreground">Abertura: <span className="text-foreground">{format(new Date(inv.created_at), "dd/MM/yyyy")}</span></p>
-                                  </div>
+                            <div className="grid gap-6 md:grid-cols-2">
+                              <div className="space-y-4">
+                                <div className="border-l-2 border-red-600 pl-3 bg-red-500/5 py-2">
+                                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-red-500 mb-2">1. PROCEDIMENTO</h4>
+                                  <p className="text-xs text-muted-foreground">Tipo: <span className="text-foreground">{inv.tipo_procedimento}</span></p>
+                                  <p className="text-xs text-muted-foreground">Abertura: <span className="text-foreground">{format(new Date(inv.created_at), "dd/MM/yyyy")}</span></p>
+                                </div>
 
                                   <div className="border-l-2 border-zinc-500 pl-3 bg-muted/50 py-2">
                                     <h4 className="text-[10px] font-bold uppercase tracking-widest text-foreground mb-2">2. AUTORIDADE</h4>
@@ -3588,6 +3692,9 @@ function Corregedoria() {
                           depoimentos={depoimentos}
                           onPrint={printRelatorio}
                           relatorioGeralVinculos={relatorioGeralVinculos}
+                          linkRelatorioGeralId={linkRelatorioGeralId}
+                          setLinkRelatorioGeralId={setLinkRelatorioGeralId}
+                          onLinkRelatorioGeral={handleLinkRelatorioGeral}
                         />
                       ))
                   )
@@ -3928,6 +4035,9 @@ function Corregedoria() {
                           depoimentos={depoimentos}
                           onPrint={printRelatorio}
                           relatorioGeralVinculos={relatorioGeralVinculos}
+                          linkRelatorioGeralId={linkRelatorioGeralId}
+                          setLinkRelatorioGeralId={setLinkRelatorioGeralId}
+                          onLinkRelatorioGeral={handleLinkRelatorioGeral}
                         />
                       ))
                   )
@@ -4481,7 +4591,7 @@ function Corregedoria() {
                               </div>
                             </div>
                             <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
-                              <Select value={rg.status} onValueChange={(v: Status) => updateStatus(rg.id, v)}>
+                              <Select value={rg.status} onValueChange={(v: Status) => updateRelatorioStatus(rg.id, v)}>
                                 <SelectTrigger className="h-8 bg-muted border-border text-[10px] text-muted-foreground uppercase tracking-widest w-[130px]">
                                   <SelectValue />
                                 </SelectTrigger>
