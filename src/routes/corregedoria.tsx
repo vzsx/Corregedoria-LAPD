@@ -1761,6 +1761,7 @@ function Corregedoria() {
   }
 
   return (
+    <>
     <div className="flex h-screen w-full overflow-hidden bg-background text-foreground font-mono">
       {/* Mobile Overlay */}
       {sidebarOpen && (
@@ -4361,6 +4362,7 @@ function Corregedoria() {
         loading={confirmDialog.loading}
       />
     </div>
+    </>
   );
 }
 
