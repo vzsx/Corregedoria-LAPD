@@ -2,6 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { Shield, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
+import { NotificationBell } from "@/components/notification-bell";
 import { useState, useEffect } from "react";
 
 export function SiteHeader() {
@@ -60,6 +61,7 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
+          {user && <NotificationBell />}
           {user ? (
             <div className="flex items-center gap-2 animate-scale-in">
               {(isCorregedor || isAdmin) && (
