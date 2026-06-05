@@ -170,6 +170,66 @@ const formatDateSafe = (dateStr: any, formatStr: string) => {
   }
 };
 
+const printDepoimento = (depoimento: Depoimento) => {
+  const w = window.open("", "_blank");
+  if (!w) return;
+  w.document.write(`
+    <html>
+    <head>
+      <title>Depoimento - ${depoimento.oficial_nome}</title>
+      <style>
+        @page { margin: 20mm 15mm; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+          font-family: 'Courier New', monospace;
+          font-size: 11px;
+          color: #1a1a1a;
+          line-height: 1.6;
+          padding: 20px;
+        }
+        .header { text-align: center; border-bottom: 2px solid #C9A03A; padding-bottom: 15px; margin-bottom: 20px; }
+        .header h1 { font-size: 16px; text-transform: uppercase; letter-spacing: 2px; color: #C9A03A; }
+        .header p { font-size: 10px; color: #666; margin-top: 4px; }
+        .badge { display: inline-block; padding: 2px 8px; border: 1px solid #ccc; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; margin: 2px; }
+        .section { margin-bottom: 15px; }
+        .section h3 { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; border-left: 3px solid #C9A03A; padding-left: 8px; margin-bottom: 8px; color: #333; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .field { margin-bottom: 4px; }
+        .field label { font-size: 9px; text-transform: uppercase; color: #999; letter-spacing: 1px; display: block; }
+        .field span { font-size: 11px; color: #1a1a1a; }
+        .content-block { border: 1px solid #ddd; padding: 12px; border-radius: 4px; margin-top: 8px; white-space: pre-wrap; font-size: 11px; line-height: 1.8; }
+        .footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; font-size: 9px; color: #999; text-transform: uppercase; letter-spacing: 1px; }
+        @media print { body { padding: 0; } }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>Depoimento</h1>
+        <p>PMESP · Corregedoria Geral · #${depoimento.numero_registro?.toString().padStart(4, '0') || '???'}</p>
+      </div>
+      <div class="section">
+        <h3>Dados do Declarante</h3>
+        <div class="grid">
+          <div class="field"><label>Nome</label><span>${depoimento.oficial_nome}</span></div>
+          <div class="field"><label>Patente</label><span>${depoimento.oficial_patente || "-"}</span></div>
+          <div class="field"><label>R.E.</label><span>${depoimento.oficial_re || "-"}</span></div>
+          <div class="field"><label>Data</label><span>${formatDateSafe(depoimento.data_depoimento, "dd/MM/yyyy")}</span></div>
+          <div class="field"><label>Batalhão</label><span>${depoimento.oficial_batalhao || "-"}</span></div>
+        </div>
+      </div>
+      <div class="section">
+        <h3>Depoimento Prestado</h3>
+        <div class="content-block">${depoimento.depoimento}</div>
+      </div>
+      ${depoimento.observacao ? `<div class="section"><h3>Observações</h3><div class="content-block">${depoimento.observacao}</div></div>` : ""}
+      <div class="footer">PMESP · Corregedoria Geral · Documento Oficial · ${format(new Date(), "dd/MM/yyyy HH:mm")}</div>
+      <script>window.print();window.close();<\u002fscript>
+    </body>
+    </html>
+  `);
+  w.document.close();
+};
+
 const printRelatorio = (relatorio: any) => {
   const w = window.open("", "_blank");
   if (!w) return;
@@ -4212,7 +4272,7 @@ function Corregedoria() {
                       <div key={d.id} className="rounded-lg border border-border bg-card overflow-hidden">
                         <div
                           onClick={() => setExpandedId(depExpanded ? null : d.id)}
-                          className="flex w-full items-start justify-between gap-4 p-5 text-left transition-colors hover:bg-muted cursor-pointer"
+                          className="flex w-full items-center justify-between gap-4 p-5 text-left transition-colors hover:bg-muted cursor-pointer"
                         >
                           <div className="flex items-center gap-4 flex-1">
                             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-muted/50">
@@ -4220,18 +4280,27 @@ function Corregedoria() {
                             </div>
                             <div className="overflow-hidden">
                               <div className="flex items-center gap-3 whitespace-nowrap overflow-hidden">
-                                <Badge variant="outline" className="bg-muted border-border text-foreground font-mono text-[10px]">#{d.numero_registro}</Badge>
+                                <Badge variant="outline" className="bg-muted border-border text-foreground font-mono text-[10px]">
+                                  #{d.numero_registro?.toString().padStart(4, '0') || '???'}
+                                </Badge>
                                 <h4 className="text-sm font-bold text-foreground truncate max-w-[200px]">{d.oficial_nome}</h4>
-                                {d.oficial_patente && <span className="text-[10px] text-muted-foreground">{d.oficial_patente}</span>}
-                                {d.oficial_re && <span className="text-[10px] text-muted-foreground">RE: {d.oficial_re}</span>}
+                                {d.oficial_patente && (
+                                  <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground bg-muted/50">
+                                    {d.oficial_patente}
+                                  </Badge>
+                                )}
                               </div>
                               <div className="mt-1 flex items-center gap-2 text-[10px] text-muted-foreground uppercase tracking-widest">
                                 <span>{formatDateSafe(d.data_depoimento, "dd/MM/yyyy")}</span>
+                                {d.oficial_re && <><span>·</span><span>RE: {d.oficial_re}</span></>}
                                 {d.oficial_batalhao && <><span>·</span><span>{d.oficial_batalhao}</span></>}
                               </div>
                             </div>
                           </div>
                           <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-foreground hover:text-foreground hover:bg-muted/50" onClick={() => printDepoimento(d)} title="Imprimir / Exportar PDF">
+                              <Printer className="h-4 w-4" />
+                            </Button>
                             <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:text-primary/80 hover:bg-primary/10" onClick={() => handleEditDepoimento(d)} title="Editar">
                               <Pencil className="h-4 w-4" />
                             </Button>
@@ -4241,24 +4310,72 @@ function Corregedoria() {
                           </div>
                         </div>
                         {depExpanded && (
-                          <div className="border-t border-border/50 bg-muted/50 p-6 space-y-4">
-                            <p className="text-xs text-foreground/80 whitespace-pre-wrap leading-relaxed bg-muted/30 p-3 rounded border border-border/50">{d.depoimento}</p>
+                          <div className="border-t border-border/50 bg-muted/50 p-6 space-y-6">
+                            {/* Depoimento */}
+                            <div className="border-l-2 border-primary pl-4 bg-primary/5 py-3">
+                              <h4 className="text-[10px] font-bold uppercase tracking-widest text-primary mb-2">Depoimento Prestado</h4>
+                              <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed font-mono">{d.depoimento}</p>
+                            </div>
+
+                            {/* Observações */}
                             {d.observacao && (
-                              <div className="rounded border border-border bg-muted p-3">
-                                <h5 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Observações</h5>
-                                <p className="text-[11px] text-muted-foreground/80 whitespace-pre-wrap leading-relaxed">{d.observacao}</p>
+                              <div className="border-l-2 border-zinc-500 pl-4 bg-muted/50 py-3">
+                                <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Observações Internas</h4>
+                                <p className="text-xs text-muted-foreground/80 whitespace-pre-wrap leading-relaxed">{d.observacao}</p>
                               </div>
                             )}
-                            {(d.relatorio_id_ip || d.relatorio_id_ato || d.investigacao_id) && (
-                              <div className="rounded border border-border bg-muted p-3">
-                                <h5 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Documentos Anexados</h5>
-                                <div className="flex flex-wrap gap-2">
-                                  {d.relatorio_id_ip && <Badge variant="outline" className="text-[9px] bg-muted border-border text-foreground">IP: {relatorios.find(r => r.id === d.relatorio_id_ip)?.titulo || "N/A"}</Badge>}
-                                  {d.relatorio_id_ato && <Badge variant="outline" className="text-[9px] bg-muted border-border text-foreground">AA: {relatorios.find(r => r.id === d.relatorio_id_ato)?.titulo || "N/A"}</Badge>}
-                                  {d.investigacao_id && <Badge variant="outline" className="text-[9px] bg-muted border-border text-foreground">INV: {investigacoes.find(i => i.id === d.investigacao_id)?.titulo || "N/A"}</Badge>}
+
+                            {/* Documentos Vinculados */}
+                            <div className="rounded border border-border bg-muted p-4">
+                              <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                                <LinkIcon className="h-4 w-4" /> Documentos Vinculados
+                              </div>
+                              {(d.relatorio_id_ip || d.relatorio_id_ato || d.investigacao_id) ? (
+                                <div className="space-y-2">
+                                  {d.relatorio_id_ip && (
+                                    <div className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
+                                      <div className="flex items-center gap-3">
+                                        <FileSignature className="h-4 w-4 text-foreground" />
+                                        <span className="text-foreground font-bold">{relatorios.find(r => r.id === d.relatorio_id_ip)?.titulo || "N/A"}</span>
+                                        <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">Inquérito Policial</Badge>
+                                      </div>
+                                      <Button size="sm" variant="ghost" className="h-7 text-xs text-foreground"
+                                        onClick={() => { setActiveTab("inqueritos"); setExpandedId(d.relatorio_id_ip); }}>
+                                        Ver Documento
+                                      </Button>
+                                    </div>
+                                  )}
+                                  {d.relatorio_id_ato && (
+                                    <div className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
+                                      <div className="flex items-center gap-3">
+                                        <FileText className="h-4 w-4 text-emerald-400" />
+                                        <span className="text-foreground font-bold">{relatorios.find(r => r.id === d.relatorio_id_ato)?.titulo || "N/A"}</span>
+                                        <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">Ato Administrativo</Badge>
+                                      </div>
+                                      <Button size="sm" variant="ghost" className="h-7 text-xs text-foreground"
+                                        onClick={() => { setActiveTab("atos"); setExpandedId(d.relatorio_id_ato); }}>
+                                        Ver Documento
+                                      </Button>
+                                    </div>
+                                  )}
+                                  {d.investigacao_id && (
+                                    <div className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
+                                      <div className="flex items-center gap-3">
+                                        <Shield className="h-4 w-4 text-foreground" />
+                                        <span className="text-foreground font-bold">{investigacoes.find(i => i.id === d.investigacao_id)?.titulo || "N/A"}</span>
+                                        <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">Investigação</Badge>
+                                      </div>
+                                      <Button size="sm" variant="ghost" className="h-7 text-xs text-foreground"
+                                        onClick={() => { setActiveTab("investigacoes"); setExpandedId(d.investigacao_id); }}>
+                                        Ver Investigação
+                                      </Button>
+                                    </div>
+                                  )}
                                 </div>
-                              </div>
-                            )}
+                              ) : (
+                                <p className="text-xs text-muted-foreground">Nenhum documento vinculado.</p>
+                              )}
+                            </div>
                           </div>
                         )}
                       </div>
