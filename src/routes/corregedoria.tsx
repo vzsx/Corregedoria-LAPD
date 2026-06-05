@@ -46,7 +46,7 @@ const RelatorioCard = ({
   linkInvestigacaoId, setLinkInvestigacaoId, depoimentos, onPrint,
   relatorioGeralVinculos,
   linkRelatorioGeralId, setLinkRelatorioGeralId, onLinkRelatorioGeral,
-  setActiveTab
+  setActiveTab, onUnlinkRelatorioGeralVinculo
 }: any) => {
   const linkedDenuncias = denunciaRelatorios
     .filter((dr: any) => dr.relatorio_id === relatorio.id)
@@ -345,23 +345,29 @@ const RelatorioCard = ({
               <FileSignature className="h-4 w-4" /> Relatórios Gerais Vinculados
             </div>
             {(() => {
-              const linkedRg = relatorioGeralVinculos
+              const linkedData = relatorioGeralVinculos
                 .filter(v => v.entidade_id === relatorio.id && (v.entidade_tipo === "inquerito" || v.entidade_tipo === "ato"))
-                .map(v => relatorios.find(r => r.id === v.relatorio_id))
-                .filter(Boolean) as Relatorio[];
-              return linkedRg.length > 0 ? (
+                .map(v => ({ vinculo: v, relatorio: relatorios.find(r => r.id === v.relatorio_id) }))
+                .filter((x): x is { vinculo: RelatorioGeralVinculo; relatorio: Relatorio } => !!x.relatorio);
+              return linkedData.length > 0 ? (
                 <div className="space-y-2 mb-4">
-                  {linkedRg.map(rg => (
+                  {linkedData.map(({ vinculo, relatorio: rg }) => (
                     <div key={rg.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
                       <div className="flex items-center gap-3">
                         <FileSignature className="h-4 w-4 text-foreground shrink-0" />
                         <span className="text-foreground font-bold">{rg.titulo}</span>
                         <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">Rel. Geral</Badge>
                       </div>
-                      <Button size="sm" variant="ghost" className="h-7 text-xs text-foreground"
-                        onClick={() => { setActiveTab("relatorios_gerais"); setExpandedId(rg.id); }}>
-                        Ver
-                      </Button>
+                      <div className="flex items-center gap-1">
+                        <Button size="sm" variant="ghost" className="h-7 text-xs text-foreground"
+                          onClick={() => { setActiveTab("relatorios_gerais"); setExpandedId(rg.id); }}>
+                          Ver
+                        </Button>
+                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-950/30"
+                          onClick={() => onUnlinkRelatorioGeralVinculo?.(vinculo.id)} title="Desanexar">
+                          <X className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -2524,30 +2530,36 @@ function Corregedoria() {
                                 <FileSignature className="h-4 w-4" /> Relatórios Gerais Vinculados
                               </div>
                               {(() => {
-                                const linkedRg = relatorioGeralVinculos
+                                const linkedData = relatorioGeralVinculos
                                   .filter(v => v.entidade_id === d.id && v.entidade_tipo === "denuncia")
-                                  .map(v => relatorios.find(r => r.id === v.relatorio_id))
-                                  .filter(Boolean) as Relatorio[];
-                                return linkedRg.length > 0 ? (
+                                  .map(v => ({ vinculo: v, relatorio: relatorios.find(r => r.id === v.relatorio_id) }))
+                                  .filter((x): x is { vinculo: RelatorioGeralVinculo; relatorio: Relatorio } => !!x.relatorio);
+                                return linkedData.length > 0 ? (
                                   <div className="space-y-2 mb-4">
-                                    {linkedRg.map(rg => (
+                                    {linkedData.map(({ vinculo, relatorio: rg }) => (
                                       <div key={rg.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
                                         <div className="flex items-center gap-3">
                                           <FileSignature className="h-4 w-4 text-foreground shrink-0" />
                                           <span className="text-foreground font-bold">{rg.titulo}</span>
                                           <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">Rel. Geral</Badge>
                                         </div>
-                                        <Button size="sm" variant="ghost" className="h-7 text-xs text-foreground"
-                                          onClick={() => { setActiveTab("relatorios_gerais"); setExpandedId(rg.id); }}>
-                                          Ver
-                                        </Button>
+                                        <div className="flex items-center gap-1">
+                                          <Button size="sm" variant="ghost" className="h-7 text-xs text-foreground"
+                                            onClick={() => { setActiveTab("relatorios_gerais"); setExpandedId(rg.id); }}>
+                                            Ver
+                                          </Button>
+                                          <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-950/30"
+                                            onClick={() => deleteRelatorioGeralVinculo(vinculo.id)} title="Desanexar">
+                                            <X className="h-3.5 w-3.5" />
+                                          </Button>
+                                        </div>
                                       </div>
                                     ))}
                                   </div>
                                 ) : (
                                   <p className="text-xs text-muted-foreground mb-4">Nenhum Relatório Geral vinculado.</p>
                                 );
-                                })()}
+                              })()}
                               <div className="flex gap-2 items-end">
                                 <div className="flex-1">
                                   <Select value={linkRelatorioGeralId} onValueChange={setLinkRelatorioGeralId}>
@@ -3239,23 +3251,29 @@ function Corregedoria() {
                                   <FileSignature className="h-4 w-4" /> Relatórios Gerais Vinculados
                                 </div>
                                 {(() => {
-                                  const linkedRg = relatorioGeralVinculos
+                                  const linkedData = relatorioGeralVinculos
                                     .filter(v => v.entidade_id === inv.id && v.entidade_tipo === "investigacao")
-                                    .map(v => relatorios.find(r => r.id === v.relatorio_id))
-                                    .filter(Boolean) as Relatorio[];
-                                  return linkedRg.length > 0 ? (
+                                    .map(v => ({ vinculo: v, relatorio: relatorios.find(r => r.id === v.relatorio_id) }))
+                                    .filter((x): x is { vinculo: RelatorioGeralVinculo; relatorio: Relatorio } => !!x.relatorio);
+                                  return linkedData.length > 0 ? (
                                     <div className="space-y-2 mb-4">
-                                      {linkedRg.map(rg => (
+                                      {linkedData.map(({ vinculo, relatorio: rg }) => (
                                         <div key={rg.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
                                           <div className="flex items-center gap-3">
                                             <FileSignature className="h-4 w-4 text-foreground shrink-0" />
                                             <span className="text-foreground font-bold">{rg.titulo}</span>
                                             <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">Rel. Geral</Badge>
                                           </div>
-                                          <Button size="sm" variant="ghost" className="h-7 text-xs text-foreground"
-                                            onClick={() => { setActiveTab("relatorios_gerais"); setExpandedId(rg.id); }}>
-                                            Ver
-                                          </Button>
+                                          <div className="flex items-center gap-1">
+                                            <Button size="sm" variant="ghost" className="h-7 text-xs text-foreground"
+                                              onClick={() => { setActiveTab("relatorios_gerais"); setExpandedId(rg.id); }}>
+                                              Ver
+                                            </Button>
+                                            <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-950/30"
+                                              onClick={() => deleteRelatorioGeralVinculo(vinculo.id)} title="Desanexar">
+                                              <X className="h-3.5 w-3.5" />
+                                            </Button>
+                                          </div>
                                         </div>
                                       ))}
                                     </div>
@@ -3697,6 +3715,7 @@ function Corregedoria() {
                           setLinkRelatorioGeralId={setLinkRelatorioGeralId}
                           onLinkRelatorioGeral={handleLinkRelatorioGeral}
                           setActiveTab={setActiveTab}
+                          onUnlinkRelatorioGeralVinculo={deleteRelatorioGeralVinculo}
                         />
                       ))
                   )
@@ -4041,6 +4060,7 @@ function Corregedoria() {
                           setLinkRelatorioGeralId={setLinkRelatorioGeralId}
                           onLinkRelatorioGeral={handleLinkRelatorioGeral}
                           setActiveTab={setActiveTab}
+                          onUnlinkRelatorioGeralVinculo={deleteRelatorioGeralVinculo}
                         />
                       ))
                   )
