@@ -46,7 +46,7 @@ const RelatorioCard = ({
   linkInvestigacaoId, setLinkInvestigacaoId, depoimentos, onPrint,
   relatorioGeralVinculos,
   linkRelatorioGeralId, setLinkRelatorioGeralId, onLinkRelatorioGeral,
-  setActiveTab, onUnlinkRelatorioGeralVinculo
+  setActiveTab, onUnlinkRelatorioGeralVinculo, onUnlinkDepoimento
 }: any) => {
   const linkedDenuncias = denunciaRelatorios
     .filter((dr: any) => dr.relatorio_id === relatorio.id)
@@ -330,6 +330,10 @@ const RelatorioCard = ({
                           {format(new Date(dep.data_depoimento), "dd/MM/yyyy")}
                         </Badge>
                       </div>
+                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-950/30"
+                        onClick={() => onUnlinkDepoimento?.(relatorio.id, dep.id)} title="Desanexar">
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
                     </div>
                   ))}
                 </div>
@@ -1815,6 +1819,39 @@ function Corregedoria() {
     toast.success("Investigação desanexada!");
   };
 
+  const handleUnlinkDepoimentoRelatorio = async (relatorioId: string, depoimentoId: string) => {
+    setLinking(true);
+    const { data: rel } = await supabase.from("relatorios").select("dados_detalhados").eq("id", relatorioId).single();
+    if (!rel) { setLinking(false); return; }
+    const current = (rel.dados_detalhados as any)?.depoimento_ids || [];
+    const updated = { ...(rel.dados_detalhados as any), depoimento_ids: current.filter((id: string) => id !== depoimentoId) };
+    await supabase.from("relatorios").update({ dados_detalhados: updated }).eq("id", relatorioId);
+    setLinking(false);
+    setRelatorios(prev => prev.map(r => r.id === relatorioId ? { ...r, dados_detalhados: updated } as Relatorio : r));
+    toast.success("Depoimento desanexado!");
+  };
+
+  const handleUnlinkDenunciaInvestigacao = async (investigacaoId: string, denunciaId: string) => {
+    const { error } = await supabase.from("denuncia_investigacao").delete().match({ investigacao_id: investigacaoId, denuncia_id: denunciaId });
+    if (error) return toast.error("Erro ao desanexar denúncia");
+    setDenunciaInvestigacoes(prev => prev.filter(di => !(di.investigacao_id === investigacaoId && di.denuncia_id === denunciaId)));
+    toast.success("Denúncia desanexada!");
+  };
+
+  const handleUnlinkDepoimentoInvestigacao = async (depoimentoId: string) => {
+    const { error } = await supabase.from("depoimentos").update({ investigacao_id: null }).eq("id", depoimentoId);
+    if (error) return toast.error("Erro ao desanexar depoimento");
+    setDepoimentos(prev => prev.map(d => d.id === depoimentoId ? { ...d, investigacao_id: null } as Depoimento : d));
+    toast.success("Depoimento desanexado!");
+  };
+
+  const handleUnlinkDocumentoDepoimento = async (depoimentoId: string, campo: string) => {
+    const { error } = await supabase.from("depoimentos").update({ [campo]: null }).eq("id", depoimentoId);
+    if (error) return toast.error("Erro ao desanexar documento");
+    setDepoimentos(prev => prev.map(d => d.id === depoimentoId ? { ...d, [campo]: null } as any : d));
+    toast.success("Documento desanexado!");
+  };
+
   const confirmDeleteOficial = (userId: string) => {
     setConfirmDialog({
       open: true,
@@ -3169,6 +3206,7 @@ function Corregedoria() {
                                             {r.tipo_denuncia}
                                           </Badge>
                                         </div>
+                                        <div className="flex items-center gap-1">
                                         <Button 
                                           size="sm" 
                                           variant="ghost" 
@@ -3180,7 +3218,12 @@ function Corregedoria() {
                                         >
                                           Ver Documento
                                         </Button>
+                                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-950/30"
+                                          onClick={() => handleUnlinkInvestigacaoRelatorio(inv.id, r.id)} title="Desanexar">
+                                          <X className="h-3.5 w-3.5" />
+                                        </Button>
                                       </div>
+                                    </div>
                                     ))}
                                   </div>
                                 ) : (
@@ -3203,14 +3246,20 @@ function Corregedoria() {
                                           </Badge>
                                           <span className="text-foreground font-bold">{d.titulo}</span>
                                         </div>
-                                        <Button 
-                                          size="sm" 
-                                          variant="ghost" 
-                                          className="h-7 text-xs text-foreground"
-                                          onClick={() => { setActiveTab("denuncias"); setExpandedId(d.id); }}
-                                        >
-                                          Ver Denúncia
-                                        </Button>
+                                        <div className="flex items-center gap-1">
+                                          <Button 
+                                            size="sm" 
+                                            variant="ghost" 
+                                            className="h-7 text-xs text-foreground"
+                                            onClick={() => { setActiveTab("denuncias"); setExpandedId(d.id); }}
+                                          >
+                                            Ver Denúncia
+                                          </Button>
+                                          <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-950/30"
+                                            onClick={() => handleUnlinkDenunciaInvestigacao(inv.id, d.id)} title="Desanexar">
+                                            <X className="h-3.5 w-3.5" />
+                                          </Button>
+                                        </div>
                                       </div>
                                     ))}
                                   </div>
@@ -3236,6 +3285,10 @@ function Corregedoria() {
                                               {format(new Date(dep.data_depoimento), "dd/MM/yyyy")}
                                             </Badge>
                                           </div>
+                                          <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-950/30"
+                                            onClick={() => handleUnlinkDepoimentoInvestigacao(dep.id)} title="Desanexar">
+                                            <X className="h-3.5 w-3.5" />
+                                          </Button>
                                         </div>
                                       ))}
                                     </div>
@@ -3716,6 +3769,7 @@ function Corregedoria() {
                           onLinkRelatorioGeral={handleLinkRelatorioGeral}
                           setActiveTab={setActiveTab}
                           onUnlinkRelatorioGeralVinculo={deleteRelatorioGeralVinculo}
+                          onUnlinkDepoimento={handleUnlinkDepoimentoRelatorio}
                         />
                       ))
                   )
@@ -4061,6 +4115,7 @@ function Corregedoria() {
                           onLinkRelatorioGeral={handleLinkRelatorioGeral}
                           setActiveTab={setActiveTab}
                           onUnlinkRelatorioGeralVinculo={deleteRelatorioGeralVinculo}
+                          onUnlinkDepoimento={handleUnlinkDepoimentoRelatorio}
                         />
                       ))
                   )
@@ -4395,10 +4450,16 @@ function Corregedoria() {
                                         <span className="text-foreground font-bold">{relatorios.find(r => r.id === d.relatorio_id_ip)?.titulo || "N/A"}</span>
                                         <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">Inquérito Policial</Badge>
                                       </div>
-                                      <Button size="sm" variant="ghost" className="h-7 text-xs text-foreground"
-                                        onClick={() => { setActiveTab("inqueritos"); setExpandedId(d.relatorio_id_ip); }}>
-                                        Ver Documento
-                                      </Button>
+                                      <div className="flex items-center gap-1">
+                                        <Button size="sm" variant="ghost" className="h-7 text-xs text-foreground"
+                                          onClick={() => { setActiveTab("inqueritos"); setExpandedId(d.relatorio_id_ip); }}>
+                                          Ver Documento
+                                        </Button>
+                                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-950/30"
+                                          onClick={() => handleUnlinkDocumentoDepoimento(d.id, "relatorio_id_ip")} title="Desanexar">
+                                          <X className="h-3.5 w-3.5" />
+                                        </Button>
+                                      </div>
                                     </div>
                                   )}
                                   {d.relatorio_id_ato && (
@@ -4408,10 +4469,16 @@ function Corregedoria() {
                                         <span className="text-foreground font-bold">{relatorios.find(r => r.id === d.relatorio_id_ato)?.titulo || "N/A"}</span>
                                         <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">Ato Administrativo</Badge>
                                       </div>
-                                      <Button size="sm" variant="ghost" className="h-7 text-xs text-foreground"
-                                        onClick={() => { setActiveTab("atos"); setExpandedId(d.relatorio_id_ato); }}>
-                                        Ver Documento
-                                      </Button>
+                                      <div className="flex items-center gap-1">
+                                        <Button size="sm" variant="ghost" className="h-7 text-xs text-foreground"
+                                          onClick={() => { setActiveTab("atos"); setExpandedId(d.relatorio_id_ato); }}>
+                                          Ver Documento
+                                        </Button>
+                                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-950/30"
+                                          onClick={() => handleUnlinkDocumentoDepoimento(d.id, "relatorio_id_ato")} title="Desanexar">
+                                          <X className="h-3.5 w-3.5" />
+                                        </Button>
+                                      </div>
                                     </div>
                                   )}
                                   {d.investigacao_id && (
@@ -4421,10 +4488,16 @@ function Corregedoria() {
                                         <span className="text-foreground font-bold">{investigacoes.find(i => i.id === d.investigacao_id)?.titulo || "N/A"}</span>
                                         <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">Investigação</Badge>
                                       </div>
-                                      <Button size="sm" variant="ghost" className="h-7 text-xs text-foreground"
-                                        onClick={() => { setActiveTab("investigacoes"); setExpandedId(d.investigacao_id); }}>
-                                        Ver Investigação
-                                      </Button>
+                                      <div className="flex items-center gap-1">
+                                        <Button size="sm" variant="ghost" className="h-7 text-xs text-foreground"
+                                          onClick={() => { setActiveTab("investigacoes"); setExpandedId(d.investigacao_id); }}>
+                                          Ver Investigação
+                                        </Button>
+                                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-950/30"
+                                          onClick={() => handleUnlinkDocumentoDepoimento(d.id, "investigacao_id")} title="Desanexar">
+                                          <X className="h-3.5 w-3.5" />
+                                        </Button>
+                                      </div>
                                     </div>
                                   )}
                                 </div>
