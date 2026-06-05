@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Search, Shield, FileText, Clock, CheckCircle2, AlertTriangle, ArrowLeft, Loader2, FileSignature, MessageSquare, Activity } from "lucide-react";
+import { Search, Shield, FileText, Clock, CheckCircle2, AlertTriangle, ArrowLeft, Loader2, FileSignature, MessageSquare, Activity, User } from "lucide-react";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -36,46 +36,50 @@ const STATUS_ICON: Record<Status, any> = {
 };
 
 function AcompanharPage() {
-  const [code, setCode] = useState("");
+  const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
-  const [denuncia, setDenuncia] = useState<any>(null);
+  const [denuncias, setDenuncias] = useState<any[]>([]);
   const [error, setError] = useState("");
   const [searched, setSearched] = useState(false);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!code.trim()) return;
+    if (!name.trim()) return;
 
     setLoading(true);
     setError("");
-    setDenuncia(null);
+    setDenuncias([]);
     setSearched(true);
-
-    const num = parseInt(code.trim(), 10);
 
     const { data, error: err } = await supabase
       .from("denuncias")
       .select("*")
-      .eq("numero_registro", num)
-      .single();
+      .filter("dados_detalhados->>reclamante_nome", "ilike", `%${name.trim()}%`)
+      .order("created_at", { ascending: false });
 
     setLoading(false);
 
-    if (err || !data) {
-      setError("Denúncia não encontrada. Verifique o código informado.");
+    if (err) {
+      console.error("Erro ao buscar denúncias:", err);
+      setError("Erro ao consultar. Tente novamente.");
       return;
     }
 
-    setDenuncia(data);
+    if (!data || data.length === 0) {
+      setError("Nenhuma denúncia encontrada com esse nome. Verifique o nome informado.");
+      return;
+    }
+
+    setDenuncias(data);
   };
 
-  const getDocCount = () => {
-    if (!denuncia) return 0;
+  const getDocCount = (denuncia: any) => {
     const dd = denuncia.dados_detalhados;
     if (!dd) return 0;
     let count = 0;
     if (dd.provas_selecionadas?.length) count += dd.provas_selecionadas.length;
     if (dd.provas_descricao) count++;
+    if (dd.relato) count++;
     return count;
   };
 
@@ -84,7 +88,6 @@ function AcompanharPage() {
       <SiteHeader />
 
       <main className="container mx-auto max-w-2xl px-6 py-16">
-        {/* Header */}
         <div className="mb-10 text-center animate-fade-in">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-card border border-border shadow-glow">
             <Search className="h-7 w-7 text-primary" />
@@ -93,25 +96,21 @@ function AcompanharPage() {
             Acompanhar Denúncia
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Digite o número de registro da sua denúncia para consultar o andamento.
+            Digite seu nome completo para consultar o andamento das suas denúncias.
           </p>
         </div>
 
-        {/* Search Form */}
         <form onSubmit={handleSearch} className="mb-10 animate-slide-up">
           <div className="flex gap-3">
-            <div className="relative flex-1">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm font-mono">#</span>
-              <Input
-                value={code}
-                onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                placeholder="0001"
-                className="pl-7 h-12 bg-card border-border text-foreground text-lg font-mono tracking-widest text-center"
-              />
-            </div>
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Seu nome completo"
+              className="h-12 bg-card border-border text-foreground text-center"
+            />
             <Button
               type="submit"
-              disabled={loading || !code.trim()}
+              disabled={loading || !name.trim()}
               className="h-12 px-8 bg-primary text-primary-foreground font-bold uppercase tracking-widest transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
             >
               {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Consultar"}
@@ -119,7 +118,6 @@ function AcompanharPage() {
           </div>
         </form>
 
-        {/* Result */}
         {loading && (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -131,105 +129,113 @@ function AcompanharPage() {
             <AlertTriangle className="mx-auto h-10 w-10 text-red-400" />
             <p className="mt-4 text-sm text-muted-foreground">{error}</p>
             <p className="mt-2 text-xs text-muted-foreground/50">
-              Você fez a denúncia pelo formulário online? Anote o número exibido após o envio.
+              Você fez a denúncia pelo formulário online? Utilize o mesmo nome cadastrado.
             </p>
           </div>
         )}
 
-        {denuncia && !loading && (
+        {denuncias.length > 0 && !loading && (
           <div className="space-y-6 animate-card-enter">
-            {/* Status Card */}
-            <div className="rounded-xl border border-border bg-card p-8 text-center">
-              <div className={`mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full ${STATUS_COLOR[denuncia.status as Status] || STATUS_COLOR.pendente}`}>
-                {(() => {
-                  const Icon = STATUS_ICON[denuncia.status as Status] || Clock;
-                  return <Icon className="h-8 w-8" />;
-                })()}
-              </div>
-              <h2 className="font-display text-2xl font-bold uppercase tracking-wide text-foreground">
-                Denúncia #{denuncia.numero_registro?.toString().padStart(4, "0")}
-              </h2>
-              <div className={`mt-3 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-widest border ${STATUS_COLOR[denuncia.status as Status] || STATUS_COLOR.pendente}`}>
-                {STATUS_LABEL[denuncia.status as Status] || "Pendente"}
-              </div>
-              <p className="mt-4 text-xs text-muted-foreground">
-                Registrada em {format(new Date(denuncia.created_at), "dd/MM/yyyy 'às' HH:mm")}
-              </p>
-            </div>
+            <p className="text-xs text-muted-foreground text-center">
+              {denuncias.length} denúncia(s) encontrada(s) para <strong className="text-foreground">{name.trim()}</strong>
+            </p>
 
-            {/* Details Card */}
-            <div className="rounded-xl border border-border bg-card p-6 space-y-5">
-              <h3 className="text-xs font-bold uppercase tracking-widest text-primary border-b border-border pb-3">
-                Informações da Denúncia
-              </h3>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Título</p>
-                  <p className="text-sm font-semibold text-foreground mt-0.5">{denuncia.titulo || "—"}</p>
-                </div>
-                <div>
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Policial Denunciado</p>
-                  <p className="text-sm font-semibold text-foreground mt-0.5">{denuncia.policial_denunciado || "—"}</p>
-                </div>
-                <div>
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Data do Ocorrido</p>
-                  <p className="text-sm font-semibold text-foreground mt-0.5">{denuncia.data_ocorrido ? format(new Date(denuncia.data_ocorrido), "dd/MM/yyyy") : "—"}</p>
-                </div>
-                <div>
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Última Atualização</p>
-                  <p className="text-sm font-semibold text-foreground mt-0.5">{format(new Date(denuncia.created_at), "dd/MM/yyyy HH:mm")}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Documentos Anexados Card */}
-            <div className="rounded-xl border border-border bg-card p-6">
-              <div className="flex items-center gap-3 border-b border-border pb-3 mb-4">
-                <FileText className="h-4 w-4 text-primary" />
-                <h3 className="text-xs font-bold uppercase tracking-widest text-primary">
-                  Documentos Anexados
-                </h3>
-              </div>
-
-              {getDocCount() > 0 ? (
-                <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-4">
-                  <FileSignature className="h-8 w-8 text-primary/60" />
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">
-                      {getDocCount()} documento(s) anexado(s)
-                    </p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">
-                      {denuncia.status === "concluida" || denuncia.status === "em_analise"
-                        ? "Os documentos estão em análise pela Corregedoria."
-                        : "Os documentos serão analisados pela Corregedoria."}
-                    </p>
+            {denuncias.map((denuncia) => (
+              <div key={denuncia.id} className="rounded-xl border border-border bg-card overflow-hidden">
+                {/* Status Header */}
+                <div className={`p-6 border-b border-border ${STATUS_COLOR[denuncia.status as Status] || STATUS_COLOR.pendente}`}>
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-background/50">
+                      {(() => {
+                        const Icon = STATUS_ICON[denuncia.status as Status] || Clock;
+                        return <Icon className="h-6 w-6" />;
+                      })()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h2 className="font-display text-lg font-bold uppercase tracking-wide text-foreground truncate">
+                          {denuncia.titulo || "Denúncia"}
+                        </h2>
+                        <span className="inline-flex items-center gap-1 rounded-full px-3 py-0.5 text-[10px] font-bold uppercase tracking-widest border shrink-0">
+                          {STATUS_LABEL[denuncia.status as Status] || "Pendente"}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        #{denuncia.numero_registro?.toString().padStart(4, "0")} · {format(new Date(denuncia.created_at), "dd/MM/yyyy 'às' HH:mm")}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              ) : (
-                <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-4">
-                  <FileText className="h-8 w-8 text-muted-foreground/30" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      Nenhum documento anexado a esta denúncia.
-                    </p>
+
+                {/* Details */}
+                <div className="p-5 space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Denunciante</p>
+                      <p className="text-sm font-semibold text-foreground mt-0.5 flex items-center gap-1.5">
+                        <User className="h-3.5 w-3.5 text-primary/60" />
+                        {denuncia.dados_detalhados?.reclamante_nome || "—"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Policial Denunciado</p>
+                      <p className="text-sm font-semibold text-foreground mt-0.5">{denuncia.policial_denunciado || "—"}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Data do Ocorrido</p>
+                      <p className="text-sm font-semibold text-foreground mt-0.5">{denuncia.data_ocorrido ? format(new Date(denuncia.data_ocorrido), "dd/MM/yyyy") : "—"}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Última Atualização</p>
+                      <p className="text-sm font-semibold text-foreground mt-0.5">{format(new Date(denuncia.created_at), "dd/MM/yyyy HH:mm")}</p>
+                    </div>
+                  </div>
+
+                  {/* Documentos Anexados */}
+                  <div className="border-t border-border pt-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <FileText className="h-3.5 w-3.5 text-primary" />
+                      <h3 className="text-[10px] font-bold uppercase tracking-widest text-primary">
+                        Documentos Anexados
+                      </h3>
+                    </div>
+                    {getDocCount(denuncia) > 0 ? (
+                      <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
+                        <FileSignature className="h-6 w-6 text-primary/60 shrink-0" />
+                        <div>
+                          <p className="text-sm font-semibold text-foreground">
+                            {getDocCount(denuncia)} documento(s) anexado(s)
+                          </p>
+                          <p className="text-[11px] text-muted-foreground mt-0.5">
+                            {denuncia.status === "concluida" || denuncia.status === "em_analise"
+                              ? "Os documentos estão em análise pela Corregedoria."
+                              : "Os documentos serão analisados pela Corregedoria."}
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
+                        <FileText className="h-6 w-6 text-muted-foreground/30 shrink-0" />
+                        <p className="text-sm text-muted-foreground">
+                          Nenhum documento anexado a esta denúncia.
+                        </p>
+                      </div>
+                    )}
+
+                    {denuncia.dados_detalhados?.provas_selecionadas?.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {denuncia.dados_detalhados.provas_selecionadas.map((p: string) => (
+                          <span key={p} className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/30 px-3 py-1 text-[10px] uppercase tracking-wider text-muted-foreground">
+                            {p}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
-              )}
+              </div>
+            ))}
 
-              {/* Show count but not content */}
-              {denuncia.dados_detalhados?.provas_selecionadas?.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {denuncia.dados_detalhados.provas_selecionadas.map((p: string) => (
-                    <span key={p} className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/30 px-3 py-1 text-[10px] uppercase tracking-wider text-muted-foreground">
-                      {p}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Footer Note */}
             <div className="text-center">
               <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50">
                 Para mais informações, entre em contato com a Corregedoria Geral PMESP.
@@ -245,16 +251,15 @@ function AcompanharPage() {
           <div className="text-center py-12 text-muted-foreground animate-fade-in">
             <Search className="mx-auto h-12 w-12 mb-4 opacity-20" />
             <p className="text-xs uppercase tracking-widest">
-              Insira o número de registro para consultar
+              Digite seu nome para consultar o andamento
             </p>
           </div>
         )}
 
-        {/* Info Cards */}
-        {!denuncia && !loading && (
+        {!denuncias.length && !loading && (
           <div className="mt-10 grid gap-4 md:grid-cols-3 animate-card-enter stagger-1">
             <div className="rounded-lg border border-border bg-card p-4 text-center">
-              <Search className="mx-auto h-5 w-5 text-primary mb-2" />
+              <User className="mx-auto h-5 w-5 text-primary mb-2" />
               <h4 className="text-[10px] font-bold uppercase tracking-wider text-foreground">Passo 1</h4>
               <p className="text-[11px] text-muted-foreground mt-1">Faça sua denúncia pelo formulário online</p>
             </div>
@@ -266,7 +271,7 @@ function AcompanharPage() {
             <div className="rounded-lg border border-border bg-card p-4 text-center">
               <Activity className="mx-auto h-5 w-5 text-primary mb-2" />
               <h4 className="text-[10px] font-bold uppercase tracking-wider text-foreground">Passo 3</h4>
-              <p className="text-[11px] text-muted-foreground mt-1">Acompanhe o andamento aqui</p>
+              <p className="text-[11px] text-muted-foreground mt-1">Consulte o andamento pelo seu nome</p>
             </div>
           </div>
         )}

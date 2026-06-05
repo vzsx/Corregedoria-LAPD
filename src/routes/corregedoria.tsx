@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { 
   Shield, FileText, Loader2, Plus, FileSignature, LayoutDashboard, 
   Users, UserPlus, LogOut, Activity, Link as LinkIcon, Trash2, Edit, Pencil,
-  MessageSquare, Printer
+  MessageSquare, Printer, Menu, X
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -632,6 +632,12 @@ function Corregedoria() {
     if (!loading && !user) navigate({ to: "/" });
   }, [user, loading, navigate]);
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const handleTabChange = (tab: Tab) => {
+    setActiveTab(tab);
+    setSidebarOpen(false);
+  };
   const [denunciaFilter, setDenunciaFilter] = useState<Status | "todas">("todas");
   const [investigacaoFilter, setInvestigacaoFilter] = useState<Status | "todas">("todas");
   const [inqueritoFilter, setInqueritoFilter] = useState<Status | "todas">("todas");
@@ -1756,16 +1762,28 @@ function Corregedoria() {
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background text-foreground font-mono">
+      {/* Mobile Overlay */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-40 bg-black/60 lg:hidden" onClick={() => setSidebarOpen(false)} />
+      )}
+
       {/* SIDEBAR */}
-      <aside className="flex w-64 flex-col border-r border-border bg-card">
-        <div className="flex items-center gap-3 border-b border-border p-6">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-muted">
-            <Shield className="h-6 w-6 text-foreground" />
+      <aside className={`${
+        sidebarOpen ? "translate-x-0" : "-translate-x-full"
+      } fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-border bg-card transition-transform duration-300 lg:static lg:z-auto lg:w-64 lg:translate-x-0`}>
+        <div className="flex items-center justify-between border-b border-border p-6">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-muted">
+              <Shield className="h-6 w-6 text-foreground" />
+            </div>
+            <div>
+              <h1 className="text-sm font-bold uppercase tracking-widest text-foreground">MDT Policial</h1>
+              <p className="text-[10px] text-muted-foreground tracking-widest">SECURE TERMINAL</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-sm font-bold uppercase tracking-widest text-foreground">MDT Policial</h1>
-            <p className="text-[10px] text-muted-foreground tracking-widest">SECURE TERMINAL</p>
-          </div>
+          <button className="lg:hidden text-muted-foreground hover:text-foreground" onClick={() => setSidebarOpen(false)}>
+            <X className="h-5 w-5" />
+          </button>
         </div>
 
         <nav className="flex-1 space-y-1 overflow-y-auto p-4">
@@ -1773,43 +1791,43 @@ function Corregedoria() {
           
           <SidebarItem 
             active={activeTab === "dashboard"} 
-            onClick={() => setActiveTab("dashboard")} 
+            onClick={() => handleTabChange("dashboard")} 
             icon={LayoutDashboard} 
             label="Dashboard" 
           />
           <SidebarItem 
             active={activeTab === "denuncias"} 
-            onClick={() => setActiveTab("denuncias")} 
+            onClick={() => handleTabChange("denuncias")} 
             icon={Activity} 
             label="Denúncias" 
           />
           <SidebarItem 
             active={activeTab === "investigacoes"} 
-            onClick={() => setActiveTab("investigacoes")} 
+            onClick={() => handleTabChange("investigacoes")} 
             icon={Shield} 
             label="Investigações" 
           />
           <SidebarItem 
             active={activeTab === "inqueritos"} 
-            onClick={() => setActiveTab("inqueritos")} 
+            onClick={() => handleTabChange("inqueritos")} 
             icon={FileSignature} 
             label="Inquéritos" 
           />
           <SidebarItem 
             active={activeTab === "atos"} 
-            onClick={() => setActiveTab("atos")} 
+            onClick={() => handleTabChange("atos")} 
             icon={FileText} 
             label="Atos Adm." 
           />
           <SidebarItem 
             active={activeTab === "depoimentos"} 
-            onClick={() => setActiveTab("depoimentos")} 
+            onClick={() => handleTabChange("depoimentos")} 
             icon={MessageSquare} 
             label="Depoimentos" 
           />
           <SidebarItem 
             active={activeTab === "oficiais"} 
-            onClick={() => setActiveTab("oficiais")} 
+            onClick={() => handleTabChange("oficiais")} 
             icon={Users} 
             label="Oficiais" 
           />
@@ -1819,7 +1837,7 @@ function Corregedoria() {
               <p className="px-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2 mt-8">Administrativo</p>
               <SidebarItem 
                 active={activeTab === "solicitacoes"} 
-                onClick={() => setActiveTab("solicitacoes")} 
+                onClick={() => handleTabChange("solicitacoes")} 
                 icon={UserPlus} 
                 label="Solicitações" 
                 badge={pendingUsers.length > 0 ? pendingUsers.length : undefined}
@@ -1845,12 +1863,17 @@ function Corregedoria() {
       {/* MAIN CONTENT */}
       <main className="flex-1 flex flex-col overflow-hidden relative">
         {/* Header / Top Bar */}
-        <header className="flex h-20 shrink-0 items-center justify-between border-b border-border bg-card/80 px-8 backdrop-blur-sm z-10">
-          <div className="flex flex-col">
-            <span className="text-xs font-medium tracking-widest text-muted-foreground uppercase">Sistema Operacional</span>
-            <h2 className="text-2xl font-bold uppercase tracking-wider text-foreground">
-              Bem-Vindo, {user?.user_metadata?.full_name || "Oficial"}
-            </h2>
+        <header className="flex h-20 shrink-0 items-center justify-between border-b border-border bg-card/80 px-4 lg:px-8 backdrop-blur-sm z-10">
+          <div className="flex items-center gap-4">
+            <button className="lg:hidden text-muted-foreground hover:text-foreground transition-colors" onClick={() => setSidebarOpen(true)}>
+              <Menu className="h-5 w-5" />
+            </button>
+            <div className="flex flex-col">
+              <span className="text-xs font-medium tracking-widest text-muted-foreground uppercase">Sistema Operacional</span>
+              <h2 className="text-lg lg:text-2xl font-bold uppercase tracking-wider text-foreground">
+                Bem-Vindo, {user?.user_metadata?.full_name || "Oficial"}
+              </h2>
+            </div>
           </div>
           <div className="text-right">
             <div className="text-sm font-bold text-foreground">{user?.user_metadata?.full_name}</div>
@@ -1859,7 +1882,7 @@ function Corregedoria() {
         </header>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-y-auto p-8">
+        <div className="flex-1 overflow-y-auto p-4 lg:p-8">
           
           {/* DASHBOARD TAB */}
           {activeTab === "dashboard" && (
