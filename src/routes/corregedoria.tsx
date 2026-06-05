@@ -1752,7 +1752,7 @@ function Corregedoria() {
 
           {/* DENUNCIAS TAB (OCORRÊNCIAS) */}
           {activeTab === "denuncias" && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="space-y-6 animate-fade-in">
               <div className="flex flex-col gap-4 border-b border-border pb-4">
                 <h3 className="text-lg font-bold uppercase tracking-wider text-foreground">Registro de Denúncias</h3>
                 
@@ -1800,10 +1800,10 @@ function Corregedoria() {
                     );
 
                     return (
-                      <div key={d.id} className="rounded-lg border border-border bg-card overflow-hidden">
+                      <div key={d.id} className="rounded-lg border border-border bg-card overflow-hidden transition-all duration-300 hover:border-primary/30 hover:shadow-[0_0_20px_-8px_rgba(201,160,58,0.15)]">
                         <button
                           onClick={() => setExpandedId(expanded ? null : d.id)}
-                          className="flex w-full items-start justify-between gap-4 p-5 text-left transition-colors hover:bg-muted"
+                          className="flex w-full items-start justify-between gap-4 p-5 text-left transition-all duration-200 hover:bg-muted"
                         >
                           <div className="flex-1 min-w-0">
                             <div className="flex flex-wrap items-center gap-3 mb-2">
@@ -2030,7 +2030,7 @@ function Corregedoria() {
           )}
 
           {activeTab === "investigacoes" && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="space-y-6 animate-fade-in">
               <div className="flex flex-col gap-4 border-b border-border pb-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-bold uppercase tracking-wider text-foreground">Investigações Internas</h3>
@@ -2645,7 +2645,7 @@ function Corregedoria() {
 
           {/* INQUÉRITOS POLICIAIS TAB */}
           {activeTab === "inqueritos" && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="space-y-6 animate-fade-in">
               <div className="flex flex-col gap-4 border-b border-border pb-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-bold uppercase tracking-wider text-foreground">Inquéritos Policiais</h3>
@@ -2957,7 +2957,7 @@ function Corregedoria() {
 
           {/* ATOS ADMINISTRATIVOS TAB */}
           {activeTab === "atos" && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="space-y-6 animate-fade-in">
               <div className="flex flex-col gap-4 border-b border-border pb-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-bold uppercase tracking-wider text-foreground">Atos Administrativos</h3>
@@ -3293,7 +3293,7 @@ function Corregedoria() {
 
           {/* DEPOIMENTOS */}
           {activeTab === "depoimentos" && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="space-y-6 animate-fade-in">
               <div className="flex items-center justify-between border-b border-border pb-4">
                 <h3 className="text-lg font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
                   <MessageSquare className="h-5 w-5" /> Depoimentos
@@ -3609,7 +3609,7 @@ function Corregedoria() {
 
           {/* OFICIAIS & SOLICITACOES... (omitidos por brevidade caso não tivessem mudado, mas estão aqui em cima) */}
           {activeTab === "solicitacoes" && isAdmin && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="space-y-6 animate-fade-in">
               <div className="flex items-center justify-between border-b border-border pb-4">
                 <h3 className="text-lg font-bold uppercase tracking-wider text-foreground">Solicitações de Acesso</h3>
                 <span className="text-sm text-muted-foreground">{pendingUsers.length} pendentes</span>
@@ -3658,7 +3658,7 @@ function Corregedoria() {
           )}
           
           {activeTab === "oficiais" && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="space-y-6 animate-fade-in">
               <div className="flex items-center justify-between border-b border-border pb-4">
                 <h3 className="text-lg font-bold uppercase tracking-wider text-foreground">Diretório de Oficiais</h3>
                 <span className="text-sm text-muted-foreground">{oficiais.length} oficiais registrados</span>

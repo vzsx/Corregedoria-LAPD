@@ -3,7 +3,7 @@ import { useState } from "react";
 import { 
   Shield, FileText, CheckCircle2, ShieldAlert, 
   User, Users, MapPin, Image, CheckSquare, Info,
-  ArrowLeft
+  ArrowLeft, Loader2
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -112,10 +112,10 @@ function Denuncias() {
       <SiteHeader />
 
       <main className="container mx-auto max-w-3xl px-6 py-12">
-        <div className="mb-12 text-center">
+        <div className="mb-12 text-center animate-fade-in">
           {/* PMESP Logo */}
-          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-card/50 p-2 border border-border shadow-glow">
-            <img src="/pmesp-logo.png" alt="Logo PMESP" className="h-full w-full object-contain" />
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-card/50 p-2 border border-border shadow-glow transition-all duration-300 hover:shadow-[0_0_30px_rgba(201,160,58,0.3)] hover:border-primary/50">
+            <img src="/pmesp-logo.png" alt="Logo PMESP" className="h-full w-full object-contain transition-transform duration-500 hover:scale-110" />
           </div>
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-foreground">
             <ShieldAlert className="h-3 w-3 text-foreground" /> Canal de Ética e Corregedoria
@@ -126,15 +126,15 @@ function Denuncias() {
           <p className="mt-4 text-sm font-medium uppercase tracking-widest text-muted-foreground">
             Formulário Simplificado de Denúncia
           </p>
-          <div className="mx-auto mt-6 h-1 w-24 bg-foreground"></div>
+          <div className="mx-auto mt-6 h-1 w-24 bg-primary"></div>
         </div>
 
         {submitted ? (
-          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-12 text-center shadow-2xl animate-in fade-in zoom-in duration-500">
+          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-12 text-center shadow-2xl animate-scale-in">
             <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-500">
               <CheckCircle2 className="h-10 w-10" />
             </div>
-            <h2 className="mt-8 font-display text-3xl font-black uppercase tracking-tight text-foreground">
+            <h2 className="mt-8 font-display text-3xl font-black uppercase tracking-tight text-foreground animate-slide-up">
               Denúncia Protocolada
             </h2>
             <p className="mt-4 leading-relaxed text-muted-foreground">
@@ -142,7 +142,7 @@ function Denuncias() {
               Um corregedor será designado para analisar as informações fornecidas.
             </p>
             <div className="mt-10 flex flex-col items-center gap-4">
-              <Button asChild className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold tracking-widest uppercase px-8 shadow-sm">
+              <Button asChild className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold tracking-widest uppercase px-8 shadow-sm transition-all duration-300 hover:scale-105">
                 <Link to="/">Voltar ao Início</Link>
               </Button>
               <button onClick={() => setSubmitted(false)} className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-4">
@@ -154,7 +154,7 @@ function Denuncias() {
           <form onSubmit={handleSubmit} className="space-y-8 pb-20">
             
             {/* 1. DADOS DO DENUNCIANTE */}
-            <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
+            <section className="rounded-xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-[0_0_30px_-10px_rgba(201,160,58,0.1)] hover:border-primary/20 animate-card-enter stagger-1">
               <div className="mb-6 flex items-center gap-3 border-b border-border pb-4">
                 <div className="flex h-10 w-10 items-center justify-center rounded bg-blue-500/10 text-blue-600">
                   <User className="h-5 w-5" />
@@ -207,7 +207,7 @@ function Denuncias() {
             </section>
 
             {/* 2. DADOS DO POLICIAL */}
-            <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
+            <section className="rounded-xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-[0_0_30px_-10px_rgba(201,160,58,0.1)] hover:border-primary/20 animate-card-enter stagger-2">
               <div className="mb-6 flex items-center gap-3 border-b border-border pb-4">
                 <div className="flex h-10 w-10 items-center justify-center rounded bg-red-500/10 text-red-600">
                   <Shield className="h-5 w-5" />
@@ -247,7 +247,7 @@ function Denuncias() {
             </section>
 
             {/* 3. TIPO DE DENÚNCIA */}
-            <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
+            <section className="rounded-xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-[0_0_30px_-10px_rgba(201,160,58,0.1)] hover:border-primary/20 animate-card-enter stagger-3">
               <div className="mb-6 flex items-center gap-3 border-b border-border pb-4">
                 <div className="flex h-10 w-10 items-center justify-center rounded bg-amber-500/10 text-amber-600">
                   <ShieldAlert className="h-5 w-5" />
@@ -280,7 +280,7 @@ function Denuncias() {
             </section>
 
             {/* 4. INFORMAÇÕES DO OCORRIDO */}
-            <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
+            <section className="rounded-xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-[0_0_30px_-10px_rgba(201,160,58,0.1)] hover:border-primary/20 animate-card-enter stagger-4">
               <div className="mb-6 flex items-center gap-3 border-b border-border pb-4">
                 <div className="flex h-10 w-10 items-center justify-center rounded bg-indigo-500/10 text-indigo-600">
                   <MapPin className="h-5 w-5" />
@@ -457,13 +457,15 @@ function Denuncias() {
               </div>
             </section>
 
-            <div className="pt-8">
+            <div className="pt-8 animate-card-enter stagger-5">
               <Button 
                 type="submit" 
                 disabled={loading} 
-                className="w-full h-16 bg-foreground text-background hover:bg-foreground/80 text-lg font-black uppercase tracking-[0.2em] shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full h-16 bg-foreground text-background hover:bg-foreground/80 text-lg font-black uppercase tracking-[0.2em] shadow-sm transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
               >
-                {loading ? "Protocolando..." : "Protocolar Denúncia Oficial"}
+                {loading ? (
+                  <span className="flex items-center gap-2"><Loader2 className="h-5 w-5 animate-spin" /> Protocolando...</span>
+                ) : "Protocolar Denúncia Oficial"}
               </Button>
               <div className="mt-4 flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground">
                 <Info className="h-3 w-3" />

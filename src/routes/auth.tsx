@@ -108,17 +108,20 @@ function AuthPage() {
   if (authLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          <p className="text-xs uppercase tracking-widest text-muted-foreground animate-pulse">Carregando...</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-6 font-mono">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
-          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full overflow-hidden bg-card border border-border shadow-sm">
-            <img src="/corregedoria-logo.png" alt="Brasão Corregedoria PMESP" className="h-full w-full object-cover" />
+      <div className="w-full max-w-md space-y-8 animate-fade-in">
+        <div className="text-center animate-slide-up">
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full overflow-hidden bg-card border border-border shadow-sm transition-all duration-300 hover:shadow-[0_0_30px_rgba(201,160,58,0.3)] hover:border-primary/50">
+            <img src="/corregedoria-logo.png" alt="Brasão Corregedoria PMESP" className="h-full w-full object-cover transition-transform duration-500 hover:scale-110" />
           </div>
           <h1 className="mt-6 font-display text-2xl font-black uppercase tracking-widest text-foreground">
             Terminal Corregedoria
@@ -128,7 +131,7 @@ function AuthPage() {
           </p>
         </div>
 
-        <div className="rounded-xl border border-border bg-card p-8 shadow-sm">
+        <div className="rounded-xl border border-border bg-card p-8 shadow-sm transition-all duration-300 hover:shadow-[0_0_40px_-10px_rgba(201,160,58,0.15)] hover:border-primary/30 animate-scale-in">
           <Tabs defaultValue="signin" className="w-full">
             <TabsList className="mb-8 grid w-full grid-cols-2 bg-background border border-border p-1">
               <TabsTrigger value="signin" className="data-[state=active]:bg-muted data-[state=active]:text-foreground cursor-pointer">ENTRAR</TabsTrigger>
