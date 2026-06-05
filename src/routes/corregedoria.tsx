@@ -39,7 +39,7 @@ export const Route = createFileRoute("/corregedoria")({
 });
 
 type Status = "pendente" | "em_analise" | "concluida" | "arquivada";
-type Tab = "dashboard" | "denuncias" | "investigacoes" | "inqueritos" | "atos" | "oficiais" | "solicitacoes" | "depoimentos";
+type Tab = "dashboard" | "denuncias" | "investigacoes" | "inqueritos" | "atos" | "oficiais" | "solicitacoes" | "depoimentos" | "relatorios_gerais";
 
 interface Denuncia {
   id: string;
@@ -125,6 +125,14 @@ interface Depoimento {
   relatorio_id_ato: string | null;
   investigacao_id: string | null;
   observacao: string | null;
+  created_at: string;
+}
+
+interface RelatorioGeralVinculo {
+  id: string;
+  relatorio_id: string;
+  entidade_id: string;
+  entidade_tipo: "denuncia" | "investigacao" | "depoimento" | "inquerito" | "ato";
   created_at: string;
 }
 
@@ -803,6 +811,20 @@ function Corregedoria() {
   const [fetching, setFetching] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
+  // Relatório Geral State
+  const [relatorioGeralVinculos, setRelatorioGeralVinculos] = useState<RelatorioGeralVinculo[]>([]);
+  const [isRelatorioGeralDialogOpen, setIsRelatorioGeralDialogOpen] = useState(false);
+  const [isEditRelatorioGeralDialogOpen, setIsEditRelatorioGeralDialogOpen] = useState(false);
+  const [editingRelatorioGeralId, setEditingRelatorioGeralId] = useState<string | null>(null);
+  const [relatorioGeralForm, setRelatorioGeralForm] = useState({
+    titulo: "",
+    conteudo: "",
+    vinculos: [] as { entidade_id: string; entidade_tipo: "denuncia" | "investigacao" | "depoimento" | "inquerito" | "ato" }[]
+  });
+  const [submittingRelatorioGeral, setSubmittingRelatorioGeral] = useState(false);
+  const [selectedEntidadeTipo, setSelectedEntidadeTipo] = useState<"denuncia" | "investigacao" | "depoimento" | "inquerito" | "ato">("denuncia");
+  const [selectedEntidadeId, setSelectedEntidadeId] = useState("");
+
   // Relatório Form State
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -972,7 +994,7 @@ function Corregedoria() {
       return;
     }
     const load = async () => {
-      const [denunciasRes, investigacoesRes, relatoriosRes, drRes, irRes, diRes, depoimentosRes, ddRes, perfisRes] = await Promise.all([
+      const [denunciasRes, investigacoesRes, relatoriosRes, drRes, irRes, diRes, depoimentosRes, ddRes, perfisRes, rgvRes] = await Promise.all([
         supabase.from("denuncias").select("*").order("created_at", { ascending: false }),
         supabase.from("investigacoes").select("*").order("created_at", { ascending: false }),
         supabase.from("relatorios").select("*").order("created_at", { ascending: false }),
@@ -981,7 +1003,8 @@ function Corregedoria() {
         supabase.from("denuncia_investigacao").select("*"),
         supabase.from("depoimentos").select("*").order("created_at", { ascending: false }),
         supabase.from("denuncia_depoimento").select("*"),
-        supabase.from("profiles").select("*").order("full_name", { ascending: true })
+        supabase.from("profiles").select("*").order("full_name", { ascending: true }),
+        supabase.from("relatorio_geral_vinculos").select("*")
       ]);
       
       if (denunciasRes.data) setDenuncias(denunciasRes.data as Denuncia[]);
@@ -992,6 +1015,7 @@ function Corregedoria() {
       if (diRes.data) setDenunciaInvestigacoes(diRes.data as DenunciaInvestigacao[]);
       if (depoimentosRes.data) setDepoimentos(depoimentosRes.data as Depoimento[]);
       if (ddRes.data) setDenunciaDepoimentos(ddRes.data as DenunciaDepoimento[]);
+      if (rgvRes.data) setRelatorioGeralVinculos(rgvRes.data as RelatorioGeralVinculo[]);
       
       // Filtrar oficiais para mostrar apenas os aprovados (não pendentes)
       if (perfisRes.data) {
@@ -1431,6 +1455,102 @@ function Corregedoria() {
       investigacao_id: "",
       observacao: ""
     });
+  };
+
+  // --- Relatório Geral Handlers ---
+
+  const submitRelatorioGeral = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!relatorioGeralForm.titulo || !relatorioGeralForm.conteudo) {
+      return toast.error("Preencha título e conteúdo do relatório");
+    }
+    setSubmittingRelatorioGeral(true);
+    const { data, error } = await supabase.from("relatorios").insert([{
+      titulo: relatorioGeralForm.titulo,
+      tipo_denuncia: "Relatório Geral",
+      oficial: user?.user_metadata?.full_name || user?.email || "Oficial",
+      conteudo: relatorioGeralForm.conteudo,
+      status: "pendente",
+      dados_detalhados: {}
+    }]).select();
+
+    setSubmittingRelatorioGeral(false);
+    if (error || !data) return toast.error("Erro ao criar relatório: " + (error?.message || "Erro desconhecido"));
+
+    const newRgId = data[0].id;
+
+    // Vincular documentos
+    for (const v of relatorioGeralForm.vinculos) {
+      await supabase.from("relatorio_geral_vinculos").insert({
+        relatorio_id: newRgId,
+        entidade_id: v.entidade_id,
+        entidade_tipo: v.entidade_tipo
+      });
+    }
+    setRelatorioGeralVinculos(prev => [...prev, ...relatorioGeralForm.vinculos.map(v => ({
+      id: crypto.randomUUID(),
+      relatorio_id: newRgId,
+      entidade_id: v.entidade_id,
+      entidade_tipo: v.entidade_tipo,
+      created_at: new Date().toISOString()
+    }))]);
+
+    setRelatorios(prev => [data[0] as Relatorio, ...prev]);
+    setRelatorioGeralForm({ titulo: "", conteudo: "", vinculos: [] });
+    setIsRelatorioGeralDialogOpen(false);
+    toast.success("Relatório Geral criado com sucesso!");
+  };
+
+  const handleEditRelatorioGeral = (rg: Relatorio) => {
+    const vinculos = relatorioGeralVinculos.filter(v => v.relatorio_id === rg.id);
+    setRelatorioGeralForm({
+      titulo: rg.titulo,
+      conteudo: rg.conteudo,
+      vinculos: vinculos.map(v => ({ entidade_id: v.entidade_id, entidade_tipo: v.entidade_tipo }))
+    });
+    setEditingRelatorioGeralId(rg.id);
+    setIsEditRelatorioGeralDialogOpen(true);
+  };
+
+  const updateRelatorioGeral = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingRelatorioGeralId) return;
+    setSubmittingRelatorioGeral(true);
+    const { error } = await supabase.from("relatorios").update({
+      titulo: relatorioGeralForm.titulo,
+      conteudo: relatorioGeralForm.conteudo
+    }).eq("id", editingRelatorioGeralId);
+    setSubmittingRelatorioGeral(false);
+    if (error) return toast.error("Erro ao atualizar: " + error.message);
+    setRelatorios(prev => prev.map(r => r.id === editingRelatorioGeralId ? { ...r, titulo: relatorioGeralForm.titulo, conteudo: relatorioGeralForm.conteudo } : r));
+    setEditingRelatorioGeralId(null);
+    setIsEditRelatorioGeralDialogOpen(false);
+    toast.success("Relatório Geral atualizado!");
+  };
+
+  const confirmDeleteRelatorioGeral = (id: string) => {
+    setConfirmDialog({
+      open: true,
+      title: "Excluir Relatório Geral",
+      description: "Tem certeza que deseja excluir este relatório permanentemente? Esta ação não pode ser desfeita.",
+      loading: false,
+      onConfirm: async () => {
+        setConfirmDialog(prev => ({ ...prev, loading: true }));
+        const { error } = await supabase.from("relatorios").delete().eq("id", id);
+        setConfirmDialog(prev => ({ ...prev, loading: false, open: false }));
+        if (error) return toast.error("Erro ao excluir: " + error.message);
+        setRelatorios(prev => prev.filter(r => r.id !== id));
+        setRelatorioGeralVinculos(prev => prev.filter(v => v.relatorio_id !== id));
+        toast.success("Relatório Geral excluído!");
+      }
+    });
+  };
+
+  const deleteRelatorioGeralVinculo = async (vinculoId: string) => {
+    const { error } = await supabase.from("relatorio_geral_vinculos").delete().eq("id", vinculoId);
+    if (error) return toast.error("Erro ao desanexar: " + error.message);
+    setRelatorioGeralVinculos(prev => prev.filter(v => v.id !== vinculoId));
+    toast.success("Documento desanexado!");
   };
 
   const submitInvestigacao = async (e: React.FormEvent) => {
@@ -2062,6 +2182,12 @@ function Corregedoria() {
             onClick={() => handleTabChange("depoimentos")} 
             icon={MessageSquare} 
             label="Depoimentos" 
+          />
+          <SidebarItem 
+            active={activeTab === "relatorios_gerais"} 
+            onClick={() => handleTabChange("relatorios_gerais")} 
+            icon={FileSignature} 
+            label="Rel. Gerais" 
           />
           <SidebarItem 
             active={activeTab === "oficiais"} 
@@ -4383,6 +4509,314 @@ function Corregedoria() {
                   })}
                 </div>
               )}
+            </div>
+          )}
+
+          {activeTab === "relatorios_gerais" && (
+            <div className="space-y-6 animate-fade-in">
+              <div className="flex items-center justify-between border-b border-border pb-4">
+                <h3 className="text-lg font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
+                  <FileSignature className="h-5 w-5" /> Relatórios em Geral
+                </h3>
+                <Dialog open={isRelatorioGeralDialogOpen} onOpenChange={setIsRelatorioGeralDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button onClick={() => {
+                      setRelatorioGeralForm({ titulo: "", conteudo: "", vinculos: [] });
+                      setSelectedEntidadeTipo("denuncia");
+                      setSelectedEntidadeId("");
+                    }} className="bg-zinc-700 hover:bg-zinc-600 text-white text-[10px] uppercase tracking-widest">
+                      <Plus className="h-3 w-3 mr-1" /> Novo Relatório Geral
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="bg-background border-border max-w-3xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle className="text-foreground uppercase tracking-wider text-sm">Criar Relatório Geral</DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={submitRelatorioGeral} className="space-y-5">
+                      <div className="space-y-2">
+                        <Label className="text-[10px] uppercase text-muted-foreground">Título do Relatório *</Label>
+                        <Input value={relatorioGeralForm.titulo} onChange={(e) => setRelatorioGeralForm({...relatorioGeralForm, titulo: e.target.value})} className="bg-background border-border text-foreground" placeholder="Ex: Relatório Consolidado - Operação X" required />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-[10px] uppercase text-muted-foreground">Conteúdo / Descrição *</Label>
+                        <Textarea rows={8} value={relatorioGeralForm.conteudo} onChange={(e) => setRelatorioGeralForm({...relatorioGeralForm, conteudo: e.target.value})} className="bg-background border-border text-foreground text-sm leading-relaxed font-mono" placeholder="Descreva o relatório geral..." required />
+                      </div>
+                      <div className="border-t border-border pt-4 space-y-4">
+                        <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Documentos Vinculados</h4>
+                        {relatorioGeralForm.vinculos.length > 0 && (
+                          <div className="space-y-2 mb-4">
+                            {relatorioGeralForm.vinculos.map((v, i) => {
+                              const label = v.entidade_tipo === "denuncia" ? denuncias.find(d => d.id === v.entidade_id)?.titulo :
+                                v.entidade_tipo === "investigacao" ? investigacoes.find(inv => inv.id === v.entidade_id)?.titulo :
+                                v.entidade_tipo === "depoimento" ? depoimentos.find(d => d.id === v.entidade_id)?.oficial_nome :
+                                v.entidade_tipo === "inquerito" ? relatorios.find(r => r.id === v.entidade_id && r.tipo_denuncia === "Inquérito Policial")?.titulo :
+                                v.entidade_tipo === "ato" ? relatorios.find(r => r.id === v.entidade_id && r.tipo_denuncia === "Ato Administrativo")?.titulo : "N/A";
+                              return (
+                                <div key={i} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
+                                  <div className="flex items-center gap-3">
+                                    <Badge variant="outline" className="text-[9px] uppercase border-border">{v.entidade_tipo}</Badge>
+                                    <span className="text-foreground font-bold">{label || "N/A"}</span>
+                                  </div>
+                                  <Button type="button" size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-400 hover:text-red-300"
+                                    onClick={() => setRelatorioGeralForm({...relatorioGeralForm, vinculos: relatorioGeralForm.vinculos.filter((_, idx) => idx !== i)})}>
+                                    <X className="h-3.5 w-3.5" />
+                                  </Button>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                        <div className="flex gap-2 items-end">
+                          <div className="flex-1">
+                            <select value={selectedEntidadeTipo} onChange={(e) => { setSelectedEntidadeTipo(e.target.value as any); setSelectedEntidadeId(""); }}
+                              className="w-full h-9 bg-background border border-border text-foreground text-xs rounded px-2 mb-2">
+                              <option value="denuncia">Denúncia</option>
+                              <option value="investigacao">Investigação</option>
+                              <option value="depoimento">Depoimento</option>
+                              <option value="inquerito">Inquérito Policial</option>
+                              <option value="ato">Ato Administrativo</option>
+                            </select>
+                            <select value={selectedEntidadeId} onChange={(e) => setSelectedEntidadeId(e.target.value)}
+                              className="w-full h-9 bg-background border border-border text-foreground text-xs rounded px-2">
+                              <option value="">Selecione...</option>
+                              {selectedEntidadeTipo === "denuncia" && denuncias.filter(d => !relatorioGeralForm.vinculos.some(v => v.entidade_id === d.id && v.entidade_tipo === "denuncia")).map(d => (
+                                <option key={d.id} value={d.id}>#{d.numero_registro} - {d.titulo}</option>
+                              ))}
+                              {selectedEntidadeTipo === "investigacao" && investigacoes.filter(inv => !relatorioGeralForm.vinculos.some(v => v.entidade_id === inv.id && v.entidade_tipo === "investigacao")).map(inv => (
+                                <option key={inv.id} value={inv.id}>#{inv.numero_registro} - {inv.titulo}</option>
+                              ))}
+                              {selectedEntidadeTipo === "depoimento" && depoimentos.filter(d => !relatorioGeralForm.vinculos.some(v => v.entidade_id === d.id && v.entidade_tipo === "depoimento")).map(d => (
+                                <option key={d.id} value={d.id}>#{d.numero_registro} - {d.oficial_nome}</option>
+                              ))}
+                              {selectedEntidadeTipo === "inquerito" && relatorios.filter(r => r.tipo_denuncia === "Inquérito Policial" && !relatorioGeralForm.vinculos.some(v => v.entidade_id === r.id && v.entidade_tipo === "inquerito")).map(r => (
+                                <option key={r.id} value={r.id}>#{r.numero_registro} - {r.titulo}</option>
+                              ))}
+                              {selectedEntidadeTipo === "ato" && relatorios.filter(r => r.tipo_denuncia === "Ato Administrativo" && !relatorioGeralForm.vinculos.some(v => v.entidade_id === r.id && v.entidade_tipo === "ato")).map(r => (
+                                <option key={r.id} value={r.id}>#{r.numero_registro} - {r.titulo}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <Button type="button" size="sm" onClick={() => {
+                            if (!selectedEntidadeId) return toast.error("Selecione um documento");
+                            if (relatorioGeralForm.vinculos.some(v => v.entidade_id === selectedEntidadeId && v.entidade_tipo === selectedEntidadeTipo)) return toast.error("Documento já vinculado");
+                            setRelatorioGeralForm({...relatorioGeralForm, vinculos: [...relatorioGeralForm.vinculos, { entidade_id: selectedEntidadeId, entidade_tipo: selectedEntidadeTipo }]});
+                            setSelectedEntidadeId("");
+                          }} className="bg-card hover:bg-slate-700 text-white text-xs h-9">
+                            Adicionar
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="pt-4 border-t border-border flex justify-end">
+                        <Button type="submit" disabled={submittingRelatorioGeral} className="bg-primary hover:bg-primary/80 text-white font-bold tracking-widest px-8 uppercase text-[10px]">
+                          {submittingRelatorioGeral ? "Criando..." : "CRIAR RELATÓRIO GERAL"}
+                        </Button>
+                      </div>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+
+                {/* Edit Relatório Geral Dialog */}
+                <Dialog open={isEditRelatorioGeralDialogOpen} onOpenChange={(open) => {
+                  if (!open) { setIsEditRelatorioGeralDialogOpen(false); setEditingRelatorioGeralId(null); }
+                }}>
+                  <DialogContent className="bg-background border-border max-w-3xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle className="text-foreground uppercase tracking-wider text-sm">Editar Relatório Geral</DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={updateRelatorioGeral} className="space-y-5">
+                      <div className="space-y-2">
+                        <Label className="text-[10px] uppercase text-muted-foreground">Título do Relatório *</Label>
+                        <Input value={relatorioGeralForm.titulo} onChange={(e) => setRelatorioGeralForm({...relatorioGeralForm, titulo: e.target.value})} className="bg-background border-border text-foreground" required />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-[10px] uppercase text-muted-foreground">Conteúdo / Descrição *</Label>
+                        <Textarea rows={8} value={relatorioGeralForm.conteudo} onChange={(e) => setRelatorioGeralForm({...relatorioGeralForm, conteudo: e.target.value})} className="bg-background border-border text-foreground text-sm leading-relaxed font-mono" required />
+                      </div>
+                      <div className="pt-4 border-t border-border flex justify-end gap-2">
+                        <Button type="button" variant="outline" onClick={() => setIsEditRelatorioGeralDialogOpen(false)} className="text-[10px] uppercase tracking-widest">Cancelar</Button>
+                        <Button type="submit" disabled={submittingRelatorioGeral} className="bg-primary hover:bg-primary/80 text-white font-bold tracking-widest px-8 uppercase text-[10px]">
+                          {submittingRelatorioGeral ? "Salvando..." : "SALVAR ALTERAÇÕES"}
+                        </Button>
+                      </div>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+              </div>
+
+              {(() => {
+                const relatoriosGerais = relatorios.filter(r => r.tipo_denuncia === "Relatório Geral");
+                return relatoriosGerais.length === 0 ? (
+                  <div className="rounded-lg border border-border border-dashed bg-card/50 p-12 text-center text-muted-foreground">
+                    <FileSignature className="h-8 w-8 mx-auto mb-3 opacity-40" />
+                    <p className="text-sm">Nenhum Relatório Geral registrado.</p>
+                    <p className="text-[10px] mt-1">Clique em "Novo Relatório Geral" para criar um.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {relatoriosGerais.map(rg => {
+                      const rgExpanded = expandedId === rg.id;
+                      const vinculos = relatorioGeralVinculos.filter(v => v.relatorio_id === rg.id);
+                      return (
+                        <div key={rg.id} className="rounded-lg border border-border bg-card overflow-hidden">
+                          <div
+                            onClick={() => setExpandedId(rgExpanded ? null : rg.id)}
+                            className="flex w-full items-center justify-between gap-4 p-5 text-left transition-colors hover:bg-muted cursor-pointer"
+                          >
+                            <div className="flex items-center gap-4 flex-1">
+                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-muted/50">
+                                <FileSignature className="h-5 w-5 text-foreground" />
+                              </div>
+                              <div className="overflow-hidden">
+                                <div className="flex items-center gap-3 whitespace-nowrap overflow-hidden">
+                                  <Badge variant="outline" className="bg-muted border-border text-foreground font-mono text-[10px]">
+                                    #{rg.numero_registro?.toString().padStart(4, '0') || '???'}
+                                  </Badge>
+                                  <h4 className="text-sm font-bold text-foreground truncate max-w-[300px]">{rg.titulo}</h4>
+                                  <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground bg-muted/50">
+                                    Relatório Geral
+                                  </Badge>
+                                </div>
+                                <div className="mt-1 flex items-center gap-2 text-[10px] text-muted-foreground uppercase tracking-widest">
+                                  <span>{format(new Date(rg.created_at), "dd/MM/yy HH:mm")}</span>
+                                  <span>·</span>
+                                  <span>{vinculos.length} documento(s) vinculado(s)</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
+                              <Select value={rg.status} onValueChange={(v: Status) => updateStatus(rg.id, v)}>
+                                <SelectTrigger className="h-8 bg-muted border-border text-[10px] text-muted-foreground uppercase tracking-widest w-[130px]">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent className="bg-muted border-border text-foreground">
+                                  {Object.entries(STATUS_LABEL).map(([val, lab]) => (
+                                    <SelectItem key={val} value={val} className="text-[10px] uppercase">{lab}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-foreground hover:text-foreground hover:bg-muted/50" onClick={() => printRelatorio(rg)} title="Imprimir">
+                                <Printer className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:text-primary/80 hover:bg-primary/10" onClick={() => handleEditRelatorioGeral(rg)} title="Editar">
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-400 hover:bg-red-500/10" onClick={() => confirmDeleteRelatorioGeral(rg.id)} title="Excluir">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                          {rgExpanded && (
+                            <div className="border-t border-border/50 bg-muted/50 p-6 space-y-6">
+                              <div className="border-l-2 border-primary pl-4 bg-primary/5 py-3">
+                                <h4 className="text-[10px] font-bold uppercase tracking-widest text-primary mb-2">Conteúdo do Relatório</h4>
+                                <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed font-mono">{rg.conteudo}</p>
+                              </div>
+
+                              {/* Documentos Vinculados */}
+                              <div className="rounded border border-border bg-muted p-4">
+                                <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                                  <LinkIcon className="h-4 w-4" /> Documentos Vinculados ({vinculos.length})
+                                </div>
+                                {vinculos.length > 0 ? (
+                                  <div className="space-y-2 mb-4">
+                                    {vinculos.map(v => {
+                                      const isDenuncia = v.entidade_tipo === "denuncia";
+                                      const isInvestigacao = v.entidade_tipo === "investigacao";
+                                      const isDepoimento = v.entidade_tipo === "depoimento";
+                                      const isInquerito = v.entidade_tipo === "inquerito";
+                                      const isAto = v.entidade_tipo === "ato";
+                                      const entity = isDenuncia ? denuncias.find(d => d.id === v.entidade_id) :
+                                        isInvestigacao ? investigacoes.find(i => i.id === v.entidade_id) :
+                                        isDepoimento ? depoimentos.find(d => d.id === v.entidade_id) :
+                                        relatorios.find(r => r.id === v.entidade_id);
+                                      const tabTarget = isDenuncia ? "denuncias" : isInvestigacao ? "investigacoes" : isDepoimento ? "depoimentos" : isInquerito ? "inqueritos" : "atos";
+                                      const icon = isInquerito ? FileSignature : isAto ? FileText : isInvestigacao ? Shield : isDepoimento ? MessageSquare : Activity;
+                                      const label = isDenuncia ? "Denúncia" : isInvestigacao ? "Investigação" : isDepoimento ? "Depoimento" : isInquerito ? "Inquérito Policial" : "Ato Administrativo";
+                                      const name = entity ? (isDepoimento ? (entity as Depoimento).oficial_nome : (entity as any).titulo) : "N/A";
+                                      return (
+                                        <div key={v.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
+                                          <div className="flex items-center gap-3">
+                                            {React.createElement(icon, { className: "h-4 w-4 text-foreground shrink-0" })}
+                                            <span className="text-foreground font-bold">{name}</span>
+                                            <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">{label}</Badge>
+                                          </div>
+                                          <div className="flex items-center gap-1">
+                                            <Button size="sm" variant="ghost" className="h-7 text-xs text-foreground"
+                                              onClick={() => { setActiveTab(tabTarget as Tab); setExpandedId(v.entidade_id); }}>
+                                              Ver
+                                            </Button>
+                                            <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-950/30"
+                                              onClick={() => deleteRelatorioGeralVinculo(v.id)} title="Desanexar">
+                                              <X className="h-3.5 w-3.5" />
+                                            </Button>
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                ) : (
+                                  <p className="text-xs text-muted-foreground mb-4">Nenhum documento vinculado.</p>
+                                )}
+                                {/* Add vinculação */}
+                                <div className="flex gap-2 items-end">
+                                  <div className="flex-1">
+                                    <select value={selectedEntidadeTipo} onChange={(e) => { setSelectedEntidadeTipo(e.target.value as any); setSelectedEntidadeId(""); }}
+                                      className="w-full h-9 bg-muted border border-border text-foreground text-xs rounded px-2 mb-1">
+                                      <option value="denuncia">Denúncia</option>
+                                      <option value="investigacao">Investigação</option>
+                                      <option value="depoimento">Depoimento</option>
+                                      <option value="inquerito">Inquérito Policial</option>
+                                      <option value="ato">Ato Administrativo</option>
+                                    </select>
+                                    <select value={selectedEntidadeId} onChange={(e) => setSelectedEntidadeId(e.target.value)}
+                                      className="w-full h-9 bg-muted border border-border text-foreground text-xs rounded px-2">
+                                      <option value="">Selecione...</option>
+                                      {selectedEntidadeTipo === "denuncia" && denuncias.filter(d => !vinculos.some(v => v.entidade_id === d.id)).map(d => (
+                                        <option key={d.id} value={d.id}>#{d.numero_registro} - {d.titulo}</option>
+                                      ))}
+                                      {selectedEntidadeTipo === "investigacao" && investigacoes.filter(i => !vinculos.some(v => v.entidade_id === i.id)).map(i => (
+                                        <option key={i.id} value={i.id}>#{i.numero_registro} - {i.titulo}</option>
+                                      ))}
+                                      {selectedEntidadeTipo === "depoimento" && depoimentos.filter(d => !vinculos.some(v => v.entidade_id === d.id)).map(d => (
+                                        <option key={d.id} value={d.id}>#{d.numero_registro} - {d.oficial_nome}</option>
+                                      ))}
+                                      {selectedEntidadeTipo === "inquerito" && relatorios.filter(r => r.tipo_denuncia === "Inquérito Policial" && !vinculos.some(v => v.entidade_id === r.id)).map(r => (
+                                        <option key={r.id} value={r.id}>#{r.numero_registro} - {r.titulo}</option>
+                                      ))}
+                                      {selectedEntidadeTipo === "ato" && relatorios.filter(r => r.tipo_denuncia === "Ato Administrativo" && !vinculos.some(v => v.entidade_id === r.id)).map(r => (
+                                        <option key={r.id} value={r.id}>#{r.numero_registro} - {r.titulo}</option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                  <Button size="sm" className="bg-card hover:bg-slate-700 text-white text-xs"
+                                    onClick={async () => {
+                                      if (!selectedEntidadeId) return toast.error("Selecione um documento");
+                                      setSubmittingRelatorioGeral(true);
+                                      const { error } = await supabase.from("relatorio_geral_vinculos").insert({
+                                        relatorio_id: rg.id,
+                                        entidade_id: selectedEntidadeId,
+                                        entidade_tipo: selectedEntidadeTipo,
+                                      });
+                                      setSubmittingRelatorioGeral(false);
+                                      if (error) return toast.error("Erro ao vincular: " + error.message);
+                                      toast.success("Documento vinculado!");
+                                      setRelatorioGeralVinculos(prev => [...prev, { id: crypto.randomUUID(), relatorio_id: rg.id, entidade_id: selectedEntidadeId, entidade_tipo: selectedEntidadeTipo, created_at: new Date().toISOString() }]);
+                                      setSelectedEntidadeId("");
+                                    }}
+                                    disabled={submittingRelatorioGeral || !selectedEntidadeId}
+                                  >
+                                    {submittingRelatorioGeral ? "..." : "Vincular"}
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
             </div>
           )}
 
