@@ -107,6 +107,11 @@ interface DenunciaInvestigacao {
   investigacao_id: string;
 }
 
+interface DenunciaDepoimento {
+  denuncia_id: string;
+  depoimento_id: string;
+}
+
 interface Depoimento {
   id: string;
   numero_registro: number;
@@ -731,6 +736,7 @@ function Corregedoria() {
   const [denunciaRelatorios, setDenunciaRelatorios] = useState<DenunciaRelatorio[]>([]);
   const [investigacaoRelatorios, setInvestigacaoRelatorios] = useState<InvestigacaoRelatorio[]>([]);
   const [denunciaInvestigacoes, setDenunciaInvestigacoes] = useState<DenunciaInvestigacao[]>([]);
+  const [denunciaDepoimentos, setDenunciaDepoimentos] = useState<DenunciaDepoimento[]>([]);
   const [depoimentos, setDepoimentos] = useState<Depoimento[]>([]);
   const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
   const [oficiais, setOficiais] = useState<Profile[]>([]);
@@ -888,6 +894,7 @@ function Corregedoria() {
   const [linkDenunciaId, setLinkDenunciaId] = useState<string>("");
   const [linkInvestigacaoId, setLinkInvestigacaoId] = useState<string>("");
   const [linkInvestigacaoDenunciaId, setLinkInvestigacaoDenunciaId] = useState<string>("");
+  const [linkDepoimentoDenunciaId, setLinkDepoimentoDenunciaId] = useState<string>("");
   const [linking, setLinking] = useState(false);
 
   useEffect(() => {
@@ -905,7 +912,7 @@ function Corregedoria() {
       return;
     }
     const load = async () => {
-      const [denunciasRes, investigacoesRes, relatoriosRes, drRes, irRes, diRes, depoimentosRes, perfisRes] = await Promise.all([
+      const [denunciasRes, investigacoesRes, relatoriosRes, drRes, irRes, diRes, depoimentosRes, ddRes, perfisRes] = await Promise.all([
         supabase.from("denuncias").select("*").order("created_at", { ascending: false }),
         supabase.from("investigacoes").select("*").order("created_at", { ascending: false }),
         supabase.from("relatorios").select("*").order("created_at", { ascending: false }),
@@ -913,6 +920,7 @@ function Corregedoria() {
         supabase.from("investigacao_relatorio").select("*"),
         supabase.from("denuncia_investigacao").select("*"),
         supabase.from("depoimentos").select("*").order("created_at", { ascending: false }),
+        supabase.from("denuncia_depoimento").select("*"),
         supabase.from("profiles").select("*").order("full_name", { ascending: true })
       ]);
       
@@ -923,6 +931,7 @@ function Corregedoria() {
       if (irRes.data) setInvestigacaoRelatorios(irRes.data as InvestigacaoRelatorio[]);
       if (diRes.data) setDenunciaInvestigacoes(diRes.data as DenunciaInvestigacao[]);
       if (depoimentosRes.data) setDepoimentos(depoimentosRes.data as Depoimento[]);
+      if (ddRes.data) setDenunciaDepoimentos(ddRes.data as DenunciaDepoimento[]);
       
       // Filtrar oficiais para mostrar apenas os aprovados (não pendentes)
       if (perfisRes.data) {
@@ -1014,6 +1023,17 @@ function Corregedoria() {
       })
       .subscribe();
 
+    const ddSub = supabase.channel('denuncia-depoimento-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'denuncia_depoimento' }, (payload) => {
+        if (payload.eventType === 'INSERT') setDenunciaDepoimentos(prev =>
+          prev.some(dd => dd.denuncia_id === payload.new.denuncia_id && dd.depoimento_id === payload.new.depoimento_id)
+            ? prev
+            : [...prev, payload.new as DenunciaDepoimento]
+        );
+        if (payload.eventType === 'DELETE') setDenunciaDepoimentos(prev => prev.filter(dd => !(dd.denuncia_id === payload.old.denuncia_id && dd.depoimento_id === payload.old.depoimento_id)));
+      })
+      .subscribe();
+
     return () => {
       supabase.removeChannel(denunciasSub);
       supabase.removeChannel(investigacoesSub);
@@ -1022,6 +1042,7 @@ function Corregedoria() {
       supabase.removeChannel(drSub);
       supabase.removeChannel(irSub);
       supabase.removeChannel(diSub);
+      supabase.removeChannel(ddSub);
     };
   }, [isCorregedor, isAdmin]);
 
@@ -2395,6 +2416,128 @@ function Corregedoria() {
                                           className="border-border text-muted-foreground hover:text-foreground text-xs h-9"
                                         >
                                           {linking ? "Vinculando..." : "Vincular Todas"}
+                                        </Button>
+                                      )}
+                                    </div>
+                                  </>
+                                );
+                              })()}
+                            </div>
+
+                            {/* Depoimentos Vinculados */}
+                            <div className="rounded border border-border bg-muted p-4">
+                              <div className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                                <MessageSquare className="h-4 w-4" /> Depoimentos Vinculados
+                              </div>
+
+                              {(() => {
+                                const linkedDepoimentos = denunciaDepoimentos
+                                  .filter(dd => dd.denuncia_id === d.id)
+                                  .map(dd => depoimentos.find(dep => dep.id === dd.depoimento_id))
+                                  .filter(Boolean) as Depoimento[];
+
+                                const availableDepoimentos = depoimentos.filter(
+                                  dep => !denunciaDepoimentos.some(dd => dd.denuncia_id === d.id && dd.depoimento_id === dep.id)
+                                );
+
+                                return (
+                                  <>
+                                    {linkedDepoimentos.length > 0 ? (
+                                      <div className="space-y-2 mb-4">
+                                        {linkedDepoimentos.map(dep => (
+                                          <div key={dep.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
+                                            <div className="flex items-center gap-3">
+                                              <MessageSquare className="h-4 w-4 text-foreground" />
+                                              <span className="text-foreground font-bold">{dep.oficial_nome}</span>
+                                              <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">
+                                                {format(new Date(dep.data_depoimento), "dd/MM/yyyy")}
+                                              </Badge>
+                                            </div>
+                                            <Button
+                                              size="sm"
+                                              variant="ghost"
+                                              className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-950/30"
+                                              onClick={async () => {
+                                                setLinking(true);
+                                                await supabase.from("denuncia_depoimento").delete().match({ denuncia_id: d.id, depoimento_id: dep.id });
+                                                setLinking(false);
+                                                setDenunciaDepoimentos(prev => prev.filter(dd => !(dd.denuncia_id === d.id && dd.depoimento_id === dep.id)));
+                                                toast.success("Depoimento desanexado!");
+                                              }}
+                                              title="Desanexar"
+                                            >
+                                              <X className="h-3.5 w-3.5" />
+                                            </Button>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    ) : (
+                                      <p className="text-xs text-muted-foreground mb-4">Nenhum depoimento vinculado a esta denúncia.</p>
+                                    )}
+
+                                    <div className="flex gap-2 items-end">
+                                      <div className="flex-1">
+                                        <select
+                                          value={linkDepoimentoDenunciaId}
+                                          onChange={(e) => setLinkDepoimentoDenunciaId(e.target.value)}
+                                          className="w-full h-9 bg-muted border border-border text-foreground text-xs rounded px-2"
+                                        >
+                                          <option value="">Selecione um depoimento...</option>
+                                          {availableDepoimentos.map(dep => (
+                                            <option key={dep.id} value={dep.id}>{dep.oficial_nome} - {format(new Date(dep.data_depoimento), "dd/MM/yyyy")}</option>
+                                          ))}
+                                        </select>
+                                      </div>
+                                      <Button
+                                        size="sm"
+                                        onClick={async () => {
+                                          if (!linkDepoimentoDenunciaId) return toast.error("Selecione um depoimento");
+                                          setLinking(true);
+                                          const { error } = await supabase.from("denuncia_depoimento").insert({
+                                            denuncia_id: d.id,
+                                            depoimento_id: linkDepoimentoDenunciaId
+                                          });
+                                          setLinking(false);
+                                          if (error) return toast.error("Erro ao vincular depoimento");
+                                          toast.success("Depoimento anexado!");
+                                          setDenunciaDepoimentos(prev =>
+                                            prev.some(dd => dd.denuncia_id === d.id && dd.depoimento_id === linkDepoimentoDenunciaId)
+                                              ? prev
+                                              : [...prev, { denuncia_id: d.id, depoimento_id: linkDepoimentoDenunciaId }]
+                                          );
+                                          setLinkDepoimentoDenunciaId("");
+                                        }}
+                                        disabled={linking || !linkDepoimentoDenunciaId}
+                                        className="bg-card hover:bg-slate-700 text-white text-xs h-9"
+                                      >
+                                        {linking ? "Vinculando..." : "Vincular"}
+                                      </Button>
+                                      {availableDepoimentos.length > 0 && (
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          onClick={async () => {
+                                            setLinking(true);
+                                            const inserts = availableDepoimentos.map(dep => ({
+                                              denuncia_id: d.id,
+                                              depoimento_id: dep.id
+                                            }));
+                                            const { error } = await supabase.from("denuncia_depoimento").insert(inserts);
+                                            setLinking(false);
+                                            if (error) return toast.error("Erro ao vincular depoimentos");
+                                            toast.success(`${inserts.length} depoimento(s) anexado(s)!`);
+                                            setDenunciaDepoimentos(prev => {
+                                              const existing = prev.filter(dd => dd.denuncia_id === d.id);
+                                              const newOnes = inserts.filter(
+                                                ins => !existing.some(ex => ex.depoimento_id === ins.depoimento_id)
+                                              );
+                                              return [...prev, ...newOnes] as DenunciaDepoimento[];
+                                            });
+                                          }}
+                                          disabled={linking}
+                                          className="border-border text-muted-foreground hover:text-foreground text-xs h-9"
+                                        >
+                                          {linking ? "Vinculando..." : "Vincular Todos"}
                                         </Button>
                                       )}
                                     </div>
