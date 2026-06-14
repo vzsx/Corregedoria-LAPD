@@ -1,4 +1,4 @@
-import type { Status, AfastamentoStatus, InvestigacaoPolicialStatus, InqueritoPolicialStatus } from "./types";
+import type { Status, AfastamentoStatus, IpmStatus, InvestigacaoPolicialStatus, InqueritoPolicialStatus } from "./types";
 
 export const STATUS_LABEL: Record<Status, string> = {
   pendente: "Pendente",
@@ -62,6 +62,18 @@ export const INQUERITO_POLICIAL_STATUS_LABEL: Record<InqueritoPolicialStatus, st
   concluido: "Concluído",
   arquivado: "Arquivado",
   encaminhado: "Encaminhado",
+};
+
+export const IPM_STATUS_LABEL: Record<IpmStatus, string> = {
+  em_andamento: "Em Andamento",
+  concluido: "Concluído",
+  arquivado: "Arquivado",
+};
+
+export const IPM_STATUS_COLOR: Record<IpmStatus, string> = {
+  em_andamento: "bg-blue-500/10 text-blue-700 border-blue-500/40",
+  concluido: "bg-emerald-500/10 text-emerald-700 border-emerald-500/40",
+  arquivado: "bg-muted text-muted-foreground border-border",
 };
 
 export const INQUERITO_POLICIAL_STATUS_COLOR: Record<InqueritoPolicialStatus, string> = {

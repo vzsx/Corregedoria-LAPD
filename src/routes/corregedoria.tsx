@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { 
   Shield, FileText, Loader2, Plus, FileSignature, LayoutDashboard, 
   Users, UserPlus, LogOut, Activity, Link as LinkIcon, Trash2, Edit, Pencil,
-  MessageSquare, Printer, Menu, X, ClipboardList
+  MessageSquare, Printer, Menu, X, ClipboardList, Gavel
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,9 +29,10 @@ import { SidebarItem } from "@/components/corregedoria/SidebarItem";
 import { StatCard } from "@/components/corregedoria/StatCard";
 import { Field } from "@/components/corregedoria/Field";
 import { AfastamentosTab } from "@/components/corregedoria/AfastamentosTab";
+import { IpmTab } from "@/components/corregedoria/IpmTab";
 import { STATUS_LABEL, STATUS_COLOR } from "@/lib/corregedoria/constants";
 import { formatDateSafe, printRelatorio, printDepoimento } from "@/lib/corregedoria/utils";
-import type { Status, Tab, Denuncia, Relatorio, Investigacao, InvestigacaoRelatorio, DenunciaRelatorio, DenunciaInvestigacao, DenunciaDepoimento, Depoimento, RelatorioGeralVinculo, Profile, PendingUser } from "@/lib/corregedoria/types";
+import type { Status, Tab, Denuncia, Relatorio, Investigacao, InvestigacaoRelatorio, DenunciaRelatorio, DenunciaInvestigacao, DenunciaDepoimento, Depoimento, RelatorioGeralVinculo, Profile, PendingUser, Ipm } from "@/lib/corregedoria/types";
 
 export const Route = createFileRoute("/corregedoria")({
   component: Corregedoria,
@@ -2043,6 +2044,12 @@ function Corregedoria() {
             onClick={() => handleTabChange("afastamentos")} 
             icon={ClipboardList} 
             label="Afastamentos" 
+          />
+          <SidebarItem 
+            active={activeTab === "ipm"} 
+            onClick={() => handleTabChange("ipm")} 
+            icon={Gavel} 
+            label="IPM" 
           />
           <SidebarItem 
             active={activeTab === "oficiais"} 
@@ -4994,6 +5001,10 @@ function Corregedoria() {
 
           {activeTab === "afastamentos" && (
             <AfastamentosTab />
+          )}
+
+          {activeTab === "ipm" && (
+            <IpmTab />
           )}
 
         </div>

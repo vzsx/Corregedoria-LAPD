@@ -1,5 +1,5 @@
 export type Status = "pendente" | "em_analise" | "concluida" | "arquivada";
-export type Tab = "dashboard" | "denuncias" | "investigacoes" | "inqueritos" | "atos" | "oficiais" | "solicitacoes" | "depoimentos" | "relatorios_gerais" | "afastamentos";
+export type Tab = "dashboard" | "denuncias" | "investigacoes" | "inqueritos" | "atos" | "oficiais" | "solicitacoes" | "depoimentos" | "relatorios_gerais" | "afastamentos" | "ipm";
 
 export interface Denuncia {
   id: string;
@@ -146,6 +146,57 @@ export interface VersaoDocumento {
   autor: string;
   documento: string;
   alteracoes: string;
+  tipo?: string;
+}
+
+export type IpmStatus = "em_andamento" | "concluido" | "arquivado";
+
+export interface Indiciado {
+  id: string;
+  nome: string;
+  posto_graduacao: string;
+  rg_pm: string;
+  unidade: string;
+}
+
+export interface Enquadramento {
+  id: string;
+  indiciado_nome: string;
+  artigos_cpm: string;
+  artigos_cppm: string;
+  artigos_rdpm: string;
+  observacoes: string;
+}
+
+export interface Vinculacao {
+  tipo: "afastamento" | "investigacao" | "policial" | "procedimento";
+  id: string;
+  descricao: string;
+}
+
+export interface Ipm {
+  id: string;
+  numero_ipm: string;
+  data_instauracao: string;
+  unidade: string;
+  status: IpmStatus;
+  encarregado_nome: string;
+  encarregado_posto: string;
+  autoridade_nome: string;
+  autoridade_posto: string;
+  fundamentacao: string;
+  artigos_cpm: string;
+  artigos_rdpm: string;
+  relatorio_fatos: string;
+  conclusao_parcial: string;
+  indiciados: Indiciado[];
+  enquadramentos: Enquadramento[];
+  vinculacoes: Vinculacao[];
+  historico_versoes: any;
+  autor_id: string | null;
+  autor_nome: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface InvestigacaoPolicial {

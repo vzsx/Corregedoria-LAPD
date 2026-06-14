@@ -1,0 +1,834 @@
+import React, { useEffect, useState } from "react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import {
+  Shield, FileText, Loader2, Plus, Trash2, Edit,
+  Printer, Search, X, FileSignature, Eye,
+  ChevronRight, AlertTriangle, Gavel, Copy, History, BookOpen,
+  UserCheck, Link2, Scale, FileSearch, ArrowRight,
+} from "lucide-react";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ConfirmDialog } from "@/components/confirm-dialog";
+import { Skeleton } from "@/components/skeleton";
+import { logAudit } from "@/lib/audit-log";
+import { IPM_STATUS_LABEL, IPM_STATUS_COLOR } from "@/lib/corregedoria/constants";
+import type { Ipm, IpmStatus, Indiciado, Enquadramento, Vinculacao, VersaoDocumento } from "@/lib/corregedoria/types";
+
+interface IpmFormData {
+  numero_ipm: string;
+  data_instauracao: string;
+  unidade: string;
+  status: IpmStatus;
+  encarregado_nome: string;
+  encarregado_posto: string;
+  autoridade_nome: string;
+  autoridade_posto: string;
+  fundamentacao: string;
+  artigos_cpm: string;
+  artigos_rdpm: string;
+  relatorio_fatos: string;
+  conclusao_parcial: string;
+  indiciados: Indiciado[];
+  enquadramentos: Enquadramento[];
+}
+
+const defaultForm: IpmFormData = {
+  numero_ipm: "",
+  data_instauracao: format(new Date(), "yyyy-MM-dd"),
+  unidade: "",
+  status: "em_andamento",
+  encarregado_nome: "",
+  encarregado_posto: "",
+  autoridade_nome: "",
+  autoridade_posto: "",
+  fundamentacao: "",
+  artigos_cpm: "",
+  artigos_rdpm: "",
+  relatorio_fatos: "",
+  conclusao_parcial: "",
+  indiciados: [],
+  enquadramentos: [],
+};
+
+const PORTARIA_TEMPLATE = (data: IpmFormData) => `PORTARIA DE INSTAURAÇÃO
+
+O ${data.autoridade_nome || "CORREGEDOR DA POLÍCIA MILITAR"}, ${data.autoridade_posto || "Corregedor da Polícia Militar do Estado de São Paulo"}, no uso de suas atribuições legais e regulamentares, especialmente nos termos do Código de Processo Penal Militar,
+
+CONSIDERANDO a necessidade de apuração dos fatos ocorridos envolvendo o(s) policial(is) militar(es) indiciado(s), que, em tese, configuram infrações penais militares;
+
+RESOLVE:
+
+Art. 1º Instaurar o presente INQUÉRITO POLICIAL MILITAR com a finalidade de apurar possível prática das infrações previstas nos artigos ${data.artigos_cpm || "do CPM"} e ${data.artigos_rdpm || "do RDPM"}.
+
+Art. 2º Designar como Encarregado do IPM o(a) ${data.encarregado_posto} ${data.encarregado_nome}, que deverá conduzir os trabalhos na forma da lei.
+
+Art. 3º Esta Portaria entra em vigor na data de sua publicação.
+
+Publique-se. Registre-se. Cumpra-se.`;
+
+function generateIpmDoc(data: IpmFormData): string {
+  const dataEmissao = format(new Date(data.data_instauracao), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+  const indiciadosStr = data.indiciados.map((i, idx) =>
+    `${idx + 1}. ${i.posto_graduacao} ${i.nome} – RG PM nº ${i.rg_pm} – ${i.unidade}`
+  ).join("\n");
+
+  const enquadramentosStr = data.enquadramentos.map(e =>
+    `  - Indiciado: ${e.indiciado_nome}\n    CPM: ${e.artigos_cpm}\n    CPPM: ${e.artigos_cppm}\n    RDPM: ${e.artigos_rdpm}\n    Obs: ${e.observacoes}`
+  ).join("\n\n");
+
+  return [
+    `POLÍCIA MILITAR DO ESTADO DE SÃO PAULO`,
+    `CORREGEDORIA DA POLÍCIA MILITAR`,
+    `INQUÉRITO POLICIAL MILITAR – IPM nº ${data.numero_ipm}`,
+    ``,
+    `─`.repeat(60),
+    ``,
+    `IPM nº ${data.numero_ipm}`,
+    `Encarregado: ${data.encarregado_posto} ${data.encarregado_nome}`,
+    `Unidade: ${data.unidade}`,
+    `Data de Instauração: ${dataEmissao}`,
+    ``,
+    `Indiciado(s):`,
+    indiciadosStr || `  Nenhum indiciado cadastrado.`,
+    ``,
+    `─`.repeat(60),
+    ``,
+    `PORTARIA DE INSTAURAÇÃO`,
+    ``,
+    PORTARIA_TEMPLATE(data),
+    ``,
+    `─`.repeat(60),
+    ``,
+    `RELATÓRIO DOS FATOS`,
+    ``,
+    data.relatorio_fatos || `(Aguardando relatório)`,
+    ``,
+    `─`.repeat(60),
+    ``,
+    `ENQUADRAMENTO LEGAL`,
+    ``,
+    enquadramentosStr || `(Nenhum enquadramento registrado)`,
+    ``,
+    `─`.repeat(60),
+    ``,
+    `CONCLUSÃO PARCIAL`,
+    ``,
+    data.conclusao_parcial || `(Aguardando conclusão)`,
+    ``,
+    `─`.repeat(60),
+    ``,
+    `São Paulo, ${dataEmissao}.`,
+    ``,
+    `____________________________________`,
+    `${data.autoridade_nome || "Corregedor da Polícia Militar"}`,
+    `${data.autoridade_posto || "Corregedor da Polícia Militar do Estado de São Paulo"}`,
+    ``,
+    `Documento gerado eletronicamente – ID único: ${crypto.randomUUID?.() || Date.now().toString(36)}`,
+  ].join("\n");
+}
+
+export function IpmTab() {
+  const { user, isAdmin } = useAuth();
+  const canDelete = isAdmin;
+  const canEdit = !!(user && (isAdmin || user.role === "corregedor"));
+  const canCreate = canEdit;
+
+  const [loading, setLoading] = useState(true);
+  const [ipms, setIpms] = useState<Ipm[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState<string>("todos");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const [form, setForm] = useState<IpmFormData>(defaultForm);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [docPreviewOpen, setDocPreviewOpen] = useState(false);
+  const [docPreviewContent, setDocPreviewContent] = useState("");
+
+  const [indiciadoForm, setIndiciadoForm] = useState<Indiciado>({ id: "", nome: "", posto_graduacao: "", rg_pm: "", unidade: "" });
+  const [indiciadoDialogOpen, setIndiciadoDialogOpen] = useState(false);
+  const [editingIndiciadoIdx, setEditingIndiciadoIdx] = useState<number | null>(null);
+
+  const [enquadramentoForm, setEnquadramentoForm] = useState<Enquadramento>({ id: "", indiciado_nome: "", artigos_cpm: "", artigos_cppm: "", artigos_rdpm: "", observacoes: "" });
+  const [enquadramentoDialogOpen, setEnquadramentoDialogOpen] = useState(false);
+  const [editingEnqIdx, setEditingEnqIdx] = useState<number | null>(null);
+
+  const [vinculacaoDialogOpen, setVinculacaoDialogOpen] = useState(false);
+  const [vinculacaoTipo, setVinculacaoTipo] = useState<Vinculacao["tipo"]>("afastamento");
+  const [vinculacaoDescricao, setVinculacaoDescricao] = useState("");
+
+  const loadIpms = async () => {
+    const { data, error } = await supabase.from("ipm").select("*").order("created_at", { ascending: false });
+    if (error) { toast.error("Erro ao carregar IPMs"); return; }
+    setIpms(data || []);
+  };
+
+  useEffect(() => {
+    const init = async () => {
+      setLoading(true);
+      await loadIpms();
+      setLoading(false);
+    };
+    init();
+  }, []);
+
+  const resetForm = () => {
+    setForm({
+      ...defaultForm,
+      data_instauracao: format(new Date(), "yyyy-MM-dd"),
+      autoridade_nome: user?.user_metadata?.full_name || "",
+    });
+    setEditingId(null);
+  };
+
+  const parseJson = (val: any, def: any = []) => {
+    if (!val) return def;
+    try { return typeof val === "string" ? JSON.parse(val) : val; } catch { return def; }
+  };
+
+  const formToInsert = (f: IpmFormData) => ({
+    numero_ipm: f.numero_ipm,
+    data_instauracao: f.data_instauracao,
+    unidade: f.unidade,
+    status: f.status,
+    encarregado_nome: f.encarregado_nome,
+    encarregado_posto: f.encarregado_posto,
+    autoridade_nome: f.autoridade_nome,
+    autoridade_posto: f.autoridade_posto,
+    fundamentacao: f.fundamentacao,
+    artigos_cpm: f.artigos_cpm,
+    artigos_rdpm: f.artigos_rdpm,
+    relatorio_fatos: f.relatorio_fatos,
+    conclusao_parcial: f.conclusao_parcial,
+    indiciados: f.indiciados,
+    enquadramentos: f.enquadramentos,
+    autor_id: user?.id || null,
+    autor_nome: user?.user_metadata?.full_name || f.autoridade_nome,
+  });
+
+  const createIpm = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!canCreate) return;
+    setSubmitting(true);
+    const { error } = await supabase.from("ipm").insert(formToInsert(form));
+    if (error) toast.error("Erro: " + error.message);
+    else { toast.success("IPM criado!"); setDialogOpen(false); resetForm(); logAudit("create", "ipm", {}); await loadIpms(); }
+    setSubmitting(false);
+  };
+
+  const updateIpm = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!canEdit || !editingId) return;
+    setSubmitting(true);
+    const existing = ipms.find(x => x.id === editingId);
+    const data = formToInsert(form);
+    let versoes: VersaoDocumento[] = parseJson(existing?.historico_versoes);
+    versoes.unshift({
+      id: crypto.randomUUID?.() || Date.now().toString(),
+      data: new Date().toISOString(),
+      autor: user?.user_metadata?.full_name || form.autoridade_nome,
+      documento: existing?.relatorio_fatos || "",
+      alteracoes: "Atualização do IPM",
+    });
+    data.historico_versoes = versoes;
+    delete (data as any).autor_id;
+    delete (data as any).autor_nome;
+    const { error } = await supabase.from("ipm").update(data).eq("id", editingId);
+    if (error) toast.error("Erro: " + error.message);
+    else { toast.success("IPM atualizado!"); setEditDialogOpen(false); setEditingId(null); resetForm(); logAudit("update", "ipm", {}); await loadIpms(); }
+    setSubmitting(false);
+  };
+
+  const deleteIpm = async (id: string) => {
+    if (!canDelete) { toast.error("Apenas admin pode excluir."); return; }
+    const { error } = await supabase.from("ipm").delete().eq("id", id);
+    if (error) toast.error("Erro: " + error.message);
+    else { toast.success("IPM excluído!"); logAudit("delete", "ipm", {}); await loadIpms(); }
+    setDeleteConfirmId(null);
+  };
+
+  const updateStatus = async (id: string, status: IpmStatus) => {
+    const existing = ipms.find(x => x.id === id);
+    let versoes: VersaoDocumento[] = parseJson(existing?.historico_versoes);
+    versoes.unshift({ id: crypto.randomUUID?.() || Date.now().toString(), data: new Date().toISOString(), autor: user?.user_metadata?.full_name || "Sistema", documento: "", alteracoes: `Status: ${IPM_STATUS_LABEL[existing?.status || "em_andamento"]} → ${IPM_STATUS_LABEL[status]}`, tipo: "status" });
+    const { error } = await supabase.from("ipm").update({ status, historico_versoes: versoes }).eq("id", id);
+    if (error) toast.error("Erro ao atualizar status");
+    else { toast.success("Status atualizado!"); await loadIpms(); }
+  };
+
+  const duplicateIpm = async (ipm: Ipm) => {
+    if (!canCreate) return;
+    const { error } = await supabase.from("ipm").insert({
+      ...formToInsert({
+        numero_ipm: ipm.numero_ipm + "-copia",
+        data_instauracao: format(new Date(), "yyyy-MM-dd"),
+        unidade: ipm.unidade,
+        status: "em_andamento",
+        encarregado_nome: ipm.encarregado_nome,
+        encarregado_posto: ipm.encarregado_posto,
+        autoridade_nome: ipm.autoridade_nome,
+        autoridade_posto: ipm.autoridade_posto,
+        fundamentacao: ipm.fundamentacao,
+        artigos_cpm: ipm.artigos_cpm,
+        artigos_rdpm: ipm.artigos_rdpm,
+        relatorio_fatos: ipm.relatorio_fatos,
+        conclusao_parcial: ipm.conclusao_parcial,
+        indiciados: parseJson(ipm.indiciados),
+        enquadramentos: parseJson(ipm.enquadramentos),
+      }),
+      autor_id: user?.id || null,
+      autor_nome: user?.user_metadata?.full_name || ipm.autoridade_nome,
+    });
+    if (error) toast.error("Erro ao duplicar: " + error.message);
+    else { toast.success("IPM duplicado!"); await loadIpms(); }
+  };
+
+  const openDocPreview = (data: IpmFormData) => {
+    setDocPreviewContent(generateIpmDoc(data));
+    setDocPreviewOpen(true);
+  };
+
+  const editIpm = (ipm: Ipm) => {
+    setForm({
+      numero_ipm: ipm.numero_ipm,
+      data_instauracao: ipm.data_instauracao,
+      unidade: ipm.unidade,
+      status: ipm.status,
+      encarregado_nome: ipm.encarregado_nome,
+      encarregado_posto: ipm.encarregado_posto,
+      autoridade_nome: ipm.autoridade_nome,
+      autoridade_posto: ipm.autoridade_posto,
+      fundamentacao: ipm.fundamentacao,
+      artigos_cpm: ipm.artigos_cpm,
+      artigos_rdpm: ipm.artigos_rdpm,
+      relatorio_fatos: ipm.relatorio_fatos,
+      conclusao_parcial: ipm.conclusao_parcial,
+      indiciados: parseJson(ipm.indiciados),
+      enquadramentos: parseJson(ipm.enquadramentos),
+    });
+    setEditingId(ipm.id);
+    setEditDialogOpen(true);
+  };
+
+  const addIndiciado = () => {
+    if (editingIndiciadoIdx !== null) {
+      const updated = [...form.indiciados];
+      updated[editingIndiciadoIdx] = { ...indiciadoForm, id: indiciadoForm.id || crypto.randomUUID?.() || Date.now().toString() };
+      setForm(f => ({ ...f, indiciados: updated }));
+    } else {
+      setForm(f => ({ ...f, indiciados: [...f.indiciados, { ...indiciadoForm, id: crypto.randomUUID?.() || Date.now().toString() }] }));
+    }
+    setIndiciadoDialogOpen(false);
+    setIndiciadoForm({ id: "", nome: "", posto_graduacao: "", rg_pm: "", unidade: "" });
+    setEditingIndiciadoIdx(null);
+  };
+
+  const addEnquadramento = () => {
+    if (editingEnqIdx !== null) {
+      const updated = [...form.enquadramentos];
+      updated[editingEnqIdx] = { ...enquadramentoForm, id: enquadramentoForm.id || crypto.randomUUID?.() || Date.now().toString() };
+      setForm(f => ({ ...f, enquadramentos: updated }));
+    } else {
+      setForm(f => ({ ...f, enquadramentos: [...f.enquadramentos, { ...enquadramentoForm, id: crypto.randomUUID?.() || Date.now().toString() }] }));
+    }
+    setEnquadramentoDialogOpen(false);
+    setEnquadramentoForm({ id: "", indiciado_nome: "", artigos_cpm: "", artigos_cppm: "", artigos_rdpm: "", observacoes: "" });
+    setEditingEnqIdx(null);
+  };
+
+  const addVinculacao = () => {
+    if (!vinculacaoDescricao.trim()) { toast.error("Informe a descrição"); return; }
+    setForm(f => ({ ...f, vinculacoes: [...(f as any).vinculacoes || [], { tipo: vinculacaoTipo, id: crypto.randomUUID?.() || Date.now().toString(), descricao: vinculacaoDescricao }] }));
+    setVinculacaoDescricao("");
+    toast.success("Vinculação adicionada!");
+  };
+
+  const printDoc = (content: string) => {
+    const win = window.open("", "_blank");
+    if (!win) return;
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>IPM</title><style>
+      @page{margin:2.5cm 2cm}
+      *{margin:0;padding:0;box-sizing:border-box}
+      body{font-family:'Times New Roman',Times,serif;font-size:12pt;line-height:1.6;color:#000}
+      .header{text-align:center;margin-bottom:30px;border-bottom:2px solid #000;padding-bottom:20px}
+      .header .title{font-size:14pt;font-weight:bold;text-transform:uppercase;letter-spacing:2px}
+      .header .sub{font-size:11pt;text-transform:uppercase;margin-top:4px}
+      pre{font-family:'Times New Roman',Times,serif;white-space:pre-wrap;font-size:12pt;line-height:1.8}
+      .footer-note{text-align:center;font-size:8pt;color:#666;margin-top:30px;border-top:1px solid #ccc;padding-top:10px}
+      @media print{body{padding:0}}
+    </style></head><body>
+    <div class="header">
+      <div class="title">Polícia Militar do Estado de São Paulo</div>
+      <div class="sub">Corregedoria da Polícia Militar</div>
+    </div>
+    <pre>${content}</pre>
+    <div class="footer-note">Documento gerado eletronicamente - Corregedoria Geral PMESP</div>
+    </body></html>`);
+    win.document.close();
+    setTimeout(() => win.print(), 500);
+  };
+
+  const filteredIpms = ipms.filter(ipm => {
+    const indiciados = parseJson(ipm.indiciados) as Indiciado[];
+    const matchesSearch = !searchTerm ||
+      ipm.numero_ipm.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      ipm.unidade.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      ipm.encarregado_nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      indiciados.some(i => i.nome?.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesFilter = filterStatus === "todos" || ipm.status === filterStatus;
+    return matchesSearch && matchesFilter;
+  });
+
+  const renderForm = (isEdit: boolean) => (
+    <div className="space-y-6">
+      {/* DADOS GERAIS */}
+      <section className="border border-border rounded-lg overflow-hidden">
+        <div className="bg-muted/50 px-4 py-3 border-b border-border">
+          <h3 className="font-bold text-sm uppercase tracking-wider flex items-center gap-2"><FileSearch className="h-4 w-4" /> DADOS GERAIS DO IPM</h3>
+        </div>
+        <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div>
+            <Label className="text-xs font-semibold">Número do IPM *</Label>
+            <Input value={form.numero_ipm} onChange={e => setForm(f => ({ ...f, numero_ipm: e.target.value }))} placeholder="Ex: 001" required />
+          </div>
+          <div>
+            <Label className="text-xs font-semibold">Data de Instauração *</Label>
+            <Input type="date" value={form.data_instauracao} onChange={e => setForm(f => ({ ...f, data_instauracao: e.target.value }))} required />
+          </div>
+          <div>
+            <Label className="text-xs font-semibold">Unidade *</Label>
+            <Input value={form.unidade} onChange={e => setForm(f => ({ ...f, unidade: e.target.value }))} placeholder="Unidade" required />
+          </div>
+          <div>
+            <Label className="text-xs font-semibold">Status</Label>
+            <Select value={form.status} onValueChange={v => setForm(f => ({ ...f, status: v as IpmStatus }))}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {(["em_andamento", "concluido", "arquivado"] as const).map(s => (
+                  <SelectItem key={s} value={s}>{IPM_STATUS_LABEL[s]}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </section>
+
+      {/* ENCARREGADO */}
+      <section className="border border-border rounded-lg overflow-hidden">
+        <div className="bg-muted/50 px-4 py-3 border-b border-border">
+          <h3 className="font-bold text-sm uppercase tracking-wider flex items-center gap-2"><UserCheck className="h-4 w-4" /> ENCARREGADO DO IPM</h3>
+        </div>
+        <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label className="text-xs font-semibold">Nome Completo *</Label>
+            <Input value={form.encarregado_nome} onChange={e => setForm(f => ({ ...f, encarregado_nome: e.target.value }))} placeholder="Nome do Encarregado" required />
+          </div>
+          <div>
+            <Label className="text-xs font-semibold">Posto/Graduação *</Label>
+            <Input value={form.encarregado_posto} onChange={e => setForm(f => ({ ...f, encarregado_posto: e.target.value }))} placeholder="Ex: Cel PM" required />
+          </div>
+        </div>
+      </section>
+
+      {/* INDICIADOS */}
+      <section className="border border-border rounded-lg overflow-hidden">
+        <div className="bg-muted/50 px-4 py-3 border-b border-border flex items-center justify-between">
+          <h3 className="font-bold text-sm uppercase tracking-wider flex items-center gap-2"><Gavel className="h-4 w-4" /> INDICIADOS</h3>
+          <Button type="button" variant="outline" size="sm" onClick={() => { setIndiciadoForm({ id: "", nome: "", posto_graduacao: "", rg_pm: "", unidade: "" }); setEditingIndiciadoIdx(null); setIndiciadoDialogOpen(true); }} className="gap-1"><Plus className="h-3 w-3" /> Adicionar</Button>
+        </div>
+        <div className="p-4">
+          {form.indiciados.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">Nenhum indiciado cadastrado.</p>
+          ) : (
+            <div className="space-y-2">
+              {form.indiciados.map((ind, idx) => (
+                <div key={ind.id} className="flex items-center justify-between bg-muted/30 rounded-lg px-4 py-3 border border-border">
+                  <div>
+                    <p className="text-sm font-medium">{ind.posto_graduacao} {ind.nome}</p>
+                    <p className="text-xs text-muted-foreground">RG PM: {ind.rg_pm} • {ind.unidade}</p>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setIndiciadoForm(ind); setEditingIndiciadoIdx(idx); setIndiciadoDialogOpen(true); }}><Edit className="h-3 w-3" /></Button>
+                    <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => setForm(f => ({ ...f, indiciados: f.indiciados.filter((_, i) => i !== idx) }))}><Trash2 className="h-3 w-3" /></Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* PORTARIA DE INSTAURAÇÃO */}
+      <section className="border border-border rounded-lg overflow-hidden">
+        <div className="bg-muted/50 px-4 py-3 border-b border-border">
+          <h3 className="font-bold text-sm uppercase tracking-wider flex items-center gap-2"><FileSignature className="h-4 w-4" /> PORTARIA DE INSTAURAÇÃO</h3>
+        </div>
+        <div className="p-4 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label className="text-xs font-semibold">Autoridade Instauradora *</Label>
+              <Input value={form.autoridade_nome} onChange={e => setForm(f => ({ ...f, autoridade_nome: e.target.value }))} placeholder="Nome da autoridade" required />
+            </div>
+            <div>
+              <Label className="text-xs font-semibold">Posto/Graduação da Autoridade *</Label>
+              <Input value={form.autoridade_posto} onChange={e => setForm(f => ({ ...f, autoridade_posto: e.target.value }))} placeholder="Ex: Cel PM" required />
+            </div>
+          </div>
+          <div>
+            <Label className="text-xs font-semibold">Fundamentação</Label>
+            <Textarea value={form.fundamentacao} onChange={e => setForm(f => ({ ...f, fundamentacao: e.target.value }))} placeholder="Fundamentação legal..." className="min-h-[60px]" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label className="text-xs font-semibold">Artigos do CPM</Label>
+              <Input value={form.artigos_cpm} onChange={e => setForm(f => ({ ...f, artigos_cpm: e.target.value }))} placeholder="Ex: Art. 187, 188" />
+            </div>
+            <div>
+              <Label className="text-xs font-semibold">Artigos do RDPM</Label>
+              <Input value={form.artigos_rdpm} onChange={e => setForm(f => ({ ...f, artigos_rdpm: e.target.value }))} placeholder="Ex: Art. 12, 15" />
+            </div>
+          </div>
+          <div className="bg-muted/20 border border-border rounded-lg p-4">
+            <p className="text-xs font-semibold text-muted-foreground mb-2">PRÉ-VISUALIZAÇÃO DA PORTARIA</p>
+            <pre className="text-xs font-mono whitespace-pre-wrap leading-relaxed text-muted-foreground">{PORTARIA_TEMPLATE(form)}</pre>
+          </div>
+        </div>
+      </section>
+
+      {/* RELATÓRIO DOS FATOS */}
+      <section className="border border-border rounded-lg overflow-hidden">
+        <div className="bg-muted/50 px-4 py-3 border-b border-border">
+          <h3 className="font-bold text-sm uppercase tracking-wider flex items-center gap-2"><FileText className="h-4 w-4" /> RELATÓRIO DOS FATOS</h3>
+        </div>
+        <div className="p-4">
+          <Textarea value={form.relatorio_fatos} onChange={e => setForm(f => ({ ...f, relatorio_fatos: e.target.value }))} placeholder="Descreva detalhadamente os fatos apurados..." className="min-h-[200px]" />
+        </div>
+      </section>
+
+      {/* ENQUADRAMENTO LEGAL */}
+      <section className="border border-border rounded-lg overflow-hidden">
+        <div className="bg-muted/50 px-4 py-3 border-b border-border flex items-center justify-between">
+          <h3 className="font-bold text-sm uppercase tracking-wider flex items-center gap-2"><Scale className="h-4 w-4" /> ENQUADRAMENTO LEGAL</h3>
+          <Button type="button" variant="outline" size="sm" onClick={() => { setEnquadramentoForm({ id: "", indiciado_nome: "", artigos_cpm: "", artigos_cppm: "", artigos_rdpm: "", observacoes: "" }); setEditingEnqIdx(null); setEnquadramentoDialogOpen(true); }} className="gap-1"><Plus className="h-3 w-3" /> Adicionar</Button>
+        </div>
+        <div className="p-4">
+          {form.enquadramentos.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">Nenhum enquadramento legal registrado.</p>
+          ) : (
+            <div className="space-y-2">
+              {form.enquadramentos.map((enq, idx) => (
+                <div key={enq.id} className="bg-muted/30 rounded-lg px-4 py-3 border border-border">
+                  <div className="flex items-start justify-between">
+                    <div className="text-sm">
+                      <p className="font-medium">{enq.indiciado_nome}</p>
+                      <p className="text-xs text-muted-foreground mt-1">CPM: {enq.artigos_cpm} | CPPM: {enq.artigos_cppm} | RDPM: {enq.artigos_rdpm}</p>
+                      {enq.observacoes && <p className="text-xs text-muted-foreground mt-1">{enq.observacoes}</p>}
+                    </div>
+                    <div className="flex gap-1 shrink-0">
+                      <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setEnquadramentoForm(enq); setEditingEnqIdx(idx); setEnquadramentoDialogOpen(true); }}><Edit className="h-3 w-3" /></Button>
+                      <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => setForm(f => ({ ...f, enquadramentos: f.enquadramentos.filter((_, i) => i !== idx) }))}><Trash2 className="h-3 w-3" /></Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* CONCLUSÃO PARCIAL */}
+      <section className="border border-border rounded-lg overflow-hidden">
+        <div className="bg-muted/50 px-4 py-3 border-b border-border">
+          <h3 className="font-bold text-sm uppercase tracking-wider flex items-center gap-2"><ArrowRight className="h-4 w-4" /> CONCLUSÃO PARCIAL</h3>
+        </div>
+        <div className="p-4">
+          <Textarea value={form.conclusao_parcial} onChange={e => setForm(f => ({ ...f, conclusao_parcial: e.target.value }))} placeholder="Conclusão parcial do inquérito..." className="min-h-[150px]" />
+        </div>
+      </section>
+
+      {/* AÇÕES */}
+      <div className="flex justify-end gap-2 pt-2 border-t border-border">
+        <Button type="button" variant="outline" onClick={() => openDocPreview(form)} className="gap-2"><Eye className="h-4 w-4" /> Visualizar Documento</Button>
+        <Button type="submit" disabled={submitting} className="gap-2">
+          {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSignature className="h-4 w-4" />}
+          {submitting ? "Salvando..." : (isEdit ? "Salvar Alterações" : "Criar IPM")}
+        </Button>
+      </div>
+    </div>
+  );
+
+  if (loading) {
+    return <div className="p-4 space-y-4"><Skeleton className="h-10 w-60" /><Skeleton className="h-48" /></div>;
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between border-b border-border pb-3">
+        <h2 className="text-lg font-bold uppercase tracking-wider flex items-center gap-2">
+          <Gavel className="h-5 w-5" /> Inquéritos Policiais Militares
+        </h2>
+        <div className="flex items-center gap-3">
+          <div className="relative w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input placeholder="Buscar IPM, unidade, encarregado, indiciado..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-9 h-8 text-xs" />
+            {searchTerm && <X className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 cursor-pointer text-muted-foreground" onClick={() => setSearchTerm("")} />}
+          </div>
+          <Select value={filterStatus} onValueChange={setFilterStatus}>
+            <SelectTrigger className="w-[140px] h-8 text-xs"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos</SelectItem>
+              {(["em_andamento", "concluido", "arquivado"] as const).map(s => (
+                <SelectItem key={s} value={s}>{IPM_STATUS_LABEL[s]}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {canCreate && (
+            <Button onClick={() => { resetForm(); setDialogOpen(true); }} size="sm" className="gap-1 text-xs">
+              <Plus className="h-3 w-3" /> Novo IPM
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {filteredIpms.length === 0 ? (
+        <div className="text-center py-12 text-muted-foreground">
+          <FileText className="h-12 w-12 mx-auto mb-3 opacity-40" />
+          <p>Nenhum IPM encontrado.</p>
+          {canCreate && <Button variant="outline" onClick={() => { resetForm(); setDialogOpen(true); }} className="mt-3 gap-2"><Plus className="h-4 w-4" /> Criar primeiro IPM</Button>}
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {filteredIpms.map(ipm => {
+            const indiciados = parseJson(ipm.indiciados) as Indiciado[];
+            const enquadramentos = parseJson(ipm.enquadramentos) as Enquadramento[];
+            const isExpanded = expandedId === ipm.id;
+            return (
+              <div key={ipm.id} className="bg-card border border-border rounded-lg overflow-hidden">
+                <div className="p-4 flex items-start justify-between cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => setExpandedId(isExpanded ? null : ipm.id)}>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge variant="outline" className={IPM_STATUS_COLOR[ipm.status]}>{IPM_STATUS_LABEL[ipm.status]}</Badge>
+                      <span className="text-xs font-mono font-bold text-primary">IPM nº {ipm.numero_ipm}</span>
+                    </div>
+                    <p className="text-sm font-semibold">Encarregado: {ipm.encarregado_posto} {ipm.encarregado_nome}</p>
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground mt-1">
+                      <span>Unidade: {ipm.unidade}</span>
+                      <span>Instauração: {format(new Date(ipm.data_instauracao), "dd/MM/yyyy")}</span>
+                      <span>Indiciados: {indiciados.length}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0 ml-4">
+                    {canEdit && <Button variant="ghost" size="icon" className="h-8 w-8" title="Editar" onClick={e => { e.stopPropagation(); editIpm(ipm); }}><Edit className="h-4 w-4" /></Button>}
+                    {canCreate && <Button variant="ghost" size="icon" className="h-8 w-8" title="Duplicar" onClick={e => { e.stopPropagation(); duplicateIpm(ipm); }}><Copy className="h-4 w-4" /></Button>}
+                    <Button variant="ghost" size="icon" className="h-8 w-8" title="Documento" onClick={e => {
+                      e.stopPropagation();
+                      openDocPreview({
+                        numero_ipm: ipm.numero_ipm,
+                        data_instauracao: ipm.data_instauracao,
+                        unidade: ipm.unidade,
+                        status: ipm.status,
+                        encarregado_nome: ipm.encarregado_nome,
+                        encarregado_posto: ipm.encarregado_posto,
+                        autoridade_nome: ipm.autoridade_nome,
+                        autoridade_posto: ipm.autoridade_posto,
+                        fundamentacao: ipm.fundamentacao,
+                        artigos_cpm: ipm.artigos_cpm,
+                        artigos_rdpm: ipm.artigos_rdpm,
+                        relatorio_fatos: ipm.relatorio_fatos,
+                        conclusao_parcial: ipm.conclusao_parcial,
+                        indiciados,
+                        enquadramentos,
+                      });
+                    }}><Eye className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" title="Histórico" onClick={e => { e.stopPropagation(); /* open history */ toast.info("Histórico disponível ao editar"); }}><History className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" title="Imprimir" onClick={e => {
+                      e.stopPropagation();
+                      printDoc(generateIpmDoc({
+                        numero_ipm: ipm.numero_ipm,
+                        data_instauracao: ipm.data_instauracao,
+                        unidade: ipm.unidade,
+                        status: ipm.status,
+                        encarregado_nome: ipm.encarregado_nome,
+                        encarregado_posto: ipm.encarregado_posto,
+                        autoridade_nome: ipm.autoridade_nome,
+                        autoridade_posto: ipm.autoridade_posto,
+                        fundamentacao: ipm.fundamentacao,
+                        artigos_cpm: ipm.artigos_cpm,
+                        artigos_rdpm: ipm.artigos_rdpm,
+                        relatorio_fatos: ipm.relatorio_fatos,
+                        conclusao_parcial: ipm.conclusao_parcial,
+                        indiciados,
+                        enquadramentos,
+                      }));
+                    }}><Printer className="h-4 w-4" /></Button>
+                    {canDelete && <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" title="Excluir" onClick={e => { e.stopPropagation(); setDeleteConfirmId(ipm.id); }}><Trash2 className="h-4 w-4" /></Button>}
+                    <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? "rotate-90" : ""}`} />
+                  </div>
+                </div>
+                {isExpanded && (
+                  <div className="border-t border-border p-4 bg-muted/20 space-y-4">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <div><p className="text-[10px] font-bold uppercase text-muted-foreground">IPM</p><p className="text-sm font-medium">IPM nº {ipm.numero_ipm}</p></div>
+                      <div><p className="text-[10px] font-bold uppercase text-muted-foreground">Encarregado</p><p className="text-sm font-medium">{ipm.encarregado_posto} {ipm.encarregado_nome}</p></div>
+                      <div><p className="text-[10px] font-bold uppercase text-muted-foreground">Data</p><p className="text-sm font-medium">{format(new Date(ipm.data_instauracao), "dd/MM/yyyy")}</p></div>
+                      <div><p className="text-[10px] font-bold uppercase text-muted-foreground">Unidade</p><p className="text-sm font-medium">{ipm.unidade}</p></div>
+                    </div>
+
+                    {indiciados.length > 0 && (
+                      <div>
+                        <h5 className="text-xs font-bold uppercase text-muted-foreground mb-2">Indiciados</h5>
+                        <div className="space-y-1">
+                          {indiciados.map(ind => (
+                            <div key={ind.id} className="text-xs p-2 bg-muted/30 rounded flex items-center gap-3 border border-border">
+                              <Gavel className="h-3 w-3 text-muted-foreground shrink-0" />
+                              <span className="font-medium">{ind.posto_graduacao} {ind.nome}</span>
+                              <span className="text-muted-foreground">RG: {ind.rg_pm}</span>
+                              <span className="text-muted-foreground">{ind.unidade}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <h5 className="text-xs font-bold uppercase text-muted-foreground mb-1">Portaria de Instauração</h5>
+                        <pre className="text-xs font-mono bg-muted p-3 rounded-lg whitespace-pre-wrap border border-border max-h-40 overflow-y-auto">{PORTARIA_TEMPLATE({
+                          numero_ipm: ipm.numero_ipm,
+                          data_instauracao: ipm.data_instauracao,
+                          unidade: ipm.unidade,
+                          status: ipm.status,
+                          encarregado_nome: ipm.encarregado_nome,
+                          encarregado_posto: ipm.encarregado_posto,
+                          autoridade_nome: ipm.autoridade_nome,
+                          autoridade_posto: ipm.autoridade_posto,
+                          fundamentacao: ipm.fundamentacao,
+                          artigos_cpm: ipm.artigos_cpm,
+                          artigos_rdpm: ipm.artigos_rdpm,
+                          relatorio_fatos: ipm.relatorio_fatos,
+                          conclusao_parcial: ipm.conclusao_parcial,
+                          indiciados,
+                          enquadramentos,
+                        })}</pre>
+                      </div>
+                      <div>
+                        <h5 className="text-xs font-bold uppercase text-muted-foreground mb-1">Conclusão</h5>
+                        <pre className="text-xs font-mono bg-muted p-3 rounded-lg whitespace-pre-wrap border border-border max-h-40 overflow-y-auto">{ipm.conclusao_parcial || "(Aguardando conclusão)"}</pre>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Select value={ipm.status} onValueChange={v => updateStatus(ipm.id, v as IpmStatus)}>
+                        <SelectTrigger className="w-[160px] h-8 text-xs"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {(["em_andamento", "concluido", "arquivado"] as const).map(s => (
+                            <SelectItem key={s} value={s}>{IPM_STATUS_LABEL[s]}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Create Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><Gavel className="h-5 w-5" /> Novo IPM</DialogTitle><DialogDescription>Preencha os dados para instaurar o Inquérito Policial Militar.</DialogDescription></DialogHeader>
+          <form onSubmit={createIpm}>{renderForm(false)}</form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><Edit className="h-5 w-5" /> Editar IPM</DialogTitle><DialogDescription>Altere os dados do IPM. Versões anteriores serão preservadas.</DialogDescription></DialogHeader>
+          <form onSubmit={updateIpm}>{renderForm(true)}</form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Indiciado Dialog */}
+      <Dialog open={indiciadoDialogOpen} onOpenChange={setIndiciadoDialogOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>{editingIndiciadoIdx !== null ? "Editar" : "Adicionar"} Indiciado</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <div><Label className="text-xs">Nome Completo</Label><Input value={indiciadoForm.nome} onChange={e => setIndiciadoForm(f => ({ ...f, nome: e.target.value }))} /></div>
+            <div><Label className="text-xs">Posto/Graduação</Label><Input value={indiciadoForm.posto_graduacao} onChange={e => setIndiciadoForm(f => ({ ...f, posto_graduacao: e.target.value }))} /></div>
+            <div><Label className="text-xs">RG PM</Label><Input value={indiciadoForm.rg_pm} onChange={e => setIndiciadoForm(f => ({ ...f, rg_pm: e.target.value }))} /></div>
+            <div><Label className="text-xs">Unidade</Label><Input value={indiciadoForm.unidade} onChange={e => setIndiciadoForm(f => ({ ...f, unidade: e.target.value }))} /></div>
+            <Button onClick={addIndiciado} className="w-full">Salvar</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Enquadramento Dialog */}
+      <Dialog open={enquadramentoDialogOpen} onOpenChange={setEnquadramentoDialogOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>{editingEnqIdx !== null ? "Editar" : "Adicionar"} Enquadramento Legal</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <div><Label className="text-xs">Nome do Indiciado</Label><Input value={enquadramentoForm.indiciado_nome} onChange={e => setEnquadramentoForm(f => ({ ...f, indiciado_nome: e.target.value }))} /></div>
+            <div><Label className="text-xs">Artigos do CPM</Label><Input value={enquadramentoForm.artigos_cpm} onChange={e => setEnquadramentoForm(f => ({ ...f, artigos_cpm: e.target.value }))} /></div>
+            <div><Label className="text-xs">Artigos do CPPM</Label><Input value={enquadramentoForm.artigos_cppm} onChange={e => setEnquadramentoForm(f => ({ ...f, artigos_cppm: e.target.value }))} /></div>
+            <div><Label className="text-xs">Artigos do RDPM</Label><Input value={enquadramentoForm.artigos_rdpm} onChange={e => setEnquadramentoForm(f => ({ ...f, artigos_rdpm: e.target.value }))} /></div>
+            <div><Label className="text-xs">Observações</Label><Textarea value={enquadramentoForm.observacoes} onChange={e => setEnquadramentoForm(f => ({ ...f, observacoes: e.target.value }))} /></div>
+            <Button onClick={addEnquadramento} className="w-full">Salvar</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Document Preview Dialog */}
+      <Dialog open={docPreviewOpen} onOpenChange={setDocPreviewOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><Eye className="h-5 w-5" /> Documento do IPM</DialogTitle></DialogHeader>
+          <div className="bg-white text-black rounded-lg p-6" id="ipm-document">
+            <pre className="font-['Times_New_Roman',Times,serif] text-sm whitespace-pre-wrap leading-relaxed">{docPreviewContent}</pre>
+          </div>
+          <div className="flex justify-end gap-2 pt-2 border-t border-border">
+            <Button variant="outline" onClick={() => printDoc(docPreviewContent)} className="gap-2"><Printer className="h-4 w-4" /> Imprimir</Button>
+            <Button variant="outline" onClick={() => {
+              const el = document.getElementById("ipm-document");
+              if (!el) return;
+              const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>IPM</title><style>
+                @page{margin:2.5cm 2cm} *{margin:0;padding:0;box-sizing:border-box}
+                body{font-family:'Times New Roman',Times,serif;font-size:12pt;line-height:1.6;color:#000}
+                .header{text-align:center;margin-bottom:30px;border-bottom:2px solid #000;padding-bottom:20px}
+                .header .title{font-size:14pt;font-weight:bold;text-transform:uppercase;letter-spacing:2px}
+                .header .sub{font-size:11pt;text-transform:uppercase;margin-top:4px}
+                pre{font-family:'Times New Roman',Times,serif;white-space:pre-wrap;font-size:12pt;line-height:1.8}
+              </style></head><body><div class="header"><div class="title">Polícia Militar do Estado de São Paulo</div><div class="sub">Corregedoria da Polícia Militar</div></div>${el.innerHTML}</body></html>`;
+              const blob = new Blob([html], { type: "text/html" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url; a.download = `IPM_${(docPreviewContent.match(/IPM nº (\S+)/)?.[1] || "documento").replace(/\//g, "-")}.html`;
+              a.click(); URL.revokeObjectURL(url);
+              toast.success("Documento exportado!");
+            }} className="gap-2"><FileText className="h-4 w-4" /> Exportar HTML</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirm */}
+      <ConfirmDialog open={deleteConfirmId !== null} onOpenChange={() => setDeleteConfirmId(null)} title="Excluir IPM" description="Tem certeza? Esta ação não pode ser desfeita." onConfirm={() => deleteConfirmId && deleteIpm(deleteConfirmId)} />
+    </div>
+  );
+}
