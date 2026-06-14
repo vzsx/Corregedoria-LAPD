@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { 
   Shield, FileText, Loader2, Plus, FileSignature, LayoutDashboard, 
   Users, UserPlus, LogOut, Activity, Link as LinkIcon, Trash2, Edit, Pencil,
-  MessageSquare, Printer, Menu, X
+  MessageSquare, Printer, Menu, X, ClipboardList
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +28,7 @@ import { logAudit } from "@/lib/audit-log";
 import { SidebarItem } from "@/components/corregedoria/SidebarItem";
 import { StatCard } from "@/components/corregedoria/StatCard";
 import { Field } from "@/components/corregedoria/Field";
+import { AfastamentosTab } from "@/components/corregedoria/AfastamentosTab";
 import { STATUS_LABEL, STATUS_COLOR } from "@/lib/corregedoria/constants";
 import { formatDateSafe, printRelatorio, printDepoimento } from "@/lib/corregedoria/utils";
 import type { Status, Tab, Denuncia, Relatorio, Investigacao, InvestigacaoRelatorio, DenunciaRelatorio, DenunciaInvestigacao, DenunciaDepoimento, Depoimento, RelatorioGeralVinculo, Profile, PendingUser } from "@/lib/corregedoria/types";
@@ -2036,6 +2037,12 @@ function Corregedoria() {
             onClick={() => handleTabChange("relatorios_gerais")} 
             icon={FileSignature} 
             label="Rel. Gerais" 
+          />
+          <SidebarItem 
+            active={activeTab === "afastamentos"} 
+            onClick={() => handleTabChange("afastamentos")} 
+            icon={ClipboardList} 
+            label="Afastamentos" 
           />
           <SidebarItem 
             active={activeTab === "oficiais"} 
@@ -4983,6 +4990,10 @@ function Corregedoria() {
                 ))}
               </div>
             </div>
+          )}
+
+          {activeTab === "afastamentos" && (
+            <AfastamentosTab />
           )}
 
         </div>

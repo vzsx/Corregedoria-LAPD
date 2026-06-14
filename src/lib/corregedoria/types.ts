@@ -1,5 +1,5 @@
 export type Status = "pendente" | "em_analise" | "concluida" | "arquivada";
-export type Tab = "dashboard" | "denuncias" | "investigacoes" | "inqueritos" | "atos" | "oficiais" | "solicitacoes" | "depoimentos" | "relatorios_gerais";
+export type Tab = "dashboard" | "denuncias" | "investigacoes" | "inqueritos" | "atos" | "oficiais" | "solicitacoes" | "depoimentos" | "relatorios_gerais" | "afastamentos";
 
 export interface Denuncia {
   id: string;
@@ -109,5 +109,64 @@ export interface PendingUser {
   role_id: string;
   full_name: string;
   badge_number: string;
+  created_at: string;
+}
+
+export type AfastamentoStatus = "ativo" | "encerrado" | "em_investigacao" | "em_inquerito";
+export type InvestigacaoPolicialStatus = "em_andamento" | "em_analise" | "concluida" | "arquivada";
+export type InqueritoPolicialStatus = "em_andamento" | "concluido" | "arquivado" | "encaminhado";
+
+export interface Afastamento {
+  id: string;
+  numero_portaria: string;
+  data_portaria: string;
+  posto_graduacao: string;
+  nome_completo: string;
+  rg_pm: string;
+  unidade: string;
+  funcao_cargo: string | null;
+  motivo_afastamento: string;
+  prazo_afastamento: string;
+  responsavel_decisao: string;
+  observacoes: string | null;
+  status: AfastamentoStatus;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface InvestigacaoPolicial {
+  id: string;
+  numero_investigacao: string;
+  data_instauracao: string;
+  encarregado: string;
+  descricao_fatos: string;
+  provas_anexadas: string | null;
+  testemunhas: string | null;
+  status: InvestigacaoPolicialStatus;
+  afastamento_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface InqueritoPolicial {
+  id: string;
+  numero_inquerito: string;
+  data_instauracao: string;
+  autoridade_responsavel: string;
+  relatorio: string | null;
+  parecer: string | null;
+  resultado: string | null;
+  status: InqueritoPolicialStatus;
+  afastamento_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Advertencia {
+  id: string;
+  descricao: string;
+  data_advertencia: string;
+  autoridade_responsavel: string;
+  afastamento_id: string;
   created_at: string;
 }
