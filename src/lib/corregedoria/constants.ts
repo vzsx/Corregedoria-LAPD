@@ -33,16 +33,14 @@ export const PROVAS_OPTIONS = [
 
 export const AFASTAMENTO_STATUS_LABEL: Record<AfastamentoStatus, string> = {
   ativo: "Ativo",
-  encerrado: "Encerrado",
-  em_investigacao: "Em Investigação",
-  em_inquerito: "Em Inquérito",
+  concluido: "Concluído",
+  arquivado: "Arquivado",
 };
 
 export const AFASTAMENTO_STATUS_COLOR: Record<AfastamentoStatus, string> = {
   ativo: "bg-amber-500/10 text-amber-700 border-amber-500/40",
-  encerrado: "bg-slate-500/10 text-slate-700 border-slate-500/40",
-  em_investigacao: "bg-blue-500/10 text-blue-700 border-blue-500/40",
-  em_inquerito: "bg-red-500/10 text-red-700 border-red-500/40",
+  concluido: "bg-emerald-500/10 text-emerald-700 border-emerald-500/40",
+  arquivado: "bg-muted text-muted-foreground border-border",
 };
 
 export const INVESTIGACAO_POLICIAL_STATUS_LABEL: Record<InvestigacaoPolicialStatus, string> = {

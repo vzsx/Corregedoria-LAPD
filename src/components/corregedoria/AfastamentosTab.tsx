@@ -4,7 +4,7 @@ import {
   Shield, FileText, Loader2, Plus, LayoutDashboard, Users, Trash2, Edit,
   Printer, Search, X, FileSignature, Activity, ClipboardList, Eye,
   ChevronDown, ChevronRight, AlertTriangle, UserCheck, ScrollText,
-  BookOpen, Ban, Clock, Gavel, Download, Copy, History, FileDown
+  BookOpen, Ban, Clock, Gavel, Copy, History, FileDown, Link2, Unlink,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -32,8 +32,7 @@ import {
 } from "@/lib/corregedoria/constants";
 import type {
   Afastamento, AfastamentoStatus,
-  InvestigacaoPolicial, InvestigacaoPolicialStatus,
-  InqueritoPolicial, InqueritoPolicialStatus,
+  InvestigacaoPolicial, InqueritoPolicial,
   Advertencia, VersaoDocumento,
 } from "@/lib/corregedoria/types";
 import { generatePortariaText, printPortaria } from "@/lib/corregedoria/portaria";
@@ -44,53 +43,53 @@ type AfastamentoSubTab = "dashboard" | "listagem" | "historico";
 
 interface PortariaFormData {
   numero_portaria: string;
-  ano: string;
-  nome_policial: string;
+  data_emissao: string;
   posto_graduacao: string;
+  nome_policial: string;
   rg_pm: string;
   unidade: string;
-  funcao: string;
-  motivo_afastamento: string;
-  prazo_afastamento: string;
-  numero_procedimento: string;
-  data_portaria: string;
-  corregedor_responsavel: string;
-  corregedor_cargo: string;
+  data_inicio: string;
+  data_termino: string;
+  observacoes: string;
+  inquerito_id: string;
+  responsavel_nome: string;
+  responsavel_posto: string;
+  responsavel_assinatura: string;
   status: AfastamentoStatus;
 }
 
-function toPortariaData(form: PortariaFormData): PortariaData {
+const MOTIVO_PADRAO = "Art. 4º O afastamento de que trata esta Portaria possui caráter meramente cautelar e não punitivo, podendo ser revisto ou revogado a qualquer tempo, conforme o andamento do procedimento apuratório.";
+
+function toPortariaData(form: PortariaFormData, inqueritoNumero?: string): PortariaData {
   return {
     numero_portaria: form.numero_portaria,
-    ano: form.ano,
-    nome_policial: form.nome_policial,
+    data_emissao: form.data_emissao,
     posto_graduacao: form.posto_graduacao,
+    nome_policial: form.nome_policial,
     rg_pm: form.rg_pm,
     unidade: form.unidade,
-    funcao: form.funcao,
-    motivo_afastamento: form.motivo_afastamento,
-    prazo_afastamento: form.prazo_afastamento,
-    numero_procedimento: form.numero_procedimento,
-    data_portaria: form.data_portaria,
-    corregedor_responsavel: form.corregedor_responsavel,
-    corregedor_cargo: form.corregedor_cargo,
+    data_inicio: form.data_inicio,
+    data_termino: form.data_termino,
+    inquerito_numero: inqueritoNumero || "",
+    responsavel_nome: form.responsavel_nome,
+    responsavel_posto: form.responsavel_posto,
   };
 }
 
 const defaultForm: PortariaFormData = {
   numero_portaria: "",
-  ano: String(new Date().getFullYear()),
-  nome_policial: "",
+  data_emissao: format(new Date(), "yyyy-MM-dd"),
   posto_graduacao: "",
+  nome_policial: "",
   rg_pm: "",
   unidade: "",
-  funcao: "",
-  motivo_afastamento: "",
-  prazo_afastamento: "",
-  numero_procedimento: "",
-  data_portaria: format(new Date(), "yyyy-MM-dd"),
-  corregedor_responsavel: "",
-  corregedor_cargo: "Corregedor Geral da Polícia Militar",
+  data_inicio: format(new Date(), "yyyy-MM-dd"),
+  data_termino: format(new Date(), "yyyy-MM-dd"),
+  observacoes: "",
+  inquerito_id: "",
+  responsavel_nome: "",
+  responsavel_posto: "",
+  responsavel_assinatura: "",
   status: "ativo",
 };
 
@@ -112,6 +111,7 @@ export function AfastamentosTab(_props: Record<string, never>) {
   const [filterStatus, setFilterStatus] = useState<string>("todos");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [inqueritoSearch, setInqueritoSearch] = useState("");
 
   const [afastamentoForm, setAfastamentoForm] = useState<PortariaFormData>(defaultForm);
   const [afastamentoDialogOpen, setAfastamentoDialogOpen] = useState(false);
@@ -121,6 +121,7 @@ export function AfastamentosTab(_props: Record<string, never>) {
 
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewData, setPreviewData] = useState<PortariaData | null>(null);
+  const [previewInquerito, setPreviewInquerito] = useState("");
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
   const [historyVersions, setHistoryVersions] = useState<VersaoDocumento[]>([]);
   const [historyTitle, setHistoryTitle] = useState("");
@@ -154,57 +155,78 @@ export function AfastamentosTab(_props: Record<string, never>) {
     init();
   }, []);
 
+  const getInquerito = (id: string | null) => inqueritos.find(i => i.id === id);
+
   const stats = {
     ativos: afastamentos.filter(a => a.status === "ativo").length,
-    encerrados: afastamentos.filter(a => a.status === "encerrado").length,
-    emInvestigacao: afastamentos.filter(a => a.status === "em_investigacao").length,
-    emInquerito: afastamentos.filter(a => a.status === "em_inquerito").length,
+    concluidos: afastamentos.filter(a => a.status === "concluido").length,
+    arquivados: afastamentos.filter(a => a.status === "arquivado").length,
   };
 
   const filteredAfastamentos = afastamentos.filter(a => {
+    const inq = a.inquerito_id ? getInquerito(a.inquerito_id) : null;
     const matchesSearch = !searchTerm ||
       a.nome_completo.toLowerCase().includes(searchTerm.toLowerCase()) ||
       a.rg_pm.toLowerCase().includes(searchTerm.toLowerCase()) ||
       a.unidade.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      a.numero_portaria.toLowerCase().includes(searchTerm.toLowerCase());
+      a.numero_portaria.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (inq?.numero_inquerito || "").toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterStatus === "todos" || a.status === filterStatus;
     return matchesSearch && matchesFilter;
   });
 
   const getInvestigacoes = (afastamentoId: string) => investigacoes.filter(i => i.afastamento_id === afastamentoId);
-  const getInqueritos = (afastamentoId: string) => inqueritos.filter(i => i.afastamento_id === afastamentoId);
+  const getInqueritosForAfastamento = (afastamentoId: string) => inqueritos.filter(i => i.afastamento_id === afastamentoId);
   const getAdvertencias = (afastamentoId: string) => advertencias.filter(a => a.afastamento_id === afastamentoId);
 
   const resetForm = () => {
     setAfastamentoForm({
       ...defaultForm,
-      ano: String(new Date().getFullYear()),
-      data_portaria: format(new Date(), "yyyy-MM-dd"),
-      corregedor_responsavel: user?.user_metadata?.full_name || "",
+      data_emissao: format(new Date(), "yyyy-MM-dd"),
+      data_inicio: format(new Date(), "yyyy-MM-dd"),
+      data_termino: format(new Date(), "yyyy-MM-dd"),
+      responsavel_nome: user?.user_metadata?.full_name || "",
+      responsavel_posto: "",
     });
+    setInqueritoSearch("");
   };
 
   const formToDb = (form: PortariaFormData) => {
-    const docText = generatePortariaText(toPortariaData(form));
+    const inq = form.inquerito_id ? getInquerito(form.inquerito_id) : null;
+    const docText = generatePortariaText(toPortariaData(form, inq?.numero_inquerito));
     return {
       numero_portaria: form.numero_portaria,
-      ano: form.ano,
-      data_portaria: form.data_portaria,
+      data_emissao: form.data_emissao,
       posto_graduacao: form.posto_graduacao,
       nome_completo: form.nome_policial,
       rg_pm: form.rg_pm,
       unidade: form.unidade,
-      funcao_cargo: form.funcao || null,
-      motivo_afastamento: form.motivo_afastamento,
-      prazo_afastamento: form.prazo_afastamento,
-      numero_procedimento: form.numero_procedimento,
-      responsavel_decisao: form.corregedor_responsavel,
-      corregedor_cargo: form.corregedor_cargo,
-      documento_conteudo: docText,
-      autor_id: user?.id || null,
-      autor_nome: user?.user_metadata?.full_name || form.corregedor_responsavel,
+      data_inicio: form.data_inicio,
+      data_termino: form.data_termino,
+      observacoes: form.observacoes || null,
+      inquerito_id: form.inquerito_id || null,
+      responsavel_nome: form.responsavel_nome,
+      responsavel_posto: form.responsavel_posto,
+      responsavel_assinatura: form.responsavel_assinatura || null,
+      motivo_afastamento: MOTIVO_PADRAO,
       status: form.status,
+      autor_id: user?.id || null,
+      autor_nome: user?.user_metadata?.full_name || form.responsavel_nome,
     };
+  };
+
+  const statusHistoryEntry = (oldStatus: string, newStatus: string) => ({
+    tipo: "status",
+    data: new Date().toISOString(),
+    autor: user?.user_metadata?.full_name || "Sistema",
+    de: oldStatus,
+    para: newStatus,
+  });
+
+  const getInqueritoNumero = (id: string | null) => {
+    if (!id) return "";
+    const inq = getInquerito(id);
+    return inq?.numero_inquerito || "";
   };
 
   const createAfastamento = async (e: React.FormEvent) => {
@@ -239,15 +261,27 @@ export function AfastamentosTab(_props: Record<string, never>) {
           : existing.historico_versoes;
       } catch { versoes = []; }
     }
+    const changes: string[] = [];
+    if (existing?.status !== afastamentoForm.status) {
+      versoes.unshift(statusHistoryEntry(existing?.status || "", afastamentoForm.status));
+      changes.push(`Status alterado: ${AFASTAMENTO_STATUS_LABEL[existing?.status || "ativo"]} → ${AFASTAMENTO_STATUS_LABEL[afastamentoForm.status]}`);
+    }
+    if (existing?.inquerito_id !== afastamentoForm.inquerito_id) {
+      const oldInq = existing?.inquerito_id ? getInquerito(existing.inquerito_id)?.numero_inquerito : "nenhum";
+      const newInq = afastamentoForm.inquerito_id ? getInquerito(afastamentoForm.inquerito_id)?.numero_inquerito : "nenhum";
+      changes.push(`Inquérito: ${oldInq} → ${newInq}`);
+    }
     const novaVersao: VersaoDocumento = {
       id: crypto.randomUUID?.() || Date.now().toString(),
       data: new Date().toISOString(),
-      autor: user?.user_metadata?.full_name || afastamentoForm.corregedor_responsavel,
-      documento: existing?.documento_conteudo || "",
-      alteracoes: "Atualização do documento",
+      autor: user?.user_metadata?.full_name || afastamentoForm.responsavel_nome,
+      documento: existing?.motivo_afastamento || "",
+      alteracoes: changes.join("; ") || "Atualização do documento",
     };
     versoes.unshift(novaVersao);
     updateData.historico_versoes = versoes;
+    delete (updateData as any).autor_id;
+    delete (updateData as any).autor_nome;
     const { error } = await supabase
       .from("afastamentos")
       .update(updateData)
@@ -281,53 +315,65 @@ export function AfastamentosTab(_props: Record<string, never>) {
   };
 
   const updateAfastamentoStatus = async (id: string, status: AfastamentoStatus) => {
-    const { error } = await supabase.from("afastamentos").update({ status }).eq("id", id);
+    const existing = afastamentos.find(a => a.id === id);
+    let versoes: VersaoDocumento[] = [];
+    if (existing?.historico_versoes) {
+      try {
+        versoes = typeof existing.historico_versoes === "string"
+          ? JSON.parse(existing.historico_versoes)
+          : existing.historico_versoes;
+      } catch { versoes = []; }
+    }
+    versoes.unshift(statusHistoryEntry(existing?.status || "", status));
+    const { error } = await supabase
+      .from("afastamentos")
+      .update({ status, historico_versoes: versoes })
+      .eq("id", id);
     if (error) toast.error("Erro ao atualizar status");
     else { toast.success("Status atualizado!"); await loadAfastamentos(); }
   };
 
   const duplicateAfastamento = async (a: Afastamento) => {
     if (!canCreate) return;
-    const docText = a.documento_conteudo || generatePortariaText({
+    const inq = a.inquerito_id ? getInquerito(a.inquerito_id) : null;
+    const docText = generatePortariaText({
       numero_portaria: a.numero_portaria + "-copia",
-      ano: String(new Date().getFullYear()),
-      nome_policial: a.nome_completo,
+      data_emissao: format(new Date(), "yyyy-MM-dd"),
       posto_graduacao: a.posto_graduacao,
+      nome_policial: a.nome_completo,
       rg_pm: a.rg_pm,
       unidade: a.unidade,
-      funcao: a.funcao_cargo || "",
-      motivo_afastamento: a.motivo_afastamento,
-      prazo_afastamento: a.prazo_afastamento,
-      numero_procedimento: a.numero_procedimento,
-      data_portaria: format(new Date(), "yyyy-MM-dd"),
-      corregedor_responsavel: a.responsavel_decisao,
-      corregedor_cargo: a.corregedor_cargo || "Corregedor Geral da Polícia Militar",
+      data_inicio: format(new Date(), "yyyy-MM-dd"),
+      data_termino: format(new Date(), "yyyy-MM-dd"),
+      inquerito_numero: inq?.numero_inquerito || "",
+      responsavel_nome: a.responsavel_nome,
+      responsavel_posto: a.responsavel_posto,
     });
     const { error } = await supabase.from("afastamentos").insert({
       numero_portaria: a.numero_portaria + "-copia",
-      ano: String(new Date().getFullYear()),
-      data_portaria: format(new Date(), "yyyy-MM-dd"),
+      data_emissao: format(new Date(), "yyyy-MM-dd"),
       posto_graduacao: a.posto_graduacao,
       nome_completo: a.nome_completo,
       rg_pm: a.rg_pm,
       unidade: a.unidade,
-      funcao_cargo: a.funcao_cargo,
-      motivo_afastamento: a.motivo_afastamento,
-      prazo_afastamento: a.prazo_afastamento,
-      numero_procedimento: a.numero_procedimento,
-      responsavel_decisao: a.responsavel_decisao,
-      corregedor_cargo: a.corregedor_cargo,
-      documento_conteudo: docText,
-      autor_id: user?.id || null,
-      autor_nome: user?.user_metadata?.full_name || a.responsavel_decisao,
+      data_inicio: format(new Date(), "yyyy-MM-dd"),
+      data_termino: format(new Date(), "yyyy-MM-dd"),
+      inquerito_id: a.inquerito_id,
+      responsavel_nome: a.responsavel_nome,
+      responsavel_posto: a.responsavel_posto,
+      motivo_afastamento: MOTIVO_PADRAO,
       status: a.status,
+      autor_id: user?.id || null,
+      autor_nome: user?.user_metadata?.full_name || a.responsavel_nome,
     });
     if (error) toast.error("Erro ao duplicar: " + error.message);
     else { toast.success("Documento duplicado!"); await loadAfastamentos(); }
   };
 
   const openPreview = (form: PortariaFormData) => {
-    setPreviewData(toPortariaData(form));
+    const inq = form.inquerito_id ? getInquerito(form.inquerito_id) : null;
+    setPreviewData(toPortariaData(form, inq?.numero_inquerito));
+    setPreviewInquerito(inq?.numero_inquerito || "");
     setPreviewOpen(true);
   };
 
@@ -341,107 +387,206 @@ export function AfastamentosTab(_props: Record<string, never>) {
       } catch { versoes = []; }
     }
     setHistoryVersions(versoes);
-    setHistoryTitle(`Histórico - Portaria nº ${a.numero_portaria}/${a.ano}`);
+    setHistoryTitle(`Histórico - Portaria nº ${a.numero_portaria}`);
     setHistoryDialogOpen(true);
   };
 
   const editAfastamento = async (a: Afastamento) => {
     setAfastamentoForm({
       numero_portaria: a.numero_portaria,
-      ano: a.ano,
-      nome_policial: a.nome_completo,
+      data_emissao: a.data_emissao,
       posto_graduacao: a.posto_graduacao,
+      nome_policial: a.nome_completo,
       rg_pm: a.rg_pm,
       unidade: a.unidade,
-      funcao: a.funcao_cargo || "",
-      motivo_afastamento: a.motivo_afastamento,
-      prazo_afastamento: a.prazo_afastamento,
-      numero_procedimento: a.numero_procedimento,
-      data_portaria: a.data_portaria,
-      corregedor_responsavel: a.responsavel_decisao,
-      corregedor_cargo: a.corregedor_cargo || "Corregedor Geral da Polícia Militar",
+      data_inicio: a.data_inicio,
+      data_termino: a.data_termino,
+      observacoes: a.observacoes || "",
+      inquerito_id: a.inquerito_id || "",
+      responsavel_nome: a.responsavel_nome,
+      responsavel_posto: a.responsavel_posto,
+      responsavel_assinatura: a.responsavel_assinatura || "",
       status: a.status,
     });
     setEditingAfastamentoId(a.id);
     setAfastamentoEditDialogOpen(true);
   };
 
+  const filteredInqueritos = inqueritos.filter(i =>
+    !inqueritoSearch || i.numero_inquerito.toLowerCase().includes(inqueritoSearch.toLowerCase())
+  );
+
   const renderFormFields = (isEdit: boolean) => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <div>
-        <Label className="text-xs font-semibold">Nº da Portaria *</Label>
-        <Input value={afastamentoForm.numero_portaria} onChange={e => setAfastamentoForm(f => ({ ...f, numero_portaria: e.target.value }))} placeholder="Ex: 001" required />
+    <div className="space-y-6">
+      {/* Seção 1: Dados do Policial Afastado */}
+      <div className="border border-border rounded-lg overflow-hidden">
+        <div className="bg-muted/50 px-4 py-3 border-b border-border">
+          <h3 className="font-bold text-sm uppercase tracking-wider flex items-center gap-2">
+            <UserCheck className="h-4 w-4" /> DADOS DO POLICIAL AFASTADO
+          </h3>
+        </div>
+        <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div>
+            <Label className="text-xs font-semibold">Número da Portaria *</Label>
+            <Input value={afastamentoForm.numero_portaria} onChange={e => setAfastamentoForm(f => ({ ...f, numero_portaria: e.target.value }))} placeholder="Ex: 001" required />
+          </div>
+          <div>
+            <Label className="text-xs font-semibold">Data de Emissão da Portaria *</Label>
+            <Input type="date" value={afastamentoForm.data_emissao} onChange={e => setAfastamentoForm(f => ({ ...f, data_emissao: e.target.value }))} required />
+          </div>
+          <div>
+            <Label className="text-xs font-semibold">Posto/Graduação *</Label>
+            <Input value={afastamentoForm.posto_graduacao} onChange={e => setAfastamentoForm(f => ({ ...f, posto_graduacao: e.target.value }))} placeholder="Ex: 1º SGT PM" required />
+          </div>
+          <div>
+            <Label className="text-xs font-semibold">Nome Completo *</Label>
+            <Input value={afastamentoForm.nome_policial} onChange={e => setAfastamentoForm(f => ({ ...f, nome_policial: e.target.value }))} placeholder="Nome completo do policial" required />
+          </div>
+          <div>
+            <Label className="text-xs font-semibold">RG PM *</Label>
+            <Input value={afastamentoForm.rg_pm} onChange={e => setAfastamentoForm(f => ({ ...f, rg_pm: e.target.value }))} placeholder="Nº do RG PM" required />
+          </div>
+          <div>
+            <Label className="text-xs font-semibold">Unidade *</Label>
+            <Input value={afastamentoForm.unidade} onChange={e => setAfastamentoForm(f => ({ ...f, unidade: e.target.value }))} placeholder="Unidade de lotação" required />
+          </div>
+          <div>
+            <Label className="text-xs font-semibold">Data de Início do Afastamento *</Label>
+            <Input type="date" value={afastamentoForm.data_inicio} onChange={e => setAfastamentoForm(f => ({ ...f, data_inicio: e.target.value }))} required />
+          </div>
+          <div>
+            <Label className="text-xs font-semibold">Data de Término do Afastamento *</Label>
+            <Input type="date" value={afastamentoForm.data_termino} onChange={e => setAfastamentoForm(f => ({ ...f, data_termino: e.target.value }))} required />
+          </div>
+          <div className="md:col-span-2 lg:col-span-1">
+            <Label className="text-xs font-semibold">Observações</Label>
+            <Textarea value={afastamentoForm.observacoes} onChange={e => setAfastamentoForm(f => ({ ...f, observacoes: e.target.value }))} placeholder="Observações (opcional)" className="min-h-[80px]" />
+          </div>
+        </div>
       </div>
-      <div>
-        <Label className="text-xs font-semibold">Ano *</Label>
-        <Input value={afastamentoForm.ano} onChange={e => setAfastamentoForm(f => ({ ...f, ano: e.target.value }))} placeholder={String(new Date().getFullYear())} required />
+
+      {/* Seção: Dados do Inquérito Vinculado */}
+      <div className="border border-border rounded-lg overflow-hidden">
+        <div className="bg-muted/50 px-4 py-3 border-b border-border">
+          <h3 className="font-bold text-sm uppercase tracking-wider flex items-center gap-2">
+            <Link2 className="h-4 w-4" /> DADOS DO INQUÉRITO VINCULADO
+          </h3>
+        </div>
+        <div className="p-4 space-y-3">
+          {afastamentoForm.inquerito_id && (
+            <div className="flex items-center justify-between bg-primary/5 border border-primary/20 rounded-lg px-4 py-3">
+              <div className="flex items-center gap-3">
+                <FileText className="h-5 w-5 text-primary" />
+                <div>
+                  <p className="text-sm font-semibold">{getInquerito(afastamentoForm.inquerito_id)?.numero_inquerito}</p>
+                  <p className="text-xs text-muted-foreground">{getInquerito(afastamentoForm.inquerito_id)?.autoridade_responsavel}</p>
+                </div>
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => setAfastamentoForm(f => ({ ...f, inquerito_id: "" }))} className="gap-1 text-destructive">
+                <Unlink className="h-4 w-4" /> Desvincular
+              </Button>
+            </div>
+          )}
+          {!afastamentoForm.inquerito_id && (
+            <div>
+              <Label className="text-xs font-semibold mb-1 block">Buscar Inquérito</Label>
+              <Input
+                placeholder="Digite o número do inquérito para buscar..."
+                value={inqueritoSearch}
+                onChange={e => setInqueritoSearch(e.target.value)}
+              />
+              {inqueritoSearch && (
+                <div className="mt-2 border border-border rounded-lg max-h-48 overflow-y-auto">
+                  {filteredInqueritos.length === 0 ? (
+                    <div className="p-3 text-sm text-muted-foreground text-center">Nenhum inquérito encontrado</div>
+                  ) : (
+                    filteredInqueritos.map(inq => (
+                      <button
+                        key={inq.id}
+                        type="button"
+                        className="w-full text-left px-4 py-2.5 hover:bg-muted/50 transition-colors text-sm flex items-center justify-between border-b border-border last:border-0"
+                        onClick={() => { setAfastamentoForm(f => ({ ...f, inquerito_id: inq.id })); setInqueritoSearch(""); }}
+                      >
+                        <div>
+                          <span className="font-medium">{inq.numero_inquerito}</span>
+                          <span className="text-muted-foreground ml-2">- {inq.autoridade_responsavel}</span>
+                        </div>
+                        <Badge variant="outline" className={INQUERITO_POLICIAL_STATUS_COLOR[inq.status]}>
+                          {INQUERITO_POLICIAL_STATUS_LABEL[inq.status]}
+                        </Badge>
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
+              {inqueritos.length === 0 && (
+                <p className="text-xs text-muted-foreground mt-1">Nenhum inquérito cadastrado no sistema.</p>
+              )}
+            </div>
+          )}
+        </div>
       </div>
-      <div>
-        <Label className="text-xs font-semibold">Data da Portaria *</Label>
-        <Input type="date" value={afastamentoForm.data_portaria} onChange={e => setAfastamentoForm(f => ({ ...f, data_portaria: e.target.value }))} required />
+
+      {/* Seção 2: Dados da Autoridade Responsável */}
+      <div className="border border-border rounded-lg overflow-hidden">
+        <div className="bg-muted/50 px-4 py-3 border-b border-border">
+          <h3 className="font-bold text-sm uppercase tracking-wider flex items-center gap-2">
+            <FileSignature className="h-4 w-4" /> DADOS DA AUTORIDADE RESPONSÁVEL
+          </h3>
+        </div>
+        <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div>
+            <Label className="text-xs font-semibold">Nome do Corregedor *</Label>
+            <Input value={afastamentoForm.responsavel_nome} onChange={e => setAfastamentoForm(f => ({ ...f, responsavel_nome: e.target.value }))} placeholder="Nome do Corregedor" required />
+          </div>
+          <div>
+            <Label className="text-xs font-semibold">Posto/Graduação do Corregedor *</Label>
+            <Input value={afastamentoForm.responsavel_posto} onChange={e => setAfastamentoForm(f => ({ ...f, responsavel_posto: e.target.value }))} placeholder="Ex: Cel PM" required />
+          </div>
+          <div>
+            <Label className="text-xs font-semibold">Assinatura Digital</Label>
+            <Input value={afastamentoForm.responsavel_assinatura} onChange={e => setAfastamentoForm(f => ({ ...f, responsavel_assinatura: e.target.value }))} placeholder="Link ou código (opcional)" />
+          </div>
+        </div>
       </div>
-      <div>
-        <Label className="text-xs font-semibold">Posto/Graduação *</Label>
-        <Input value={afastamentoForm.posto_graduacao} onChange={e => setAfastamentoForm(f => ({ ...f, posto_graduacao: e.target.value }))} placeholder="Ex: 1º SGT PM" required />
+
+      {/* Seção: Controle do Afastamento */}
+      <div className="border border-border rounded-lg overflow-hidden">
+        <div className="bg-muted/50 px-4 py-3 border-b border-border">
+          <h3 className="font-bold text-sm uppercase tracking-wider flex items-center gap-2">
+            <Activity className="h-4 w-4" /> CONTROLE DO AFASTAMENTO
+          </h3>
+        </div>
+        <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label className="text-xs font-semibold">Status do Afastamento *</Label>
+            <Select value={afastamentoForm.status} onValueChange={v => setAfastamentoForm(f => ({ ...f, status: v as AfastamentoStatus }))}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ativo">Ativo</SelectItem>
+                <SelectItem value="concluido">Concluído</SelectItem>
+                <SelectItem value="arquivado">Arquivado</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-end gap-2">
+            <Button type="button" variant="outline" onClick={() => openPreview(afastamentoForm)} className="gap-2">
+              <Eye className="h-4 w-4" /> Visualizar Documento
+            </Button>
+            {!isEdit && (
+              <Button type="submit" disabled={submitting} className="gap-2">
+                {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSignature className="h-4 w-4" />}
+                {submitting ? "Salvando..." : "Emitir Portaria"}
+              </Button>
+            )}
+          </div>
+        </div>
       </div>
-      <div>
-        <Label className="text-xs font-semibold">Nome do Policial *</Label>
-        <Input value={afastamentoForm.nome_policial} onChange={e => setAfastamentoForm(f => ({ ...f, nome_policial: e.target.value }))} placeholder="Nome completo" required />
-      </div>
-      <div>
-        <Label className="text-xs font-semibold">RG PM *</Label>
-        <Input value={afastamentoForm.rg_pm} onChange={e => setAfastamentoForm(f => ({ ...f, rg_pm: e.target.value }))} placeholder="Nº do RG PM" required />
-      </div>
-      <div>
-        <Label className="text-xs font-semibold">Unidade *</Label>
-        <Input value={afastamentoForm.unidade} onChange={e => setAfastamentoForm(f => ({ ...f, unidade: e.target.value }))} placeholder="Unidade de lotação" required />
-      </div>
-      <div>
-        <Label className="text-xs font-semibold">Função</Label>
-        <Input value={afastamentoForm.funcao} onChange={e => setAfastamentoForm(f => ({ ...f, funcao: e.target.value }))} placeholder="Função/cargo" />
-      </div>
-      <div>
-        <Label className="text-xs font-semibold">Prazo do Afastamento *</Label>
-        <Input value={afastamentoForm.prazo_afastamento} onChange={e => setAfastamentoForm(f => ({ ...f, prazo_afastamento: e.target.value }))} placeholder="Ex: 90 dias" required />
-      </div>
-      <div>
-        <Label className="text-xs font-semibold">Nº do Procedimento *</Label>
-        <Input value={afastamentoForm.numero_procedimento} onChange={e => setAfastamentoForm(f => ({ ...f, numero_procedimento: e.target.value }))} placeholder="Nº do procedimento apuratório" required />
-      </div>
-      <div className="md:col-span-2 lg:col-span-1">
-        <Label className="text-xs font-semibold">Motivo do Afastamento *</Label>
-        <Input value={afastamentoForm.motivo_afastamento} onChange={e => setAfastamentoForm(f => ({ ...f, motivo_afastamento: e.target.value }))} placeholder="Motivo" required />
-      </div>
-      <div>
-        <Label className="text-xs font-semibold">Status</Label>
-        <Select value={afastamentoForm.status} onValueChange={v => setAfastamentoForm(f => ({ ...f, status: v as AfastamentoStatus }))}>
-          <SelectTrigger><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ativo">Ativo</SelectItem>
-            <SelectItem value="em_investigacao">Em Investigação</SelectItem>
-            <SelectItem value="em_inquerito">Em Inquérito</SelectItem>
-            <SelectItem value="encerrado">Encerrado</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="md:col-span-2">
-        <Label className="text-xs font-semibold">Corregedor Responsável *</Label>
-        <Input value={afastamentoForm.corregedor_responsavel} onChange={e => setAfastamentoForm(f => ({ ...f, corregedor_responsavel: e.target.value }))} placeholder="Nome do Corregedor" required />
-      </div>
-      <div>
-        <Label className="text-xs font-semibold">Cargo do Corregedor</Label>
-        <Input value={afastamentoForm.corregedor_cargo} onChange={e => setAfastamentoForm(f => ({ ...f, corregedor_cargo: e.target.value }))} />
-      </div>
-      <div className="md:col-span-2 lg:col-span-3 flex items-end gap-2 pt-2">
-        <Button type="button" variant="outline" onClick={() => openPreview(afastamentoForm)} className="gap-2">
-          <Eye className="h-4 w-4" /> Visualizar Documento
-        </Button>
-        {!isEdit && (
-          <Button type="submit" disabled={submitting} className="gap-2">
-            {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSignature className="h-4 w-4" />}
-            {submitting ? "Salvando..." : "Emitir Portaria"}
-          </Button>
-        )}
+
+      {/* Motivo automático (não editável) */}
+      <div className="bg-muted/20 border border-border rounded-lg p-4">
+        <p className="text-xs font-semibold text-muted-foreground mb-2">TEXTO CAUTELAR PADRÃO (Art. 4º)</p>
+        <p className="text-sm text-muted-foreground italic leading-relaxed">{MOTIVO_PADRAO}</p>
       </div>
     </div>
   );
@@ -464,19 +609,19 @@ export function AfastamentosTab(_props: Record<string, never>) {
     content = (
       <div className="space-y-6 animate-fade-in">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard title="Ativos" value={stats.ativos} icon={Shield} color="bg-red-500/10 text-red-600 border-red-500/20" />
-          <StatCard title="Em Investigação" value={stats.emInvestigacao} icon={Search} color="bg-amber-500/10 text-amber-600 border-amber-500/20" />
-          <StatCard title="Em Inquérito" value={stats.emInquerito} icon={Gavel} color="bg-blue-500/10 text-blue-600 border-blue-500/20" />
-          <StatCard title="Encerrados" value={stats.encerrados} icon={Ban} color="bg-gray-500/10 text-gray-600 border-gray-500/20" />
+          <StatCard title="Ativos" value={stats.ativos} icon={Shield} color="bg-amber-500/10 text-amber-600 border-amber-500/20" />
+          <StatCard title="Concluídos" value={stats.concluidos} icon={Ban} color="bg-emerald-500/10 text-emerald-600 border-emerald-500/20" />
+          <StatCard title="Arquivados" value={stats.arquivados} icon={FileText} color="bg-gray-500/10 text-gray-600 border-gray-500/20" />
+          <StatCard title="Total" value={afastamentos.length} icon={ClipboardList} color="bg-primary/10 text-primary border-primary/20" />
         </div>
 
         <div className="bg-card border border-border rounded-lg p-5">
           <h4 className="font-bold text-sm uppercase tracking-wider mb-4 flex items-center gap-2">
             <Activity className="h-4 w-4" /> Distribuição por Status
           </h4>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {(["ativo", "em_investigacao", "em_inquerito", "encerrado"] as const).map(s => {
-              const count = stats[s === "em_investigacao" ? "emInvestigacao" : s === "em_inquerito" ? "emInquerito" : s === "encerrado" ? "encerrados" : "ativos"];
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {(["ativo", "concluido", "arquivado"] as const).map(s => {
+              const count = s === "ativo" ? stats.ativos : s === "concluido" ? stats.concluidos : stats.arquivados;
               const total = afastamentos.length || 1;
               const pct = Math.round((count / total) * 100);
               return (
@@ -511,20 +656,23 @@ export function AfastamentosTab(_props: Record<string, never>) {
               <Clock className="h-4 w-4" /> Últimas Portarias Emitidas
             </h4>
             <div className="space-y-2">
-              {recentAfastamentos.map(a => (
-                <div key={a.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <Badge variant="outline" className={AFASTAMENTO_STATUS_COLOR[a.status]}>
-                      {AFASTAMENTO_STATUS_LABEL[a.status]}
-                    </Badge>
-                    <div>
-                      <p className="text-sm font-medium">{a.posto_graduacao} {a.nome_completo}</p>
-                      <p className="text-xs text-muted-foreground">Portaria nº {a.numero_portaria}/{a.ano} • {a.unidade}</p>
+              {recentAfastamentos.map(a => {
+                const inq = a.inquerito_id ? getInquerito(a.inquerito_id) : null;
+                return (
+                  <div key={a.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <Badge variant="outline" className={AFASTAMENTO_STATUS_COLOR[a.status]}>
+                        {AFASTAMENTO_STATUS_LABEL[a.status]}
+                      </Badge>
+                      <div>
+                        <p className="text-sm font-medium">{a.posto_graduacao} {a.nome_completo}</p>
+                        <p className="text-xs text-muted-foreground">Portaria nº {a.numero_portaria} • {a.unidade}{inq ? ` • Inq: ${inq.numero_inquerito}` : ''}</p>
+                      </div>
                     </div>
+                    <div className="text-xs text-muted-foreground">{format(new Date(a.created_at), "dd/MM/yyyy")}</div>
                   </div>
-                  <div className="text-xs text-muted-foreground">{format(new Date(a.created_at), "dd/MM/yyyy")}</div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
@@ -537,14 +685,14 @@ export function AfastamentosTab(_props: Record<string, never>) {
           <div className="flex flex-1 gap-3 w-full sm:w-auto">
             <div className="relative flex-1 sm:max-w-xs">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Buscar por nome, RG, unidade ou portaria..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-9" />
+              <Input placeholder="Buscar por nome, RG, unidade, portaria ou inquérito..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-9" />
               {searchTerm && <X className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 cursor-pointer text-muted-foreground" onClick={() => setSearchTerm("")} />}
             </div>
             <Select value={filterStatus} onValueChange={setFilterStatus}>
               <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="todos">Todos os Status</SelectItem>
-                {(["ativo", "em_investigacao", "em_inquerito", "encerrado"] as const).map(s => (
+                {(["ativo", "concluido", "arquivado"] as const).map(s => (
                   <SelectItem key={s} value={s}>{AFASTAMENTO_STATUS_LABEL[s]}</SelectItem>
                 ))}
               </SelectContent>
@@ -566,19 +714,21 @@ export function AfastamentosTab(_props: Record<string, never>) {
           <div className="space-y-3">
             {filteredAfastamentos.map(a => {
               const isExpanded = expandedId === a.id;
+              const inq = a.inquerito_id ? getInquerito(a.inquerito_id) : null;
               return (
                 <div key={a.id} className="bg-card border border-border rounded-lg overflow-hidden">
                   <div className="p-4 flex items-start justify-between cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => setExpandedId(isExpanded ? null : a.id)}>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <Badge variant="outline" className={AFASTAMENTO_STATUS_COLOR[a.status]}>{AFASTAMENTO_STATUS_LABEL[a.status]}</Badge>
-                        <span className="text-xs font-mono text-muted-foreground">Portaria nº {a.numero_portaria}/{a.ano}</span>
+                        <span className="text-xs font-mono text-muted-foreground">Portaria nº {a.numero_portaria}</span>
+                        {inq && <Badge variant="secondary" className="text-[10px] px-1 py-0">Inq: {inq.numero_inquerito}</Badge>}
                       </div>
                       <p className="font-semibold text-sm truncate">{a.posto_graduacao} {a.nome_completo}</p>
                       <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground mt-1">
                         <span>RG PM: {a.rg_pm}</span>
                         <span>{a.unidade}</span>
-                        <span>Prazo: {a.prazo_afastamento}</span>
+                        <span>Período: {format(new Date(a.data_inicio), "dd/MM/yy")} a {format(new Date(a.data_termino), "dd/MM/yy")}</span>
                       </div>
                     </div>
                     <div className="flex items-center gap-1 shrink-0 ml-4">
@@ -594,45 +744,48 @@ export function AfastamentosTab(_props: Record<string, never>) {
                       )}
                       <Button variant="ghost" size="icon" className="h-8 w-8" title="Visualizar documento" onClick={e => {
                         e.stopPropagation();
-                        setPreviewData({
+                        setPreviewData(toPortariaData({
                           numero_portaria: a.numero_portaria,
-                          ano: a.ano,
-                          nome_policial: a.nome_completo,
+                          data_emissao: a.data_emissao,
                           posto_graduacao: a.posto_graduacao,
+                          nome_policial: a.nome_completo,
                           rg_pm: a.rg_pm,
                           unidade: a.unidade,
-                          funcao: a.funcao_cargo || "",
-                          motivo_afastamento: a.motivo_afastamento,
-                          prazo_afastamento: a.prazo_afastamento,
-                          numero_procedimento: a.numero_procedimento,
-                          data_portaria: a.data_portaria,
-                          corregedor_responsavel: a.responsavel_decisao,
-                          corregedor_cargo: a.corregedor_cargo || "Corregedor Geral da Polícia Militar",
-                        });
+                          data_inicio: a.data_inicio,
+                          data_termino: a.data_termino,
+                          observacoes: a.observacoes || "",
+                          inquerito_id: a.inquerito_id || "",
+                          responsavel_nome: a.responsavel_nome,
+                          responsavel_posto: a.responsavel_posto,
+                          responsavel_assinatura: a.responsavel_assinatura || "",
+                          status: a.status,
+                        }, inq?.numero_inquerito));
+                        setPreviewInquerito(inq?.numero_inquerito || "");
                         setPreviewOpen(true);
                       }}>
                         <Eye className="h-4 w-4" />
                       </Button>
-                      {a.historico_versoes && <Button variant="ghost" size="icon" className="h-8 w-8" title="Histórico" onClick={e => { e.stopPropagation(); openHistory(a); }}>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" title="Histórico" onClick={e => { e.stopPropagation(); openHistory(a); }}>
                         <History className="h-4 w-4" />
-                      </Button>}
+                      </Button>
                       <Button variant="ghost" size="icon" className="h-8 w-8" title="Imprimir" onClick={e => {
                         e.stopPropagation();
-                        printPortaria({
+                        printPortaria(toPortariaData({
                           numero_portaria: a.numero_portaria,
-                          ano: a.ano,
-                          nome_policial: a.nome_completo,
+                          data_emissao: a.data_emissao,
                           posto_graduacao: a.posto_graduacao,
+                          nome_policial: a.nome_completo,
                           rg_pm: a.rg_pm,
                           unidade: a.unidade,
-                          funcao: a.funcao_cargo || "",
-                          motivo_afastamento: a.motivo_afastamento,
-                          prazo_afastamento: a.prazo_afastamento,
-                          numero_procedimento: a.numero_procedimento,
-                          data_portaria: a.data_portaria,
-                          corregedor_responsavel: a.responsavel_decisao,
-                          corregedor_cargo: a.corregedor_cargo || "Corregedor Geral da Polícia Militar",
-                        });
+                          data_inicio: a.data_inicio,
+                          data_termino: a.data_termino,
+                          observacoes: a.observacoes || "",
+                          inquerito_id: a.inquerito_id || "",
+                          responsavel_nome: a.responsavel_nome,
+                          responsavel_posto: a.responsavel_posto,
+                          responsavel_assinatura: a.responsavel_assinatura || "",
+                          status: a.status,
+                        }, inq?.numero_inquerito), inq?.numero_inquerito);
                       }}>
                         <Printer className="h-4 w-4" />
                       </Button>
@@ -648,23 +801,26 @@ export function AfastamentosTab(_props: Record<string, never>) {
                   {isExpanded && (
                     <div className="border-t border-border p-4 bg-muted/20 space-y-4">
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <Field label="Procedimento"><span className="text-sm font-medium">{a.numero_procedimento}</span></Field>
-                        <Field label="Motivo"><span className="text-sm font-medium">{a.motivo_afastamento}</span></Field>
-                        <Field label="Responsável"><span className="text-sm font-medium">{a.responsavel_decisao}</span></Field>
-                        <Field label="Data"><span className="text-sm font-medium">{format(new Date(a.data_portaria), "dd/MM/yyyy")}</span></Field>
+                        <Field label="Portaria"><span className="text-sm font-medium">{a.numero_portaria}</span></Field>
+                        <Field label="Início"><span className="text-sm font-medium">{format(new Date(a.data_inicio), "dd/MM/yyyy")}</span></Field>
+                        <Field label="Término"><span className="text-sm font-medium">{format(new Date(a.data_termino), "dd/MM/yyyy")}</span></Field>
+                        <Field label="Responsável"><span className="text-sm font-medium">{a.responsavel_nome}</span></Field>
                       </div>
-
-                      {a.documento_conteudo && (
-                        <div>
-                          <h5 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Documento</h5>
-                          <pre className="text-xs font-mono bg-muted p-3 rounded-lg whitespace-pre-wrap border border-border max-h-60 overflow-y-auto">{a.documento_conteudo}</pre>
+                      {inq && (
+                        <div className="flex items-center gap-3 bg-primary/5 border border-primary/20 rounded-lg px-4 py-3">
+                          <Link2 className="h-4 w-4 text-primary" />
+                          <div className="text-sm">
+                            <span className="font-medium">Inquérito Vinculado:</span> {inq.numero_inquerito}
+                            <span className="text-muted-foreground ml-2">- {inq.autoridade_responsavel}</span>
+                            <Badge variant="outline" className={`ml-2 ${INQUERITO_POLICIAL_STATUS_COLOR[inq.status]}`}>{INQUERITO_POLICIAL_STATUS_LABEL[inq.status]}</Badge>
+                          </div>
                         </div>
                       )}
 
                       <LinkedTables
                         afastamentoId={a.id}
                         investigacoes={getInvestigacoes(a.id)}
-                        inqueritos={getInqueritos(a.id)}
+                        inqueritos={getInqueritosForAfastamento(a.id)}
                         advertencias={getAdvertencias(a.id)}
                         canEdit={canEdit}
                         canDelete={canDelete}
@@ -717,46 +873,47 @@ export function AfastamentosTab(_props: Record<string, never>) {
                     <Badge variant="outline">{registros.length} registro(s)</Badge>
                   </div>
                   <div className="divide-y divide-border">
-                    {registros.map(r => (
-                      <div key={r.id} className="p-4 hover:bg-muted/20 transition-colors">
-                        <div className="flex items-center justify-between mb-1">
-                          <Badge variant="outline" className={AFASTAMENTO_STATUS_COLOR[r.status]}>{AFASTAMENTO_STATUS_LABEL[r.status]}</Badge>
-                          <span className="text-xs text-muted-foreground">Portaria nº {r.numero_portaria}/{r.ano}</span>
+                    {registros.map(r => {
+                      const inq = r.inquerito_id ? getInquerito(r.inquerito_id) : null;
+                      return (
+                        <div key={r.id} className="p-4 hover:bg-muted/20 transition-colors">
+                          <div className="flex items-center justify-between mb-1">
+                            <Badge variant="outline" className={AFASTAMENTO_STATUS_COLOR[r.status]}>{AFASTAMENTO_STATUS_LABEL[r.status]}</Badge>
+                            <span className="text-xs text-muted-foreground">Portaria nº {r.numero_portaria}</span>
+                          </div>
+                          <p className="text-sm text-muted-foreground">Período: {format(new Date(r.data_inicio), "dd/MM/yyyy")} a {format(new Date(r.data_termino), "dd/MM/yyyy")}</p>
+                          {inq && <p className="text-sm text-muted-foreground">Inquérito vinculado: {inq.numero_inquerito}</p>}
+                          <p className="text-sm text-muted-foreground">Responsável: {r.responsavel_nome}</p>
+                          <div className="flex gap-2 mt-2">
+                            <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={() => {
+                              setPreviewData(toPortariaData({
+                                numero_portaria: r.numero_portaria,
+                                data_emissao: r.data_emissao,
+                                posto_graduacao: r.posto_graduacao,
+                                nome_policial: r.nome_completo,
+                                rg_pm: r.rg_pm,
+                                unidade: r.unidade,
+                                data_inicio: r.data_inicio,
+                                data_termino: r.data_termino,
+                                observacoes: r.observacoes || "",
+                                inquerito_id: r.inquerito_id || "",
+                                responsavel_nome: r.responsavel_nome,
+                                responsavel_posto: r.responsavel_posto,
+                                responsavel_assinatura: r.responsavel_assinatura || "",
+                                status: r.status,
+                              }, inq?.numero_inquerito));
+                              setPreviewInquerito(inq?.numero_inquerito || "");
+                              setPreviewOpen(true);
+                            }}>
+                              <Eye className="h-3 w-3" /> Documento
+                            </Button>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-2">
+                            Criado em {format(new Date(r.created_at), "dd/MM/yyyy 'às' HH:mm")} por {r.autor_nome || r.responsavel_nome}
+                          </p>
                         </div>
-                        <p className="text-sm text-muted-foreground">Prazo: {r.prazo_afastamento} • Procedimento: {r.numero_procedimento}</p>
-                        <p className="text-sm text-muted-foreground">Responsável: {r.responsavel_decisao}</p>
-                        <div className="flex gap-2 mt-2">
-                          <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={() => {
-                            setPreviewData({
-                              numero_portaria: r.numero_portaria,
-                              ano: r.ano,
-                              nome_policial: r.nome_completo,
-                              posto_graduacao: r.posto_graduacao,
-                              rg_pm: r.rg_pm,
-                              unidade: r.unidade,
-                              funcao: r.funcao_cargo || "",
-                              motivo_afastamento: r.motivo_afastamento,
-                              prazo_afastamento: r.prazo_afastamento,
-                              numero_procedimento: r.numero_procedimento,
-                              data_portaria: r.data_portaria,
-                              corregedor_responsavel: r.responsavel_decisao,
-                              corregedor_cargo: r.corregedor_cargo || "Corregedor Geral da Polícia Militar",
-                            });
-                            setPreviewOpen(true);
-                          }}>
-                            <Eye className="h-3 w-3" /> Documento
-                          </Button>
-                          <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={() => {
-                            setHistoricoSearch(r.rg_pm);
-                          }}>
-                            <FileText className="h-3 w-3" /> Detalhes
-                          </Button>
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-2">
-                          Criado em {format(new Date(r.created_at), "dd/MM/yyyy 'às' HH:mm")} por {r.autor_nome || r.responsavel_decisao}
-                        </p>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               );
@@ -785,7 +942,7 @@ export function AfastamentosTab(_props: Record<string, never>) {
 
       {/* Create Dialog */}
       <Dialog open={afastamentoDialogOpen} onOpenChange={setAfastamentoDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <FileSignature className="h-5 w-5" /> Nova Portaria de Afastamento
@@ -802,7 +959,7 @@ export function AfastamentosTab(_props: Record<string, never>) {
 
       {/* Edit Dialog */}
       <Dialog open={afastamentoEditDialogOpen} onOpenChange={setAfastamentoEditDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Edit className="h-5 w-5" /> Editar Portaria de Afastamento
@@ -834,20 +991,21 @@ export function AfastamentosTab(_props: Record<string, never>) {
               <Eye className="h-5 w-5" /> Pré-visualização da Portaria
             </DialogTitle>
             <DialogDescription>
-              Documento oficial gerado. Use o botão abaixo para imprimir ou exportar.
+              Documento oficial gerado. Use os botões abaixo para imprimir ou exportar.
             </DialogDescription>
           </DialogHeader>
           {previewData && (
             <div className="space-y-4">
-              <PortariaPreview data={previewData} />
+              <PortariaPreview data={previewData} inqueritoNumero={previewInquerito} />
               <div className="flex justify-end gap-2 pt-2 border-t border-border no-print">
-                <Button variant="outline" onClick={() => { if (previewData) printPortaria(previewData); }} className="gap-2">
+                <Button variant="outline" onClick={() => { if (previewData) printPortaria(previewData, previewInquerito); }} className="gap-2">
                   <Printer className="h-4 w-4" /> Imprimir
                 </Button>
                 <Button variant="outline" onClick={() => {
                   if (!previewData) return;
+                  const el = document.getElementById("portaria-document");
                   const html = `<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><title>Portaria nº ${previewData.numero_portaria}/${previewData.ano}</title>
+<html><head><meta charset="UTF-8"><title>Portaria nº ${previewData.numero_portaria}</title>
 <style>
 @page{margin:2.5cm 2cm}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -858,6 +1016,10 @@ body{font-family:'Times New Roman',Times,serif;font-size:12pt;line-height:1.6;co
 .header .title{font-size:14pt;font-weight:bold;text-transform:uppercase;margin-top:8px;letter-spacing:2px}
 .header .subtitle{font-size:11pt;font-weight:bold;text-transform:uppercase;margin-top:4px}
 .portaria-num{text-align:center;font-size:13pt;font-weight:bold;text-transform:uppercase;margin:30px 0 20px}
+.info-box{border:1px solid #999;padding:12px 16px;margin-bottom:20px;font-size:10pt;background:#f9f9f9}
+.info-box table{width:100%;border-collapse:collapse}
+.info-box td{padding:3px 8px}
+.info-box td:first-child{font-weight:bold;width:180px}
 .ementa{text-align:justify;font-size:11pt;margin-bottom:25px;font-style:italic}
 .resolve{text-align:center;font-size:12pt;font-weight:bold;text-transform:uppercase;margin:25px 0 20px;letter-spacing:3px}
 .artigo{text-align:justify;font-size:12pt;margin-bottom:12px;text-indent:2cm}
@@ -868,12 +1030,12 @@ body{font-family:'Times New Roman',Times,serif;font-size:12pt;line-height:1.6;co
 .rodape .nome{font-size:11pt;font-weight:bold}
 .rodape .cargo{font-size:10pt}
 @media print{body{padding:0}.no-print{display:none}}
-</style></head><body>${document.getElementById("portaria-document")?.innerHTML || ""}</body></html>`;
+</style></head><body>${el?.innerHTML || ""}</body></html>`;
                   const blob = new Blob([html], { type: "text/html" });
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement("a");
                   a.href = url;
-                  a.download = `Portaria_${previewData.numero_portaria}_${previewData.ano}.html`;
+                  a.download = `Portaria_${previewData.numero_portaria}.html`;
                   a.click();
                   URL.revokeObjectURL(url);
                   toast.success("Documento exportado!");
@@ -903,28 +1065,30 @@ body{font-family:'Times New Roman',Times,serif;font-size:12pt;line-height:1.6;co
               <History className="h-5 w-5" /> {historyTitle}
             </DialogTitle>
             <DialogDescription>
-              Versões anteriores do documento. Clique em uma versão para visualizar.
+              Registro de alterações do documento.
             </DialogDescription>
           </DialogHeader>
           {historyVersions.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <History className="h-10 w-10 mx-auto mb-2 opacity-40" />
-              <p>Nenhuma versão anterior registrada.</p>
+              <p>Nenhuma alteração registrada.</p>
             </div>
           ) : (
             <div className="space-y-3">
               {historyVersions.map((v, i) => (
                 <div key={v.id} className="border border-border rounded-lg p-4 hover:bg-muted/20 transition-colors">
                   <div className="flex items-center justify-between mb-2">
-                    <Badge variant="outline">v{historyVersions.length - i}</Badge>
+                    <Badge variant="outline">{v.tipo === "status" ? "Status" : `v${historyVersions.length - i}`}</Badge>
                     <span className="text-xs text-muted-foreground">{format(new Date(v.data), "dd/MM/yyyy 'às' HH:mm")}</span>
                   </div>
                   <p className="text-xs text-muted-foreground mb-1">Autor: {v.autor}</p>
                   <p className="text-xs text-muted-foreground">{v.alteracoes}</p>
-                  <details className="mt-2">
-                    <summary className="text-xs cursor-pointer text-primary hover:underline">Ver documento</summary>
-                    <pre className="text-xs font-mono bg-muted p-3 rounded-lg mt-2 whitespace-pre-wrap border border-border max-h-40 overflow-y-auto">{v.documento}</pre>
-                  </details>
+                  {v.tipo !== "status" && v.documento && (
+                    <details className="mt-2">
+                      <summary className="text-xs cursor-pointer text-primary hover:underline">Ver documento</summary>
+                      <pre className="text-xs font-mono bg-muted p-3 rounded-lg mt-2 whitespace-pre-wrap border border-border max-h-40 overflow-y-auto">{v.documento}</pre>
+                    </details>
+                  )}
                 </div>
               ))}
             </div>

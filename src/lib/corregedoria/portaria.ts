@@ -1,33 +1,34 @@
 import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 export interface PortariaData {
   numero_portaria: string;
-  ano: string;
-  nome_policial: string;
+  data_emissao: string;
   posto_graduacao: string;
+  nome_policial: string;
   rg_pm: string;
   unidade: string;
-  funcao: string;
-  motivo_afastamento: string;
-  prazo_afastamento: string;
-  numero_procedimento: string;
-  data_portaria: string;
-  corregedor_responsavel: string;
-  corregedor_cargo?: string;
+  data_inicio: string;
+  data_termino: string;
+  inquerito_numero: string;
+  responsavel_nome: string;
+  responsavel_posto: string;
 }
 
 export function generatePortariaText(data: PortariaData): string {
-  const dataFormatada = format(new Date(data.data_portaria), "dd 'de' MMMM 'de' yyyy");
+  const dataEmissao = format(new Date(data.data_emissao), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+  const dataInicio = format(new Date(data.data_inicio), "dd/MM/yyyy");
+  const dataTermino = format(new Date(data.data_termino), "dd/MM/yyyy");
   const cidade = "São Paulo";
 
   return [
-    `PORTARIA Nº ${data.numero_portaria}/${data.ano} – CPM`,
+    `PORTARIA Nº ${data.numero_portaria} – CPM`,
     ``,
-    `O ${data.corregedor_responsavel || "CORREGEDOR GERAL"}, no uso de suas atribuições legais e com fundamento no disposto na legislação vigente,`,
+    `O ${data.responsavel_nome || "CORREGEDOR GERAL"}, ${data.responsavel_posto || "Corregedor Geral da Polícia Militar"}, no uso de suas atribuições legais e com fundamento no disposto na legislação vigente,`,
     ``,
     `RESOLVE:`,
     ``,
-    `Art. 1º Determinar o afastamento cautelar do serviço operacional, pelo prazo de ${data.prazo_afastamento}, do seguinte policial militar:`,
+    `Art. 1º Determinar o afastamento cautelar do serviço operacional, no período de ${dataInicio} a ${dataTermino}, do seguinte policial militar:`,
     ``,
     `I – ${data.posto_graduacao} ${data.nome_policial}, RG PM nº ${data.rg_pm}, lotado(a) no(a) ${data.unidade}.`,
     ``,
@@ -41,24 +42,25 @@ export function generatePortariaText(data: PortariaData): string {
     ``,
     `REGISTRE-SE, PUBLIQUE-SE E CUMPRA-SE.`,
     ``,
-    `${cidade}, ${dataFormatada}.`,
+    `${cidade}, ${dataEmissao}.`,
     ``,
     `____________________________________`,
-    `${data.corregedor_responsavel || "Corregedor Geral"}`,
-    `${data.corregedor_cargo || "Corregedor Geral da Polícia Militar"}`,
+    `${data.responsavel_nome || "Corregedor Geral"}`,
+    `${data.responsavel_posto || "Corregedor Geral da Polícia Militar"}`,
   ].join("\n");
 }
 
-export function generatePortariaHTML(data: PortariaData): string {
-  const conteudo = generatePortariaText(data).split("\n");
-  const dataFormatada = format(new Date(data.data_portaria), "dd 'de' MMMM 'de' yyyy");
+export function generatePortariaHTML(data: PortariaData, inqueritoNumero?: string): string {
+  const dataEmissao = format(new Date(data.data_emissao), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+  const dataInicio = format(new Date(data.data_inicio), "dd/MM/yyyy");
+  const dataTermino = format(new Date(data.data_termino), "dd/MM/yyyy");
 
   return `
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Portaria nº ${data.numero_portaria}/${data.ano} - CPM</title>
+  <title>Portaria nº ${data.numero_portaria} - CPM</title>
   <style>
     @page { margin: 2.5cm 2cm 2cm 2cm; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -86,6 +88,16 @@ export function generatePortariaHTML(data: PortariaData): string {
       text-transform: uppercase;
       margin: 30px 0 20px 0;
     }
+    .info-box {
+      border: 1px solid #999;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      font-size: 10pt;
+      background: #f9f9f9;
+    }
+    .info-box table { width: 100%; border-collapse: collapse; }
+    .info-box td { padding: 3px 8px; }
+    .info-box td:first-child { font-weight: bold; width: 180px; }
     .ementa {
       text-align: justify;
       font-size: 11pt;
@@ -146,16 +158,18 @@ export function generatePortariaHTML(data: PortariaData): string {
     <div class="subtitle">Corregedoria da Polícia Militar</div>
   </div>
 
-  <div class="portaria-num">PORTARIA Nº ${data.numero_portaria}/${data.ano} – CPM</div>
+  <div class="portaria-num">PORTARIA Nº ${data.numero_portaria} – CPM</div>
+
+  ${inqueritoNumero ? `<div class="info-box"><table><tr><td>Inquérito Vinculado:</td><td>${inqueritoNumero}</td></tr><tr><td>Policial:</td><td>${data.posto_graduacao} ${data.nome_policial} – RG PM nº ${data.rg_pm}</td></tr><tr><td>Período:</td><td>${dataInicio} a ${dataTermino}</td></tr></table></div>` : ''}
 
   <div class="ementa">
-    O ${data.corregedor_responsavel || "CORREGEDOR GERAL"}, no uso de suas atribuições legais e com fundamento no disposto na legislação vigente,
+    O ${data.responsavel_nome || "CORREGEDOR GERAL"}, ${data.responsavel_posto || "Corregedor Geral da Polícia Militar"}, no uso de suas atribuições legais e com fundamento no disposto na legislação vigente,
   </div>
 
   <div class="resolve">R E S O L V E:</div>
 
   <div class="artigo">
-    <strong>Art. 1º</strong> Determinar o afastamento cautelar do serviço operacional, pelo prazo de ${data.prazo_afastamento}, do seguinte policial militar:
+    <strong>Art. 1º</strong> Determinar o afastamento cautelar do serviço operacional, no período de ${dataInicio} a ${dataTermino}, do seguinte policial militar:
   </div>
 
   <div class="artigo" style="text-indent: 3cm;">
@@ -181,10 +195,10 @@ export function generatePortariaHTML(data: PortariaData): string {
   <div class="final">REGISTRE-SE, PUBLIQUE-SE E CUMPRA-SE.</div>
 
   <div class="rodape">
-    <div class="local-data">São Paulo, ${dataFormatada}.</div>
+    <div class="local-data">São Paulo, ${dataEmissao}.</div>
     <div class="linha">____________________________________</div>
-    <div class="nome">${data.corregedor_responsavel || "Corregedor Geral"}</div>
-    <div class="cargo">${data.corregedor_cargo || "Corregedor Geral da Polícia Militar"}</div>
+    <div class="nome">${data.responsavel_nome || "Corregedor Geral"}</div>
+    <div class="cargo">${data.responsavel_posto || "Corregedor Geral da Polícia Militar"}</div>
   </div>
 
   <div class="footer-note">
@@ -194,8 +208,8 @@ export function generatePortariaHTML(data: PortariaData): string {
 </html>`;
 }
 
-export function printPortaria(data: PortariaData) {
-  const html = generatePortariaHTML(data);
+export function printPortaria(data: PortariaData, inqueritoNumero?: string) {
+  const html = generatePortariaHTML(data, inqueritoNumero);
   const win = window.open("", "_blank");
   if (!win) return;
   win.document.write(html);

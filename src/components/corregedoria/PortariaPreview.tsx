@@ -1,13 +1,17 @@
 import React from "react";
 import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import type { PortariaData } from "@/lib/corregedoria/portaria";
 
 interface PortariaPreviewProps {
   data: PortariaData;
+  inqueritoNumero?: string;
 }
 
-export function PortariaPreview({ data }: PortariaPreviewProps) {
-  const dataFormatada = format(new Date(data.data_portaria), "dd 'de' MMMM 'de' yyyy");
+export function PortariaPreview({ data, inqueritoNumero }: PortariaPreviewProps) {
+  const dataEmissao = format(new Date(data.data_emissao), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+  const dataInicio = format(new Date(data.data_inicio), "dd/MM/yyyy");
+  const dataTermino = format(new Date(data.data_termino), "dd/MM/yyyy");
 
   return (
     <div className="bg-white text-black rounded-lg shadow-lg overflow-hidden print:shadow-none" id="portaria-document">
@@ -20,6 +24,10 @@ export function PortariaPreview({ data }: PortariaPreviewProps) {
         .portaria-doc .header .subtitle { font-size: 12px; font-weight: bold; text-transform: uppercase; margin-top: 4px; color: #1a1a2e; }
         .portaria-doc .content { padding: 25px 30px; }
         .portaria-doc .portaria-num { text-align: center; font-size: 14px; font-weight: bold; text-transform: uppercase; margin: 20px 0; }
+        .portaria-doc .info-box { border: 1px solid #ccc; padding: 10px 14px; margin-bottom: 20px; font-size: 11px; background: #f8f9fa; border-radius: 4px; }
+        .portaria-doc .info-box table { width: 100%; border-collapse: collapse; }
+        .portaria-doc .info-box td { padding: 2px 6px; }
+        .portaria-doc .info-box td:first-child { font-weight: bold; width: 160px; color: #555; }
         .portaria-doc .ementa { text-align: justify; font-size: 12px; margin-bottom: 20px; font-style: italic; padding: 10px 15px; background: #f8f9fa; border-left: 3px solid #1a1a2e; }
         .portaria-doc .resolve { text-align: center; font-size: 13px; font-weight: bold; text-transform: uppercase; margin: 20px 0; letter-spacing: 4px; }
         .portaria-doc .artigo { text-align: justify; font-size: 12px; margin-bottom: 12px; text-indent: 1.5cm; line-height: 1.8; }
@@ -44,16 +52,27 @@ export function PortariaPreview({ data }: PortariaPreviewProps) {
         </div>
 
         <div className="content">
-          <div className="portaria-num">PORTARIA Nº {data.numero_portaria}/{data.ano} – CPM</div>
+          <div className="portaria-num">PORTARIA Nº {data.numero_portaria} – CPM</div>
+
+          <div className="info-box">
+            <table>
+              <tbody>
+                {inqueritoNumero && <tr><td>Inquérito Vinculado:</td><td>{inqueritoNumero}</td></tr>}
+                <tr><td>Policial:</td><td>{data.posto_graduacao} {data.nome_policial} – RG PM nº {data.rg_pm}</td></tr>
+                <tr><td>Unidade:</td><td>{data.unidade}</td></tr>
+                <tr><td>Período:</td><td>{dataInicio} a {dataTermino}</td></tr>
+              </tbody>
+            </table>
+          </div>
 
           <div className="ementa">
-            O {data.corregedor_responsavel || "CORREGEDOR GERAL DA POLÍCIA MILITAR"}, no uso de suas atribuições legais e com fundamento no disposto na legislação vigente,
+            O {data.responsavel_nome || "CORREGEDOR GERAL DA POLÍCIA MILITAR"}, {data.responsavel_posto || "Corregedor Geral da Polícia Militar"}, no uso de suas atribuições legais e com fundamento no disposto na legislação vigente,
           </div>
 
           <div className="resolve">R E S O L V E:</div>
 
           <div className="artigo">
-            <b>Art. 1º</b> Determinar o afastamento cautelar do serviço operacional, pelo prazo de {data.prazo_afastamento}, do seguinte policial militar:
+            <b>Art. 1º</b> Determinar o afastamento cautelar do serviço operacional, no período de {dataInicio} a {dataTermino}, do seguinte policial militar:
           </div>
 
           <div className="artigo" style={{ textIndent: "2.5cm" }}>
@@ -79,14 +98,14 @@ export function PortariaPreview({ data }: PortariaPreviewProps) {
           <div className="final">REGISTRE-SE, PUBLIQUE-SE E CUMPRA-SE.</div>
 
           <div className="rodape">
-            <div className="local-data">São Paulo, {dataFormatada}.</div>
+            <div className="local-data">São Paulo, {dataEmissao}.</div>
             <div className="linha">____________________________________</div>
-            <div className="nome">{data.corregedor_responsavel || "Corregedor Geral"}</div>
-            <div className="cargo">{data.corregedor_cargo || "Corregedor Geral da Polícia Militar"}</div>
+            <div className="nome">{data.responsavel_nome || "Corregedor Geral"}</div>
+            <div className="cargo">{data.responsavel_posto || "Corregedor Geral da Polícia Militar"}</div>
           </div>
 
           <div className="footer-note">
-            Documento gerado eletronicamente em {format(new Date(), "dd/MM/yyyy 'às' HH:mm")} por {data.corregedor_responsavel || "Sistema"} — Corregedoria Geral PMESP
+            Documento gerado eletronicamente em {format(new Date(), "dd/MM/yyyy 'às' HH:mm")} por {data.responsavel_nome || "Sistema"} — Corregedoria Geral PMESP
           </div>
         </div>
       </div>

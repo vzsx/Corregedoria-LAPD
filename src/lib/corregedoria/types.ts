@@ -112,31 +112,30 @@ export interface PendingUser {
   created_at: string;
 }
 
-export type AfastamentoStatus = "ativo" | "encerrado" | "em_investigacao" | "em_inquerito";
+export type AfastamentoStatus = "ativo" | "concluido" | "arquivado";
 export type InvestigacaoPolicialStatus = "em_andamento" | "em_analise" | "concluida" | "arquivada";
 export type InqueritoPolicialStatus = "em_andamento" | "concluido" | "arquivado" | "encaminhado";
 
 export interface Afastamento {
   id: string;
   numero_portaria: string;
-  ano: string;
-  data_portaria: string;
+  data_emissao: string;
   posto_graduacao: string;
   nome_completo: string;
   rg_pm: string;
   unidade: string;
-  funcao_cargo: string | null;
+  data_inicio: string;
+  data_termino: string;
+  observacoes: string | null;
+  inquerito_id: string | null;
+  responsavel_nome: string;
+  responsavel_posto: string;
+  responsavel_assinatura: string | null;
   motivo_afastamento: string;
-  prazo_afastamento: string;
-  numero_procedimento: string;
-  responsavel_decisao: string;
-  corregedor_cargo: string | null;
-  documento_conteudo: string | null;
+  status: AfastamentoStatus;
   autor_id: string | null;
   autor_nome: string | null;
   historico_versoes: any;
-  observacoes: string | null;
-  status: AfastamentoStatus;
   created_at: string;
   updated_at: string;
 }

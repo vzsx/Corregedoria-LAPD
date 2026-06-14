@@ -6,7 +6,7 @@
 DO $$
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'afastamento_status') THEN
-        CREATE TYPE afastamento_status AS ENUM ('ativo', 'encerrado', 'em_investigacao', 'em_inquerito');
+        CREATE TYPE afastamento_status AS ENUM ('ativo', 'concluido', 'arquivado');
     END IF;
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'investigacao_policial_status') THEN
         CREATE TYPE investigacao_policial_status AS ENUM ('em_andamento', 'em_analise', 'concluida', 'arquivada');
@@ -18,33 +18,30 @@ END $$;
 
 -- 2. TABLES
 
--- Afastamentos
 CREATE TABLE IF NOT EXISTS public.afastamentos (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     numero_portaria TEXT NOT NULL,
-    ano TEXT NOT NULL DEFAULT '',
-    data_portaria DATE NOT NULL,
+    data_emissao DATE NOT NULL,
     posto_graduacao TEXT NOT NULL,
     nome_completo TEXT NOT NULL,
     rg_pm TEXT NOT NULL,
     unidade TEXT NOT NULL,
-    funcao_cargo TEXT,
-    motivo_afastamento TEXT NOT NULL,
-    prazo_afastamento TEXT NOT NULL,
-    numero_procedimento TEXT NOT NULL DEFAULT '',
-    responsavel_decisao TEXT NOT NULL,
-    corregedor_cargo TEXT DEFAULT 'Corregedor Geral da Polícia Militar',
-    documento_conteudo TEXT,
+    data_inicio DATE NOT NULL,
+    data_termino DATE NOT NULL,
+    observacoes TEXT,
+    inquerito_id UUID REFERENCES public.inqueritos_policial(id) ON DELETE SET NULL,
+    responsavel_nome TEXT NOT NULL,
+    responsavel_posto TEXT NOT NULL DEFAULT '',
+    responsavel_assinatura TEXT,
+    motivo_afastamento TEXT NOT NULL DEFAULT 'Art. 4º O afastamento de que trata esta Portaria possui caráter meramente cautelar e não punitivo, podendo ser revisto ou revogado a qualquer tempo, conforme o andamento do procedimento apuratório.',
+    status afastamento_status DEFAULT 'ativo',
     autor_id UUID,
     autor_nome TEXT,
     historico_versoes JSONB DEFAULT '[]'::jsonb,
-    observacoes TEXT,
-    status afastamento_status DEFAULT 'ativo',
     created_at TIMESTAMPTZ DEFAULT now(),
     updated_at TIMESTAMPTZ DEFAULT now()
 );
 
--- Investigacoes vinculadas ao policial afastado
 CREATE TABLE IF NOT EXISTS public.investigacoes_policial (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     numero_investigacao TEXT NOT NULL,
@@ -59,7 +56,6 @@ CREATE TABLE IF NOT EXISTS public.investigacoes_policial (
     updated_at TIMESTAMPTZ DEFAULT now()
 );
 
--- Inqueritos vinculados ao policial afastado
 CREATE TABLE IF NOT EXISTS public.inqueritos_policial (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     numero_inquerito TEXT NOT NULL,
@@ -74,7 +70,6 @@ CREATE TABLE IF NOT EXISTS public.inqueritos_policial (
     updated_at TIMESTAMPTZ DEFAULT now()
 );
 
--- Advertencias vinculadas ao policial
 CREATE TABLE IF NOT EXISTS public.advertencias (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     descricao TEXT NOT NULL,
@@ -84,13 +79,12 @@ CREATE TABLE IF NOT EXISTS public.advertencias (
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
--- 3. RLS POLICIES
+-- 3. RLS
 ALTER TABLE public.afastamentos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.investigacoes_policial ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.inqueritos_policial ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.advertencias ENABLE ROW LEVEL SECURITY;
 
--- Afastamentos policies (uses existing app_role: 'admin', 'corregedor', 'pending')
 DO $$ BEGIN
     CREATE POLICY "Staff can view afastamentos" ON public.afastamentos FOR SELECT
     USING (public.has_role(auth.uid(), 'corregedor') OR public.has_role(auth.uid(), 'admin'));
@@ -111,7 +105,6 @@ DO $$ BEGIN
     USING (public.has_role(auth.uid(), 'admin'));
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
--- Investigacoes policial policies
 DO $$ BEGIN
     CREATE POLICY "Staff can view investigacoes_policial" ON public.investigacoes_policial FOR SELECT
     USING (public.has_role(auth.uid(), 'corregedor') OR public.has_role(auth.uid(), 'admin'));
@@ -132,7 +125,6 @@ DO $$ BEGIN
     USING (public.has_role(auth.uid(), 'admin'));
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
--- Inqueritos policial policies
 DO $$ BEGIN
     CREATE POLICY "Staff can view inqueritos_policial" ON public.inqueritos_policial FOR SELECT
     USING (public.has_role(auth.uid(), 'corregedor') OR public.has_role(auth.uid(), 'admin'));
@@ -153,7 +145,6 @@ DO $$ BEGIN
     USING (public.has_role(auth.uid(), 'admin'));
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
--- Advertencias policies
 DO $$ BEGIN
     CREATE POLICY "Staff can view advertencias" ON public.advertencias FOR SELECT
     USING (public.has_role(auth.uid(), 'corregedor') OR public.has_role(auth.uid(), 'admin'));
@@ -169,5 +160,5 @@ DO $$ BEGIN
     USING (public.has_role(auth.uid(), 'admin'));
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
--- 4. SEQUENCE FOR numero_registro
+-- 4. SEQUENCE
 CREATE SEQUENCE IF NOT EXISTS public.afastamentos_numero_registro_seq;
