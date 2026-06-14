@@ -119,6 +119,7 @@ export type InqueritoPolicialStatus = "em_andamento" | "concluido" | "arquivado"
 export interface Afastamento {
   id: string;
   numero_portaria: string;
+  ano: string;
   data_portaria: string;
   posto_graduacao: string;
   nome_completo: string;
@@ -127,11 +128,25 @@ export interface Afastamento {
   funcao_cargo: string | null;
   motivo_afastamento: string;
   prazo_afastamento: string;
+  numero_procedimento: string;
   responsavel_decisao: string;
+  corregedor_cargo: string | null;
+  documento_conteudo: string | null;
+  autor_id: string | null;
+  autor_nome: string | null;
+  historico_versoes: any;
   observacoes: string | null;
   status: AfastamentoStatus;
   created_at: string;
   updated_at: string;
+}
+
+export interface VersaoDocumento {
+  id: string;
+  data: string;
+  autor: string;
+  documento: string;
+  alteracoes: string;
 }
 
 export interface InvestigacaoPolicial {

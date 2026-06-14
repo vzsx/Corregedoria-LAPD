@@ -4,7 +4,7 @@ import {
   Shield, FileText, Loader2, Plus, LayoutDashboard, Users, Trash2, Edit,
   Printer, Search, X, FileSignature, Activity, ClipboardList, Eye,
   ChevronDown, ChevronRight, AlertTriangle, UserCheck, ScrollText,
-  BookOpen, Ban, Clock, Gavel, Download
+  BookOpen, Ban, Clock, Gavel, Download, Copy, History, FileDown
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,7 +16,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,171 +34,126 @@ import type {
   Afastamento, AfastamentoStatus,
   InvestigacaoPolicial, InvestigacaoPolicialStatus,
   InqueritoPolicial, InqueritoPolicialStatus,
-  Advertencia,
+  Advertencia, VersaoDocumento,
 } from "@/lib/corregedoria/types";
+import { generatePortariaText, printPortaria } from "@/lib/corregedoria/portaria";
+import type { PortariaData } from "@/lib/corregedoria/portaria";
+import { PortariaPreview } from "@/components/corregedoria/PortariaPreview";
 
 type AfastamentoSubTab = "dashboard" | "listagem" | "historico";
 
-interface AfastamentosTabProps {
+interface PortariaFormData {
+  numero_portaria: string;
+  ano: string;
+  nome_policial: string;
+  posto_graduacao: string;
+  rg_pm: string;
+  unidade: string;
+  funcao: string;
+  motivo_afastamento: string;
+  prazo_afastamento: string;
+  numero_procedimento: string;
+  data_portaria: string;
+  corregedor_responsavel: string;
+  corregedor_cargo: string;
+  status: AfastamentoStatus;
 }
 
-export function AfastamentosTab(_props: AfastamentosTabProps) {
+function toPortariaData(form: PortariaFormData): PortariaData {
+  return {
+    numero_portaria: form.numero_portaria,
+    ano: form.ano,
+    nome_policial: form.nome_policial,
+    posto_graduacao: form.posto_graduacao,
+    rg_pm: form.rg_pm,
+    unidade: form.unidade,
+    funcao: form.funcao,
+    motivo_afastamento: form.motivo_afastamento,
+    prazo_afastamento: form.prazo_afastamento,
+    numero_procedimento: form.numero_procedimento,
+    data_portaria: form.data_portaria,
+    corregedor_responsavel: form.corregedor_responsavel,
+    corregedor_cargo: form.corregedor_cargo,
+  };
+}
+
+const defaultForm: PortariaFormData = {
+  numero_portaria: "",
+  ano: String(new Date().getFullYear()),
+  nome_policial: "",
+  posto_graduacao: "",
+  rg_pm: "",
+  unidade: "",
+  funcao: "",
+  motivo_afastamento: "",
+  prazo_afastamento: "",
+  numero_procedimento: "",
+  data_portaria: format(new Date(), "yyyy-MM-dd"),
+  corregedor_responsavel: "",
+  corregedor_cargo: "Corregedor Geral da Polícia Militar",
+  status: "ativo",
+};
+
+export function AfastamentosTab(_props: Record<string, never>) {
   const { user, isAdmin, roles } = useAuth();
   const currentRole = roles[0] || "consulta";
-
-  // --- Role-based permissions ---
   const canDelete = currentRole === "corregedor_geral" || currentRole === "subcorregedor" || isAdmin;
-  const canEdit = currentRole !== "consulta";
-  const canCreate = currentRole !== "consulta";
-  const isInvestigador = currentRole === "investigador" || canEdit;
-  const isConsulta = currentRole === "consulta";
-  const canManageInvestigacoes = currentRole === "investigador" || currentRole === "corregedor" || currentRole === "subcorregedor" || currentRole === "corregedor_geral" || isAdmin;
+  const canEdit = currentRole === "corregedor_geral" || currentRole === "subcorregedor" || currentRole === "corregedor" || currentRole === "investigador" || isAdmin;
+  const canCreate = canEdit;
 
-  // --- Sub-tab state ---
-  const [subTab, setSubTab] = useState<AfastamentoSubTab>("dashboard");
-
-  // --- Data state ---
+  const [loading, setLoading] = useState(true);
   const [afastamentos, setAfastamentos] = useState<Afastamento[]>([]);
   const [investigacoes, setInvestigacoes] = useState<InvestigacaoPolicial[]>([]);
   const [inqueritos, setInqueritos] = useState<InqueritoPolicial[]>([]);
   const [advertencias, setAdvertencias] = useState<Advertencia[]>([]);
-  const [fetching, setFetching] = useState(true);
 
-  // --- UI state ---
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [subTab, setSubTab] = useState<AfastamentoSubTab>("dashboard");
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState<AfastamentoStatus | "todos">("todos");
-  const [selectedPolicial, setSelectedPolicial] = useState<Afastamento | null>(null);
+  const [filterStatus, setFilterStatus] = useState<string>("todos");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  // --- Afastamento form state ---
+  const [afastamentoForm, setAfastamentoForm] = useState<PortariaFormData>(defaultForm);
   const [afastamentoDialogOpen, setAfastamentoDialogOpen] = useState(false);
   const [afastamentoEditDialogOpen, setAfastamentoEditDialogOpen] = useState(false);
   const [editingAfastamentoId, setEditingAfastamentoId] = useState<string | null>(null);
-  const [afastamentoForm, setAfastamentoForm] = useState({
-    numero_portaria: "",
-    data_portaria: format(new Date(), "yyyy-MM-dd"),
-    posto_graduacao: "",
-    nome_completo: "",
-    rg_pm: "",
-    unidade: "",
-    funcao_cargo: "",
-    motivo_afastamento: "",
-    prazo_afastamento: "",
-    responsavel_decisao: "",
-    observacoes: "",
-    status: "ativo" as AfastamentoStatus,
-  });
-  const [submitting, setSubmitting] = useState(false);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
-  // --- Investigação form state ---
-  const [investigacaoDialogOpen, setInvestigacaoDialogOpen] = useState(false);
-  const [investigacaoEditDialogOpen, setInvestigacaoEditDialogOpen] = useState(false);
-  const [editingInvestigacaoId, setEditingInvestigacaoId] = useState<string | null>(null);
-  const [investigacaoForm, setInvestigacaoForm] = useState({
-    numero_investigacao: "",
-    data_instauracao: format(new Date(), "yyyy-MM-dd"),
-    encarregado: "",
-    descricao_fatos: "",
-    provas_anexadas: "",
-    testemunhas: "",
-    status: "em_andamento" as InvestigacaoPolicialStatus,
-  });
-  const [investigacaoAfastamentoId, setInvestigacaoAfastamentoId] = useState<string>("");
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewData, setPreviewData] = useState<PortariaData | null>(null);
+  const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
+  const [historyVersions, setHistoryVersions] = useState<VersaoDocumento[]>([]);
+  const [historyTitle, setHistoryTitle] = useState("");
 
-  // --- Inquérito form state ---
-  const [inqueritoDialogOpen, setInqueritoDialogOpen] = useState(false);
-  const [inqueritoEditDialogOpen, setInqueritoEditDialogOpen] = useState(false);
-  const [editingInqueritoId, setEditingInqueritoId] = useState<string | null>(null);
-  const [inqueritoForm, setInqueritoForm] = useState({
-    numero_inquerito: "",
-    data_instauracao: format(new Date(), "yyyy-MM-dd"),
-    autoridade_responsavel: "",
-    relatorio: "",
-    parecer: "",
-    resultado: "",
-    status: "em_andamento" as InqueritoPolicialStatus,
-  });
-  const [inqueritoAfastamentoId, setInqueritoAfastamentoId] = useState<string>("");
+  const loadAfastamentos = async () => {
+    const { data, error } = await supabase
+      .from("afastamentos")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) { toast.error("Erro ao carregar afastamentos"); return; }
+    setAfastamentos(data || []);
+  };
 
-  // --- Advertência form state ---
-  const [advertenciaDialogOpen, setAdvertenciaDialogOpen] = useState(false);
-  const [advertenciaForm, setAdvertenciaForm] = useState({
-    descricao: "",
-    data_advertencia: format(new Date(), "yyyy-MM-dd"),
-    autoridade_responsavel: "",
-  });
-  const [advertenciaAfastamentoId, setAdvertenciaAfastamentoId] = useState<string>("");
+  const loadLinkedData = async () => {
+    const [invRes, inqRes, advRes] = await Promise.all([
+      supabase.from("investigacoes_policial").select("*"),
+      supabase.from("inqueritos_policial").select("*"),
+      supabase.from("advertencias").select("*"),
+    ]);
+    if (invRes.data) setInvestigacoes(invRes.data);
+    if (inqRes.data) setInqueritos(inqRes.data);
+    if (advRes.data) setAdvertencias(advRes.data);
+  };
 
-  // --- Confirm dialog ---
-  const [confirmDialog, setConfirmDialog] = useState<{
-    open: boolean;
-    title: string;
-    description: string;
-    onConfirm: () => void;
-    loading?: boolean;
-  }>({ open: false, title: "", description: "", onConfirm: () => {} });
-
-  // --- Load data ---
   useEffect(() => {
-    const load = async () => {
-      setFetching(true);
-      const [afastamentosRes, investigacoesRes, inqueritosRes, advertenciasRes] = await Promise.all([
-        supabase.from("afastamentos").select("*").order("created_at", { ascending: false }),
-        supabase.from("investigacoes_policial").select("*").order("created_at", { ascending: false }),
-        supabase.from("inqueritos_policial").select("*").order("created_at", { ascending: false }),
-        supabase.from("advertencias").select("*").order("created_at", { ascending: false }),
-      ]);
-      if (afastamentosRes.data) setAfastamentos(afastamentosRes.data as Afastamento[]);
-      if (investigacoesRes.data) setInvestigacoes(investigacoesRes.data as InvestigacaoPolicial[]);
-      if (inqueritosRes.data) setInqueritos(inqueritosRes.data as InqueritoPolicial[]);
-      if (advertenciasRes.data) setAdvertencias(advertenciasRes.data as Advertencia[]);
-      setFetching(false);
+    const init = async () => {
+      setLoading(true);
+      await Promise.all([loadAfastamentos(), loadLinkedData()]);
+      setLoading(false);
     };
-    load();
-
-    // Real-time subscriptions
-    const afastamentosSub = supabase.channel("afastamentos-changes")
-      .on("postgres_changes", { event: "*", schema: "public", table: "afastamentos" }, (payload) => {
-        if (payload.eventType === "INSERT") setAfastamentos(prev => prev.some(a => a.id === payload.new.id) ? prev : [payload.new as Afastamento, ...prev]);
-        if (payload.eventType === "UPDATE") setAfastamentos(prev => prev.map(a => a.id === payload.new.id ? payload.new as Afastamento : a));
-        if (payload.eventType === "DELETE") setAfastamentos(prev => prev.filter(a => a.id !== payload.old.id));
-      })
-      .subscribe();
-
-    const investigacoesSub = supabase.channel("investigacoes-policial-changes")
-      .on("postgres_changes", { event: "*", schema: "public", table: "investigacoes_policial" }, (payload) => {
-        if (payload.eventType === "INSERT") setInvestigacoes(prev => prev.some(i => i.id === payload.new.id) ? prev : [payload.new as InvestigacaoPolicial, ...prev]);
-        if (payload.eventType === "UPDATE") setInvestigacoes(prev => prev.map(i => i.id === payload.new.id ? payload.new as InvestigacaoPolicial : i));
-        if (payload.eventType === "DELETE") setInvestigacoes(prev => prev.filter(i => i.id !== payload.old.id));
-      })
-      .subscribe();
-
-    const inqueritosSub = supabase.channel("inqueritos-policial-changes")
-      .on("postgres_changes", { event: "*", schema: "public", table: "inqueritos_policial" }, (payload) => {
-        if (payload.eventType === "INSERT") setInqueritos(prev => prev.some(i => i.id === payload.new.id) ? prev : [payload.new as InqueritoPolicial, ...prev]);
-        if (payload.eventType === "UPDATE") setInqueritos(prev => prev.map(i => i.id === payload.new.id ? payload.new as InqueritoPolicial : i));
-        if (payload.eventType === "DELETE") setInqueritos(prev => prev.filter(i => i.id !== payload.old.id));
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(afastamentosSub);
-      supabase.removeChannel(investigacoesSub);
-      supabase.removeChannel(inqueritosSub);
-    };
+    init();
   }, []);
 
-  // --- Set default values from user ---
-  useEffect(() => {
-    if (user) {
-      const name = user.user_metadata?.full_name || "";
-      if (!afastamentoForm.responsavel_decisao) {
-        setAfastamentoForm(prev => ({ ...prev, responsavel_decisao: name }));
-      }
-    }
-  }, [user]);
-
-  // --- Computed stats ---
   const stats = {
     ativos: afastamentos.filter(a => a.status === "ativo").length,
     encerrados: afastamentos.filter(a => a.status === "encerrado").length,
@@ -206,9 +161,8 @@ export function AfastamentosTab(_props: AfastamentosTabProps) {
     emInquerito: afastamentos.filter(a => a.status === "em_inquerito").length,
   };
 
-  // --- Filtered list ---
   const filteredAfastamentos = afastamentos.filter(a => {
-    const matchesSearch = !searchTerm || 
+    const matchesSearch = !searchTerm ||
       a.nome_completo.toLowerCase().includes(searchTerm.toLowerCase()) ||
       a.rg_pm.toLowerCase().includes(searchTerm.toLowerCase()) ||
       a.unidade.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -217,37 +171,56 @@ export function AfastamentosTab(_props: AfastamentosTabProps) {
     return matchesSearch && matchesFilter;
   });
 
-  // --- Helpers for linked data ---
   const getInvestigacoes = (afastamentoId: string) => investigacoes.filter(i => i.afastamento_id === afastamentoId);
   const getInqueritos = (afastamentoId: string) => inqueritos.filter(i => i.afastamento_id === afastamentoId);
   const getAdvertencias = (afastamentoId: string) => advertencias.filter(a => a.afastamento_id === afastamentoId);
 
-  // --- CRUD: Afastamento ---
+  const resetForm = () => {
+    setAfastamentoForm({
+      ...defaultForm,
+      ano: String(new Date().getFullYear()),
+      data_portaria: format(new Date(), "yyyy-MM-dd"),
+      corregedor_responsavel: user?.user_metadata?.full_name || "",
+    });
+  };
+
+  const formToDb = (form: PortariaFormData) => {
+    const docText = generatePortariaText(toPortariaData(form));
+    return {
+      numero_portaria: form.numero_portaria,
+      ano: form.ano,
+      data_portaria: form.data_portaria,
+      posto_graduacao: form.posto_graduacao,
+      nome_completo: form.nome_policial,
+      rg_pm: form.rg_pm,
+      unidade: form.unidade,
+      funcao_cargo: form.funcao || null,
+      motivo_afastamento: form.motivo_afastamento,
+      prazo_afastamento: form.prazo_afastamento,
+      numero_procedimento: form.numero_procedimento,
+      responsavel_decisao: form.corregedor_responsavel,
+      corregedor_cargo: form.corregedor_cargo,
+      documento_conteudo: docText,
+      autor_id: user?.id || null,
+      autor_nome: user?.user_metadata?.full_name || form.corregedor_responsavel,
+      status: form.status,
+    };
+  };
+
   const createAfastamento = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!canCreate) return;
     setSubmitting(true);
-    const { error } = await supabase.from("afastamentos").insert({
-      numero_portaria: afastamentoForm.numero_portaria,
-      data_portaria: afastamentoForm.data_portaria,
-      posto_graduacao: afastamentoForm.posto_graduacao,
-      nome_completo: afastamentoForm.nome_completo,
-      rg_pm: afastamentoForm.rg_pm,
-      unidade: afastamentoForm.unidade,
-      funcao_cargo: afastamentoForm.funcao_cargo || null,
-      motivo_afastamento: afastamentoForm.motivo_afastamento,
-      prazo_afastamento: afastamentoForm.prazo_afastamento,
-      responsavel_decisao: afastamentoForm.responsavel_decisao,
-      observacoes: afastamentoForm.observacoes || null,
-      status: afastamentoForm.status,
-    });
+    const insertData = formToDb(afastamentoForm);
+    const { error } = await supabase.from("afastamentos").insert(insertData);
     if (error) {
       toast.error("Erro ao criar afastamento: " + error.message);
     } else {
       toast.success("Afastamento cadastrado com sucesso!");
       setAfastamentoDialogOpen(false);
-      resetAfastamentoForm();
-      logAudit("create", "afastamentos", { nome: afastamentoForm.nome_completo });
+      resetForm();
+      logAudit("create", "afastamentos", { nome: afastamentoForm.nome_policial });
+      await loadAfastamentos();
     }
     setSubmitting(false);
   };
@@ -256,28 +229,38 @@ export function AfastamentosTab(_props: AfastamentosTabProps) {
     e.preventDefault();
     if (!canEdit || !editingAfastamentoId) return;
     setSubmitting(true);
-    const { error } = await supabase.from("afastamentos").update({
-      numero_portaria: afastamentoForm.numero_portaria,
-      data_portaria: afastamentoForm.data_portaria,
-      posto_graduacao: afastamentoForm.posto_graduacao,
-      nome_completo: afastamentoForm.nome_completo,
-      rg_pm: afastamentoForm.rg_pm,
-      unidade: afastamentoForm.unidade,
-      funcao_cargo: afastamentoForm.funcao_cargo || null,
-      motivo_afastamento: afastamentoForm.motivo_afastamento,
-      prazo_afastamento: afastamentoForm.prazo_afastamento,
-      responsavel_decisao: afastamentoForm.responsavel_decisao,
-      observacoes: afastamentoForm.observacoes || null,
-      status: afastamentoForm.status,
-    }).eq("id", editingAfastamentoId);
+    const existing = afastamentos.find(a => a.id === editingAfastamentoId);
+    const updateData = formToDb(afastamentoForm);
+    let versoes: VersaoDocumento[] = [];
+    if (existing?.historico_versoes) {
+      try {
+        versoes = typeof existing.historico_versoes === "string"
+          ? JSON.parse(existing.historico_versoes)
+          : existing.historico_versoes;
+      } catch { versoes = []; }
+    }
+    const novaVersao: VersaoDocumento = {
+      id: crypto.randomUUID?.() || Date.now().toString(),
+      data: new Date().toISOString(),
+      autor: user?.user_metadata?.full_name || afastamentoForm.corregedor_responsavel,
+      documento: existing?.documento_conteudo || "",
+      alteracoes: "Atualização do documento",
+    };
+    versoes.unshift(novaVersao);
+    updateData.historico_versoes = versoes;
+    const { error } = await supabase
+      .from("afastamentos")
+      .update(updateData)
+      .eq("id", editingAfastamentoId);
     if (error) {
       toast.error("Erro ao atualizar afastamento: " + error.message);
     } else {
       toast.success("Afastamento atualizado!");
       setAfastamentoEditDialogOpen(false);
       setEditingAfastamentoId(null);
-      resetAfastamentoForm();
+      resetForm();
       logAudit("update", "afastamentos", { id: editingAfastamentoId });
+      await loadAfastamentos();
     }
     setSubmitting(false);
   };
@@ -288,772 +271,405 @@ export function AfastamentosTab(_props: AfastamentosTabProps) {
       return;
     }
     const { error } = await supabase.from("afastamentos").delete().eq("id", id);
-    if (error) {
-      toast.error("Erro ao excluir: " + error.message);
-    } else {
+    if (error) { toast.error("Erro ao excluir: " + error.message); }
+    else {
       toast.success("Afastamento excluído!");
       logAudit("delete", "afastamentos", { id });
+      await loadAfastamentos();
     }
+    setDeleteConfirmId(null);
   };
 
   const updateAfastamentoStatus = async (id: string, status: AfastamentoStatus) => {
     const { error } = await supabase.from("afastamentos").update({ status }).eq("id", id);
     if (error) toast.error("Erro ao atualizar status");
-    else toast.success("Status atualizado!");
+    else { toast.success("Status atualizado!"); await loadAfastamentos(); }
   };
 
-  const resetAfastamentoForm = () => {
-    setAfastamentoForm({
-      numero_portaria: "",
+  const duplicateAfastamento = async (a: Afastamento) => {
+    if (!canCreate) return;
+    const docText = a.documento_conteudo || generatePortariaText({
+      numero_portaria: a.numero_portaria + "-copia",
+      ano: String(new Date().getFullYear()),
+      nome_policial: a.nome_completo,
+      posto_graduacao: a.posto_graduacao,
+      rg_pm: a.rg_pm,
+      unidade: a.unidade,
+      funcao: a.funcao_cargo || "",
+      motivo_afastamento: a.motivo_afastamento,
+      prazo_afastamento: a.prazo_afastamento,
+      numero_procedimento: a.numero_procedimento,
       data_portaria: format(new Date(), "yyyy-MM-dd"),
-      posto_graduacao: "",
-      nome_completo: "",
-      rg_pm: "",
-      unidade: "",
-      funcao_cargo: "",
-      motivo_afastamento: "",
-      prazo_afastamento: "",
-      responsavel_decisao: user?.user_metadata?.full_name || "",
-      observacoes: "",
-      status: "ativo" as AfastamentoStatus,
+      corregedor_responsavel: a.responsavel_decisao,
+      corregedor_cargo: a.corregedor_cargo || "Corregedor Geral da Polícia Militar",
     });
+    const { error } = await supabase.from("afastamentos").insert({
+      numero_portaria: a.numero_portaria + "-copia",
+      ano: String(new Date().getFullYear()),
+      data_portaria: format(new Date(), "yyyy-MM-dd"),
+      posto_graduacao: a.posto_graduacao,
+      nome_completo: a.nome_completo,
+      rg_pm: a.rg_pm,
+      unidade: a.unidade,
+      funcao_cargo: a.funcao_cargo,
+      motivo_afastamento: a.motivo_afastamento,
+      prazo_afastamento: a.prazo_afastamento,
+      numero_procedimento: a.numero_procedimento,
+      responsavel_decisao: a.responsavel_decisao,
+      corregedor_cargo: a.corregedor_cargo,
+      documento_conteudo: docText,
+      autor_id: user?.id || null,
+      autor_nome: user?.user_metadata?.full_name || a.responsavel_decisao,
+      status: a.status,
+    });
+    if (error) toast.error("Erro ao duplicar: " + error.message);
+    else { toast.success("Documento duplicado!"); await loadAfastamentos(); }
   };
 
-  const openEditAfastamento = (afastamento: Afastamento) => {
+  const openPreview = (form: PortariaFormData) => {
+    setPreviewData(toPortariaData(form));
+    setPreviewOpen(true);
+  };
+
+  const openHistory = (a: Afastamento) => {
+    let versoes: VersaoDocumento[] = [];
+    if (a.historico_versoes) {
+      try {
+        versoes = typeof a.historico_versoes === "string"
+          ? JSON.parse(a.historico_versoes)
+          : a.historico_versoes;
+      } catch { versoes = []; }
+    }
+    setHistoryVersions(versoes);
+    setHistoryTitle(`Histórico - Portaria nº ${a.numero_portaria}/${a.ano}`);
+    setHistoryDialogOpen(true);
+  };
+
+  const editAfastamento = async (a: Afastamento) => {
     setAfastamentoForm({
-      numero_portaria: afastamento.numero_portaria,
-      data_portaria: afastamento.data_portaria,
-      posto_graduacao: afastamento.posto_graduacao,
-      nome_completo: afastamento.nome_completo,
-      rg_pm: afastamento.rg_pm,
-      unidade: afastamento.unidade,
-      funcao_cargo: afastamento.funcao_cargo || "",
-      motivo_afastamento: afastamento.motivo_afastamento,
-      prazo_afastamento: afastamento.prazo_afastamento,
-      responsavel_decisao: afastamento.responsavel_decisao,
-      observacoes: afastamento.observacoes || "",
-      status: afastamento.status,
+      numero_portaria: a.numero_portaria,
+      ano: a.ano,
+      nome_policial: a.nome_completo,
+      posto_graduacao: a.posto_graduacao,
+      rg_pm: a.rg_pm,
+      unidade: a.unidade,
+      funcao: a.funcao_cargo || "",
+      motivo_afastamento: a.motivo_afastamento,
+      prazo_afastamento: a.prazo_afastamento,
+      numero_procedimento: a.numero_procedimento,
+      data_portaria: a.data_portaria,
+      corregedor_responsavel: a.responsavel_decisao,
+      corregedor_cargo: a.corregedor_cargo || "Corregedor Geral da Polícia Militar",
+      status: a.status,
     });
-    setEditingAfastamentoId(afastamento.id);
+    setEditingAfastamentoId(a.id);
     setAfastamentoEditDialogOpen(true);
   };
 
-  // --- CRUD: Investigação ---
-  const createInvestigacao = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!canManageInvestigacoes || !investigacaoAfastamentoId) return;
-    setSubmitting(true);
-    const { error } = await supabase.from("investigacoes_policial").insert({
-      numero_investigacao: investigacaoForm.numero_investigacao,
-      data_instauracao: investigacaoForm.data_instauracao,
-      encarregado: investigacaoForm.encarregado,
-      descricao_fatos: investigacaoForm.descricao_fatos,
-      provas_anexadas: investigacaoForm.provas_anexadas || null,
-      testemunhas: investigacaoForm.testemunhas || null,
-      status: investigacaoForm.status,
-      afastamento_id: investigacaoAfastamentoId,
-    });
-    if (error) {
-      toast.error("Erro ao criar investigação: " + error.message);
-    } else {
-      toast.success("Investigação criada!");
-      setInvestigacaoDialogOpen(false);
-      resetInvestigacaoForm();
-    }
-    setSubmitting(false);
-  };
-
-  const updateInvestigacao = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!canManageInvestigacoes || !editingInvestigacaoId) return;
-    setSubmitting(true);
-    const { error } = await supabase.from("investigacoes_policial").update({
-      numero_investigacao: investigacaoForm.numero_investigacao,
-      data_instauracao: investigacaoForm.data_instauracao,
-      encarregado: investigacaoForm.encarregado,
-      descricao_fatos: investigacaoForm.descricao_fatos,
-      provas_anexadas: investigacaoForm.provas_anexadas || null,
-      testemunhas: investigacaoForm.testemunhas || null,
-      status: investigacaoForm.status,
-    }).eq("id", editingInvestigacaoId);
-    if (error) {
-      toast.error("Erro ao atualizar investigação: " + error.message);
-    } else {
-      toast.success("Investigação atualizada!");
-      setInvestigacaoEditDialogOpen(false);
-      setEditingInvestigacaoId(null);
-      resetInvestigacaoForm();
-    }
-    setSubmitting(false);
-  };
-
-  const deleteInvestigacao = async (id: string) => {
-    if (!canDelete) {
-      toast.error("Apenas Corregedor Geral e Subcorregedor podem excluir.");
-      return;
-    }
-    await supabase.from("investigacoes_policial").delete().eq("id", id);
-    toast.success("Investigação excluída!");
-  };
-
-  const resetInvestigacaoForm = () => {
-    setInvestigacaoForm({
-      numero_investigacao: "",
-      data_instauracao: format(new Date(), "yyyy-MM-dd"),
-      encarregado: "",
-      descricao_fatos: "",
-      provas_anexadas: "",
-      testemunhas: "",
-      status: "em_andamento" as InvestigacaoPolicialStatus,
-    });
-  };
-
-  const openEditInvestigacao = (inv: InvestigacaoPolicial) => {
-    setInvestigacaoForm({
-      numero_investigacao: inv.numero_investigacao,
-      data_instauracao: inv.data_instauracao,
-      encarregado: inv.encarregado,
-      descricao_fatos: inv.descricao_fatos,
-      provas_anexadas: inv.provas_anexadas || "",
-      testemunhas: inv.testemunhas || "",
-      status: inv.status,
-    });
-    setEditingInvestigacaoId(inv.id);
-    setInvestigacaoEditDialogOpen(true);
-  };
-
-  // --- CRUD: Inquérito ---
-  const createInquerito = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!canEdit || !inqueritoAfastamentoId) return;
-    setSubmitting(true);
-    const { error } = await supabase.from("inqueritos_policial").insert({
-      numero_inquerito: inqueritoForm.numero_inquerito,
-      data_instauracao: inqueritoForm.data_instauracao,
-      autoridade_responsavel: inqueritoForm.autoridade_responsavel,
-      relatorio: inqueritoForm.relatorio || null,
-      parecer: inqueritoForm.parecer || null,
-      resultado: inqueritoForm.resultado || null,
-      status: inqueritoForm.status,
-      afastamento_id: inqueritoAfastamentoId,
-    });
-    if (error) {
-      toast.error("Erro ao criar inquérito: " + error.message);
-    } else {
-      toast.success("Inquérito criado!");
-      setInqueritoDialogOpen(false);
-      resetInqueritoForm();
-    }
-    setSubmitting(false);
-  };
-
-  const updateInquerito = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!canEdit || !editingInqueritoId) return;
-    setSubmitting(true);
-    const { error } = await supabase.from("inqueritos_policial").update({
-      numero_inquerito: inqueritoForm.numero_inquerito,
-      data_instauracao: inqueritoForm.data_instauracao,
-      autoridade_responsavel: inqueritoForm.autoridade_responsavel,
-      relatorio: inqueritoForm.relatorio || null,
-      parecer: inqueritoForm.parecer || null,
-      resultado: inqueritoForm.resultado || null,
-      status: inqueritoForm.status,
-    }).eq("id", editingInqueritoId);
-    if (error) {
-      toast.error("Erro ao atualizar inquérito: " + error.message);
-    } else {
-      toast.success("Inquérito atualizado!");
-      setInqueritoEditDialogOpen(false);
-      setEditingInqueritoId(null);
-      resetInqueritoForm();
-    }
-    setSubmitting(false);
-  };
-
-  const deleteInquerito = async (id: string) => {
-    if (!canDelete) {
-      toast.error("Apenas Corregedor Geral e Subcorregedor podem excluir.");
-      return;
-    }
-    await supabase.from("inqueritos_policial").delete().eq("id", id);
-    toast.success("Inquérito excluído!");
-  };
-
-  const resetInqueritoForm = () => {
-    setInqueritoForm({
-      numero_inquerito: "",
-      data_instauracao: format(new Date(), "yyyy-MM-dd"),
-      autoridade_responsavel: "",
-      relatorio: "",
-      parecer: "",
-      resultado: "",
-      status: "em_andamento" as InqueritoPolicialStatus,
-    });
-  };
-
-  const openEditInquerito = (inq: InqueritoPolicial) => {
-    setInqueritoForm({
-      numero_inquerito: inq.numero_inquerito,
-      data_instauracao: inq.data_instauracao,
-      autoridade_responsavel: inq.autoridade_responsavel,
-      relatorio: inq.relatorio || "",
-      parecer: inq.parecer || "",
-      resultado: inq.resultado || "",
-      status: inq.status,
-    });
-    setEditingInqueritoId(inq.id);
-    setInqueritoEditDialogOpen(true);
-  };
-
-  // --- CRUD: Advertência ---
-  const createAdvertencia = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!canEdit || !advertenciaAfastamentoId) return;
-    const { error } = await supabase.from("advertencias").insert({
-      descricao: advertenciaForm.descricao,
-      data_advertencia: advertenciaForm.data_advertencia,
-      autoridade_responsavel: advertenciaForm.autoridade_responsavel,
-      afastamento_id: advertenciaAfastamentoId,
-    });
-    if (error) {
-      toast.error("Erro ao adicionar advertência: " + error.message);
-    } else {
-      toast.success("Advertência registrada!");
-      setAdvertenciaDialogOpen(false);
-      setAdvertenciaForm({
-        descricao: "",
-        data_advertencia: format(new Date(), "yyyy-MM-dd"),
-        autoridade_responsavel: "",
-      });
-    }
-  };
-
-  // --- Print / PDF ---
-  const printAfastamento = (afastamento: Afastamento) => {
-    const win = window.open("", "_blank");
-    if (!win) return;
-    const linkedInvs = getInvestigacoes(afastamento.id);
-    const linkedInqs = getInqueritos(afastamento.id);
-    const linkedAdvs = getAdvertencias(afastamento.id);
-    win.document.write(`
-      <html><head><title>Afastamento - ${afastamento.nome_completo}</title>
-      <style>
-        body { font-family: 'Courier New', monospace; padding: 40px; color: #222; max-width: 800px; margin: 0 auto; }
-        h1 { text-align: center; font-size: 14px; text-transform: uppercase; border-bottom: 2px solid #000; padding-bottom: 10px; }
-        h2 { font-size: 12px; margin-top: 20px; border-bottom: 1px solid #999; padding-bottom: 4px; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .header h3 { font-size: 11px; text-transform: uppercase; margin: 0; }
-        .field { margin: 6px 0; font-size: 11px; }
-        .field strong { display: inline-block; width: 200px; }
-        table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 10px; }
-        th, td { border: 1px solid #999; padding: 4px 6px; text-align: left; }
-        th { background: #eee; }
-        .footer { margin-top: 40px; font-size: 10px; text-align: center; color: #666; }
-        @media print { body { padding: 0; } }
-      </style></head><body>
-      <div class="header">
-        <h3>Corregedoria Geral da Polícia Militar</h3>
-        <h1>Registro de Afastamento</h1>
+  const renderFormFields = (isEdit: boolean) => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div>
+        <Label className="text-xs font-semibold">Nº da Portaria *</Label>
+        <Input value={afastamentoForm.numero_portaria} onChange={e => setAfastamentoForm(f => ({ ...f, numero_portaria: e.target.value }))} placeholder="Ex: 001" required />
       </div>
-      <div class="field"><strong>Número da Portaria:</strong> ${afastamento.numero_portaria}</div>
-      <div class="field"><strong>Data da Portaria:</strong> ${format(new Date(afastamento.data_portaria), "dd/MM/yyyy")}</div>
-      <div class="field"><strong>Posto/Graduação:</strong> ${afastamento.posto_graduacao}</div>
-      <div class="field"><strong>Nome Completo:</strong> ${afastamento.nome_completo}</div>
-      <div class="field"><strong>RG PM:</strong> ${afastamento.rg_pm}</div>
-      <div class="field"><strong>Unidade:</strong> ${afastamento.unidade}</div>
-      <div class="field"><strong>Função/Cargo:</strong> ${afastamento.funcao_cargo || "N/A"}</div>
-      <div class="field"><strong>Motivo do Afastamento:</strong> ${afastamento.motivo_afastamento}</div>
-      <div class="field"><strong>Prazo do Afastamento:</strong> ${afastamento.prazo_afastamento}</div>
-      <div class="field"><strong>Responsável pela Decisão:</strong> ${afastamento.responsavel_decisao}</div>
-      <div class="field"><strong>Status:</strong> ${AFASTAMENTO_STATUS_LABEL[afastamento.status]}</div>
-      ${afastamento.observacoes ? `<div class="field"><strong>Observações:</strong> ${afastamento.observacoes}</div>` : ""}
-      ${linkedInvs.length > 0 ? `
-        <h2>Investigações Vinculadas</h2>
-        <table><tr><th>Nº Investigação</th><th>Data</th><th>Encarregado</th><th>Status</th></tr>
-        ${linkedInvs.map(i => `<tr><td>${i.numero_investigacao}</td><td>${format(new Date(i.data_instauracao), "dd/MM/yyyy")}</td><td>${i.encarregado}</td><td>${INVESTIGACAO_POLICIAL_STATUS_LABEL[i.status]}</td></tr>`).join("")}
-        </table>` : ""}
-      ${linkedInqs.length > 0 ? `
-        <h2>Inquéritos Vinculados</h2>
-        <table><tr><th>Nº Inquérito</th><th>Data</th><th>Autoridade</th><th>Status</th></tr>
-        ${linkedInqs.map(i => `<tr><td>${i.numero_inquerito}</td><td>${format(new Date(i.data_instauracao), "dd/MM/yyyy")}</td><td>${i.autoridade_responsavel}</td><td>${INQUERITO_POLICIAL_STATUS_LABEL[i.status]}</td></tr>`).join("")}
-        </table>` : ""}
-      <div class="footer">Documento gerado em ${format(new Date(), "dd/MM/yyyy 'às' HH:mm")} - Corregedoria Geral PMESP</div>
-      <script>window.print();</script>
-      </body></html>
-    `);
-    win.document.close();
-  };
+      <div>
+        <Label className="text-xs font-semibold">Ano *</Label>
+        <Input value={afastamentoForm.ano} onChange={e => setAfastamentoForm(f => ({ ...f, ano: e.target.value }))} placeholder={String(new Date().getFullYear())} required />
+      </div>
+      <div>
+        <Label className="text-xs font-semibold">Data da Portaria *</Label>
+        <Input type="date" value={afastamentoForm.data_portaria} onChange={e => setAfastamentoForm(f => ({ ...f, data_portaria: e.target.value }))} required />
+      </div>
+      <div>
+        <Label className="text-xs font-semibold">Posto/Graduação *</Label>
+        <Input value={afastamentoForm.posto_graduacao} onChange={e => setAfastamentoForm(f => ({ ...f, posto_graduacao: e.target.value }))} placeholder="Ex: 1º SGT PM" required />
+      </div>
+      <div>
+        <Label className="text-xs font-semibold">Nome do Policial *</Label>
+        <Input value={afastamentoForm.nome_policial} onChange={e => setAfastamentoForm(f => ({ ...f, nome_policial: e.target.value }))} placeholder="Nome completo" required />
+      </div>
+      <div>
+        <Label className="text-xs font-semibold">RG PM *</Label>
+        <Input value={afastamentoForm.rg_pm} onChange={e => setAfastamentoForm(f => ({ ...f, rg_pm: e.target.value }))} placeholder="Nº do RG PM" required />
+      </div>
+      <div>
+        <Label className="text-xs font-semibold">Unidade *</Label>
+        <Input value={afastamentoForm.unidade} onChange={e => setAfastamentoForm(f => ({ ...f, unidade: e.target.value }))} placeholder="Unidade de lotação" required />
+      </div>
+      <div>
+        <Label className="text-xs font-semibold">Função</Label>
+        <Input value={afastamentoForm.funcao} onChange={e => setAfastamentoForm(f => ({ ...f, funcao: e.target.value }))} placeholder="Função/cargo" />
+      </div>
+      <div>
+        <Label className="text-xs font-semibold">Prazo do Afastamento *</Label>
+        <Input value={afastamentoForm.prazo_afastamento} onChange={e => setAfastamentoForm(f => ({ ...f, prazo_afastamento: e.target.value }))} placeholder="Ex: 90 dias" required />
+      </div>
+      <div>
+        <Label className="text-xs font-semibold">Nº do Procedimento *</Label>
+        <Input value={afastamentoForm.numero_procedimento} onChange={e => setAfastamentoForm(f => ({ ...f, numero_procedimento: e.target.value }))} placeholder="Nº do procedimento apuratório" required />
+      </div>
+      <div className="md:col-span-2 lg:col-span-1">
+        <Label className="text-xs font-semibold">Motivo do Afastamento *</Label>
+        <Input value={afastamentoForm.motivo_afastamento} onChange={e => setAfastamentoForm(f => ({ ...f, motivo_afastamento: e.target.value }))} placeholder="Motivo" required />
+      </div>
+      <div>
+        <Label className="text-xs font-semibold">Status</Label>
+        <Select value={afastamentoForm.status} onValueChange={v => setAfastamentoForm(f => ({ ...f, status: v as AfastamentoStatus }))}>
+          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ativo">Ativo</SelectItem>
+            <SelectItem value="em_investigacao">Em Investigação</SelectItem>
+            <SelectItem value="em_inquerito">Em Inquérito</SelectItem>
+            <SelectItem value="encerrado">Encerrado</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="md:col-span-2">
+        <Label className="text-xs font-semibold">Corregedor Responsável *</Label>
+        <Input value={afastamentoForm.corregedor_responsavel} onChange={e => setAfastamentoForm(f => ({ ...f, corregedor_responsavel: e.target.value }))} placeholder="Nome do Corregedor" required />
+      </div>
+      <div>
+        <Label className="text-xs font-semibold">Cargo do Corregedor</Label>
+        <Input value={afastamentoForm.corregedor_cargo} onChange={e => setAfastamentoForm(f => ({ ...f, corregedor_cargo: e.target.value }))} />
+      </div>
+      <div className="md:col-span-2 lg:col-span-3 flex items-end gap-2 pt-2">
+        <Button type="button" variant="outline" onClick={() => openPreview(afastamentoForm)} className="gap-2">
+          <Eye className="h-4 w-4" /> Visualizar Documento
+        </Button>
+        {!isEdit && (
+          <Button type="submit" disabled={submitting} className="gap-2">
+            {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSignature className="h-4 w-4" />}
+            {submitting ? "Salvando..." : "Emitir Portaria"}
+          </Button>
+        )}
+      </div>
+    </div>
+  );
 
-  let content: JSX.Element | null = null;
+  if (loading) {
+    return (
+      <div className="space-y-4 p-4">
+        <Skeleton className="h-10 w-60" />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[1,2,3,4].map(i => <Skeleton key={i} className="h-24" />)}
+        </div>
+      </div>
+    );
+  }
 
-  // --- Dashboard ---
+  let content: React.ReactNode;
+
   if (subTab === "dashboard") {
+    const recentAfastamentos = afastamentos.slice(0, 5);
     content = (
-      <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <div className="flex items-center justify-between border-b border-border pb-4">
-          <h3 className="text-lg font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
-            <ClipboardList className="h-5 w-5" /> Dashboard de Afastamentos
-          </h3>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setSubTab("listagem")}
-              className="border-border text-muted-foreground hover:text-foreground text-[10px] uppercase"
-            >
-              <Eye className="h-3.5 w-3.5 mr-1" /> Ver Listagem
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setSubTab("historico")}
-              className="border-border text-muted-foreground hover:text-foreground text-[10px] uppercase"
-            >
-              <BookOpen className="h-3.5 w-3.5 mr-1" /> Histórico
-            </Button>
+      <div className="space-y-6 animate-fade-in">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <StatCard title="Ativos" value={stats.ativos} icon={Shield} color="bg-red-500/10 text-red-600 border-red-500/20" />
+          <StatCard title="Em Investigação" value={stats.emInvestigacao} icon={Search} color="bg-amber-500/10 text-amber-600 border-amber-500/20" />
+          <StatCard title="Em Inquérito" value={stats.emInquerito} icon={Gavel} color="bg-blue-500/10 text-blue-600 border-blue-500/20" />
+          <StatCard title="Encerrados" value={stats.encerrados} icon={Ban} color="bg-gray-500/10 text-gray-600 border-gray-500/20" />
+        </div>
+
+        <div className="bg-card border border-border rounded-lg p-5">
+          <h4 className="font-bold text-sm uppercase tracking-wider mb-4 flex items-center gap-2">
+            <Activity className="h-4 w-4" /> Distribuição por Status
+          </h4>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {(["ativo", "em_investigacao", "em_inquerito", "encerrado"] as const).map(s => {
+              const count = stats[s === "em_investigacao" ? "emInvestigacao" : s === "em_inquerito" ? "emInquerito" : s === "encerrado" ? "encerrados" : "ativos"];
+              const total = afastamentos.length || 1;
+              const pct = Math.round((count / total) * 100);
+              return (
+                <div key={s} className="text-center p-3 rounded-lg bg-muted/50">
+                  <div className="text-2xl font-bold">{count}</div>
+                  <div className="text-xs text-muted-foreground">{AFASTAMENTO_STATUS_LABEL[s]}</div>
+                  <div className="w-full bg-muted rounded-full h-1.5 mt-2">
+                    <div className={`h-1.5 rounded-full ${AFASTAMENTO_STATUS_COLOR[s].replace('text-', 'bg-')}`} style={{ width: `${pct}%` }} />
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        {fetching ? (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
-            {[1,2,3,4].map(i => <Skeleton key={i} className="h-24" />)}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
-            <StatCard
-              title="Afastamentos Ativos"
-              value={stats.ativos}
-              icon={AlertTriangle}
-              color="text-amber-500"
-            />
-            <StatCard
-              title="Afastamentos Encerrados"
-              value={stats.encerrados}
-              icon={UserCheck}
-              color="text-slate-400"
-            />
-            <StatCard
-              title="Em Investigação"
-              value={stats.emInvestigacao}
-              icon={Shield}
-              color="text-blue-500"
-            />
-            <StatCard
-              title="Em Inquérito"
-              value={stats.emInquerito}
-              icon={Gavel}
-              color="text-red-500"
-            />
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          <div className="rounded-lg border border-border bg-card p-5">
-            <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Afastamentos por Status</h4>
-            <div className="space-y-3">
-              {(Object.entries(AFASTAMENTO_STATUS_LABEL) as [AfastamentoStatus, string][]).map(([key, label]) => {
-                const count = afastamentos.filter(a => a.status === key).length;
-                const total = afastamentos.length || 1;
-                return (
-                  <div key={key} className="space-y-1">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-foreground">{label}</span>
-                      <span className="text-muted-foreground font-mono">{count}</span>
-                    </div>
-                    <div className="h-2 rounded-full bg-muted overflow-hidden">
-                      <div className={`h-full rounded-full transition-all duration-500 ${AFASTAMENTO_STATUS_COLOR[key].split(" ")[0]}`}
-                        style={{ width: `${(count / total) * 100}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="rounded-lg border border-border bg-card p-5">
-            <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Últimos Afastamentos</h4>
-            <div className="space-y-2">
-              {afastamentos.slice(0, 5).map(a => (
-                <div key={a.id} className="flex items-center justify-between p-2 rounded bg-muted/50">
-                  <div className="overflow-hidden">
-                    <p className="text-xs text-foreground font-bold truncate">{a.nome_completo}</p>
-                    <p className="text-[10px] text-muted-foreground">{a.motivo_afastamento}</p>
-                  </div>
-                  <Badge variant="outline" className={`text-[9px] uppercase ${AFASTAMENTO_STATUS_COLOR[a.status]}`}>
-                    {AFASTAMENTO_STATUS_LABEL[a.status]}
-                  </Badge>
-                </div>
-              ))}
-              {afastamentos.length === 0 && (
-                <p className="text-xs text-muted-foreground text-center py-4">Nenhum afastamento registrado.</p>
-              )}
-            </div>
-          </div>
-
-          <div className="rounded-lg border border-border bg-card p-5">
-            <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Ações Rápidas</h4>
-            <div className="space-y-2">
-              {canCreate && (
-                <Button
-                  onClick={() => { resetAfastamentoForm(); setAfastamentoDialogOpen(true); }}
-                  className="w-full bg-primary hover:bg-primary/80 text-white text-[10px] uppercase font-bold"
-                  size="sm"
-                >
-                  <Plus className="h-3.5 w-3.5 mr-1" /> Novo Afastamento
-                </Button>
-              )}
-              <Button
-                onClick={() => setSubTab("listagem")}
-                variant="outline"
-                className="w-full border-border text-muted-foreground hover:text-foreground text-[10px] uppercase"
-                size="sm"
-              >
-                <Eye className="h-3.5 w-3.5 mr-1" /> Ver Todos os Registros
+        {canCreate && (
+          <div className="bg-card border border-border rounded-lg p-5">
+            <h4 className="font-bold text-sm uppercase tracking-wider mb-3 flex items-center gap-2">
+              <FileSignature className="h-4 w-4" /> Ações Rápidas
+            </h4>
+            <div className="flex flex-wrap gap-3">
+              <Button onClick={() => { resetForm(); setAfastamentoDialogOpen(true); }} className="gap-2">
+                <Plus className="h-4 w-4" /> Nova Portaria de Afastamento
               </Button>
             </div>
           </div>
-        </div>
+        )}
+
+        {recentAfastamentos.length > 0 && (
+          <div className="bg-card border border-border rounded-lg p-5">
+            <h4 className="font-bold text-sm uppercase tracking-wider mb-3 flex items-center gap-2">
+              <Clock className="h-4 w-4" /> Últimas Portarias Emitidas
+            </h4>
+            <div className="space-y-2">
+              {recentAfastamentos.map(a => (
+                <div key={a.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <Badge variant="outline" className={AFASTAMENTO_STATUS_COLOR[a.status]}>
+                      {AFASTAMENTO_STATUS_LABEL[a.status]}
+                    </Badge>
+                    <div>
+                      <p className="text-sm font-medium">{a.posto_graduacao} {a.nome_completo}</p>
+                      <p className="text-xs text-muted-foreground">Portaria nº {a.numero_portaria}/{a.ano} • {a.unidade}</p>
+                    </div>
+                  </div>
+                  <div className="text-xs text-muted-foreground">{format(new Date(a.created_at), "dd/MM/yyyy")}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     );
   } else if (subTab === "listagem") {
     content = (
-      <div className="space-y-6 animate-fade-in">
-        {/* Header */}
-        <div className="flex flex-col gap-4 border-b border-border pb-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="text-lg font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
-              <ClipboardList className="h-5 w-5" /> Registro de Afastamentos
-            </h3>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setSubTab("dashboard")}
-                className="border-border text-muted-foreground hover:text-foreground text-[10px] uppercase"
-              >
-                <LayoutDashboard className="h-3.5 w-3.5 mr-1" /> Dashboard
-              </Button>
-              {canCreate && (
-                <Button
-                  size="sm"
-                  onClick={() => { resetAfastamentoForm(); setAfastamentoDialogOpen(true); }}
-                  className="bg-primary hover:bg-primary/80 text-white text-[10px] uppercase"
-                >
-                  <Plus className="h-3.5 w-3.5 mr-1" /> Novo Afastamento
-                </Button>
-              )}
+      <div className="space-y-4 animate-fade-in">
+        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+          <div className="flex flex-1 gap-3 w-full sm:w-auto">
+            <div className="relative flex-1 sm:max-w-xs">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input placeholder="Buscar por nome, RG, unidade ou portaria..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-9" />
+              {searchTerm && <X className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 cursor-pointer text-muted-foreground" onClick={() => setSearchTerm("")} />}
             </div>
-          </div>
-
-          {/* Search & Filters */}
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-              <Input
-                placeholder="Pesquisar por nome, RG, unidade, portaria..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="bg-background border-border text-foreground text-xs pl-9 h-9"
-              />
-            </div>
-            <Select
-              value={filterStatus}
-              onValueChange={(v) => setFilterStatus(v as AfastamentoStatus | "todos")}
-            >
-              <SelectTrigger className="bg-background border-border text-foreground text-[10px] uppercase h-9 w-[160px]">
-                <SelectValue placeholder="Filtrar por status" />
-              </SelectTrigger>
-              <SelectContent className="bg-muted border-border text-foreground">
-                <SelectItem value="todos" className="text-[10px]">Todos</SelectItem>
-                {Object.entries(AFASTAMENTO_STATUS_LABEL).map(([val, lab]) => (
-                  <SelectItem key={val} value={val} className="text-[10px]">{lab}</SelectItem>
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos os Status</SelectItem>
+                {(["ativo", "em_investigacao", "em_inquerito", "encerrado"] as const).map(s => (
+                  <SelectItem key={s} value={s}>{AFASTAMENTO_STATUS_LABEL[s]}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <span className="text-xs text-muted-foreground">
-              {filteredAfastamentos.length} registro(s)
-            </span>
           </div>
+          {canCreate && (
+            <Button onClick={() => { resetForm(); setAfastamentoDialogOpen(true); }} className="gap-2 shrink-0">
+              <Plus className="h-4 w-4" /> Nova Portaria
+            </Button>
+          )}
         </div>
 
-        {/* List */}
-        {fetching ? (
-          <div className="space-y-3">{[1,2,3].map(i => <Skeleton key={i} className="h-20" />)}</div>
-        ) : filteredAfastamentos.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-            <ClipboardList className="h-12 w-12 mb-3 opacity-30" />
-            <p className="text-sm">Nenhum afastamento encontrado.</p>
-            {canCreate && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => { resetAfastamentoForm(); setAfastamentoDialogOpen(true); }}
-                className="mt-4 border-border text-[10px] uppercase"
-              >
-                <Plus className="h-3.5 w-3.5 mr-1" /> Cadastrar Primeiro Afastamento
-              </Button>
-            )}
+        {filteredAfastamentos.length === 0 ? (
+          <div className="text-center py-12 text-muted-foreground">
+            <FileText className="h-12 w-12 mx-auto mb-3 opacity-40" />
+            <p>Nenhuma portaria encontrada.</p>
           </div>
         ) : (
           <div className="space-y-3">
-            {filteredAfastamentos.map(afastamento => {
-              const isExpanded = expandedId === afastamento.id;
-              const linkedInvs = getInvestigacoes(afastamento.id);
-              const linkedInqs = getInqueritos(afastamento.id);
-              const linkedAdvs = getAdvertencias(afastamento.id);
+            {filteredAfastamentos.map(a => {
+              const isExpanded = expandedId === a.id;
               return (
-                <div key={afastamento.id} className="rounded-lg border border-border bg-card overflow-hidden">
-                  {/* Card Header */}
-                  <div
-                    className="flex w-full items-center justify-between gap-4 p-5 text-left transition-colors hover:bg-muted cursor-pointer"
-                    onClick={() => setExpandedId(isExpanded ? null : afastamento.id)}
-                  >
-                    <div className="flex items-center gap-4 flex-1 overflow-hidden">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-muted/50">
-                        {afastamento.status === "ativo" ? (
-                          <AlertTriangle className="h-5 w-5 text-amber-500" />
-                        ) : afastamento.status === "encerrado" ? (
-                          <UserCheck className="h-5 w-5 text-slate-400" />
-                        ) : (
-                          <Shield className="h-5 w-5 text-red-500" />
-                        )}
+                <div key={a.id} className="bg-card border border-border rounded-lg overflow-hidden">
+                  <div className="p-4 flex items-start justify-between cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => setExpandedId(isExpanded ? null : a.id)}>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Badge variant="outline" className={AFASTAMENTO_STATUS_COLOR[a.status]}>{AFASTAMENTO_STATUS_LABEL[a.status]}</Badge>
+                        <span className="text-xs font-mono text-muted-foreground">Portaria nº {a.numero_portaria}/{a.ano}</span>
                       </div>
-                      <div className="overflow-hidden min-w-0">
-                        <div className="flex items-center gap-3 whitespace-nowrap overflow-hidden">
-                          <h4 className="font-bold uppercase text-foreground tracking-wide truncate">
-                            {afastamento.nome_completo}
-                          </h4>
-                          <Badge variant="outline" className="bg-muted border-border text-foreground font-mono text-[9px]">
-                            RG: {afastamento.rg_pm}
-                          </Badge>
-                          <Badge variant="outline" className="bg-muted border-border text-muted-foreground text-[9px] uppercase">
-                            {afastamento.posto_graduacao}
-                          </Badge>
-                          <Badge variant="outline" className={`text-[9px] uppercase border ${AFASTAMENTO_STATUS_COLOR[afastamento.status]}`}>
-                            {AFASTAMENTO_STATUS_LABEL[afastamento.status]}
-                          </Badge>
-                        </div>
-                        <div className="mt-1 flex items-center gap-3 text-[10px] text-muted-foreground uppercase tracking-widest">
-                          <span>Portaria: {afastamento.numero_portaria}</span>
-                          <span>·</span>
-                          <span>{format(new Date(afastamento.data_portaria), "dd/MM/yyyy")}</span>
-                          <span>·</span>
-                          <span>{afastamento.unidade}</span>
-                          <span>·</span>
-                          <span>{afastamento.motivo_afastamento}</span>
-                        </div>
+                      <p className="font-semibold text-sm truncate">{a.posto_graduacao} {a.nome_completo}</p>
+                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground mt-1">
+                        <span>RG PM: {a.rg_pm}</span>
+                        <span>{a.unidade}</span>
+                        <span>Prazo: {a.prazo_afastamento}</span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 shrink-0" onClick={(e) => e.stopPropagation()}>
-                      {/* Status Select */}
+                    <div className="flex items-center gap-1 shrink-0 ml-4">
                       {canEdit && (
-                        <Select
-                          value={afastamento.status}
-                          onValueChange={(v: AfastamentoStatus) => updateAfastamentoStatus(afastamento.id, v)}
-                        >
-                          <SelectTrigger className="h-8 bg-muted border-border text-[10px] text-muted-foreground uppercase w-[140px]">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="bg-muted border-border text-foreground">
-                            {Object.entries(AFASTAMENTO_STATUS_LABEL).map(([val, lab]) => (
-                              <SelectItem key={val} value={val} className="text-[10px] uppercase">{lab}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      )}
-                      {canEdit && (
-                        <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-foreground hover:text-foreground hover:bg-muted/50"
-                          onClick={() => openEditAfastamento(afastamento)} title="Editar">
+                        <Button variant="ghost" size="icon" className="h-8 w-8" title="Editar" onClick={e => { e.stopPropagation(); editAfastamento(a); }}>
                           <Edit className="h-4 w-4" />
                         </Button>
                       )}
+                      {canCreate && (
+                        <Button variant="ghost" size="icon" className="h-8 w-8" title="Duplicar" onClick={e => { e.stopPropagation(); duplicateAfastamento(a); }}>
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                      )}
+                      <Button variant="ghost" size="icon" className="h-8 w-8" title="Visualizar documento" onClick={e => {
+                        e.stopPropagation();
+                        setPreviewData({
+                          numero_portaria: a.numero_portaria,
+                          ano: a.ano,
+                          nome_policial: a.nome_completo,
+                          posto_graduacao: a.posto_graduacao,
+                          rg_pm: a.rg_pm,
+                          unidade: a.unidade,
+                          funcao: a.funcao_cargo || "",
+                          motivo_afastamento: a.motivo_afastamento,
+                          prazo_afastamento: a.prazo_afastamento,
+                          numero_procedimento: a.numero_procedimento,
+                          data_portaria: a.data_portaria,
+                          corregedor_responsavel: a.responsavel_decisao,
+                          corregedor_cargo: a.corregedor_cargo || "Corregedor Geral da Polícia Militar",
+                        });
+                        setPreviewOpen(true);
+                      }}>
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      {a.historico_versoes && <Button variant="ghost" size="icon" className="h-8 w-8" title="Histórico" onClick={e => { e.stopPropagation(); openHistory(a); }}>
+                        <History className="h-4 w-4" />
+                      </Button>}
+                      <Button variant="ghost" size="icon" className="h-8 w-8" title="Imprimir" onClick={e => {
+                        e.stopPropagation();
+                        printPortaria({
+                          numero_portaria: a.numero_portaria,
+                          ano: a.ano,
+                          nome_policial: a.nome_completo,
+                          posto_graduacao: a.posto_graduacao,
+                          rg_pm: a.rg_pm,
+                          unidade: a.unidade,
+                          funcao: a.funcao_cargo || "",
+                          motivo_afastamento: a.motivo_afastamento,
+                          prazo_afastamento: a.prazo_afastamento,
+                          numero_procedimento: a.numero_procedimento,
+                          data_portaria: a.data_portaria,
+                          corregedor_responsavel: a.responsavel_decisao,
+                          corregedor_cargo: a.corregedor_cargo || "Corregedor Geral da Polícia Militar",
+                        });
+                      }}>
+                        <Printer className="h-4 w-4" />
+                      </Button>
                       {canDelete && (
-                        <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-red-500 hover:text-red-400 hover:bg-red-500/10"
-                          onClick={() => setConfirmDialog({
-                            open: true,
-                            title: "Excluir Afastamento",
-                            description: `Tem certeza que deseja excluir o afastamento de ${afastamento.nome_completo}?`,
-                            onConfirm: () => { deleteAfastamento(afastamento.id); setConfirmDialog(prev => ({ ...prev, open: false })); },
-                          })}
-                          title="Excluir">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" title="Excluir" onClick={e => { e.stopPropagation(); setDeleteConfirmId(a.id); }}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       )}
-                      <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-foreground hover:text-foreground hover:bg-muted/50"
-                        onClick={() => printAfastamento(afastamento)} title="Imprimir / PDF">
-                        <Printer className="h-4 w-4" />
-                      </Button>
-                      <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-foreground hover:text-foreground hover:bg-muted/50"
-                        onClick={() => setExpandedId(isExpanded ? null : afastamento.id)} title="Expandir">
-                        {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                      </Button>
+                      <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? "rotate-90" : ""}`} />
                     </div>
                   </div>
 
-                  {/* Expanded Content */}
                   {isExpanded && (
-                    <div className="border-t border-border/50 bg-muted/50 p-6 space-y-6">
-                      {/* Full Details */}
-                      <div className="grid md:grid-cols-3 gap-4">
-                        <div className="space-y-2">
-                          <p className="text-[10px] text-muted-foreground"><strong className="text-foreground">Nº Portaria:</strong> {afastamento.numero_portaria}</p>
-                          <p className="text-[10px] text-muted-foreground"><strong className="text-foreground">Data da Portaria:</strong> {format(new Date(afastamento.data_portaria), "dd/MM/yyyy")}</p>
-                          <p className="text-[10px] text-muted-foreground"><strong className="text-foreground">Posto/Graduação:</strong> {afastamento.posto_graduacao}</p>
-                        </div>
-                        <div className="space-y-2">
-                          <p className="text-[10px] text-muted-foreground"><strong className="text-foreground">Função/Cargo:</strong> {afastamento.funcao_cargo || "N/A"}</p>
-                          <p className="text-[10px] text-muted-foreground"><strong className="text-foreground">Motivo:</strong> {afastamento.motivo_afastamento}</p>
-                          <p className="text-[10px] text-muted-foreground"><strong className="text-foreground">Prazo:</strong> {afastamento.prazo_afastamento}</p>
-                        </div>
-                        <div className="space-y-2">
-                          <p className="text-[10px] text-muted-foreground"><strong className="text-foreground">Responsável:</strong> {afastamento.responsavel_decisao}</p>
-                          {afastamento.observacoes && (
-                            <p className="text-[10px] text-muted-foreground"><strong className="text-foreground">Observações:</strong> {afastamento.observacoes}</p>
-                          )}
-                        </div>
+                    <div className="border-t border-border p-4 bg-muted/20 space-y-4">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <Field label="Procedimento"><span className="text-sm font-medium">{a.numero_procedimento}</span></Field>
+                        <Field label="Motivo"><span className="text-sm font-medium">{a.motivo_afastamento}</span></Field>
+                        <Field label="Responsável"><span className="text-sm font-medium">{a.responsavel_decisao}</span></Field>
+                        <Field label="Data"><span className="text-sm font-medium">{format(new Date(a.data_portaria), "dd/MM/yyyy")}</span></Field>
                       </div>
 
-                      {/* Linked Investigations */}
-                      <div className="rounded border border-border bg-muted p-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <h4 className="text-xs font-bold uppercase tracking-widest text-foreground flex items-center gap-2">
-                            <Shield className="h-4 w-4" /> Investigações ({linkedInvs.length})
-                          </h4>
-                          {canManageInvestigacoes && (
-                            <Button size="sm" variant="outline" className="border-border text-[10px] uppercase h-7"
-                              onClick={() => { resetInvestigacaoForm(); setInvestigacaoAfastamentoId(afastamento.id); setInvestigacaoDialogOpen(true); }}>
-                              <Plus className="h-3 w-3 mr-1" /> Nova Investigação
-                            </Button>
-                          )}
+                      {a.documento_conteudo && (
+                        <div>
+                          <h5 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Documento</h5>
+                          <pre className="text-xs font-mono bg-muted p-3 rounded-lg whitespace-pre-wrap border border-border max-h-60 overflow-y-auto">{a.documento_conteudo}</pre>
                         </div>
-                        {linkedInvs.length > 0 ? (
-                          <div className="space-y-2">
-                            {linkedInvs.map(inv => (
-                              <div key={inv.id} className="flex items-center justify-between rounded bg-background px-3 py-2 text-sm border border-border">
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-xs text-foreground font-bold">#{inv.numero_investigacao}</span>
-                                    <Badge variant="outline" className={`text-[9px] uppercase ${INVESTIGACAO_POLICIAL_STATUS_COLOR[inv.status]}`}>
-                                      {INVESTIGACAO_POLICIAL_STATUS_LABEL[inv.status]}
-                                    </Badge>
-                                  </div>
-                                  <p className="text-[10px] text-muted-foreground mt-1">Encarregado: {inv.encarregado} · {format(new Date(inv.data_instauracao), "dd/MM/yyyy")}</p>
-                                  <p className="text-[10px] text-foreground mt-1">{inv.descricao_fatos.substring(0, 200)}{inv.descricao_fatos.length > 200 ? "..." : ""}</p>
-                                  {inv.provas_anexadas && <p className="text-[10px] text-muted-foreground mt-1">Provas: {inv.provas_anexadas}</p>}
-                                  {inv.testemunhas && <p className="text-[10px] text-muted-foreground">Testemunhas: {inv.testemunhas}</p>}
-                                </div>
-                                <div className="flex gap-1 ml-2 shrink-0">
-                                  {canManageInvestigacoes && (
-                                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0"
-                                      onClick={() => openEditInvestigacao(inv)} title="Editar">
-                                      <Edit className="h-3.5 w-3.5" />
-                                    </Button>
-                                  )}
-                                  {canDelete && (
-                                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-500 hover:text-red-400"
-                                      onClick={() => deleteInvestigacao(inv.id)} title="Excluir">
-                                      <Trash2 className="h-3.5 w-3.5" />
-                                    </Button>
-                                  )}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="text-xs text-muted-foreground">Nenhuma investigação vinculada.</p>
-                        )}
-                      </div>
+                      )}
 
-                      {/* Linked Inquiries */}
-                      <div className="rounded border border-border bg-muted p-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <h4 className="text-xs font-bold uppercase tracking-widest text-foreground flex items-center gap-2">
-                            <FileSignature className="h-4 w-4" /> Inquéritos ({linkedInqs.length})
-                          </h4>
-                          {canEdit && (
-                            <Button size="sm" variant="outline" className="border-border text-[10px] uppercase h-7"
-                              onClick={() => { resetInqueritoForm(); setInqueritoAfastamentoId(afastamento.id); setInqueritoDialogOpen(true); }}>
-                              <Plus className="h-3 w-3 mr-1" /> Novo Inquérito
-                            </Button>
-                          )}
-                        </div>
-                        {linkedInqs.length > 0 ? (
-                          <div className="space-y-2">
-                            {linkedInqs.map(inq => (
-                              <div key={inq.id} className="flex items-center justify-between rounded bg-background px-3 py-2 text-sm border border-border">
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-xs text-foreground font-bold">#{inq.numero_inquerito}</span>
-                                    <Badge variant="outline" className={`text-[9px] uppercase ${INQUERITO_POLICIAL_STATUS_COLOR[inq.status]}`}>
-                                      {INQUERITO_POLICIAL_STATUS_LABEL[inq.status]}
-                                    </Badge>
-                                  </div>
-                                  <p className="text-[10px] text-muted-foreground mt-1">Autoridade: {inq.autoridade_responsavel} · {format(new Date(inq.data_instauracao), "dd/MM/yyyy")}</p>
-                                  {inq.relatorio && <p className="text-[10px] text-foreground mt-1">Relatório: {inq.relatorio.substring(0, 200)}{inq.relatorio.length > 200 ? "..." : ""}</p>}
-                                  {inq.parecer && <p className="text-[10px] text-foreground mt-1">Parecer: {inq.parecer.substring(0, 200)}{inq.parecer.length > 200 ? "..." : ""}</p>}
-                                  {inq.resultado && <p className="text-[10px] text-muted-foreground mt-1">Resultado: {inq.resultado}</p>}
-                                </div>
-                                <div className="flex gap-1 ml-2 shrink-0">
-                                  {canEdit && (
-                                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0"
-                                      onClick={() => openEditInquerito(inq)} title="Editar">
-                                      <Edit className="h-3.5 w-3.5" />
-                                    </Button>
-                                  )}
-                                  {canDelete && (
-                                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-500 hover:text-red-400"
-                                      onClick={() => deleteInquerito(inq.id)} title="Excluir">
-                                      <Trash2 className="h-3.5 w-3.5" />
-                                    </Button>
-                                  )}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="text-xs text-muted-foreground">Nenhum inquérito vinculado.</p>
-                        )}
-                      </div>
-
-                      {/* Advertencias */}
-                      <div className="rounded border border-border bg-muted p-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <h4 className="text-xs font-bold uppercase tracking-widest text-foreground flex items-center gap-2">
-                            <Ban className="h-4 w-4" /> Advertências ({linkedAdvs.length})
-                          </h4>
-                          {canEdit && (
-                            <Button size="sm" variant="outline" className="border-border text-[10px] uppercase h-7"
-                              onClick={() => { setAdvertenciaAfastamentoId(afastamento.id); setAdvertenciaDialogOpen(true); }}>
-                              <Plus className="h-3 w-3 mr-1" /> Nova Advertência
-                            </Button>
-                          )}
-                        </div>
-                        {linkedAdvs.length > 0 ? (
-                          <div className="space-y-2">
-                            {linkedAdvs.map(adv => (
-                              <div key={adv.id} className="flex items-center justify-between rounded bg-background px-3 py-2 text-sm border border-border">
-                                <div>
-                                  <p className="text-xs text-foreground font-bold">{format(new Date(adv.data_advertencia), "dd/MM/yyyy")} - {adv.autoridade_responsavel}</p>
-                                  <p className="text-[10px] text-muted-foreground mt-1">{adv.descricao}</p>
-                                </div>
-                                {canDelete && (
-                                  <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-500"
-                                    onClick={async () => {
-                                      await supabase.from("advertencias").delete().eq("id", adv.id);
-                                      toast.success("Advertência excluída!");
-                                    }}>
-                                    <Trash2 className="h-3.5 w-3.5" />
-                                  </Button>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="text-xs text-muted-foreground">Nenhuma advertência registrada.</p>
-                        )}
-                      </div>
+                      <LinkedTables
+                        afastamentoId={a.id}
+                        investigacoes={getInvestigacoes(a.id)}
+                        inqueritos={getInqueritos(a.id)}
+                        advertencias={getAdvertencias(a.id)}
+                        canEdit={canEdit}
+                        canDelete={canDelete}
+                        onReload={() => loadLinkedData()}
+                      />
                     </div>
                   )}
                 </div>
@@ -1061,94 +677,90 @@ export function AfastamentosTab(_props: AfastamentosTabProps) {
             })}
           </div>
         )}
-
-        </div>
-      );
-    } else if (subTab === "historico") {
+      </div>
+    );
+  } else if (subTab === "historico") {
+    const [historicoSearch, setHistoricoSearch] = useState("");
+    const uniquePoliciais = Array.from(new Map(afastamentos.map(a => [a.rg_pm, a])).values());
+    const filteredPoliciais = uniquePoliciais.filter(p =>
+      !historicoSearch || p.nome_completo.toLowerCase().includes(historicoSearch.toLowerCase()) || p.rg_pm.includes(historicoSearch)
+    );
     content = (
       <div className="space-y-6 animate-fade-in">
         <div className="flex items-center justify-between border-b border-border pb-4">
           <h3 className="text-lg font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
             <BookOpen className="h-5 w-5" /> Histórico Individual do Policial
           </h3>
-          <Button variant="outline" size="sm" onClick={() => setSubTab("dashboard")}
-            className="border-border text-muted-foreground hover:text-foreground text-[10px] uppercase">
-            <LayoutDashboard className="h-3.5 w-3.5 mr-1" /> Dashboard
-          </Button>
+          <div className="relative w-72">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input placeholder="Buscar policial por nome ou RG PM..." value={historicoSearch} onChange={e => setHistoricoSearch(e.target.value)} className="pl-9" />
+            {historicoSearch && <X className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 cursor-pointer text-muted-foreground" onClick={() => setHistoricoSearch("")} />}
+          </div>
         </div>
 
-        {/* Search */}
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-          <Input
-            placeholder="Digite o nome, RG ou unidade do policial..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="bg-background border-border text-foreground text-xs pl-9 h-9"
-          />
-        </div>
-
-        {/* Results */}
-        {searchTerm.length > 2 ? (
-          <div className="space-y-4">
-            {afastamentos
-              .filter(a => a.nome_completo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                a.rg_pm.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                a.unidade.toLowerCase().includes(searchTerm.toLowerCase()))
-              .map(afastamento => {
-                const linkedInvs = getInvestigacoes(afastamento.id);
-                const linkedInqs = getInqueritos(afastamento.id);
-                const linkedAdvs = getAdvertencias(afastamento.id);
-                return (
-                  <div key={afastamento.id} className="rounded-lg border border-border bg-card overflow-hidden">
-                    <div className="p-5">
-                      <div className="flex items-center justify-between mb-4">
-                        <div>
-                          <h4 className="font-bold text-foreground uppercase tracking-wide">{afastamento.nome_completo}</h4>
-                          <p className="text-[10px] text-muted-foreground">
-                            RG: {afastamento.rg_pm} · {afastamento.posto_graduacao} · {afastamento.unidade}
-                          </p>
-                        </div>
-                        <Badge variant="outline" className={`text-[9px] uppercase ${AFASTAMENTO_STATUS_COLOR[afastamento.status]}`}>
-                          {AFASTAMENTO_STATUS_LABEL[afastamento.status]}
-                        </Badge>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
-                        <div className="rounded bg-muted/50 p-3 border border-border">
-                          <p className="text-2xl font-bold text-foreground">{1}</p>
-                          <p className="text-[9px] uppercase text-muted-foreground">Afastamento</p>
-                        </div>
-                        <div className="rounded bg-muted/50 p-3 border border-border">
-                          <p className="text-2xl font-bold text-foreground">{linkedInvs.length}</p>
-                          <p className="text-[9px] uppercase text-muted-foreground">Investigações</p>
-                        </div>
-                        <div className="rounded bg-muted/50 p-3 border border-border">
-                          <p className="text-2xl font-bold text-foreground">{linkedInqs.length}</p>
-                          <p className="text-[9px] uppercase text-muted-foreground">Inquéritos</p>
-                        </div>
-                        <div className="rounded bg-muted/50 p-3 border border-border">
-                          <p className="text-2xl font-bold text-foreground">{linkedAdvs.length}</p>
-                          <p className="text-[9px] uppercase text-muted-foreground">Advertências</p>
-                        </div>
-                      </div>
-
-                      <Button size="sm" variant="outline" className="mt-4 border-border text-[10px] uppercase"
-                        onClick={() => { setExpandedId(afastamento.id); setSubTab("listagem"); }}>
-                        Ver Detalhes Completos
-                      </Button>
-                    </div>
-                  </div>
-                );
-              })}
-            {afastamentos.filter(a => a.nome_completo.toLowerCase().includes(searchTerm.toLowerCase())).length === 0 && (
-              <p className="text-sm text-muted-foreground text-center py-8">Nenhum policial encontrado com esse termo.</p>
-            )}
+        {filteredPoliciais.length === 0 ? (
+          <div className="text-center py-12 text-muted-foreground">
+            <Users className="h-12 w-12 mx-auto mb-3 opacity-40" />
+            <p>Nenhum policial encontrado.</p>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-            <BookOpen className="h-12 w-12 mb-3 opacity-30" />
-            <p className="text-sm">Digite pelo menos 3 caracteres para pesquisar o histórico de um policial.</p>
+          <div className="space-y-4">
+            {filteredPoliciais.map(p => {
+              const registros = afastamentos.filter(a => a.rg_pm === p.rg_pm);
+              return (
+                <div key={p.rg_pm} className="bg-card border border-border rounded-lg overflow-hidden">
+                  <div className="p-4 bg-muted/30 flex items-center justify-between border-b border-border">
+                    <div>
+                      <h4 className="font-bold">{p.posto_graduacao} {p.nome_completo}</h4>
+                      <p className="text-sm text-muted-foreground">RG PM: {p.rg_pm} • {p.unidade}</p>
+                    </div>
+                    <Badge variant="outline">{registros.length} registro(s)</Badge>
+                  </div>
+                  <div className="divide-y divide-border">
+                    {registros.map(r => (
+                      <div key={r.id} className="p-4 hover:bg-muted/20 transition-colors">
+                        <div className="flex items-center justify-between mb-1">
+                          <Badge variant="outline" className={AFASTAMENTO_STATUS_COLOR[r.status]}>{AFASTAMENTO_STATUS_LABEL[r.status]}</Badge>
+                          <span className="text-xs text-muted-foreground">Portaria nº {r.numero_portaria}/{r.ano}</span>
+                        </div>
+                        <p className="text-sm text-muted-foreground">Prazo: {r.prazo_afastamento} • Procedimento: {r.numero_procedimento}</p>
+                        <p className="text-sm text-muted-foreground">Responsável: {r.responsavel_decisao}</p>
+                        <div className="flex gap-2 mt-2">
+                          <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={() => {
+                            setPreviewData({
+                              numero_portaria: r.numero_portaria,
+                              ano: r.ano,
+                              nome_policial: r.nome_completo,
+                              posto_graduacao: r.posto_graduacao,
+                              rg_pm: r.rg_pm,
+                              unidade: r.unidade,
+                              funcao: r.funcao_cargo || "",
+                              motivo_afastamento: r.motivo_afastamento,
+                              prazo_afastamento: r.prazo_afastamento,
+                              numero_procedimento: r.numero_procedimento,
+                              data_portaria: r.data_portaria,
+                              corregedor_responsavel: r.responsavel_decisao,
+                              corregedor_cargo: r.corregedor_cargo || "Corregedor Geral da Polícia Militar",
+                            });
+                            setPreviewOpen(true);
+                          }}>
+                            <Eye className="h-3 w-3" /> Documento
+                          </Button>
+                          <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={() => {
+                            setHistoricoSearch(r.rg_pm);
+                          }}>
+                            <FileText className="h-3 w-3" /> Detalhes
+                          </Button>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Criado em {format(new Date(r.created_at), "dd/MM/yyyy 'às' HH:mm")} por {r.autor_nome || r.responsavel_decisao}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
@@ -1156,217 +768,57 @@ export function AfastamentosTab(_props: AfastamentosTabProps) {
   }
 
   return (
-    <>
+    <div className="space-y-4">
+      <div className="flex items-center gap-2 border-b border-border pb-2">
+        <Button variant={subTab === "dashboard" ? "default" : "ghost"} size="sm" onClick={() => setSubTab("dashboard")} className="gap-1.5">
+          <LayoutDashboard className="h-4 w-4" /> Dashboard
+        </Button>
+        <Button variant={subTab === "listagem" ? "default" : "ghost"} size="sm" onClick={() => setSubTab("listagem")} className="gap-1.5">
+          <ClipboardList className="h-4 w-4" /> Portarias
+        </Button>
+        <Button variant={subTab === "historico" ? "default" : "ghost"} size="sm" onClick={() => setSubTab("historico")} className="gap-1.5">
+          <BookOpen className="h-4 w-4" /> Histórico
+        </Button>
+      </div>
+
       {content}
 
-      {/* Create Afastamento Dialog */}
-      <Dialog open={afastamentoDialogOpen} onOpenChange={(open) => { setAfastamentoDialogOpen(open); if (!open) resetAfastamentoForm(); }}>
-        <DialogContent className="sm:max-w-[600px] bg-card border-border text-foreground">
+      {/* Create Dialog */}
+      <Dialog open={afastamentoDialogOpen} onOpenChange={setAfastamentoDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <div className="text-center pb-2 border-b border-border">
-              <p className="text-[9px] font-bold uppercase tracking-widest text-foreground mb-1">Corregedoria Geral (PMESP)</p>
-              <DialogTitle className="text-foreground uppercase tracking-wider text-sm">Novo Afastamento</DialogTitle>
-            </div>
+            <DialogTitle className="flex items-center gap-2">
+              <FileSignature className="h-5 w-5" /> Nova Portaria de Afastamento
+            </DialogTitle>
+            <DialogDescription>
+              Preencha os dados para gerar a Portaria de Afastamento Cautelar.
+            </DialogDescription>
           </DialogHeader>
-          <form onSubmit={createAfastamento} className="space-y-4 mt-2">
-            <div className="max-h-[70vh] overflow-y-auto pr-2 space-y-4 custom-scrollbar">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase text-muted-foreground">Nº da Portaria *</Label>
-                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                    value={afastamentoForm.numero_portaria}
-                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, numero_portaria: e.target.value })} />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase text-muted-foreground">Data da Portaria *</Label>
-                  <Input required type="date" className="bg-background border-border text-foreground h-8 text-xs"
-                    value={afastamentoForm.data_portaria}
-                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, data_portaria: e.target.value })} />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase text-muted-foreground">Posto/Graduação *</Label>
-                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                    value={afastamentoForm.posto_graduacao}
-                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, posto_graduacao: e.target.value })} />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase text-muted-foreground">Nome Completo *</Label>
-                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                    value={afastamentoForm.nome_completo}
-                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, nome_completo: e.target.value })} />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase text-muted-foreground">RG PM *</Label>
-                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                    value={afastamentoForm.rg_pm}
-                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, rg_pm: e.target.value })} />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase text-muted-foreground">Unidade *</Label>
-                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                    value={afastamentoForm.unidade}
-                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, unidade: e.target.value })} />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase text-muted-foreground">Função/Cargo</Label>
-                  <Input className="bg-background border-border text-foreground h-8 text-xs"
-                    value={afastamentoForm.funcao_cargo}
-                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, funcao_cargo: e.target.value })} />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase text-muted-foreground">Motivo do Afastamento *</Label>
-                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                    value={afastamentoForm.motivo_afastamento}
-                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, motivo_afastamento: e.target.value })} />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase text-muted-foreground">Prazo do Afastamento *</Label>
-                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                    value={afastamentoForm.prazo_afastamento}
-                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, prazo_afastamento: e.target.value })} />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase text-muted-foreground">Responsável pela Decisão *</Label>
-                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                    value={afastamentoForm.responsavel_decisao}
-                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, responsavel_decisao: e.target.value })} />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <Label className="text-[10px] uppercase text-muted-foreground">Observações</Label>
-                <Textarea rows={3} className="bg-background border-border text-foreground text-xs"
-                  value={afastamentoForm.observacoes}
-                  onChange={(e) => setAfastamentoForm({ ...afastamentoForm, observacoes: e.target.value })} />
-              </div>
-            </div>
-            <div className="pt-4 border-t border-border flex justify-end gap-2">
-              <Button type="button" variant="outline" size="sm" className="border-border text-[10px] uppercase"
-                onClick={() => { setAfastamentoDialogOpen(false); resetAfastamentoForm(); }}>
-                Cancelar
-              </Button>
-              <Button type="submit" disabled={submitting} className="bg-primary hover:bg-primary/80 text-white px-8 font-bold tracking-widest text-[10px] uppercase">
-                {submitting ? "Salvando..." : "Salvar"}
-              </Button>
-            </div>
+          <form onSubmit={createAfastamento} className="space-y-6">
+            {renderFormFields(false)}
           </form>
         </DialogContent>
       </Dialog>
 
-      {/* Edit Afastamento Dialog */}
-      <Dialog open={afastamentoEditDialogOpen} onOpenChange={(open) => { setAfastamentoEditDialogOpen(open); if (!open) { setEditingAfastamentoId(null); resetAfastamentoForm(); } }}>
-        <DialogContent className="sm:max-w-[600px] bg-card border-border text-foreground">
+      {/* Edit Dialog */}
+      <Dialog open={afastamentoEditDialogOpen} onOpenChange={setAfastamentoEditDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <div className="text-center pb-2 border-b border-border">
-              <p className="text-[9px] font-bold uppercase tracking-widest text-foreground mb-1">Corregedoria Geral (PMESP)</p>
-              <DialogTitle className="text-foreground uppercase tracking-wider text-sm">Editar Afastamento</DialogTitle>
-            </div>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="h-5 w-5" /> Editar Portaria de Afastamento
+            </DialogTitle>
+            <DialogDescription>
+              Altere os dados da portaria. Uma nova versão será registrada no histórico.
+            </DialogDescription>
           </DialogHeader>
-          <form onSubmit={updateAfastamento} className="space-y-4 mt-2">
-            <div className="max-h-[70vh] overflow-y-auto pr-2 space-y-4 custom-scrollbar">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase text-muted-foreground">Nº da Portaria</Label>
-                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                    value={afastamentoForm.numero_portaria}
-                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, numero_portaria: e.target.value })} />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase text-muted-foreground">Data da Portaria</Label>
-                  <Input required type="date" className="bg-background border-border text-foreground h-8 text-xs"
-                    value={afastamentoForm.data_portaria}
-                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, data_portaria: e.target.value })} />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase text-muted-foreground">Posto/Graduação</Label>
-                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                    value={afastamentoForm.posto_graduacao}
-                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, posto_graduacao: e.target.value })} />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase text-muted-foreground">Nome Completo</Label>
-                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                    value={afastamentoForm.nome_completo}
-                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, nome_completo: e.target.value })} />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase text-muted-foreground">RG PM</Label>
-                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                    value={afastamentoForm.rg_pm}
-                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, rg_pm: e.target.value })} />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase text-muted-foreground">Unidade</Label>
-                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                    value={afastamentoForm.unidade}
-                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, unidade: e.target.value })} />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase text-muted-foreground">Função/Cargo</Label>
-                  <Input className="bg-background border-border text-foreground h-8 text-xs"
-                    value={afastamentoForm.funcao_cargo}
-                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, funcao_cargo: e.target.value })} />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase text-muted-foreground">Motivo do Afastamento</Label>
-                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                    value={afastamentoForm.motivo_afastamento}
-                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, motivo_afastamento: e.target.value })} />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase text-muted-foreground">Prazo do Afastamento</Label>
-                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                    value={afastamentoForm.prazo_afastamento}
-                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, prazo_afastamento: e.target.value })} />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase text-muted-foreground">Responsável pela Decisão</Label>
-                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                    value={afastamentoForm.responsavel_decisao}
-                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, responsavel_decisao: e.target.value })} />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <Label className="text-[10px] uppercase text-muted-foreground">Status</Label>
-                <Select value={afastamentoForm.status} onValueChange={(v: AfastamentoStatus) => setAfastamentoForm({ ...afastamentoForm, status: v })}>
-                  <SelectTrigger className="bg-background border-border text-foreground h-8 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-muted border-border text-foreground">
-                    {Object.entries(AFASTAMENTO_STATUS_LABEL).map(([val, lab]) => (
-                      <SelectItem key={val} value={val} className="text-[10px]">{lab}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1">
-                <Label className="text-[10px] uppercase text-muted-foreground">Observações</Label>
-                <Textarea rows={3} className="bg-background border-border text-foreground text-xs"
-                  value={afastamentoForm.observacoes}
-                  onChange={(e) => setAfastamentoForm({ ...afastamentoForm, observacoes: e.target.value })} />
-              </div>
-            </div>
-            <div className="pt-4 border-t border-border flex justify-end gap-2">
-              <Button type="button" variant="outline" size="sm" className="border-border text-[10px] uppercase"
-                onClick={() => { setAfastamentoEditDialogOpen(false); setEditingAfastamentoId(null); resetAfastamentoForm(); }}>
-                Cancelar
+          <form onSubmit={updateAfastamento} className="space-y-6">
+            {renderFormFields(true)}
+            <div className="flex justify-end gap-2 pt-2 border-t border-border">
+              <Button type="button" variant="outline" onClick={() => openPreview(afastamentoForm)} className="gap-2">
+                <Eye className="h-4 w-4" /> Visualizar
               </Button>
-              <Button type="submit" disabled={submitting} className="bg-primary hover:bg-primary/80 text-white px-8 font-bold tracking-widest text-[10px] uppercase">
+              <Button type="submit" disabled={submitting} className="gap-2">
+                {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSignature className="h-4 w-4" />}
                 {submitting ? "Salvando..." : "Salvar Alterações"}
               </Button>
             </div>
@@ -1374,14 +826,248 @@ export function AfastamentosTab(_props: AfastamentosTabProps) {
         </DialogContent>
       </Dialog>
 
+      {/* Preview Dialog */}
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="h-5 w-5" /> Pré-visualização da Portaria
+            </DialogTitle>
+            <DialogDescription>
+              Documento oficial gerado. Use o botão abaixo para imprimir ou exportar.
+            </DialogDescription>
+          </DialogHeader>
+          {previewData && (
+            <div className="space-y-4">
+              <PortariaPreview data={previewData} />
+              <div className="flex justify-end gap-2 pt-2 border-t border-border no-print">
+                <Button variant="outline" onClick={() => { if (previewData) printPortaria(previewData); }} className="gap-2">
+                  <Printer className="h-4 w-4" /> Imprimir
+                </Button>
+                <Button variant="outline" onClick={() => {
+                  if (!previewData) return;
+                  const html = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Portaria nº ${previewData.numero_portaria}/${previewData.ano}</title>
+<style>
+@page{margin:2.5cm 2cm}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Times New Roman',Times,serif;font-size:12pt;line-height:1.6;color:#000;padding:0}
+.header{text-align:center;margin-bottom:30px;padding-bottom:20px;border-bottom:2px solid #000}
+.header .gov{font-size:10pt;font-weight:bold;text-transform:uppercase;letter-spacing:1px}
+.header .org{font-size:9pt;margin-top:2px}
+.header .title{font-size:14pt;font-weight:bold;text-transform:uppercase;margin-top:8px;letter-spacing:2px}
+.header .subtitle{font-size:11pt;font-weight:bold;text-transform:uppercase;margin-top:4px}
+.portaria-num{text-align:center;font-size:13pt;font-weight:bold;text-transform:uppercase;margin:30px 0 20px}
+.ementa{text-align:justify;font-size:11pt;margin-bottom:25px;font-style:italic}
+.resolve{text-align:center;font-size:12pt;font-weight:bold;text-transform:uppercase;margin:25px 0 20px;letter-spacing:3px}
+.artigo{text-align:justify;font-size:12pt;margin-bottom:12px;text-indent:2cm}
+.final{text-align:center;font-size:11pt;font-weight:bold;text-transform:uppercase;margin:25px 0 30px;letter-spacing:2px}
+.rodape{text-align:center;margin-top:50px}
+.rodape .local-data{font-size:11pt;margin-bottom:15px}
+.rodape .linha{font-size:11pt;margin-bottom:5px}
+.rodape .nome{font-size:11pt;font-weight:bold}
+.rodape .cargo{font-size:10pt}
+@media print{body{padding:0}.no-print{display:none}}
+</style></head><body>${document.getElementById("portaria-document")?.innerHTML || ""}</body></html>`;
+                  const blob = new Blob([html], { type: "text/html" });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = `Portaria_${previewData.numero_portaria}_${previewData.ano}.html`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                  toast.success("Documento exportado!");
+                }} className="gap-2">
+                  <FileDown className="h-4 w-4" /> Exportar HTML
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirm */}
       <ConfirmDialog
-        open={confirmDialog.open}
-        onOpenChange={(open) => setConfirmDialog(prev => ({ ...prev, open }))}
-        onConfirm={confirmDialog.onConfirm}
-        title={confirmDialog.title}
-        description={confirmDialog.description}
-        loading={confirmDialog.loading}
+        open={deleteConfirmId !== null}
+        onOpenChange={() => setDeleteConfirmId(null)}
+        title="Excluir Portaria"
+        description="Tem certeza que deseja excluir esta portaria? Esta ação não pode ser desfeita."
+        onConfirm={() => deleteConfirmId && deleteAfastamento(deleteConfirmId)}
       />
-    </>
+
+      {/* History Dialog */}
+      <Dialog open={historyDialogOpen} onOpenChange={setHistoryDialogOpen}>
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <History className="h-5 w-5" /> {historyTitle}
+            </DialogTitle>
+            <DialogDescription>
+              Versões anteriores do documento. Clique em uma versão para visualizar.
+            </DialogDescription>
+          </DialogHeader>
+          {historyVersions.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <History className="h-10 w-10 mx-auto mb-2 opacity-40" />
+              <p>Nenhuma versão anterior registrada.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {historyVersions.map((v, i) => (
+                <div key={v.id} className="border border-border rounded-lg p-4 hover:bg-muted/20 transition-colors">
+                  <div className="flex items-center justify-between mb-2">
+                    <Badge variant="outline">v{historyVersions.length - i}</Badge>
+                    <span className="text-xs text-muted-foreground">{format(new Date(v.data), "dd/MM/yyyy 'às' HH:mm")}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-1">Autor: {v.autor}</p>
+                  <p className="text-xs text-muted-foreground">{v.alteracoes}</p>
+                  <details className="mt-2">
+                    <summary className="text-xs cursor-pointer text-primary hover:underline">Ver documento</summary>
+                    <pre className="text-xs font-mono bg-muted p-3 rounded-lg mt-2 whitespace-pre-wrap border border-border max-h-40 overflow-y-auto">{v.documento}</pre>
+                  </details>
+                </div>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function LinkedTables({ afastamentoId, investigacoes, inqueritos, advertencias, canEdit, canDelete, onReload }: {
+  afastamentoId: string;
+  investigacoes: InvestigacaoPolicial[];
+  inqueritos: InqueritoPolicial[];
+  advertencias: Advertencia[];
+  canEdit: boolean;
+  canDelete: boolean;
+  onReload: () => void;
+}) {
+  const [invDialogOpen, setInvDialogOpen] = useState(false);
+  const [inqDialogOpen, setInqDialogOpen] = useState(false);
+  const [advDialogOpen, setAdvDialogOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const [invForm, setInvForm] = useState({ numero_investigacao: "", data_instauracao: format(new Date(), "yyyy-MM-dd"), encarregado: "", descricao_fatos: "", provas_anexadas: "", testemunhas: "" });
+  const [inqForm, setInqForm] = useState({ numero_inquerito: "", data_instauracao: format(new Date(), "yyyy-MM-dd"), autoridade_responsavel: "", relatorio: "", parecer: "", resultado: "" });
+  const [advForm, setAdvForm] = useState({ descricao: "", data_advertencia: format(new Date(), "yyyy-MM-dd"), autoridade_responsavel: "" });
+
+  const createInvestigacao = async (e: React.FormEvent) => {
+    e.preventDefault(); if (!canEdit) return;
+    setSubmitting(true);
+    const { error } = await supabase.from("investigacoes_policial").insert({ ...invForm, afastamento_id: afastamentoId, status: "em_andamento" });
+    if (error) toast.error("Erro: " + error.message); else { toast.success("Investigação registrada!"); setInvDialogOpen(false); setInvForm({ numero_investigacao: "", data_instauracao: format(new Date(), "yyyy-MM-dd"), encarregado: "", descricao_fatos: "", provas_anexadas: "", testemunhas: "" }); onReload(); }
+    setSubmitting(false);
+  };
+
+  const createInquerito = async (e: React.FormEvent) => {
+    e.preventDefault(); if (!canEdit) return;
+    setSubmitting(true);
+    const { error } = await supabase.from("inqueritos_policial").insert({ ...inqForm, afastamento_id: afastamentoId, status: "em_andamento" });
+    if (error) toast.error("Erro: " + error.message); else { toast.success("Inquérito registrado!"); setInqDialogOpen(false); setInqForm({ numero_inquerito: "", data_instauracao: format(new Date(), "yyyy-MM-dd"), autoridade_responsavel: "", relatorio: "", parecer: "", resultado: "" }); onReload(); }
+    setSubmitting(false);
+  };
+
+  const createAdvertencia = async (e: React.FormEvent) => {
+    e.preventDefault(); if (!canEdit) return;
+    setSubmitting(true);
+    const { error } = await supabase.from("advertencias").insert({ ...advForm, afastamento_id: afastamentoId });
+    if (error) toast.error("Erro: " + error.message); else { toast.success("Advertência registrada!"); setAdvDialogOpen(false); setAdvForm({ descricao: "", data_advertencia: format(new Date(), "yyyy-MM-dd"), autoridade_responsavel: "" }); onReload(); }
+    setSubmitting(false);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="border border-border rounded-lg p-3">
+          <div className="flex items-center justify-between mb-2">
+            <h5 className="text-xs font-bold uppercase tracking-wider flex items-center gap-1"><Search className="h-3 w-3" /> Investigações ({investigacoes.length})</h5>
+            {canEdit && <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setInvDialogOpen(true)}><Plus className="h-3 w-3" /></Button>}
+          </div>
+          {investigacoes.length === 0 ? <p className="text-xs text-muted-foreground">Nenhuma investigação vinculada.</p> : (
+            <div className="space-y-1 max-h-32 overflow-y-auto">
+              {investigacoes.map(i => (
+                <div key={i.id} className="text-xs p-1.5 bg-muted/30 rounded flex items-center justify-between">
+                  <span>{i.numero_investigacao} - <Badge variant="outline" className="text-[10px] px-1 py-0">{INVESTIGACAO_POLICIAL_STATUS_LABEL[i.status]}</Badge></span>
+                  {canDelete && <Button variant="ghost" size="icon" className="h-5 w-5 text-destructive" onClick={async () => { await supabase.from("investigacoes_policial").delete().eq("id", i.id); onReload(); }}><Trash2 className="h-3 w-3" /></Button>}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="border border-border rounded-lg p-3">
+          <div className="flex items-center justify-between mb-2">
+            <h5 className="text-xs font-bold uppercase tracking-wider flex items-center gap-1"><Gavel className="h-3 w-3" /> Inquéritos ({inqueritos.length})</h5>
+            {canEdit && <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setInqDialogOpen(true)}><Plus className="h-3 w-3" /></Button>}
+          </div>
+          {inqueritos.length === 0 ? <p className="text-xs text-muted-foreground">Nenhum inquérito vinculado.</p> : (
+            <div className="space-y-1 max-h-32 overflow-y-auto">
+              {inqueritos.map(i => (
+                <div key={i.id} className="text-xs p-1.5 bg-muted/30 rounded flex items-center justify-between">
+                  <span>{i.numero_inquerito} - <Badge variant="outline" className="text-[10px] px-1 py-0">{INQUERITO_POLICIAL_STATUS_LABEL[i.status]}</Badge></span>
+                  {canDelete && <Button variant="ghost" size="icon" className="h-5 w-5 text-destructive" onClick={async () => { await supabase.from("inqueritos_policial").delete().eq("id", i.id); onReload(); }}><Trash2 className="h-3 w-3" /></Button>}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="border border-border rounded-lg p-3">
+          <div className="flex items-center justify-between mb-2">
+            <h5 className="text-xs font-bold uppercase tracking-wider flex items-center gap-1"><AlertTriangle className="h-3 w-3" /> Advertências ({advertencias.length})</h5>
+            {canEdit && <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setAdvDialogOpen(true)}><Plus className="h-3 w-3" /></Button>}
+          </div>
+          {advertencias.length === 0 ? <p className="text-xs text-muted-foreground">Nenhuma advertência registrada.</p> : (
+            <div className="space-y-1 max-h-32 overflow-y-auto">
+              {advertencias.map(a => (
+                <div key={a.id} className="text-xs p-1.5 bg-muted/30 rounded flex items-center justify-between">
+                  <span className="truncate">{a.descricao}</span>
+                  {canDelete && <Button variant="ghost" size="icon" className="h-5 w-5 text-destructive shrink-0" onClick={async () => { await supabase.from("advertencias").delete().eq("id", a.id); onReload(); }}><Trash2 className="h-3 w-3" /></Button>}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <Dialog open={invDialogOpen} onOpenChange={setInvDialogOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Nova Investigação</DialogTitle></DialogHeader>
+          <form onSubmit={createInvestigacao} className="space-y-3">
+            <div><Label className="text-xs">Nº Investigação</Label><Input value={invForm.numero_investigacao} onChange={e => setInvForm(f => ({...f, numero_investigacao: e.target.value}))} required /></div>
+            <div><Label className="text-xs">Data</Label><Input type="date" value={invForm.data_instauracao} onChange={e => setInvForm(f => ({...f, data_instauracao: e.target.value}))} required /></div>
+            <div><Label className="text-xs">Encarregado</Label><Input value={invForm.encarregado} onChange={e => setInvForm(f => ({...f, encarregado: e.target.value}))} required /></div>
+            <div><Label className="text-xs">Descrição dos Fatos</Label><Textarea value={invForm.descricao_fatos} onChange={e => setInvForm(f => ({...f, descricao_fatos: e.target.value}))} required /></div>
+            <Button type="submit" disabled={submitting} className="w-full">{submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Registrar"}</Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={inqDialogOpen} onOpenChange={setInqDialogOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Novo Inquérito</DialogTitle></DialogHeader>
+          <form onSubmit={createInquerito} className="space-y-3">
+            <div><Label className="text-xs">Nº Inquérito</Label><Input value={inqForm.numero_inquerito} onChange={e => setInqForm(f => ({...f, numero_inquerito: e.target.value}))} required /></div>
+            <div><Label className="text-xs">Data</Label><Input type="date" value={inqForm.data_instauracao} onChange={e => setInqForm(f => ({...f, data_instauracao: e.target.value}))} required /></div>
+            <div><Label className="text-xs">Autoridade Responsável</Label><Input value={inqForm.autoridade_responsavel} onChange={e => setInqForm(f => ({...f, autoridade_responsavel: e.target.value}))} required /></div>
+            <Button type="submit" disabled={submitting} className="w-full">{submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Registrar"}</Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={advDialogOpen} onOpenChange={setAdvDialogOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Nova Advertência</DialogTitle></DialogHeader>
+          <form onSubmit={createAdvertencia} className="space-y-3">
+            <div><Label className="text-xs">Descrição</Label><Textarea value={advForm.descricao} onChange={e => setAdvForm(f => ({...f, descricao: e.target.value}))} required /></div>
+            <div><Label className="text-xs">Data</Label><Input type="date" value={advForm.data_advertencia} onChange={e => setAdvForm(f => ({...f, data_advertencia: e.target.value}))} required /></div>
+            <div><Label className="text-xs">Autoridade</Label><Input value={advForm.autoridade_responsavel} onChange={e => setAdvForm(f => ({...f, autoridade_responsavel: e.target.value}))} required /></div>
+            <Button type="submit" disabled={submitting} className="w-full">{submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Registrar"}</Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }

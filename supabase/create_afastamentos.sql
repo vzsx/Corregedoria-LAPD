@@ -14,9 +14,6 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'inquerito_policial_status') THEN
         CREATE TYPE inquerito_policial_status AS ENUM ('em_andamento', 'concluido', 'arquivado', 'encaminhado');
     END IF;
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_role') THEN
-        CREATE TYPE app_role AS ENUM ('corregedor_geral', 'subcorregedor', 'corregedor', 'investigador', 'consulta', 'admin');
-    END IF;
 END $$;
 
 -- 2. TABLES
@@ -25,6 +22,7 @@ END $$;
 CREATE TABLE IF NOT EXISTS public.afastamentos (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     numero_portaria TEXT NOT NULL,
+    ano TEXT NOT NULL DEFAULT '',
     data_portaria DATE NOT NULL,
     posto_graduacao TEXT NOT NULL,
     nome_completo TEXT NOT NULL,
@@ -33,7 +31,13 @@ CREATE TABLE IF NOT EXISTS public.afastamentos (
     funcao_cargo TEXT,
     motivo_afastamento TEXT NOT NULL,
     prazo_afastamento TEXT NOT NULL,
+    numero_procedimento TEXT NOT NULL DEFAULT '',
     responsavel_decisao TEXT NOT NULL,
+    corregedor_cargo TEXT DEFAULT 'Corregedor Geral da Polícia Militar',
+    documento_conteudo TEXT,
+    autor_id UUID,
+    autor_nome TEXT,
+    historico_versoes JSONB DEFAULT '[]'::jsonb,
     observacoes TEXT,
     status afastamento_status DEFAULT 'ativo',
     created_at TIMESTAMPTZ DEFAULT now(),
@@ -86,83 +90,83 @@ ALTER TABLE public.investigacoes_policial ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.inqueritos_policial ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.advertencias ENABLE ROW LEVEL SECURITY;
 
--- Afastamentos policies
+-- Afastamentos policies (uses existing app_role: 'admin', 'corregedor', 'pending')
 DO $$ BEGIN
     CREATE POLICY "Staff can view afastamentos" ON public.afastamentos FOR SELECT
-    USING (public.has_role(auth.uid(), 'corregedor_geral'::app_role) OR public.has_role(auth.uid(), 'subcorregedor'::app_role) OR public.has_role(auth.uid(), 'corregedor'::app_role) OR public.has_role(auth.uid(), 'investigador'::app_role) OR public.has_role(auth.uid(), 'consulta'::app_role) OR public.has_role(auth.uid(), 'admin'::app_role));
+    USING (public.has_role(auth.uid(), 'corregedor') OR public.has_role(auth.uid(), 'admin'));
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
     CREATE POLICY "Staff can insert afastamentos" ON public.afastamentos FOR INSERT
-    WITH CHECK (public.has_role(auth.uid(), 'corregedor_geral'::app_role) OR public.has_role(auth.uid(), 'subcorregedor'::app_role) OR public.has_role(auth.uid(), 'corregedor'::app_role) OR public.has_role(auth.uid(), 'investigador'::app_role) OR public.has_role(auth.uid(), 'admin'::app_role));
+    WITH CHECK (public.has_role(auth.uid(), 'corregedor') OR public.has_role(auth.uid(), 'admin'));
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
     CREATE POLICY "Staff can update afastamentos" ON public.afastamentos FOR UPDATE
-    USING (public.has_role(auth.uid(), 'corregedor_geral'::app_role) OR public.has_role(auth.uid(), 'subcorregedor'::app_role) OR public.has_role(auth.uid(), 'corregedor'::app_role) OR public.has_role(auth.uid(), 'investigador'::app_role) OR public.has_role(auth.uid(), 'admin'::app_role));
+    USING (public.has_role(auth.uid(), 'corregedor') OR public.has_role(auth.uid(), 'admin'));
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
-    CREATE POLICY "Senior staff can delete afastamentos" ON public.afastamentos FOR DELETE
-    USING (public.has_role(auth.uid(), 'corregedor_geral'::app_role) OR public.has_role(auth.uid(), 'subcorregedor'::app_role) OR public.has_role(auth.uid(), 'admin'::app_role));
+    CREATE POLICY "Staff can delete afastamentos" ON public.afastamentos FOR DELETE
+    USING (public.has_role(auth.uid(), 'admin'));
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- Investigacoes policial policies
 DO $$ BEGIN
     CREATE POLICY "Staff can view investigacoes_policial" ON public.investigacoes_policial FOR SELECT
-    USING (public.has_role(auth.uid(), 'corregedor_geral'::app_role) OR public.has_role(auth.uid(), 'subcorregedor'::app_role) OR public.has_role(auth.uid(), 'corregedor'::app_role) OR public.has_role(auth.uid(), 'investigador'::app_role) OR public.has_role(auth.uid(), 'consulta'::app_role) OR public.has_role(auth.uid(), 'admin'::app_role));
+    USING (public.has_role(auth.uid(), 'corregedor') OR public.has_role(auth.uid(), 'admin'));
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
-    CREATE POLICY "Investigadores can insert/update investigacoes_policial" ON public.investigacoes_policial FOR INSERT
-    WITH CHECK (public.has_role(auth.uid(), 'corregedor_geral'::app_role) OR public.has_role(auth.uid(), 'subcorregedor'::app_role) OR public.has_role(auth.uid(), 'corregedor'::app_role) OR public.has_role(auth.uid(), 'investigador'::app_role) OR public.has_role(auth.uid(), 'admin'::app_role));
+    CREATE POLICY "Staff can insert investigacoes_policial" ON public.investigacoes_policial FOR INSERT
+    WITH CHECK (public.has_role(auth.uid(), 'corregedor') OR public.has_role(auth.uid(), 'admin'));
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
-    CREATE POLICY "Investigadores can update investigacoes_policial" ON public.investigacoes_policial FOR UPDATE
-    USING (public.has_role(auth.uid(), 'corregedor_geral'::app_role) OR public.has_role(auth.uid(), 'subcorregedor'::app_role) OR public.has_role(auth.uid(), 'corregedor'::app_role) OR public.has_role(auth.uid(), 'investigador'::app_role) OR public.has_role(auth.uid(), 'admin'::app_role));
+    CREATE POLICY "Staff can update investigacoes_policial" ON public.investigacoes_policial FOR UPDATE
+    USING (public.has_role(auth.uid(), 'corregedor') OR public.has_role(auth.uid(), 'admin'));
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
-    CREATE POLICY "Senior staff can delete investigacoes_policial" ON public.investigacoes_policial FOR DELETE
-    USING (public.has_role(auth.uid(), 'corregedor_geral'::app_role) OR public.has_role(auth.uid(), 'subcorregedor'::app_role) OR public.has_role(auth.uid(), 'admin'::app_role));
+    CREATE POLICY "Staff can delete investigacoes_policial" ON public.investigacoes_policial FOR DELETE
+    USING (public.has_role(auth.uid(), 'admin'));
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- Inqueritos policial policies
 DO $$ BEGIN
     CREATE POLICY "Staff can view inqueritos_policial" ON public.inqueritos_policial FOR SELECT
-    USING (public.has_role(auth.uid(), 'corregedor_geral'::app_role) OR public.has_role(auth.uid(), 'subcorregedor'::app_role) OR public.has_role(auth.uid(), 'corregedor'::app_role) OR public.has_role(auth.uid(), 'investigador'::app_role) OR public.has_role(auth.uid(), 'consulta'::app_role) OR public.has_role(auth.uid(), 'admin'::app_role));
+    USING (public.has_role(auth.uid(), 'corregedor') OR public.has_role(auth.uid(), 'admin'));
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
-    CREATE POLICY "Staff can insert/update inqueritos_policial" ON public.inqueritos_policial FOR INSERT
-    WITH CHECK (public.has_role(auth.uid(), 'corregedor_geral'::app_role) OR public.has_role(auth.uid(), 'subcorregedor'::app_role) OR public.has_role(auth.uid(), 'corregedor'::app_role) OR public.has_role(auth.uid(), 'investigador'::app_role) OR public.has_role(auth.uid(), 'admin'::app_role));
+    CREATE POLICY "Staff can insert inqueritos_policial" ON public.inqueritos_policial FOR INSERT
+    WITH CHECK (public.has_role(auth.uid(), 'corregedor') OR public.has_role(auth.uid(), 'admin'));
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
     CREATE POLICY "Staff can update inqueritos_policial" ON public.inqueritos_policial FOR UPDATE
-    USING (public.has_role(auth.uid(), 'corregedor_geral'::app_role) OR public.has_role(auth.uid(), 'subcorregedor'::app_role) OR public.has_role(auth.uid(), 'corregedor'::app_role) OR public.has_role(auth.uid(), 'investigador'::app_role) OR public.has_role(auth.uid(), 'admin'::app_role));
+    USING (public.has_role(auth.uid(), 'corregedor') OR public.has_role(auth.uid(), 'admin'));
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
-    CREATE POLICY "Senior staff can delete inqueritos_policial" ON public.inqueritos_policial FOR DELETE
-    USING (public.has_role(auth.uid(), 'corregedor_geral'::app_role) OR public.has_role(auth.uid(), 'subcorregedor'::app_role) OR public.has_role(auth.uid(), 'admin'::app_role));
+    CREATE POLICY "Staff can delete inqueritos_policial" ON public.inqueritos_policial FOR DELETE
+    USING (public.has_role(auth.uid(), 'admin'));
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- Advertencias policies
 DO $$ BEGIN
     CREATE POLICY "Staff can view advertencias" ON public.advertencias FOR SELECT
-    USING (public.has_role(auth.uid(), 'corregedor_geral'::app_role) OR public.has_role(auth.uid(), 'subcorregedor'::app_role) OR public.has_role(auth.uid(), 'corregedor'::app_role) OR public.has_role(auth.uid(), 'investigador'::app_role) OR public.has_role(auth.uid(), 'consulta'::app_role) OR public.has_role(auth.uid(), 'admin'::app_role));
+    USING (public.has_role(auth.uid(), 'corregedor') OR public.has_role(auth.uid(), 'admin'));
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
     CREATE POLICY "Staff can insert advertencias" ON public.advertencias FOR INSERT
-    WITH CHECK (public.has_role(auth.uid(), 'corregedor_geral'::app_role) OR public.has_role(auth.uid(), 'subcorregedor'::app_role) OR public.has_role(auth.uid(), 'corregedor'::app_role) OR public.has_role(auth.uid(), 'admin'::app_role));
+    WITH CHECK (public.has_role(auth.uid(), 'corregedor') OR public.has_role(auth.uid(), 'admin'));
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
-    CREATE POLICY "Senior staff can delete advertencias" ON public.advertencias FOR DELETE
-    USING (public.has_role(auth.uid(), 'corregedor_geral'::app_role) OR public.has_role(auth.uid(), 'subcorregedor'::app_role) OR public.has_role(auth.uid(), 'admin'::app_role));
+    CREATE POLICY "Staff can delete advertencias" ON public.advertencias FOR DELETE
+    USING (public.has_role(auth.uid(), 'admin'));
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- 4. SEQUENCE FOR numero_registro
