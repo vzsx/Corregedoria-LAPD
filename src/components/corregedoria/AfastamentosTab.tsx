@@ -125,6 +125,7 @@ export function AfastamentosTab(_props: Record<string, never>) {
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
   const [historyVersions, setHistoryVersions] = useState<VersaoDocumento[]>([]);
   const [historyTitle, setHistoryTitle] = useState("");
+  const [historicoSearch, setHistoricoSearch] = useState("");
 
   const loadAfastamentos = async () => {
     const { data, error } = await supabase
@@ -836,7 +837,6 @@ export function AfastamentosTab(_props: Record<string, never>) {
       </div>
     );
   } else if (subTab === "historico") {
-    const [historicoSearch, setHistoricoSearch] = useState("");
     const uniquePoliciais = Array.from(new Map(afastamentos.map(a => [a.rg_pm, a])).values());
     const filteredPoliciais = uniquePoliciais.filter(p =>
       !historicoSearch || p.nome_completo.toLowerCase().includes(historicoSearch.toLowerCase()) || p.rg_pm.includes(historicoSearch)
