@@ -15,23 +15,12 @@ CREATE TABLE IF NOT EXISTS public.ipm_vinculos (
 ALTER TABLE public.ipm_vinculos ENABLE ROW LEVEL SECURITY;
 
 -- Policies
-DO $$
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_policies WHERE tablename = 'ipm_vinculos' AND policyname = 'Corregedor pode gerenciar vinculos'
-    ) THEN
-        CREATE POLICY "Corregedor pode gerenciar vinculos" ON public.ipm_vinculos
-            FOR ALL USING (
-                EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('corregedor', 'admin'))
-            );
-    END IF;
+CREATE POLICY "Corregedor pode gerenciar vinculos" ON public.ipm_vinculos
+    FOR ALL USING (
+        public.has_role(auth.uid(), 'corregedor') OR public.has_role(auth.uid(), 'admin')
+    );
 
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_policies WHERE tablename = 'ipm_vinculos' AND policyname = 'Corregedor pode ler vinculos'
-    ) THEN
-        CREATE POLICY "Corregedor pode ler vinculos" ON public.ipm_vinculos
-            FOR SELECT USING (
-                EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('corregedor', 'admin'))
-            );
-    END IF;
-END $$;
+CREATE POLICY "Corregedor pode ler vinculos" ON public.ipm_vinculos
+    FOR SELECT USING (
+        public.has_role(auth.uid(), 'corregedor') OR public.has_role(auth.uid(), 'admin')
+    );
