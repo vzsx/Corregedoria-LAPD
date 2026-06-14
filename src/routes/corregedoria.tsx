@@ -48,7 +48,9 @@ const RelatorioCard = ({
   linkInvestigacaoId, setLinkInvestigacaoId, depoimentos, onPrint,
   relatorioGeralVinculos,
   linkRelatorioGeralId, setLinkRelatorioGeralId, onLinkRelatorioGeral,
-  setActiveTab, onUnlinkRelatorioGeralVinculo, onUnlinkDepoimento, onUnlinkDocumentoAnexado
+  setActiveTab, onUnlinkRelatorioGeralVinculo, onUnlinkDepoimento, onUnlinkDocumentoAnexado,
+  ipms, ipmVinculos, linkIpmId, setLinkIpmId,
+  handleLinkIpm, handleUnlinkIpm
 }: any) => {
   const linkedDenuncias = denunciaRelatorios
     .filter((dr: any) => dr.relatorio_id === relatorio.id)
@@ -415,6 +417,63 @@ const RelatorioCard = ({
                 {linking ? "Vinculando..." : "Vincular"}
               </Button>
             </div>
+            </div>
+
+          {/* IPMs Vinculados */}
+          <div className="rounded border border-border bg-muted p-4">
+            <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+              <Gavel className="h-4 w-4" /> IPMs Vinculados
+            </div>
+            {(() => {
+              const linked = ipmVinculos
+                .filter(v => v.entidade_id === relatorio.id && v.entidade_tipo === "relatorio")
+                .map(v => ({ vinculo: v, ipm: ipms.find((ip: any) => ip.id === v.ipm_id) }))
+                .filter((x): x is { vinculo: any; ipm: any } => !!x.ipm);
+              const available = ipms.filter((ip: any) => !ipmVinculos.some(v => v.ipm_id === ip.id && v.entidade_id === relatorio.id && v.entidade_tipo === "relatorio"));
+              return (
+                <>
+                  {linked.length > 0 ? (
+                    <div className="space-y-2 mb-3">
+                      {linked.map(({ vinculo, ipm }) => (
+                        <div key={vinculo.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
+                          <div className="flex items-center gap-3">
+                            <Gavel className="h-4 w-4 text-foreground shrink-0" />
+                            <span className="text-foreground font-bold">IPM nº {ipm.numero_ipm}</span>
+                            <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">IPM</Badge>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-950/30"
+                              onClick={() => handleUnlinkIpm(vinculo.id)} title="Desanexar">
+                              <X className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground mb-3">Nenhum IPM vinculado.</p>
+                  )}
+                  <div className="flex gap-2 items-end">
+                    <div className="flex-1">
+                      <Select value={linkIpmId} onValueChange={setLinkIpmId}>
+                        <SelectTrigger className="bg-muted border-border text-foreground text-xs">
+                          <SelectValue placeholder="Vincular IPM..." />
+                        </SelectTrigger>
+                        <SelectContent className="bg-muted border-border text-foreground">
+                          {available.map((ip: any) => (
+                            <SelectItem key={ip.id} value={ip.id}>IPM nº {ip.numero_ipm} - {ip.encarregado_nome}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <Button size="sm" onClick={() => handleLinkIpm(linkIpmId, relatorio.id, "relatorio")}
+                      disabled={linking || !linkIpmId} className="bg-card hover:bg-slate-700 text-white text-xs">
+                      {linking ? "Vinculando..." : "Vincular"}
+                    </Button>
+                  </div>
+                </>
+              );
+            })()}
           </div>
 
           {relatorio.tipo_denuncia === "Inquérito Policial" && relatorio.dados_detalhados && (
@@ -750,6 +809,8 @@ function Corregedoria() {
   const [investigacaoPage, setInvestigacaoPage] = useState(1);
   const PAGE_SIZE = 10;
   
+  const [ipms, setIpms] = useState<Ipm[]>([]);
+  
   // Link Relatório State
   const [linkRelatorioId, setLinkRelatorioId] = useState<string>("");
   const [linkDenunciaId, setLinkDenunciaId] = useState<string>("");
@@ -776,7 +837,7 @@ function Corregedoria() {
       return;
     }
     const load = async () => {
-      const [denunciasRes, investigacoesRes, relatoriosRes, drRes, irRes, diRes, depoimentosRes, ddRes, perfisRes, rgvRes, ivRes] = await Promise.all([
+      const [denunciasRes, investigacoesRes, relatoriosRes, drRes, irRes, diRes, depoimentosRes, ddRes, perfisRes, rgvRes, ivRes, ipmsRes] = await Promise.all([
         supabase.from("denuncias").select("*").order("created_at", { ascending: false }),
         supabase.from("investigacoes").select("*").order("created_at", { ascending: false }),
         supabase.from("relatorios").select("*").order("created_at", { ascending: false }),
@@ -787,7 +848,8 @@ function Corregedoria() {
         supabase.from("denuncia_depoimento").select("*"),
         supabase.from("profiles").select("*").order("full_name", { ascending: true }),
         supabase.from("relatorio_geral_vinculos").select("*"),
-        supabase.from("ipm_vinculos").select("*")
+        supabase.from("ipm_vinculos").select("*"),
+        supabase.from("ipm").select("*").order("created_at", { ascending: false })
       ]);
       
       if (denunciasRes.data) setDenuncias(denunciasRes.data as Denuncia[]);
@@ -800,6 +862,7 @@ function Corregedoria() {
       if (ddRes.data) setDenunciaDepoimentos(ddRes.data as DenunciaDepoimento[]);
       if (rgvRes.data) setRelatorioGeralVinculos(rgvRes.data as RelatorioGeralVinculo[]);
       if (ivRes.data) setIpmVinculos(ivRes.data as IpmVinculo[]);
+      if (ipmsRes.data) setIpms(ipmsRes.data as Ipm[]);
       
       // Filtrar oficiais para mostrar apenas os aprovados (não pendentes)
       if (perfisRes.data) {
@@ -2678,6 +2741,63 @@ function Corregedoria() {
                               </div>
                             </div>
 
+                            {/* IPMs Vinculados */}
+                            <div className="rounded border border-border bg-muted p-4">
+                              <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                                <Gavel className="h-4 w-4" /> IPMs Vinculados
+                              </div>
+                              {(() => {
+                                const linked = ipmVinculos
+                                  .filter(v => v.entidade_id === d.id && v.entidade_tipo === "denuncia")
+                                  .map(v => ({ vinculo: v, ipm: ipms.find((ip: any) => ip.id === v.ipm_id) }))
+                                  .filter((x): x is { vinculo: any; ipm: any } => !!x.ipm);
+                                const available = ipms.filter((ip: any) => !ipmVinculos.some(v => v.ipm_id === ip.id && v.entidade_id === d.id && v.entidade_tipo === "denuncia"));
+                                return (
+                                  <>
+                                    {linked.length > 0 ? (
+                                      <div className="space-y-2 mb-3">
+                                        {linked.map(({ vinculo, ipm }) => (
+                                          <div key={vinculo.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
+                                            <div className="flex items-center gap-3">
+                                              <Gavel className="h-4 w-4 text-foreground shrink-0" />
+                                              <span className="text-foreground font-bold">IPM nº {ipm.numero_ipm}</span>
+                                              <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">IPM</Badge>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                              <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-950/30"
+                                                onClick={() => handleUnlinkIpm(vinculo.id)} title="Desanexar">
+                                                <X className="h-3.5 w-3.5" />
+                                              </Button>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    ) : (
+                                      <p className="text-xs text-muted-foreground mb-3">Nenhum IPM vinculado.</p>
+                                    )}
+                                    <div className="flex gap-2 items-end">
+                                      <div className="flex-1">
+                                        <Select value={linkIpmId} onValueChange={setLinkIpmId}>
+                                          <SelectTrigger className="bg-muted border-border text-foreground text-xs">
+                                            <SelectValue placeholder="Vincular IPM..." />
+                                          </SelectTrigger>
+                                          <SelectContent className="bg-muted border-border text-foreground">
+                                            {available.map((ip: any) => (
+                                              <SelectItem key={ip.id} value={ip.id}>IPM nº {ip.numero_ipm} - {ip.encarregado_nome}</SelectItem>
+                                            ))}
+                                          </SelectContent>
+                                        </Select>
+                                      </div>
+                                      <Button size="sm" onClick={() => handleLinkIpm(linkIpmId, d.id, "denuncia")}
+                                        disabled={linking || !linkIpmId} className="bg-card hover:bg-slate-700 text-white text-xs">
+                                        {linking ? "Vinculando..." : "Vincular"}
+                                      </Button>
+                                    </div>
+                                  </>
+                                );
+                              })()}
+                            </div>
+
                             {/* DADOS DETALHADOS (SE EXISTIREM) */}
                             {d.dados_detalhados && (
                               <div className="mt-4 space-y-4 animate-in fade-in duration-500">
@@ -3415,6 +3535,63 @@ function Corregedoria() {
                               </div>
                             </div>
 
+                            {/* IPMs Vinculados */}
+                            <div className="rounded border border-border bg-muted p-4">
+                              <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                                <Gavel className="h-4 w-4" /> IPMs Vinculados
+                              </div>
+                              {(() => {
+                                const linked = ipmVinculos
+                                  .filter(v => v.entidade_id === inv.id && v.entidade_tipo === "investigacao")
+                                  .map(v => ({ vinculo: v, ipm: ipms.find((ip: any) => ip.id === v.ipm_id) }))
+                                  .filter((x): x is { vinculo: any; ipm: any } => !!x.ipm);
+                                const available = ipms.filter((ip: any) => !ipmVinculos.some(v => v.ipm_id === ip.id && v.entidade_id === inv.id && v.entidade_tipo === "investigacao"));
+                                return (
+                                  <>
+                                    {linked.length > 0 ? (
+                                      <div className="space-y-2 mb-3">
+                                        {linked.map(({ vinculo, ipm }) => (
+                                          <div key={vinculo.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
+                                            <div className="flex items-center gap-3">
+                                              <Gavel className="h-4 w-4 text-foreground shrink-0" />
+                                              <span className="text-foreground font-bold">IPM nº {ipm.numero_ipm}</span>
+                                              <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">IPM</Badge>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                              <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-950/30"
+                                                onClick={() => handleUnlinkIpm(vinculo.id)} title="Desanexar">
+                                                <X className="h-3.5 w-3.5" />
+                                              </Button>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    ) : (
+                                      <p className="text-xs text-muted-foreground mb-3">Nenhum IPM vinculado.</p>
+                                    )}
+                                    <div className="flex gap-2 items-end">
+                                      <div className="flex-1">
+                                        <Select value={linkIpmId} onValueChange={setLinkIpmId}>
+                                          <SelectTrigger className="bg-muted border-border text-foreground text-xs">
+                                            <SelectValue placeholder="Vincular IPM..." />
+                                          </SelectTrigger>
+                                          <SelectContent className="bg-muted border-border text-foreground">
+                                            {available.map((ip: any) => (
+                                              <SelectItem key={ip.id} value={ip.id}>IPM nº {ip.numero_ipm} - {ip.encarregado_nome}</SelectItem>
+                                            ))}
+                                          </SelectContent>
+                                        </Select>
+                                      </div>
+                                      <Button size="sm" onClick={() => handleLinkIpm(linkIpmId, inv.id, "investigacao")}
+                                        disabled={linking || !linkIpmId} className="bg-card hover:bg-slate-700 text-white text-xs">
+                                        {linking ? "Vinculando..." : "Vincular"}
+                                      </Button>
+                                    </div>
+                                  </>
+                                );
+                              })()}
+                            </div>
+
                             <div className="grid gap-6 md:grid-cols-2">
                               <div className="space-y-4">
                                 <div className="border-l-2 border-red-600 pl-3 bg-red-500/5 py-2">
@@ -3866,9 +4043,15 @@ function Corregedoria() {
                           onLinkRelatorioGeral={handleLinkRelatorioGeral}
                           setActiveTab={setActiveTab}
                           onUnlinkRelatorioGeralVinculo={deleteRelatorioGeralVinculo}
-                          onUnlinkDepoimento={handleUnlinkDepoimentoRelatorio}
-                          onUnlinkDocumentoAnexado={handleUnlinkDocumentoRelatorio}
-                        />
+                           onUnlinkDepoimento={handleUnlinkDepoimentoRelatorio}
+                           onUnlinkDocumentoAnexado={handleUnlinkDocumentoRelatorio}
+                           ipms={ipms}
+                           ipmVinculos={ipmVinculos}
+                           linkIpmId={linkIpmId}
+                           setLinkIpmId={setLinkIpmId}
+                           handleLinkIpm={handleLinkIpm}
+                           handleUnlinkIpm={handleUnlinkIpm}
+                         />
                       ))
                   )
                 }
