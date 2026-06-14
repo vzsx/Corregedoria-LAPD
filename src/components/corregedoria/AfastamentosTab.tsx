@@ -1064,10 +1064,7 @@ export function AfastamentosTab(_props: AfastamentosTabProps) {
 
         </div>
       );
-    }
-
-  // --- Histórico Individual ---
-  } else if (subTab === "historico") {
+    } else if (subTab === "historico") {
     content = (
       <div className="space-y-6 animate-fade-in">
         <div className="flex items-center justify-between border-b border-border pb-4">
