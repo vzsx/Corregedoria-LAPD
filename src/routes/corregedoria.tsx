@@ -2016,6 +2016,12 @@ function Corregedoria() {
             label="Investigações" 
           />
           <SidebarItem 
+            active={activeTab === "ipm"} 
+            onClick={() => handleTabChange("ipm")} 
+            icon={Gavel} 
+            label="IPM" 
+          />
+          <SidebarItem 
             active={activeTab === "atos"} 
             onClick={() => handleTabChange("atos")} 
             icon={FileText} 
@@ -2038,12 +2044,6 @@ function Corregedoria() {
             onClick={() => handleTabChange("afastamentos")} 
             icon={ClipboardList} 
             label="Afastamentos" 
-          />
-          <SidebarItem 
-            active={activeTab === "ipm"} 
-            onClick={() => handleTabChange("ipm")} 
-            icon={Gavel} 
-            label="IPM" 
           />
           <SidebarItem 
             active={activeTab === "oficiais"} 
@@ -3486,6 +3486,11 @@ function Corregedoria() {
           {/* INQUÉRITOS POLICIAIS TAB */}
           {activeTab === "inqueritos" && null}
 
+          {/* IPM TAB */}
+          {activeTab === "ipm" && (
+            <IpmTab />
+          )}
+
           {/* ATOS ADMINISTRATIVOS TAB */}
           {activeTab === "atos" && (
             <div className="space-y-6 animate-fade-in">
@@ -4675,10 +4680,6 @@ function Corregedoria() {
 
           {activeTab === "afastamentos" && (
             <AfastamentosTab />
-          )}
-
-          {activeTab === "ipm" && (
-            <IpmTab />
           )}
 
         </div>
