@@ -4435,10 +4435,67 @@ function Corregedoria() {
                                       </div>
                                     </div>
                                   )}
-                                </div>
-                              ) : (
-                                <p className="text-xs text-muted-foreground">Nenhum documento vinculado.</p>
-                              )}
+                              </div>
+                            ) : (
+                              <p className="text-xs text-muted-foreground">Nenhum documento vinculado.</p>
+                            )}
+                            </div>
+
+                            {/* IPMs Vinculados */}
+                            <div className="rounded border border-border bg-muted p-4">
+                              <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                                <Gavel className="h-4 w-4" /> IPMs Vinculados
+                              </div>
+                              {(() => {
+                                const linked = ipmVinculos
+                                  .filter(v => v.entidade_id === d.id && v.entidade_tipo === "depoimento")
+                                  .map(v => ({ vinculo: v, ipm: ipms.find(ip => ip.id === v.ipm_id) }))
+                                  .filter((x): x is { vinculo: any; ipm: any } => !!x.ipm);
+                                const available = ipms.filter(ip => !ipmVinculos.some(v => v.ipm_id === ip.id && v.entidade_id === d.id && v.entidade_tipo === "depoimento"));
+                                return (
+                                  <>
+                                    {linked.length > 0 ? (
+                                      <div className="space-y-2 mb-3">
+                                        {linked.map(({ vinculo, ipm }) => (
+                                          <div key={vinculo.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
+                                            <div className="flex items-center gap-3">
+                                              <Gavel className="h-4 w-4 text-foreground shrink-0" />
+                                              <span className="text-foreground font-bold">IPM nº {ipm.numero_ipm}</span>
+                                              <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">IPM</Badge>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                              <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-950/30"
+                                                onClick={() => handleUnlinkIpm(vinculo.id)} title="Desanexar">
+                                                <X className="h-3.5 w-3.5" />
+                                              </Button>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    ) : (
+                                      <p className="text-xs text-muted-foreground mb-3">Nenhum IPM vinculado.</p>
+                                    )}
+                                    <div className="flex gap-2 items-end">
+                                      <div className="flex-1">
+                                        <Select value={linkIpmId} onValueChange={setLinkIpmId}>
+                                          <SelectTrigger className="bg-muted border-border text-foreground text-xs">
+                                            <SelectValue placeholder="Vincular IPM..." />
+                                          </SelectTrigger>
+                                          <SelectContent className="bg-muted border-border text-foreground">
+                                            {available.map(ip => (
+                                              <SelectItem key={ip.id} value={ip.id}>IPM nº {ip.numero_ipm} - {ip.encarregado_nome}</SelectItem>
+                                            ))}
+                                          </SelectContent>
+                                        </Select>
+                                      </div>
+                                      <Button size="sm" onClick={() => handleLinkIpm(linkIpmId, d.id, "depoimento")}
+                                        disabled={linking || !linkIpmId} className="bg-card hover:bg-slate-700 text-white text-xs">
+                                        {linking ? "Vinculando..." : "Vincular"}
+                                      </Button>
+                                    </div>
+                                  </>
+                                );
+                              })()}
                             </div>
                           </div>
                         )}
