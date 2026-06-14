@@ -1062,7 +1062,7 @@ export function AfastamentosTab(_props: AfastamentosTabProps) {
           </div>
         )}
 
-        </>
+        </div>
       );
     }
 
