@@ -585,9 +585,11 @@ export function AfastamentosTab(_props: AfastamentosTabProps) {
     win.document.close();
   };
 
+  let content: JSX.Element | null = null;
+
   // --- Dashboard ---
   if (subTab === "dashboard") {
-    return (
+    content = (
       <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <div className="flex items-center justify-between border-b border-border pb-4">
           <h3 className="text-lg font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
@@ -715,11 +717,8 @@ export function AfastamentosTab(_props: AfastamentosTabProps) {
         </div>
       </div>
     );
-  }
-
-  // --- Listagem ---
-  if (subTab === "listagem") {
-    return (
+  } else if (subTab === "listagem") {
+    content = (
       <div className="space-y-6 animate-fade-in">
         {/* Header */}
         <div className="flex flex-col gap-4 border-b border-border pb-4">
@@ -1063,522 +1062,13 @@ export function AfastamentosTab(_props: AfastamentosTabProps) {
           </div>
         )}
 
-        {/* Create/Edit Afastamento Dialog */}
-        <Dialog open={afastamentoDialogOpen} onOpenChange={(open) => { setAfastamentoDialogOpen(open); if (!open) resetAfastamentoForm(); }}>
-          <DialogContent className="sm:max-w-[600px] bg-card border-border text-foreground">
-            <DialogHeader>
-              <div className="text-center pb-2 border-b border-border">
-                <p className="text-[9px] font-bold uppercase tracking-widest text-foreground mb-1">Corregedoria Geral (PMESP)</p>
-                <DialogTitle className="text-foreground uppercase tracking-wider text-sm">Novo Afastamento</DialogTitle>
-              </div>
-            </DialogHeader>
-            <form onSubmit={createAfastamento} className="space-y-4 mt-2">
-              <div className="max-h-[70vh] overflow-y-auto pr-2 space-y-4 custom-scrollbar">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase text-muted-foreground">Nº da Portaria *</Label>
-                    <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                      value={afastamentoForm.numero_portaria}
-                      onChange={(e) => setAfastamentoForm({ ...afastamentoForm, numero_portaria: e.target.value })} />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase text-muted-foreground">Data da Portaria *</Label>
-                    <Input required type="date" className="bg-background border-border text-foreground h-8 text-xs"
-                      value={afastamentoForm.data_portaria}
-                      onChange={(e) => setAfastamentoForm({ ...afastamentoForm, data_portaria: e.target.value })} />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase text-muted-foreground">Posto/Graduação *</Label>
-                    <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                      value={afastamentoForm.posto_graduacao}
-                      onChange={(e) => setAfastamentoForm({ ...afastamentoForm, posto_graduacao: e.target.value })} />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase text-muted-foreground">Nome Completo *</Label>
-                    <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                      value={afastamentoForm.nome_completo}
-                      onChange={(e) => setAfastamentoForm({ ...afastamentoForm, nome_completo: e.target.value })} />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase text-muted-foreground">RG PM *</Label>
-                    <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                      value={afastamentoForm.rg_pm}
-                      onChange={(e) => setAfastamentoForm({ ...afastamentoForm, rg_pm: e.target.value })} />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase text-muted-foreground">Unidade *</Label>
-                    <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                      value={afastamentoForm.unidade}
-                      onChange={(e) => setAfastamentoForm({ ...afastamentoForm, unidade: e.target.value })} />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase text-muted-foreground">Função/Cargo</Label>
-                    <Input className="bg-background border-border text-foreground h-8 text-xs"
-                      value={afastamentoForm.funcao_cargo}
-                      onChange={(e) => setAfastamentoForm({ ...afastamentoForm, funcao_cargo: e.target.value })} />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase text-muted-foreground">Motivo do Afastamento *</Label>
-                    <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                      value={afastamentoForm.motivo_afastamento}
-                      onChange={(e) => setAfastamentoForm({ ...afastamentoForm, motivo_afastamento: e.target.value })} />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase text-muted-foreground">Prazo do Afastamento *</Label>
-                    <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                      value={afastamentoForm.prazo_afastamento}
-                      onChange={(e) => setAfastamentoForm({ ...afastamentoForm, prazo_afastamento: e.target.value })} />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase text-muted-foreground">Responsável pela Decisão *</Label>
-                    <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                      value={afastamentoForm.responsavel_decisao}
-                      onChange={(e) => setAfastamentoForm({ ...afastamentoForm, responsavel_decisao: e.target.value })} />
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase text-muted-foreground">Observações</Label>
-                  <Textarea rows={3} className="bg-background border-border text-foreground text-xs"
-                    value={afastamentoForm.observacoes}
-                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, observacoes: e.target.value })} />
-                </div>
-              </div>
-              <div className="pt-4 border-t border-border flex justify-end gap-2">
-                <Button type="button" variant="outline" size="sm" className="border-border text-[10px] uppercase"
-                  onClick={() => { setAfastamentoDialogOpen(false); resetAfastamentoForm(); }}>
-                  Cancelar
-                </Button>
-                <Button type="submit" disabled={submitting} className="bg-primary hover:bg-primary/80 text-white px-8 font-bold tracking-widest text-[10px] uppercase">
-                  {submitting ? "Salvando..." : "Salvar"}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
-
-        {/* Edit Afastamento Dialog */}
-        <Dialog open={afastamentoEditDialogOpen} onOpenChange={(open) => { setAfastamentoEditDialogOpen(open); if (!open) { setEditingAfastamentoId(null); resetAfastamentoForm(); } }}>
-          <DialogContent className="sm:max-w-[600px] bg-card border-border text-foreground">
-            <DialogHeader>
-              <div className="text-center pb-2 border-b border-border">
-                <p className="text-[9px] font-bold uppercase tracking-widest text-foreground mb-1">Corregedoria Geral (PMESP)</p>
-                <DialogTitle className="text-foreground uppercase tracking-wider text-sm">Editar Afastamento</DialogTitle>
-              </div>
-            </DialogHeader>
-            <form onSubmit={updateAfastamento} className="space-y-4 mt-2">
-              <div className="max-h-[70vh] overflow-y-auto pr-2 space-y-4 custom-scrollbar">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase text-muted-foreground">Nº da Portaria</Label>
-                    <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                      value={afastamentoForm.numero_portaria}
-                      onChange={(e) => setAfastamentoForm({ ...afastamentoForm, numero_portaria: e.target.value })} />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase text-muted-foreground">Data da Portaria</Label>
-                    <Input required type="date" className="bg-background border-border text-foreground h-8 text-xs"
-                      value={afastamentoForm.data_portaria}
-                      onChange={(e) => setAfastamentoForm({ ...afastamentoForm, data_portaria: e.target.value })} />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase text-muted-foreground">Posto/Graduação</Label>
-                    <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                      value={afastamentoForm.posto_graduacao}
-                      onChange={(e) => setAfastamentoForm({ ...afastamentoForm, posto_graduacao: e.target.value })} />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase text-muted-foreground">Nome Completo</Label>
-                    <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                      value={afastamentoForm.nome_completo}
-                      onChange={(e) => setAfastamentoForm({ ...afastamentoForm, nome_completo: e.target.value })} />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase text-muted-foreground">RG PM</Label>
-                    <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                      value={afastamentoForm.rg_pm}
-                      onChange={(e) => setAfastamentoForm({ ...afastamentoForm, rg_pm: e.target.value })} />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase text-muted-foreground">Unidade</Label>
-                    <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                      value={afastamentoForm.unidade}
-                      onChange={(e) => setAfastamentoForm({ ...afastamentoForm, unidade: e.target.value })} />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase text-muted-foreground">Função/Cargo</Label>
-                    <Input className="bg-background border-border text-foreground h-8 text-xs"
-                      value={afastamentoForm.funcao_cargo}
-                      onChange={(e) => setAfastamentoForm({ ...afastamentoForm, funcao_cargo: e.target.value })} />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase text-muted-foreground">Motivo do Afastamento</Label>
-                    <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                      value={afastamentoForm.motivo_afastamento}
-                      onChange={(e) => setAfastamentoForm({ ...afastamentoForm, motivo_afastamento: e.target.value })} />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase text-muted-foreground">Prazo do Afastamento</Label>
-                    <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                      value={afastamentoForm.prazo_afastamento}
-                      onChange={(e) => setAfastamentoForm({ ...afastamentoForm, prazo_afastamento: e.target.value })} />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase text-muted-foreground">Responsável pela Decisão</Label>
-                    <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                      value={afastamentoForm.responsavel_decisao}
-                      onChange={(e) => setAfastamentoForm({ ...afastamentoForm, responsavel_decisao: e.target.value })} />
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase text-muted-foreground">Status</Label>
-                  <Select value={afastamentoForm.status} onValueChange={(v: AfastamentoStatus) => setAfastamentoForm({ ...afastamentoForm, status: v })}>
-                    <SelectTrigger className="bg-background border-border text-foreground h-8 text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-muted border-border text-foreground">
-                      {Object.entries(AFASTAMENTO_STATUS_LABEL).map(([val, lab]) => (
-                        <SelectItem key={val} value={val} className="text-[10px]">{lab}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase text-muted-foreground">Observações</Label>
-                  <Textarea rows={3} className="bg-background border-border text-foreground text-xs"
-                    value={afastamentoForm.observacoes}
-                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, observacoes: e.target.value })} />
-                </div>
-              </div>
-              <div className="pt-4 border-t border-border flex justify-end gap-2">
-                <Button type="button" variant="outline" size="sm" className="border-border text-[10px] uppercase"
-                  onClick={() => { setAfastamentoEditDialogOpen(false); setEditingAfastamentoId(null); resetAfastamentoForm(); }}>
-                  Cancelar
-                </Button>
-                <Button type="submit" disabled={submitting} className="bg-primary hover:bg-primary/80 text-white px-8 font-bold tracking-widest text-[10px] uppercase">
-                  {submitting ? "Salvando..." : "Salvar Alterações"}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
-
-        {/* Create Investigação Dialog */}
-        <Dialog open={investigacaoDialogOpen} onOpenChange={(open) => { setInvestigacaoDialogOpen(open); if (!open) resetInvestigacaoForm(); }}>
-          <DialogContent className="sm:max-w-[500px] bg-card border-border text-foreground">
-            <DialogHeader>
-              <DialogTitle className="text-sm uppercase tracking-wider">Nova Investigação</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={createInvestigacao} className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase text-muted-foreground">Nº da Investigação *</Label>
-                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                    value={investigacaoForm.numero_investigacao}
-                    onChange={(e) => setInvestigacaoForm({ ...investigacaoForm, numero_investigacao: e.target.value })} />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase text-muted-foreground">Data de Instauração *</Label>
-                  <Input required type="date" className="bg-background border-border text-foreground h-8 text-xs"
-                    value={investigacaoForm.data_instauracao}
-                    onChange={(e) => setInvestigacaoForm({ ...investigacaoForm, data_instauracao: e.target.value })} />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <Label className="text-[10px] uppercase text-muted-foreground">Encarregado *</Label>
-                <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                  value={investigacaoForm.encarregado}
-                  onChange={(e) => setInvestigacaoForm({ ...investigacaoForm, encarregado: e.target.value })} />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-[10px] uppercase text-muted-foreground">Descrição dos Fatos *</Label>
-                <Textarea required rows={4} className="bg-background border-border text-foreground text-xs"
-                  value={investigacaoForm.descricao_fatos}
-                  onChange={(e) => setInvestigacaoForm({ ...investigacaoForm, descricao_fatos: e.target.value })} />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-[10px] uppercase text-muted-foreground">Provas Anexadas</Label>
-                <Textarea rows={2} className="bg-background border-border text-foreground text-xs"
-                  value={investigacaoForm.provas_anexadas}
-                  onChange={(e) => setInvestigacaoForm({ ...investigacaoForm, provas_anexadas: e.target.value })} />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-[10px] uppercase text-muted-foreground">Testemunhas</Label>
-                <Textarea rows={2} className="bg-background border-border text-foreground text-xs"
-                  value={investigacaoForm.testemunhas}
-                  onChange={(e) => setInvestigacaoForm({ ...investigacaoForm, testemunhas: e.target.value })} />
-              </div>
-              <div className="pt-2 border-t border-border flex justify-end gap-2">
-                <Button type="button" variant="outline" size="sm" className="border-border text-[10px] uppercase"
-                  onClick={() => { setInvestigacaoDialogOpen(false); resetInvestigacaoForm(); }}>Cancelar</Button>
-                <Button type="submit" disabled={submitting} className="bg-primary hover:bg-primary/80 text-white text-[10px] uppercase">
-                  {submitting ? "Salvando..." : "Salvar"}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
-
-        {/* Edit Investigação Dialog */}
-        <Dialog open={investigacaoEditDialogOpen} onOpenChange={(open) => { setInvestigacaoEditDialogOpen(open); if (!open) { setEditingInvestigacaoId(null); resetInvestigacaoForm(); } }}>
-          <DialogContent className="sm:max-w-[500px] bg-card border-border text-foreground">
-            <DialogHeader>
-              <DialogTitle className="text-sm uppercase tracking-wider">Editar Investigação</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={updateInvestigacao} className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase text-muted-foreground">Nº da Investigação</Label>
-                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                    value={investigacaoForm.numero_investigacao}
-                    onChange={(e) => setInvestigacaoForm({ ...investigacaoForm, numero_investigacao: e.target.value })} />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase text-muted-foreground">Data de Instauração</Label>
-                  <Input required type="date" className="bg-background border-border text-foreground h-8 text-xs"
-                    value={investigacaoForm.data_instauracao}
-                    onChange={(e) => setInvestigacaoForm({ ...investigacaoForm, data_instauracao: e.target.value })} />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <Label className="text-[10px] uppercase text-muted-foreground">Encarregado</Label>
-                <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                  value={investigacaoForm.encarregado}
-                  onChange={(e) => setInvestigacaoForm({ ...investigacaoForm, encarregado: e.target.value })} />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-[10px] uppercase text-muted-foreground">Descrição dos Fatos</Label>
-                <Textarea required rows={4} className="bg-background border-border text-foreground text-xs"
-                  value={investigacaoForm.descricao_fatos}
-                  onChange={(e) => setInvestigacaoForm({ ...investigacaoForm, descricao_fatos: e.target.value })} />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-[10px] uppercase text-muted-foreground">Provas Anexadas</Label>
-                <Textarea rows={2} className="bg-background border-border text-foreground text-xs"
-                  value={investigacaoForm.provas_anexadas}
-                  onChange={(e) => setInvestigacaoForm({ ...investigacaoForm, provas_anexadas: e.target.value })} />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-[10px] uppercase text-muted-foreground">Testemunhas</Label>
-                <Textarea rows={2} className="bg-background border-border text-foreground text-xs"
-                  value={investigacaoForm.testemunhas}
-                  onChange={(e) => setInvestigacaoForm({ ...investigacaoForm, testemunhas: e.target.value })} />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-[10px] uppercase text-muted-foreground">Status</Label>
-                <Select value={investigacaoForm.status} onValueChange={(v: InvestigacaoPolicialStatus) => setInvestigacaoForm({ ...investigacaoForm, status: v })}>
-                  <SelectTrigger className="bg-background border-border text-foreground h-8 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-muted border-border text-foreground">
-                    {Object.entries(INVESTIGACAO_POLICIAL_STATUS_LABEL).map(([val, lab]) => (
-                      <SelectItem key={val} value={val} className="text-[10px]">{lab}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="pt-2 border-t border-border flex justify-end gap-2">
-                <Button type="button" variant="outline" size="sm" className="border-border text-[10px] uppercase"
-                  onClick={() => { setInvestigacaoEditDialogOpen(false); setEditingInvestigacaoId(null); resetInvestigacaoForm(); }}>Cancelar</Button>
-                <Button type="submit" disabled={submitting} className="bg-primary hover:bg-primary/80 text-white text-[10px] uppercase">
-                  {submitting ? "Salvando..." : "Salvar Alterações"}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
-
-        {/* Create Inquérito Dialog */}
-        <Dialog open={inqueritoDialogOpen} onOpenChange={(open) => { setInqueritoDialogOpen(open); if (!open) resetInqueritoForm(); }}>
-          <DialogContent className="sm:max-w-[500px] bg-card border-border text-foreground">
-            <DialogHeader>
-              <DialogTitle className="text-sm uppercase tracking-wider">Novo Inquérito</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={createInquerito} className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase text-muted-foreground">Nº do Inquérito *</Label>
-                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                    value={inqueritoForm.numero_inquerito}
-                    onChange={(e) => setInqueritoForm({ ...inqueritoForm, numero_inquerito: e.target.value })} />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase text-muted-foreground">Data de Instauração *</Label>
-                  <Input required type="date" className="bg-background border-border text-foreground h-8 text-xs"
-                    value={inqueritoForm.data_instauracao}
-                    onChange={(e) => setInqueritoForm({ ...inqueritoForm, data_instauracao: e.target.value })} />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <Label className="text-[10px] uppercase text-muted-foreground">Autoridade Responsável *</Label>
-                <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                  value={inqueritoForm.autoridade_responsavel}
-                  onChange={(e) => setInqueritoForm({ ...inqueritoForm, autoridade_responsavel: e.target.value })} />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-[10px] uppercase text-muted-foreground">Relatório</Label>
-                <Textarea rows={4} className="bg-background border-border text-foreground text-xs"
-                  value={inqueritoForm.relatorio}
-                  onChange={(e) => setInqueritoForm({ ...inqueritoForm, relatorio: e.target.value })} />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-[10px] uppercase text-muted-foreground">Parecer</Label>
-                <Textarea rows={3} className="bg-background border-border text-foreground text-xs"
-                  value={inqueritoForm.parecer}
-                  onChange={(e) => setInqueritoForm({ ...inqueritoForm, parecer: e.target.value })} />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-[10px] uppercase text-muted-foreground">Resultado</Label>
-                <Input className="bg-background border-border text-foreground h-8 text-xs"
-                  value={inqueritoForm.resultado}
-                  onChange={(e) => setInqueritoForm({ ...inqueritoForm, resultado: e.target.value })} />
-              </div>
-              <div className="pt-2 border-t border-border flex justify-end gap-2">
-                <Button type="button" variant="outline" size="sm" className="border-border text-[10px] uppercase"
-                  onClick={() => { setInqueritoDialogOpen(false); resetInqueritoForm(); }}>Cancelar</Button>
-                <Button type="submit" disabled={submitting} className="bg-primary hover:bg-primary/80 text-white text-[10px] uppercase">
-                  {submitting ? "Salvando..." : "Salvar"}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
-
-        {/* Edit Inquérito Dialog */}
-        <Dialog open={inqueritoEditDialogOpen} onOpenChange={(open) => { setInqueritoEditDialogOpen(open); if (!open) { setEditingInqueritoId(null); resetInqueritoForm(); } }}>
-          <DialogContent className="sm:max-w-[500px] bg-card border-border text-foreground">
-            <DialogHeader>
-              <DialogTitle className="text-sm uppercase tracking-wider">Editar Inquérito</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={updateInquerito} className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase text-muted-foreground">Nº do Inquérito</Label>
-                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                    value={inqueritoForm.numero_inquerito}
-                    onChange={(e) => setInqueritoForm({ ...inqueritoForm, numero_inquerito: e.target.value })} />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase text-muted-foreground">Data de Instauração</Label>
-                  <Input required type="date" className="bg-background border-border text-foreground h-8 text-xs"
-                    value={inqueritoForm.data_instauracao}
-                    onChange={(e) => setInqueritoForm({ ...inqueritoForm, data_instauracao: e.target.value })} />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <Label className="text-[10px] uppercase text-muted-foreground">Autoridade Responsável</Label>
-                <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                  value={inqueritoForm.autoridade_responsavel}
-                  onChange={(e) => setInqueritoForm({ ...inqueritoForm, autoridade_responsavel: e.target.value })} />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-[10px] uppercase text-muted-foreground">Relatório</Label>
-                <Textarea rows={4} className="bg-background border-border text-foreground text-xs"
-                  value={inqueritoForm.relatorio}
-                  onChange={(e) => setInqueritoForm({ ...inqueritoForm, relatorio: e.target.value })} />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-[10px] uppercase text-muted-foreground">Parecer</Label>
-                <Textarea rows={3} className="bg-background border-border text-foreground text-xs"
-                  value={inqueritoForm.parecer}
-                  onChange={(e) => setInqueritoForm({ ...inqueritoForm, parecer: e.target.value })} />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-[10px] uppercase text-muted-foreground">Resultado</Label>
-                <Input className="bg-background border-border text-foreground h-8 text-xs"
-                  value={inqueritoForm.resultado}
-                  onChange={(e) => setInqueritoForm({ ...inqueritoForm, resultado: e.target.value })} />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-[10px] uppercase text-muted-foreground">Status</Label>
-                <Select value={inqueritoForm.status} onValueChange={(v: InqueritoPolicialStatus) => setInqueritoForm({ ...inqueritoForm, status: v })}>
-                  <SelectTrigger className="bg-background border-border text-foreground h-8 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-muted border-border text-foreground">
-                    {Object.entries(INQUERITO_POLICIAL_STATUS_LABEL).map(([val, lab]) => (
-                      <SelectItem key={val} value={val} className="text-[10px]">{lab}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="pt-2 border-t border-border flex justify-end gap-2">
-                <Button type="button" variant="outline" size="sm" className="border-border text-[10px] uppercase"
-                  onClick={() => { setInqueritoEditDialogOpen(false); setEditingInqueritoId(null); resetInqueritoForm(); }}>Cancelar</Button>
-                <Button type="submit" disabled={submitting} className="bg-primary hover:bg-primary/80 text-white text-[10px] uppercase">
-                  {submitting ? "Salvando..." : "Salvar Alterações"}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
-
-        {/* Advertência Dialog */}
-        <Dialog open={advertenciaDialogOpen} onOpenChange={(open) => setAdvertenciaDialogOpen(open)}>
-          <DialogContent className="sm:max-w-[400px] bg-card border-border text-foreground">
-            <DialogHeader>
-              <DialogTitle className="text-sm uppercase tracking-wider">Nova Advertência</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={createAdvertencia} className="space-y-3">
-              <div className="space-y-1">
-                <Label className="text-[10px] uppercase text-muted-foreground">Descrição *</Label>
-                <Textarea required rows={3} className="bg-background border-border text-foreground text-xs"
-                  value={advertenciaForm.descricao}
-                  onChange={(e) => setAdvertenciaForm({ ...advertenciaForm, descricao: e.target.value })} />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase text-muted-foreground">Data *</Label>
-                  <Input required type="date" className="bg-background border-border text-foreground h-8 text-xs"
-                    value={advertenciaForm.data_advertencia}
-                    onChange={(e) => setAdvertenciaForm({ ...advertenciaForm, data_advertencia: e.target.value })} />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase text-muted-foreground">Autoridade *</Label>
-                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
-                    value={advertenciaForm.autoridade_responsavel}
-                    onChange={(e) => setAdvertenciaForm({ ...advertenciaForm, autoridade_responsavel: e.target.value })} />
-                </div>
-              </div>
-              <div className="pt-2 border-t border-border flex justify-end gap-2">
-                <Button type="button" variant="outline" size="sm" className="border-border text-[10px] uppercase"
-                  onClick={() => setAdvertenciaDialogOpen(false)}>Cancelar</Button>
-                <Button type="submit" className="bg-primary hover:bg-primary/80 text-white text-[10px] uppercase">Salvar</Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
-
-        <ConfirmDialog
-          open={confirmDialog.open}
-          onOpenChange={(open) => setConfirmDialog(prev => ({ ...prev, open }))}
-          onConfirm={confirmDialog.onConfirm}
-          title={confirmDialog.title}
-          description={confirmDialog.description}
-          loading={confirmDialog.loading}
-        />
-      </div>
-    );
-  }
+        </>
+      );
+    }
 
   // --- Histórico Individual ---
-  if (subTab === "historico") {
-    return (
+  } else if (subTab === "historico") {
+    content = (
       <div className="space-y-6 animate-fade-in">
         <div className="flex items-center justify-between border-b border-border pb-4">
           <h3 className="text-lg font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
@@ -1668,5 +1158,233 @@ export function AfastamentosTab(_props: AfastamentosTabProps) {
     );
   }
 
-  return null;
+  return (
+    <>
+      {content}
+
+      {/* Create Afastamento Dialog */}
+      <Dialog open={afastamentoDialogOpen} onOpenChange={(open) => { setAfastamentoDialogOpen(open); if (!open) resetAfastamentoForm(); }}>
+        <DialogContent className="sm:max-w-[600px] bg-card border-border text-foreground">
+          <DialogHeader>
+            <div className="text-center pb-2 border-b border-border">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-foreground mb-1">Corregedoria Geral (PMESP)</p>
+              <DialogTitle className="text-foreground uppercase tracking-wider text-sm">Novo Afastamento</DialogTitle>
+            </div>
+          </DialogHeader>
+          <form onSubmit={createAfastamento} className="space-y-4 mt-2">
+            <div className="max-h-[70vh] overflow-y-auto pr-2 space-y-4 custom-scrollbar">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase text-muted-foreground">Nº da Portaria *</Label>
+                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
+                    value={afastamentoForm.numero_portaria}
+                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, numero_portaria: e.target.value })} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase text-muted-foreground">Data da Portaria *</Label>
+                  <Input required type="date" className="bg-background border-border text-foreground h-8 text-xs"
+                    value={afastamentoForm.data_portaria}
+                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, data_portaria: e.target.value })} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase text-muted-foreground">Posto/Graduação *</Label>
+                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
+                    value={afastamentoForm.posto_graduacao}
+                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, posto_graduacao: e.target.value })} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase text-muted-foreground">Nome Completo *</Label>
+                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
+                    value={afastamentoForm.nome_completo}
+                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, nome_completo: e.target.value })} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase text-muted-foreground">RG PM *</Label>
+                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
+                    value={afastamentoForm.rg_pm}
+                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, rg_pm: e.target.value })} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase text-muted-foreground">Unidade *</Label>
+                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
+                    value={afastamentoForm.unidade}
+                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, unidade: e.target.value })} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase text-muted-foreground">Função/Cargo</Label>
+                  <Input className="bg-background border-border text-foreground h-8 text-xs"
+                    value={afastamentoForm.funcao_cargo}
+                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, funcao_cargo: e.target.value })} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase text-muted-foreground">Motivo do Afastamento *</Label>
+                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
+                    value={afastamentoForm.motivo_afastamento}
+                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, motivo_afastamento: e.target.value })} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase text-muted-foreground">Prazo do Afastamento *</Label>
+                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
+                    value={afastamentoForm.prazo_afastamento}
+                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, prazo_afastamento: e.target.value })} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase text-muted-foreground">Responsável pela Decisão *</Label>
+                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
+                    value={afastamentoForm.responsavel_decisao}
+                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, responsavel_decisao: e.target.value })} />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-[10px] uppercase text-muted-foreground">Observações</Label>
+                <Textarea rows={3} className="bg-background border-border text-foreground text-xs"
+                  value={afastamentoForm.observacoes}
+                  onChange={(e) => setAfastamentoForm({ ...afastamentoForm, observacoes: e.target.value })} />
+              </div>
+            </div>
+            <div className="pt-4 border-t border-border flex justify-end gap-2">
+              <Button type="button" variant="outline" size="sm" className="border-border text-[10px] uppercase"
+                onClick={() => { setAfastamentoDialogOpen(false); resetAfastamentoForm(); }}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={submitting} className="bg-primary hover:bg-primary/80 text-white px-8 font-bold tracking-widest text-[10px] uppercase">
+                {submitting ? "Salvando..." : "Salvar"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Afastamento Dialog */}
+      <Dialog open={afastamentoEditDialogOpen} onOpenChange={(open) => { setAfastamentoEditDialogOpen(open); if (!open) { setEditingAfastamentoId(null); resetAfastamentoForm(); } }}>
+        <DialogContent className="sm:max-w-[600px] bg-card border-border text-foreground">
+          <DialogHeader>
+            <div className="text-center pb-2 border-b border-border">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-foreground mb-1">Corregedoria Geral (PMESP)</p>
+              <DialogTitle className="text-foreground uppercase tracking-wider text-sm">Editar Afastamento</DialogTitle>
+            </div>
+          </DialogHeader>
+          <form onSubmit={updateAfastamento} className="space-y-4 mt-2">
+            <div className="max-h-[70vh] overflow-y-auto pr-2 space-y-4 custom-scrollbar">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase text-muted-foreground">Nº da Portaria</Label>
+                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
+                    value={afastamentoForm.numero_portaria}
+                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, numero_portaria: e.target.value })} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase text-muted-foreground">Data da Portaria</Label>
+                  <Input required type="date" className="bg-background border-border text-foreground h-8 text-xs"
+                    value={afastamentoForm.data_portaria}
+                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, data_portaria: e.target.value })} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase text-muted-foreground">Posto/Graduação</Label>
+                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
+                    value={afastamentoForm.posto_graduacao}
+                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, posto_graduacao: e.target.value })} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase text-muted-foreground">Nome Completo</Label>
+                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
+                    value={afastamentoForm.nome_completo}
+                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, nome_completo: e.target.value })} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase text-muted-foreground">RG PM</Label>
+                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
+                    value={afastamentoForm.rg_pm}
+                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, rg_pm: e.target.value })} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase text-muted-foreground">Unidade</Label>
+                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
+                    value={afastamentoForm.unidade}
+                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, unidade: e.target.value })} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase text-muted-foreground">Função/Cargo</Label>
+                  <Input className="bg-background border-border text-foreground h-8 text-xs"
+                    value={afastamentoForm.funcao_cargo}
+                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, funcao_cargo: e.target.value })} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase text-muted-foreground">Motivo do Afastamento</Label>
+                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
+                    value={afastamentoForm.motivo_afastamento}
+                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, motivo_afastamento: e.target.value })} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase text-muted-foreground">Prazo do Afastamento</Label>
+                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
+                    value={afastamentoForm.prazo_afastamento}
+                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, prazo_afastamento: e.target.value })} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-[10px] uppercase text-muted-foreground">Responsável pela Decisão</Label>
+                  <Input required className="bg-background border-border text-foreground h-8 text-xs"
+                    value={afastamentoForm.responsavel_decisao}
+                    onChange={(e) => setAfastamentoForm({ ...afastamentoForm, responsavel_decisao: e.target.value })} />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-[10px] uppercase text-muted-foreground">Status</Label>
+                <Select value={afastamentoForm.status} onValueChange={(v: AfastamentoStatus) => setAfastamentoForm({ ...afastamentoForm, status: v })}>
+                  <SelectTrigger className="bg-background border-border text-foreground h-8 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-muted border-border text-foreground">
+                    {Object.entries(AFASTAMENTO_STATUS_LABEL).map(([val, lab]) => (
+                      <SelectItem key={val} value={val} className="text-[10px]">{lab}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-[10px] uppercase text-muted-foreground">Observações</Label>
+                <Textarea rows={3} className="bg-background border-border text-foreground text-xs"
+                  value={afastamentoForm.observacoes}
+                  onChange={(e) => setAfastamentoForm({ ...afastamentoForm, observacoes: e.target.value })} />
+              </div>
+            </div>
+            <div className="pt-4 border-t border-border flex justify-end gap-2">
+              <Button type="button" variant="outline" size="sm" className="border-border text-[10px] uppercase"
+                onClick={() => { setAfastamentoEditDialogOpen(false); setEditingAfastamentoId(null); resetAfastamentoForm(); }}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={submitting} className="bg-primary hover:bg-primary/80 text-white px-8 font-bold tracking-widest text-[10px] uppercase">
+                {submitting ? "Salvando..." : "Salvar Alterações"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <ConfirmDialog
+        open={confirmDialog.open}
+        onOpenChange={(open) => setConfirmDialog(prev => ({ ...prev, open }))}
+        onConfirm={confirmDialog.onConfirm}
+        title={confirmDialog.title}
+        description={confirmDialog.description}
+        loading={confirmDialog.loading}
+      />
+    </>
+  );
 }
