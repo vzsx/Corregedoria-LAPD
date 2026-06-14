@@ -199,6 +199,14 @@ export interface Ipm {
   updated_at: string;
 }
 
+export interface IpmVinculo {
+  id: string;
+  ipm_id: string;
+  entidade_id: string;
+  entidade_tipo: "denuncia" | "investigacao" | "relatorio" | "depoimento" | "afastamento";
+  created_at: string;
+}
+
 export interface InvestigacaoPolicial {
   id: string;
   numero_investigacao: string;

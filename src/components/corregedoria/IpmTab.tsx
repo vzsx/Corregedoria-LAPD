@@ -5,7 +5,7 @@ import {
   Shield, FileText, Loader2, Plus, Trash2, Edit,
   Printer, Search, X, FileSignature, Eye,
   ChevronRight, AlertTriangle, Gavel, Copy, History, BookOpen,
-  UserCheck, Link2, Scale, FileSearch, ArrowRight,
+  UserCheck, Link2, Scale, FileSearch, ArrowRight, Activity, MessageSquare,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -140,7 +140,20 @@ function generateIpmDoc(data: IpmFormData): string {
   ].join("\n");
 }
 
-export function IpmTab() {
+interface IpmTabProps {
+  denuncias: any[];
+  investigacoes: any[];
+  relatorios: any[];
+  depoimentos: any[];
+  ipmVinculos: any[];
+  linkIpmId: string;
+  setLinkIpmId: (v: string) => void;
+  linking: boolean;
+  handleLinkIpm: (ipmId: string, entidadeId: string, entidadeTipo: string) => Promise<void>;
+  handleUnlinkIpm: (vinculoId: string) => Promise<void>;
+}
+
+export function IpmTab({ denuncias, investigacoes, relatorios, depoimentos, ipmVinculos, linkIpmId, setLinkIpmId, linking: parentLinking, handleLinkIpm, handleUnlinkIpm }: IpmTabProps) {
   const { user, isAdmin } = useAuth();
   const canDelete = isAdmin;
   const canEdit = !!(user && (isAdmin || user.role === "corregedor"));
@@ -172,6 +185,11 @@ export function IpmTab() {
   const [vinculacaoDialogOpen, setVinculacaoDialogOpen] = useState(false);
   const [vinculacaoTipo, setVinculacaoTipo] = useState<Vinculacao["tipo"]>("afastamento");
   const [vinculacaoDescricao, setVinculacaoDescricao] = useState("");
+
+  const [denunciaLinkId, setDenunciaLinkId] = useState("");
+  const [investigacaoLinkId, setInvestigacaoLinkId] = useState("");
+  const [atoLinkId, setAtoLinkId] = useState("");
+  const [depoimentoLinkId, setDepoimentoLinkId] = useState("");
 
   const loadIpms = async () => {
     const { data, error } = await supabase.from("ipm").select("*").order("created_at", { ascending: false });
@@ -742,6 +760,235 @@ export function IpmTab() {
                           ))}
                         </SelectContent>
                       </Select>
+                    </div>
+
+                    {/* DENÚNCIAS VINCULADAS */}
+                    <div className="rounded border border-border bg-muted p-4">
+                      <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                        <Activity className="h-4 w-4" /> Denúncias Vinculadas
+                      </div>
+                      {(() => {
+                        const linked = ipmVinculos
+                          .filter(v => v.ipm_id === ipm.id && v.entidade_tipo === "denuncia")
+                          .map(v => ({ vinculo: v, entidade: denuncias.find(d => d.id === v.entidade_id) }))
+                          .filter((x): x is { vinculo: any; entidade: any } => !!x.entidade);
+                        const available = denuncias.filter(d => !ipmVinculos.some(v => v.ipm_id === ipm.id && v.entidade_id === d.id && v.entidade_tipo === "denuncia"));
+                        return (
+                          <>
+                            {linked.length > 0 ? (
+                              <div className="space-y-2 mb-3">
+                                {linked.map(({ vinculo, entidade }) => (
+                                  <div key={vinculo.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
+                                    <div className="flex items-center gap-3">
+                                      <Activity className="h-4 w-4 text-foreground shrink-0" />
+                                      <span className="text-foreground font-bold">{entidade.titulo}</span>
+                                      <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">Denúncia</Badge>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-950/30"
+                                        onClick={() => handleUnlinkIpm(vinculo.id)} title="Desanexar">
+                                        <X className="h-3.5 w-3.5" />
+                                      </Button>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="text-xs text-muted-foreground mb-3">Nenhuma denúncia vinculada.</p>
+                            )}
+                            <div className="flex gap-2 items-end">
+                              <div className="flex-1">
+                                <Select value={denunciaLinkId} onValueChange={setDenunciaLinkId}>
+                                  <SelectTrigger className="bg-muted border-border text-foreground text-xs">
+                                    <SelectValue placeholder="Vincular denúncia..." />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-muted border-border text-foreground">
+                                    {available.map(d => (
+                                      <SelectItem key={d.id} value={d.id}>{d.titulo}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <Button size="sm" onClick={() => handleLinkIpm(ipm.id, denunciaLinkId, "denuncia")}
+                                disabled={parentLinking || !denunciaLinkId} className="bg-card hover:bg-slate-700 text-white text-xs">
+                                {parentLinking ? "Vinculando..." : "Vincular"}
+                              </Button>
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </div>
+
+                    {/* INVESTIGAÇÕES VINCULADAS */}
+                    <div className="rounded border border-border bg-muted p-4">
+                      <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                        <Shield className="h-4 w-4" /> Investigações Vinculadas
+                      </div>
+                      {(() => {
+                        const linked = ipmVinculos
+                          .filter(v => v.ipm_id === ipm.id && v.entidade_tipo === "investigacao")
+                          .map(v => ({ vinculo: v, entidade: investigacoes.find(i => i.id === v.entidade_id) }))
+                          .filter((x): x is { vinculo: any; entidade: any } => !!x.entidade);
+                        const available = investigacoes.filter(i => !ipmVinculos.some(v => v.ipm_id === ipm.id && v.entidade_id === i.id && v.entidade_tipo === "investigacao"));
+                        return (
+                          <>
+                            {linked.length > 0 ? (
+                              <div className="space-y-2 mb-3">
+                                {linked.map(({ vinculo, entidade }) => (
+                                  <div key={vinculo.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
+                                    <div className="flex items-center gap-3">
+                                      <Shield className="h-4 w-4 text-foreground shrink-0" />
+                                      <span className="text-foreground font-bold">{entidade.titulo}</span>
+                                      <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">Investigação</Badge>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-950/30"
+                                        onClick={() => handleUnlinkIpm(vinculo.id)} title="Desanexar">
+                                        <X className="h-3.5 w-3.5" />
+                                      </Button>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="text-xs text-muted-foreground mb-3">Nenhuma investigação vinculada.</p>
+                            )}
+                            <div className="flex gap-2 items-end">
+                              <div className="flex-1">
+                                <Select value={investigacaoLinkId} onValueChange={setInvestigacaoLinkId}>
+                                  <SelectTrigger className="bg-muted border-border text-foreground text-xs">
+                                    <SelectValue placeholder="Vincular investigação..." />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-muted border-border text-foreground">
+                                    {available.map(i => (
+                                      <SelectItem key={i.id} value={i.id}>{i.titulo}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <Button size="sm" onClick={() => handleLinkIpm(ipm.id, investigacaoLinkId, "investigacao")}
+                                disabled={parentLinking || !investigacaoLinkId} className="bg-card hover:bg-slate-700 text-white text-xs">
+                                {parentLinking ? "Vinculando..." : "Vincular"}
+                              </Button>
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </div>
+
+                    {/* ATOS ADMINISTRATIVOS VINCULADOS */}
+                    <div className="rounded border border-border bg-muted p-4">
+                      <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                        <FileText className="h-4 w-4" /> Atos Administrativos Vinculados
+                      </div>
+                      {(() => {
+                        const atos = relatorios.filter(r => r.tipo_denuncia === "Ato Administrativo");
+                        const linked = ipmVinculos
+                          .filter(v => v.ipm_id === ipm.id && v.entidade_tipo === "relatorio")
+                          .map(v => ({ vinculo: v, entidade: relatorios.find(r => r.id === v.entidade_id && r.tipo_denuncia === "Ato Administrativo") }))
+                          .filter((x): x is { vinculo: any; entidade: any } => !!x.entidade);
+                        const available = atos.filter(r => !ipmVinculos.some(v => v.ipm_id === ipm.id && v.entidade_id === r.id && v.entidade_tipo === "relatorio"));
+                        return (
+                          <>
+                            {linked.length > 0 ? (
+                              <div className="space-y-2 mb-3">
+                                {linked.map(({ vinculo, entidade }) => (
+                                  <div key={vinculo.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
+                                    <div className="flex items-center gap-3">
+                                      <FileText className="h-4 w-4 text-foreground shrink-0" />
+                                      <span className="text-foreground font-bold">{entidade.titulo}</span>
+                                      <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">Ato Administrativo</Badge>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-950/30"
+                                        onClick={() => handleUnlinkIpm(vinculo.id)} title="Desanexar">
+                                        <X className="h-3.5 w-3.5" />
+                                      </Button>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="text-xs text-muted-foreground mb-3">Nenhum ato administrativo vinculado.</p>
+                            )}
+                            <div className="flex gap-2 items-end">
+                              <div className="flex-1">
+                                <Select value={atoLinkId} onValueChange={setAtoLinkId}>
+                                  <SelectTrigger className="bg-muted border-border text-foreground text-xs">
+                                    <SelectValue placeholder="Vincular ato..." />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-muted border-border text-foreground">
+                                    {available.map(r => (
+                                      <SelectItem key={r.id} value={r.id}>{r.titulo}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <Button size="sm" onClick={() => handleLinkIpm(ipm.id, atoLinkId, "relatorio")}
+                                disabled={parentLinking || !atoLinkId} className="bg-card hover:bg-slate-700 text-white text-xs">
+                                {parentLinking ? "Vinculando..." : "Vincular"}
+                              </Button>
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </div>
+
+                    {/* DEPOIMENTOS VINCULADOS */}
+                    <div className="rounded border border-border bg-muted p-4">
+                      <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                        <MessageSquare className="h-4 w-4" /> Depoimentos Vinculados
+                      </div>
+                      {(() => {
+                        const linked = ipmVinculos
+                          .filter(v => v.ipm_id === ipm.id && v.entidade_tipo === "depoimento")
+                          .map(v => ({ vinculo: v, entidade: depoimentos.find(d => d.id === v.entidade_id) }))
+                          .filter((x): x is { vinculo: any; entidade: any } => !!x.entidade);
+                        const available = depoimentos.filter(d => !ipmVinculos.some(v => v.ipm_id === ipm.id && v.entidade_id === d.id && v.entidade_tipo === "depoimento"));
+                        return (
+                          <>
+                            {linked.length > 0 ? (
+                              <div className="space-y-2 mb-3">
+                                {linked.map(({ vinculo, entidade }) => (
+                                  <div key={vinculo.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
+                                    <div className="flex items-center gap-3">
+                                      <MessageSquare className="h-4 w-4 text-foreground shrink-0" />
+                                      <span className="text-foreground font-bold">{entidade.oficial_nome || entidade.titulo || entidade.id}</span>
+                                      <Badge variant="outline" className="text-[9px] uppercase border-border text-muted-foreground">Depoimento</Badge>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-950/30"
+                                        onClick={() => handleUnlinkIpm(vinculo.id)} title="Desanexar">
+                                        <X className="h-3.5 w-3.5" />
+                                      </Button>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="text-xs text-muted-foreground mb-3">Nenhum depoimento vinculado.</p>
+                            )}
+                            <div className="flex gap-2 items-end">
+                              <div className="flex-1">
+                                <Select value={depoimentoLinkId} onValueChange={setDepoimentoLinkId}>
+                                  <SelectTrigger className="bg-muted border-border text-foreground text-xs">
+                                    <SelectValue placeholder="Vincular depoimento..." />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-muted border-border text-foreground">
+                                    {available.map(d => (
+                                      <SelectItem key={d.id} value={d.id}>{d.oficial_nome} - {d.data_depoimento ? format(new Date(d.data_depoimento), "dd/MM/yyyy") : ""}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <Button size="sm" onClick={() => handleLinkIpm(ipm.id, depoimentoLinkId, "depoimento")}
+                                disabled={parentLinking || !depoimentoLinkId} className="bg-card hover:bg-slate-700 text-white text-xs">
+                                {parentLinking ? "Vinculando..." : "Vincular"}
+                              </Button>
+                            </div>
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
                 )}

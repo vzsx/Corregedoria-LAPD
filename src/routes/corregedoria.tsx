@@ -32,7 +32,7 @@ import { AfastamentosTab } from "@/components/corregedoria/AfastamentosTab";
 import { IpmTab } from "@/components/corregedoria/IpmTab";
 import { STATUS_LABEL, STATUS_COLOR } from "@/lib/corregedoria/constants";
 import { formatDateSafe, printRelatorio, printDepoimento } from "@/lib/corregedoria/utils";
-import type { Status, Tab, Denuncia, Relatorio, Investigacao, InvestigacaoRelatorio, DenunciaRelatorio, DenunciaInvestigacao, DenunciaDepoimento, Depoimento, RelatorioGeralVinculo, Profile, PendingUser, Ipm } from "@/lib/corregedoria/types";
+import type { Status, Tab, Denuncia, Relatorio, Investigacao, InvestigacaoRelatorio, DenunciaRelatorio, DenunciaInvestigacao, DenunciaDepoimento, Depoimento, RelatorioGeralVinculo, Profile, PendingUser, Ipm, IpmVinculo } from "@/lib/corregedoria/types";
 
 export const Route = createFileRoute("/corregedoria")({
   component: Corregedoria,
@@ -757,7 +757,9 @@ function Corregedoria() {
   const [linkRelatorioGeralId, setLinkRelatorioGeralId] = useState<string>("");
   const [linkInvestigacaoDenunciaId, setLinkInvestigacaoDenunciaId] = useState<string>("");
   const [linkDepoimentoDenunciaId, setLinkDepoimentoDenunciaId] = useState<string>("");
+  const [linkIpmId, setLinkIpmId] = useState<string>("");
   const [linking, setLinking] = useState(false);
+  const [ipmVinculos, setIpmVinculos] = useState<IpmVinculo[]>([]);
 
   useEffect(() => {
     if (user && !relatorioForm.oficial) {
@@ -774,7 +776,7 @@ function Corregedoria() {
       return;
     }
     const load = async () => {
-      const [denunciasRes, investigacoesRes, relatoriosRes, drRes, irRes, diRes, depoimentosRes, ddRes, perfisRes, rgvRes] = await Promise.all([
+      const [denunciasRes, investigacoesRes, relatoriosRes, drRes, irRes, diRes, depoimentosRes, ddRes, perfisRes, rgvRes, ivRes] = await Promise.all([
         supabase.from("denuncias").select("*").order("created_at", { ascending: false }),
         supabase.from("investigacoes").select("*").order("created_at", { ascending: false }),
         supabase.from("relatorios").select("*").order("created_at", { ascending: false }),
@@ -784,7 +786,8 @@ function Corregedoria() {
         supabase.from("depoimentos").select("*").order("created_at", { ascending: false }),
         supabase.from("denuncia_depoimento").select("*"),
         supabase.from("profiles").select("*").order("full_name", { ascending: true }),
-        supabase.from("relatorio_geral_vinculos").select("*")
+        supabase.from("relatorio_geral_vinculos").select("*"),
+        supabase.from("ipm_vinculos").select("*")
       ]);
       
       if (denunciasRes.data) setDenuncias(denunciasRes.data as Denuncia[]);
@@ -796,6 +799,7 @@ function Corregedoria() {
       if (depoimentosRes.data) setDepoimentos(depoimentosRes.data as Depoimento[]);
       if (ddRes.data) setDenunciaDepoimentos(ddRes.data as DenunciaDepoimento[]);
       if (rgvRes.data) setRelatorioGeralVinculos(rgvRes.data as RelatorioGeralVinculo[]);
+      if (ivRes.data) setIpmVinculos(ivRes.data as IpmVinculo[]);
       
       // Filtrar oficiais para mostrar apenas os aprovados (não pendentes)
       if (perfisRes.data) {
@@ -1871,6 +1875,29 @@ function Corregedoria() {
     if (error) return toast.error("Erro ao desanexar documento");
     setDepoimentos(prev => prev.map(d => d.id === depoimentoId ? { ...d, [campo]: null } as any : d));
     toast.success("Documento desanexado!");
+  };
+
+  const handleLinkIpm = async (ipmId: string, entidadeId: string, entidadeTipo: string) => {
+    setLinking(true);
+    const { error } = await supabase.from("ipm_vinculos").insert({
+      ipm_id: ipmId,
+      entidade_id: entidadeId,
+      entidade_tipo: entidadeTipo,
+    });
+    setLinking(false);
+    if (error) return toast.error("Erro ao vincular: " + error.message);
+    toast.success("IPM vinculado com sucesso!");
+    setIpmVinculos(prev => [...prev, { id: crypto.randomUUID?.() || Date.now().toString(), ipm_id: ipmId, entidade_id: entidadeId, entidade_tipo: entidadeTipo as any, created_at: new Date().toISOString() }]);
+    setLinkIpmId("");
+  };
+
+  const handleUnlinkIpm = async (vinculoId: string) => {
+    setLinking(true);
+    const { error } = await supabase.from("ipm_vinculos").delete().eq("id", vinculoId);
+    setLinking(false);
+    if (error) return toast.error("Erro ao desanexar IPM");
+    setIpmVinculos(prev => prev.filter(v => v.id !== vinculoId));
+    toast.success("IPM desanexado!");
   };
 
   const confirmDeleteOficial = (userId: string) => {
@@ -3488,7 +3515,18 @@ function Corregedoria() {
 
           {/* IPM TAB */}
           {activeTab === "ipm" && (
-            <IpmTab />
+            <IpmTab
+              denuncias={denuncias}
+              investigacoes={investigacoes}
+              relatorios={relatorios}
+              depoimentos={depoimentos}
+              ipmVinculos={ipmVinculos}
+              linkIpmId={linkIpmId}
+              setLinkIpmId={setLinkIpmId}
+              linking={linking}
+              handleLinkIpm={handleLinkIpm}
+              handleUnlinkIpm={handleUnlinkIpm}
+            />
           )}
 
           {/* ATOS ADMINISTRATIVOS TAB */}
