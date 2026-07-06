@@ -134,22 +134,7 @@ function generateIpmHtml(data: IpmFormData, autorNome?: string, autorPosto?: str
     max-width: 451.4pt;
     padding: 72pt;
     margin: 0 auto;
-    position: relative;
-    overflow: hidden;
   }
-  .watermark {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 500px;
-    height: 500px;
-    opacity: 0.06;
-    pointer-events: none;
-    z-index: 0;
-  }
-  .watermark svg { width: 100%; height: 100%; }
-  .content { position: relative; z-index: 1; }
   p { margin: 0; color: #000; font-size: 11pt; font-family: "Arial"; }
   .header-table {
     width: 100%;
@@ -178,125 +163,90 @@ function generateIpmHtml(data: IpmFormData, autorNome?: string, autorPosto?: str
     line-height: 1.35;
     text-align: center;
   }
-  .body-left {
-    padding: 14pt 0 2pt;
-    line-height: 1.0;
-    text-align: justify;
-  }
-  .body-left-bold { font-weight: 700; }
+  .body-justify { padding: 12pt 0; line-height: 1.0; text-align: justify; }
   .title-h1 {
-    padding-top: 18pt;
-    padding-bottom: 4pt;
+    padding-top: 24pt;
+    padding-bottom: 6pt;
     line-height: 1.0;
     text-align: left;
-    font-size: 14pt;
+    font-size: 11pt;
     font-weight: 700;
     color: #434343;
   }
-  .body-justify { padding: 6pt 0; line-height: 1.15; text-align: justify; }
-  .spacer { height: 6pt; }
-  .center-text { text-align: center; line-height: 1.15; }
-  .artigo { padding: 4pt 0; line-height: 1.15; text-align: justify; }
+  .artigo { padding: 12pt 0; line-height: 1.0; text-align: justify; }
   .divider { border: none; border-top: 1px solid #000; margin: 0; }
-  .footer-doc {
-    text-align: center;
-    font-size: 10pt;
+  .page-number {
+    text-align: right;
+    font-size: 9pt;
     padding-top: 10px;
-    margin-top: 20px;
   }
   @media print {
     body { margin: 0; }
     .doc-content { padding: 72pt; max-width: none; }
-    .watermark { position: fixed; }
   }
 </style>
 </head>
 <body class="doc-content">
-  <!-- MARCA D'AGUA -->
-  <div class="watermark">
-    <svg viewBox="0 0 600 700" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <path id="topArc" d="M 80,310 A 240,240 0 0,1 520,310"/>
-        <path id="bottomArc" d="M 130,380 A 200,200 0 0,0 470,380"/>
-      </defs>
-      <circle cx="300" cy="330" r="270" fill="none" stroke="#000" stroke-width="4"/>
-      <circle cx="300" cy="330" r="248" fill="none" stroke="#000" stroke-width="1.5"/>
-      <circle cx="300" cy="330" r="155" fill="none" stroke="#000" stroke-width="3"/>
-      <circle cx="300" cy="330" r="138" fill="none" stroke="#000" stroke-width="1.5"/>
-      <polygon points="300,200 318,270 390,270 332,310 350,380 300,342 250,380 268,310 210,270 282,270" fill="none" stroke="#000" stroke-width="1"/>
-      <text font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#000" letter-spacing="16">
-        <textPath href="#topArc" startOffset="50%" text-anchor="middle">POLICIA MILITAR</textPath>
-      </text>
-      <text font-family="Arial, sans-serif" font-size="36" fill="#000" letter-spacing="10">
-        <textPath href="#bottomArc" startOffset="50%" text-anchor="middle">SAO PAULO</textPath>
-      </text>
-    </svg>
-  </div>
+  <!-- CABECALHO: logos laterais + texto centralizado -->
+  <table class="header-table">
+    <tr>
+      <td class="logo-cell" style="width:80px;">
+        <img src="${BRASAO_SP_LOGO}" style="width:75px;height:auto;" title="">
+      </td>
+      <td class="text-cell">
+        <p>GOVERNO DO ESTADO DE SÃO PAULO</p>
+        <p>SECRETARIA DE ESTADO DA SEGURANÇA PÚBLICA</p>
+        <p>POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</p>
+        <p>QUARTEL DA CORREGEDORIA-GERAL DA POLÍCIA MILITAR</p>
+      </td>
+      <td class="logo-cell" style="width:92px;">
+        <img src="${PM_LOGO}" style="width:88px;height:auto;" title="">
+      </td>
+    </tr>
+  </table>
 
-  <div class="content">
-    <!-- CABECALHO: logos laterais + texto centralizado -->
-    <table class="header-table">
-      <tr>
-        <td class="logo-cell" style="width:80px;">
-          <img src="${BRASAO_SP_LOGO}" style="width:75px;height:auto;" title="">
-        </td>
-        <td class="text-cell">
-          <p>GOVERNO DO ESTADO DE SÃO PAULO</p>
-          <p>SECRETARIA DE ESTADO DA SEGURANÇA PÚBLICA</p>
-          <p>POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</p>
-          <p>QUARTEL DA CORREGEDORIA-GERAL DA POLÍCIA MILITAR</p>
-        </td>
-        <td class="logo-cell" style="width:92px;">
-          <img src="${PM_LOGO}" style="width:88px;height:auto;" title="">
-        </td>
-      </tr>
-    </table>
+  <!-- CORPO DO DOCUMENTO -->
+  <p class="body-justify"><strong>POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</strong></p>
+  <p class="body-justify"><strong>CORREGEDORIA DA POLÍCIA MILITAR</strong></p>
 
-    <!-- CORPO DO DOCUMENTO -->
-    <p class="body-left"><span class="body-left-bold">POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</span></p>
-    <p class="body-left"><span class="body-left-bold">CORREGEDORIA DA POLÍCIA MILITAR</span></p>
+  <!-- TITULO DA PORTARIA -->
+  <h1 class="title-h1">PORTARIA Nº ${data.numero_ipm || "____"}/2026 – CPM</h1>
 
-    <!-- TITULO DA PORTARIA -->
-    <h1 class="title-h1">PORTARIA Nº ${data.numero_ipm || "____"}/2026 – CPM</h1>
+  <!-- TEXTOS DE CONSIDERACAO -->
+  <p class="body-justify">O CORREGEDOR DA POLÍCIA MILITAR DO ESTADO DE SÃO PAULO, no uso de suas atribuições legais e regulamentares, especialmente nos termos do Regulamento Disciplinar da Polícia Militar do Estado de São Paulo (RDPM),</p>
+  <p class="body-justify">CONSIDERANDO a necessidade de apurar, de forma ampla, imparcial e fundamentada, os fatos constantes da notícia de possível transgressão disciplinar e/ou crime militar;</p>
+  <p class="body-justify">CONSIDERANDO que os elementos iniciais indicam a necessidade de produção de provas, oitivas e demais diligências indispensáveis ao completo esclarecimento dos fatos;</p>
 
-    <!-- TEXTOS DE CONSIDERACAO -->
-    <p class="body-justify">O CORREGEDOR DA POLÍCIA MILITAR DO ESTADO DE SÃO PAULO, no uso de suas atribuições legais e regulamentares, especialmente nos termos do Regulamento Disciplinar da Polícia Militar do Estado de São Paulo (RDPM),</p>
-    <p class="body-justify">CONSIDERANDO a necessidade de apurar, de forma ampla, imparcial e fundamentada, os fatos constantes da notícia de possível transgressão disciplinar e/ou crime militar;</p>
-    <p class="body-justify">CONSIDERANDO que os elementos iniciais indicam a necessidade de produção de provas, oitivas e demais diligências indispensáveis ao completo esclarecimento dos fatos;</p>
+  <!-- RESOLVE -->
+  <p style="padding:18pt 0 4pt;line-height:1.0;text-align:left;"><strong>RESOLVE:</strong></p>
 
-    <!-- RESOLVE -->
-    <p style="padding:10pt 0 4pt;line-height:1.0;"><strong>RESOLVE:</strong></p>
+  <!-- ARTIGOS -->
+  <p class="artigo"><strong>Art. 1º</strong> Instaurar INQUÉRITO POLICIAL MILITAR (IPM) para apurar os fatos ocorridos em ${data.data_instauracao ? format(new Date(data.data_instauracao), "dd/MM/yyyy") : "//2026"}, envolvendo o(s) policial(is) militar(es): ${indiciadosMatriculas}, matrícula(s): ${matriculas}.</p>
+  <p class="artigo"><strong>Art. 2º</strong> Designar como Encarregado do Inquérito Policial Militar o(a) ${data.encarregado_posto || "__________________________"} ${data.encarregado_nome || "__________________________"}, que deverá conduzir os trabalhos observando rigorosamente a legislação vigente, bem como os princípios da legalidade, imparcialidade e devido processo.</p>
+  <p class="artigo"><strong>Art. 3º</strong> O Encarregado do IPM poderá requisitar documentos, determinar diligências, proceder à oitiva de testemunhas, realizar interrogatórios e praticar todos os atos necessários à completa elucidação dos fatos.</p>
+  <p class="artigo"><strong>Art. 4º</strong> O prazo para conclusão do presente Inquérito Policial Militar será de __________ dias, podendo ser prorrogado mediante autorização da Corregedoria, quando devidamente justificado.</p>
+  <p class="artigo"><strong>Art. 5º</strong> Concluído o Inquérito, os autos deverão ser encaminhados à Corregedoria da Polícia Militar para análise, manifestação e adoção das providências cabíveis.</p>
+  <p class="artigo"><strong>Art. 6º</strong> Esta Portaria entra em vigor na data de sua publicação.</p>
 
-    <!-- ARTIGOS -->
-    <p class="artigo"><strong>Art. 1º</strong> Instaurar INQUÉRITO POLICIAL MILITAR (IPM) para apurar os fatos ocorridos em ${data.data_instauracao ? format(new Date(data.data_instauracao), "dd/MM/yyyy") : "//2026"}, envolvendo o(s) policial(is) militar(es): ${indiciadosMatriculas}, matrícula(s): ${matriculas}.</p>
-    <p class="artigo"><strong>Art. 2º</strong> Designar como Encarregado do Inquérito Policial Militar o(a) ${data.encarregado_posto || "__________________________"} ${data.encarregado_nome || "__________________________"}, que deverá conduzir os trabalhos observando rigorosamente a legislação vigente, bem como os princípios da legalidade, imparcialidade e devido processo.</p>
-    <p class="artigo"><strong>Art. 3º</strong> O Encarregado do IPM poderá requisitar documentos, determinar diligências, proceder à oitiva de testemunhas, realizar interrogatórios e praticar todos os atos necessários à completa elucidação dos fatos.</p>
-    <p class="artigo"><strong>Art. 4º</strong> O prazo para conclusão do presente Inquérito Policial Militar será de __________ dias, podendo ser prorrogado mediante autorização da Corregedoria, quando devidamente justificado.</p>
-    <p class="artigo"><strong>Art. 5º</strong> Concluído o Inquérito, os autos deverão ser encaminhados à Corregedoria da Polícia Militar para análise, manifestação e adoção das providências cabíveis.</p>
-    <p class="artigo"><strong>Art. 6º</strong> Esta Portaria entra em vigor na data de sua publicação.</p>
+  <!-- PUBLIQUE-SE -->
+  <p style="padding:12pt 0;line-height:1.0;">Publique-se. Registre-se. Cumpra-se.</p>
 
-    <!-- PUBLIQUE-SE -->
-    <p style="padding:8pt 0;line-height:1.15;">Publique-se. Registre-se. Cumpra-se.</p>
+  <!-- LINHA -->
+  <hr class="divider">
 
-    <!-- LINHA -->
-    <hr class="divider">
+  <!-- DATA -->
+  <p style="text-align:center;padding:12pt 0 0;line-height:1.0;">São Paulo, ${dataFormatada}.</p>
 
-    <!-- DATA -->
-    <p style="text-align:center;padding:14pt 0 0;line-height:1.15;">São Paulo, ${dataFormatada}.</p>
+  <!-- ESPACO PARA ASSINATURA -->
+  <p style="text-align:center;padding:0;line-height:1.0;"><br><br><br><br><br></p>
 
-    <!-- ESPACO PARA ASSINATURA -->
-    <p style="text-align:center;padding:0;line-height:1.15;"><br><br><br><br><br></p>
+  <!-- ASSINATURA -->
+  <p style="text-align:center;padding:0;line-height:1.15;">Ass: ${autorNomeFinal || "___________________________"}</p>
+  ${autorPostoFinal ? `<p style="text-align:center;padding:0;line-height:1.15;font-size:10pt;">${autorPostoFinal}</p>` : ""}
+  <p style="text-align:center;padding:0;line-height:1.15;font-size:10pt;">Corregedor da Polícia Militar do Estado de São Paulo</p>
 
-    <!-- ASSINATURA -->
-    <p style="text-align:center;padding:0;line-height:1.15;">Ass: ${autorNomeFinal || "___________________________"}</p>
-    ${autorPostoFinal ? `<p style="text-align:center;padding:2pt 0 0;line-height:1.15;font-size:10pt;">${autorPostoFinal}</p>` : ""}
-    <p style="text-align:center;padding:2pt 0 0;line-height:1.15;font-size:10pt;">Corregedor da Polícia Militar do Estado de São Paulo</p>
-
-    <!-- RODAPE -->
-    <div class="footer-doc">
-      <p>Corregedor da Polícia Militar do Estado de São Paulo</p>
-    </div>
-  </div>
+  <!-- NUMERO DA PAGINA -->
+  <div class="page-number">1</div>
 </body>
 </html>`;
 }
