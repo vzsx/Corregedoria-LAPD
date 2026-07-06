@@ -1,6 +1,6 @@
 import type React from "react";
 
-export function StatCard({ title, value, icon: Icon, color }: { title: string; value: string; icon: React.ElementType; color: string }) {
+export function StatCard({ title, value, icon: Icon, color }: { title: string; value: string | number; icon: React.ElementType; color: string }) {
   return (
     <div className="flex flex-col gap-2 rounded-lg border border-border bg-card p-6">
       <div className="flex items-center justify-between">

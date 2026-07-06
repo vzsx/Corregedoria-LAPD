@@ -194,7 +194,7 @@ export function IpmTab({ denuncias, investigacoes, relatorios, depoimentos, ipmV
   const loadIpms = async () => {
     const { data, error } = await supabase.from("ipm").select("*").order("created_at", { ascending: false });
     if (error) { toast.error("Erro ao carregar IPMs"); return; }
-    setIpms(data || []);
+    setIpms((data as any) || []);
   };
 
   useEffect(() => {
@@ -246,7 +246,7 @@ export function IpmTab({ denuncias, investigacoes, relatorios, depoimentos, ipmV
     setSubmitting(true);
     const { error } = await supabase.from("ipm").insert(formToInsert(form));
     if (error) toast.error("Erro: " + error.message);
-    else { toast.success("IPM criado!"); setDialogOpen(false); resetForm(); logAudit("create", "ipm", {}); await loadIpms(); }
+    else { toast.success("IPM criado!"); setDialogOpen(false); resetForm(); logAudit({ action: "create", entity_type: "ipm", entity_id: undefined, details: {} }); await loadIpms(); }
     setSubmitting(false);
   };
 
@@ -264,12 +264,12 @@ export function IpmTab({ denuncias, investigacoes, relatorios, depoimentos, ipmV
       documento: existing?.relatorio_fatos || "",
       alteracoes: "Atualização do IPM",
     });
-    data.historico_versoes = versoes;
+    (data as any).historico_versoes = versoes;
     delete (data as any).autor_id;
     delete (data as any).autor_nome;
     const { error } = await supabase.from("ipm").update(data).eq("id", editingId);
     if (error) toast.error("Erro: " + error.message);
-    else { toast.success("IPM atualizado!"); setEditDialogOpen(false); setEditingId(null); resetForm(); logAudit("update", "ipm", {}); await loadIpms(); }
+    else { toast.success("IPM atualizado!"); setEditDialogOpen(false); setEditingId(null); resetForm(); logAudit({ action: "update", entity_type: "ipm", entity_id: editingId, details: { id: editingId } }); await loadIpms(); }
     setSubmitting(false);
   };
 
@@ -277,7 +277,7 @@ export function IpmTab({ denuncias, investigacoes, relatorios, depoimentos, ipmV
     if (!canDelete) { toast.error("Apenas admin pode excluir."); return; }
     const { error } = await supabase.from("ipm").delete().eq("id", id);
     if (error) toast.error("Erro: " + error.message);
-    else { toast.success("IPM excluído!"); logAudit("delete", "ipm", {}); await loadIpms(); }
+    else { toast.success("IPM excluído!"); logAudit({ action: "delete", entity_type: "ipm", entity_id: editingId ?? undefined, details: { id: editingId } }); await loadIpms(); }
     setDeleteConfirmId(null);
   };
 

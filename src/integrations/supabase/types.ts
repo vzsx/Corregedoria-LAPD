@@ -133,6 +133,7 @@ export type Database = {
       relatorios: {
         Row: {
           id: string
+          numero_registro: number
           titulo: string
           tipo_denuncia: string
           oficial: string
@@ -155,6 +156,157 @@ export type Database = {
       }
       denuncia_investigacao: {
         Row: { denuncia_id: string; investigacao_id: string }
+        Insert: any; Update: any; Relationships: []
+      }
+      depoimentos: {
+        Row: {
+          id: string
+          numero_registro: number
+          oficial_nome: string
+          oficial_patente: string | null
+          oficial_re: string | null
+          depoimento: string
+          data_depoimento: string
+          oficial_batalhao: string | null
+          relatorio_id_ip: string | null
+          relatorio_id_ato: string | null
+          investigacao_id: string | null
+          observacao: string | null
+          created_at: string
+        }
+        Insert: any; Update: any; Relationships: []
+      }
+      denuncia_depoimento: {
+        Row: { denuncia_id: string; depoimento_id: string }
+        Insert: any; Update: any; Relationships: []
+      }
+      relatorio_geral_vinculos: {
+        Row: {
+          id: string
+          relatorio_id: string
+          entidade_id: string
+          entidade_tipo: string
+          created_at: string
+        }
+        Insert: any; Update: any; Relationships: []
+      }
+      ipm: {
+        Row: {
+          id: string
+          numero_ipm: string
+          data_instauracao: string
+          unidade: string
+          status: string
+          encarregado_nome: string
+          encarregado_posto: string
+          autoridade_nome: string
+          autoridade_posto: string
+          fundamentacao: string
+          artigos_cpm: string
+          artigos_rdpm: string
+          relatorio_fatos: string
+          conclusao_parcial: string
+          indiciados: Json
+          enquadramentos: Json
+          vinculacoes: Json
+          historico_versoes: Json
+          autor_id: string | null
+          autor_nome: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: any; Update: any; Relationships: []
+      }
+      ipm_vinculos: {
+        Row: {
+          id: string
+          ipm_id: string
+          entidade_id: string
+          entidade_tipo: string
+          created_at: string
+        }
+        Insert: any; Update: any; Relationships: []
+      }
+      audit_logs: {
+        Row: {
+          id: string
+          user_id: string
+          user_name: string
+          action: string
+          entity_type: string
+          entity_id: string
+          details: Json
+          created_at: string
+        }
+        Insert: any; Update: any; Relationships: []
+      }
+      afastamentos: {
+        Row: {
+          id: string
+          numero_portaria: string
+          data_emissao: string
+          posto_graduacao: string
+          nome_completo: string
+          rg_pm: string
+          unidade: string
+          data_inicio: string
+          data_termino: string
+          observacoes: string | null
+          inquerito_id: string | null
+          responsavel_nome: string
+          responsavel_posto: string
+          responsavel_assinatura: string | null
+          motivo_afastamento: string
+          status: string
+          autor_id: string | null
+          autor_nome: string | null
+          historico_versoes: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: any; Update: any; Relationships: []
+      }
+      investigacoes_policial: {
+        Row: {
+          id: string
+          numero_investigacao: string
+          data_instauracao: string
+          encarregado: string
+          descricao_fatos: string
+          provas_anexadas: string | null
+          testemunhas: string | null
+          status: string
+          afastamento_id: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: any; Update: any; Relationships: []
+      }
+      inqueritos_policial: {
+        Row: {
+          id: string
+          numero_inquerito: string
+          data_instauracao: string
+          autoridade_responsavel: string
+          relatorio: string | null
+          parecer: string | null
+          resultado: string | null
+          status: string
+          afastamento_id: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: any; Update: any; Relationships: []
+      }
+      advertencias: {
+        Row: {
+          id: string
+          descricao: string
+          data_advertencia: string
+          autoridade_responsavel: string
+          afastamento_id: string
+          created_at: string
+        }
         Insert: any; Update: any; Relationships: []
       }
     }

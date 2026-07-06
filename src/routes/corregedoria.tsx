@@ -48,7 +48,7 @@ const RelatorioCard = ({
   linkInvestigacaoId, setLinkInvestigacaoId, depoimentos, onPrint,
   relatorioGeralVinculos,
   linkRelatorioGeralId, setLinkRelatorioGeralId, onLinkRelatorioGeral,
-  setActiveTab, onUnlinkRelatorioGeralVinculo, onUnlinkDepoimento, onUnlinkDocumentoAnexado,
+  setActiveTab, setExpandedId, onUnlinkRelatorioGeralVinculo, onUnlinkDepoimento, onUnlinkDocumentoAnexado,
   ipms, ipmVinculos, linkIpmId, setLinkIpmId,
   handleLinkIpm, handleUnlinkIpm
 }: any) => {
@@ -158,10 +158,10 @@ const RelatorioCard = ({
               const linkedDocIds = relatorio.tipo_denuncia === "Inquérito Policial"
                 ? (relatorio.dados_detalhados?.ato_ids_vinculados || [])
                 : (relatorio.dados_detalhados?.ip_ids_vinculados || []);
-              const linkedDocs = relatorios.filter(r => linkedDocIds.includes(r.id));
+              const linkedDocs = relatorios.filter((r: any) => linkedDocIds.includes(r.id));
               return linkedDocs.length > 0 ? (
                 <div className="space-y-2 mb-4">
-                  {linkedDocs.map(r => (
+                  {linkedDocs.map((r: any) => (
                     <div key={r.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
                       <div className="flex items-center gap-3">
                         {r.tipo_denuncia === "Inquérito Policial" ? (
@@ -328,10 +328,10 @@ const RelatorioCard = ({
             </div>
             {(() => {
               const depIds = relatorio.dados_detalhados?.depoimento_ids || [];
-              const linkedDeps = depoimentos?.filter(d => depIds.includes(d.id)) || [];
+              const linkedDeps = depoimentos?.filter((d: any) => depIds.includes(d.id)) || [];
               return linkedDeps.length > 0 ? (
                 <div className="space-y-2 mb-4">
-                  {linkedDeps.map(dep => (
+                  {linkedDeps.map((dep: any) => (
                     <div key={dep.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
                       <div className="flex items-center gap-3">
                         <MessageSquare className="h-4 w-4 text-foreground shrink-0" />
@@ -360,12 +360,12 @@ const RelatorioCard = ({
             </div>
             {(() => {
               const linkedData = relatorioGeralVinculos
-                .filter(v => v.entidade_id === relatorio.id && (v.entidade_tipo === "inquerito" || v.entidade_tipo === "ato"))
-                .map(v => ({ vinculo: v, relatorio: relatorios.find(r => r.id === v.relatorio_id) }))
-                .filter((x): x is { vinculo: RelatorioGeralVinculo; relatorio: Relatorio } => !!x.relatorio);
+                .filter((v: any) => v.entidade_id === relatorio.id && (v.entidade_tipo === "inquerito" || v.entidade_tipo === "ato"))
+                .map((v: any) => ({ vinculo: v, relatorio: relatorios.find((r: any) => r.id === v.relatorio_id) }))
+                .filter((x: any): x is { vinculo: RelatorioGeralVinculo; relatorio: Relatorio } => !!x.relatorio);
               return linkedData.length > 0 ? (
                 <div className="space-y-2 mb-4">
-                  {linkedData.map(({ vinculo, relatorio: rg }) => (
+                  {linkedData.map(({ vinculo, relatorio: rg }: any) => (
                     <div key={rg.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
                       <div className="flex items-center gap-3">
                         <FileSignature className="h-4 w-4 text-foreground shrink-0" />
@@ -397,8 +397,8 @@ const RelatorioCard = ({
                   </SelectTrigger>
                   <SelectContent className="bg-muted border-border text-foreground">
                     {relatorios
-                      .filter(r => r.tipo_denuncia === "Relatório Geral" && !relatorioGeralVinculos.some(v => v.relatorio_id === r.id && v.entidade_id === relatorio.id && (v.entidade_tipo === "inquerito" || v.entidade_tipo === "ato")))
-                      .map(rg => (
+                      .filter((r: any) => r.tipo_denuncia === "Relatório Geral" && !relatorioGeralVinculos.some((v: any) => v.relatorio_id === r.id && v.entidade_id === relatorio.id && (v.entidade_tipo === "inquerito" || v.entidade_tipo === "ato")))
+                      .map((rg: any) => (
                         <SelectItem key={rg.id} value={rg.id}>{rg.titulo}</SelectItem>
                       ))
                     }
@@ -426,15 +426,15 @@ const RelatorioCard = ({
             </div>
             {(() => {
               const linked = ipmVinculos
-                .filter(v => v.entidade_id === relatorio.id && v.entidade_tipo === "relatorio")
-                .map(v => ({ vinculo: v, ipm: ipms.find((ip: any) => ip.id === v.ipm_id) }))
-                .filter((x): x is { vinculo: any; ipm: any } => !!x.ipm);
-              const available = ipms.filter((ip: any) => !ipmVinculos.some(v => v.ipm_id === ip.id && v.entidade_id === relatorio.id && v.entidade_tipo === "relatorio"));
+                .filter((v: any) => v.entidade_id === relatorio.id && v.entidade_tipo === "relatorio")
+                .map((v: any) => ({ vinculo: v, ipm: ipms.find((ip: any) => ip.id === v.ipm_id) }))
+                .filter((x: any): x is { vinculo: any; ipm: any } => !!x.ipm);
+              const available = ipms.filter((ip: any) => !ipmVinculos.some((v: any) => v.ipm_id === ip.id && v.entidade_id === relatorio.id && v.entidade_tipo === "relatorio"));
               return (
                 <>
                   {linked.length > 0 ? (
                     <div className="space-y-2 mb-3">
-                      {linked.map(({ vinculo, ipm }) => (
+                      {linked.map(({ vinculo, ipm }: any) => (
                         <div key={vinculo.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
                           <div className="flex items-center gap-3">
                             <Gavel className="h-4 w-4 text-foreground shrink-0" />
@@ -862,7 +862,7 @@ function Corregedoria() {
       if (ddRes.data) setDenunciaDepoimentos(ddRes.data as DenunciaDepoimento[]);
       if (rgvRes.data) setRelatorioGeralVinculos(rgvRes.data as RelatorioGeralVinculo[]);
       if (ivRes.data) setIpmVinculos(ivRes.data as IpmVinculo[]);
-      if (ipmsRes.data) setIpms(ipmsRes.data as Ipm[]);
+      if (ipmsRes.data) setIpms(ipmsRes.data as unknown as Ipm[]);
       
       // Filtrar oficiais para mostrar apenas os aprovados (não pendentes)
       if (perfisRes.data) {
@@ -1940,7 +1940,7 @@ function Corregedoria() {
     toast.success("Documento desanexado!");
   };
 
-  const handleLinkIpm = async (ipmId: string, entidadeId: string, entidadeTipo: string) => {
+  const handleLinkIpm = async (ipmId: string, entidadeId: string, entidadeTipo: string): Promise<void> => {
     setLinking(true);
     const { error } = await supabase.from("ipm_vinculos").insert({
       ipm_id: ipmId,
@@ -1948,17 +1948,17 @@ function Corregedoria() {
       entidade_tipo: entidadeTipo,
     });
     setLinking(false);
-    if (error) return toast.error("Erro ao vincular: " + error.message);
+    if (error) { toast.error("Erro ao vincular: " + error.message); return; }
     toast.success("IPM vinculado com sucesso!");
     setIpmVinculos(prev => [...prev, { id: crypto.randomUUID?.() || Date.now().toString(), ipm_id: ipmId, entidade_id: entidadeId, entidade_tipo: entidadeTipo as any, created_at: new Date().toISOString() }]);
     setLinkIpmId("");
   };
 
-  const handleUnlinkIpm = async (vinculoId: string) => {
+  const handleUnlinkIpm = async (vinculoId: string): Promise<void> => {
     setLinking(true);
     const { error } = await supabase.from("ipm_vinculos").delete().eq("id", vinculoId);
     setLinking(false);
-    if (error) return toast.error("Erro ao desanexar IPM");
+    if (error) { toast.error("Erro ao desanexar IPM"); return; }
     setIpmVinculos(prev => prev.filter(v => v.id !== vinculoId));
     toast.success("IPM desanexado!");
   };
@@ -2690,7 +2690,7 @@ function Corregedoria() {
                                   .filter((x): x is { vinculo: RelatorioGeralVinculo; relatorio: Relatorio } => !!x.relatorio);
                                 return linkedData.length > 0 ? (
                                   <div className="space-y-2 mb-4">
-                                    {linkedData.map(({ vinculo, relatorio: rg }) => (
+                  {linkedData.map(({ vinculo, relatorio: rg }: any) => (
                                       <div key={rg.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
                                         <div className="flex items-center gap-3">
                                           <FileSignature className="h-4 w-4 text-foreground shrink-0" />
@@ -3484,7 +3484,7 @@ function Corregedoria() {
                                     .filter((x): x is { vinculo: RelatorioGeralVinculo; relatorio: Relatorio } => !!x.relatorio);
                                   return linkedData.length > 0 ? (
                                     <div className="space-y-2 mb-4">
-                                      {linkedData.map(({ vinculo, relatorio: rg }) => (
+{linkedData.map(({ vinculo, relatorio: rg }: any) => (
                                         <div key={rg.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
                                           <div className="flex items-center gap-3">
                                             <FileSignature className="h-4 w-4 text-foreground shrink-0" />
@@ -4003,6 +4003,7 @@ function Corregedoria() {
                           onToggle={() => setExpandedId(expandedId === r.id ? null : r.id)}
                           isAdmin={true}
                           onApprove={approveDocumento}
+                          setExpandedId={setExpandedId}
                           relatorios={relatorios}
                           onEdit={(rel: any) => {
                             setEditingRelatorioId(rel.id);

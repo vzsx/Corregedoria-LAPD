@@ -95,7 +95,7 @@ const defaultForm: PortariaFormData = {
 
 export function AfastamentosTab(_props: Record<string, never>) {
   const { user, isAdmin, roles } = useAuth();
-  const currentRole = roles[0] || "consulta";
+  const currentRole: string = (roles[0] || "consulta") as string;
   const canDelete = currentRole === "corregedor_geral" || currentRole === "subcorregedor" || isAdmin;
   const canEdit = currentRole === "corregedor_geral" || currentRole === "subcorregedor" || currentRole === "corregedor" || currentRole === "investigador" || isAdmin;
   const canCreate = canEdit;
@@ -133,7 +133,7 @@ export function AfastamentosTab(_props: Record<string, never>) {
       .select("*")
       .order("created_at", { ascending: false });
     if (error) { toast.error("Erro ao carregar afastamentos"); return; }
-    setAfastamentos(data || []);
+    setAfastamentos((data as any) || []);
   };
 
   const loadLinkedData = async () => {
@@ -142,9 +142,9 @@ export function AfastamentosTab(_props: Record<string, never>) {
       supabase.from("inqueritos_policial").select("*"),
       supabase.from("advertencias").select("*"),
     ]);
-    if (invRes.data) setInvestigacoes(invRes.data);
-    if (inqRes.data) setInqueritos(inqRes.data);
-    if (advRes.data) setAdvertencias(advRes.data);
+    if (invRes.data) setInvestigacoes((invRes.data as any));
+    if (inqRes.data) setInqueritos((inqRes.data as any));
+    if (advRes.data) setAdvertencias((advRes.data as any));
   };
 
   useEffect(() => {
@@ -217,9 +217,12 @@ export function AfastamentosTab(_props: Record<string, never>) {
   };
 
   const statusHistoryEntry = (oldStatus: string, newStatus: string) => ({
+    id: crypto.randomUUID?.() || Date.now().toString(),
     tipo: "status",
     data: new Date().toISOString(),
     autor: user?.user_metadata?.full_name || "Sistema",
+    documento: "Afastamento",
+    alteracoes: `Status alterado de "${oldStatus}" para "${newStatus}"`,
     de: oldStatus,
     para: newStatus,
   });
@@ -242,7 +245,7 @@ export function AfastamentosTab(_props: Record<string, never>) {
       toast.success("Afastamento cadastrado com sucesso!");
       setAfastamentoDialogOpen(false);
       resetForm();
-      logAudit("create", "afastamentos", { nome: afastamentoForm.nome_policial });
+      logAudit({ action: "create", entity_type: "afastamentos", entity_id: undefined, details: { nome: afastamentoForm.nome_policial } });
       await loadAfastamentos();
     }
     setSubmitting(false);
@@ -280,7 +283,7 @@ export function AfastamentosTab(_props: Record<string, never>) {
       alteracoes: changes.join("; ") || "Atualização do documento",
     };
     versoes.unshift(novaVersao);
-    updateData.historico_versoes = versoes;
+    (updateData as any).historico_versoes = versoes;
     delete (updateData as any).autor_id;
     delete (updateData as any).autor_nome;
     const { error } = await supabase
@@ -294,7 +297,7 @@ export function AfastamentosTab(_props: Record<string, never>) {
       setAfastamentoEditDialogOpen(false);
       setEditingAfastamentoId(null);
       resetForm();
-      logAudit("update", "afastamentos", { id: editingAfastamentoId });
+      logAudit({ action: "update", entity_type: "afastamentos", entity_id: editingAfastamentoId, details: { id: editingAfastamentoId } });
       await loadAfastamentos();
     }
     setSubmitting(false);
@@ -309,7 +312,7 @@ export function AfastamentosTab(_props: Record<string, never>) {
     if (error) { toast.error("Erro ao excluir: " + error.message); }
     else {
       toast.success("Afastamento excluído!");
-      logAudit("delete", "afastamentos", { id });
+      logAudit({ action: "delete", entity_type: "afastamentos", entity_id: id, details: { id } });
       await loadAfastamentos();
     }
     setDeleteConfirmId(null);
