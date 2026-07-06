@@ -146,9 +146,9 @@ table td,table th{padding:0}
 p{margin:0;color:#000000;font-size:11pt;font-family:"Arial"}
 h2{padding-top:18pt;color:#000000;font-size:16pt;padding-bottom:6pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}
 .doc-content{position:relative}
-.watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-15deg);opacity:0.08;pointer-events:none;z-index:0;width:350px;height:350px}
+.watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.08;pointer-events:none;z-index:0;width:350px;height:350px}
 .doc-content > *:not(.watermark){position:relative;z-index:1}
-@media print{body{margin:0}.c6{max-width:none}.watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-15deg);opacity:0.08}}
+@media print{body{margin:0}.c6{max-width:none}.watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.08}}
 </style>
 </head>
 <body class="c6 doc-content">
