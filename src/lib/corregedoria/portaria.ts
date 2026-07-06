@@ -64,32 +64,51 @@ export function generatePortariaHTML(data: PortariaData, inqueritoNumero?: strin
 <meta charset="UTF-8">
 <style type="text/css">
 @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
-@page { margin: 0; }
+
+@page {
+  size: A4 portrait;
+  margin: 3cm 2cm 3cm 2cm;
+}
+
 ol{margin:0;padding:0}
 table td,table th{padding:0}
-.c0{color:#000000;font-weight:400;font-size:10pt;font-family:"Arial";font-style:normal}
-.c1{padding-top:14pt;padding-bottom:4pt;line-height:1.0;orphans:2;widows:2;text-align:left}
-.c2{color:#000000;font-weight:700;font-size:10pt;font-family:"Arial";font-style:normal}
+
+p{
+  margin:0;
+  color:#000000;
+  font-size:12pt;
+  font-family:"Arial",sans-serif;
+  line-height:1.5;
+  text-align:justify;
+}
+
+/* Classes portaria */
+.c0{color:#000000;font-weight:400;font-size:12pt;font-family:"Arial",sans-serif;font-style:normal}
+.c1{padding-top:0pt;padding-bottom:0pt;line-height:1.5;orphans:2;widows:2;text-align:left;text-indent:1.25cm}
+.c2{color:#000000;font-weight:700;font-size:12pt;font-family:"Arial",sans-serif;font-style:normal}
 .c3{font-weight:700}
-.c4{font-size:10pt}
-.c5{color:#000000;font-size:11pt;font-family:"Arial";font-style:normal}
+.c4{font-size:12pt}
+.c5{color:#000000;font-size:12pt;font-family:"Arial",sans-serif;font-style:normal}
 .c6{padding-top:0pt;padding-bottom:0pt;line-height:1.15;orphans:2;widows:2;text-align:center}
-.c7{padding-top:12pt;padding-bottom:12pt;line-height:1.0;orphans:2;widows:2;text-align:left}
-.c8{background-color:#ffffff;max-width:451.4pt;padding:72pt 72pt 72pt 72pt}
-.c9{padding-top:12pt;padding-bottom:12pt;line-height:1.0;text-align:center;height:11pt}
-.c11{padding-top:12pt;padding-bottom:12pt;line-height:1.0;text-align:center}
+.c7{padding-top:0pt;padding-bottom:0pt;line-height:1.5;orphans:2;widows:2;text-align:justify;text-indent:1.25cm}
+.c8{background-color:#ffffff;max-width:160mm}
+.c9{padding-top:0pt;padding-bottom:0pt;line-height:1.5;text-align:center}
+.c11{padding-top:0pt;padding-bottom:0pt;line-height:1.5;text-align:center}
 .c12{padding-top:0pt;padding-bottom:0pt;line-height:1.15;text-align:right;height:11pt}
 .c13{font-weight:400}
-.c14{padding-top:12pt;padding-bottom:12pt;line-height:1.0;text-align:justify}
-p{margin:0;color:#000000;font-size:11pt;font-family:"Arial"}
-h3{padding-top:14pt;color:#434343;font-size:14pt;padding-bottom:4pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}
+.c14{padding-top:0pt;padding-bottom:0pt;line-height:1.5;text-align:justify;text-indent:1.25cm}
+h3{padding-top:14pt;color:#434343;font-size:14pt;padding-bottom:4pt;font-family:"Arial",sans-serif;line-height:1.5;page-break-after:avoid;orphans:2;widows:2;text-align:left}
 .doc-content{position:relative}
 .watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.08;pointer-events:none;z-index:0;width:15.9cm;height:13.5cm;object-fit:contain}
 .doc-content > *:not(.watermark){position:relative;z-index:1}
 .signature-block{page-break-inside:avoid}
 .signature-name{font-family:'Great Vibes',cursive;font-size:26pt;color:#000}
 .signature-title{font-size:10pt;color:#000;margin-top:2pt}
-@media print{body{margin:0}.c8{max-width:none}.watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.08}}
+@media print{
+  body{margin:0;padding:0}
+  .c8{max-width:none;padding:0}
+  .watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.08}
+}
 </style>
 </head>
 <body class="c8 doc-content">

@@ -126,33 +126,63 @@ function generateIpmHtml(data: IpmFormData, autorNome?: string, autorPosto?: str
 <meta charset="UTF-8">
 <style type="text/css">
 @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
-@page { margin: 0; }
+
+@page {
+  size: A4 portrait;
+  margin: 3cm 2cm 3cm 2cm;
+}
+
 ol{margin:0;padding:0}
 table td,table th{padding:0}
-.c4{color:#000000;font-weight:700;text-decoration:none;vertical-align:baseline;font-size:11pt;font-family:"Arial";font-style:normal}
-.c11{padding-top:12pt;padding-bottom:12pt;line-height:1.0;orphans:2;widows:2;text-align:justify}
-.c17{padding-top:18pt;padding-bottom:4pt;line-height:1.0;orphans:2;widows:2;text-align:left}
+
+p{
+  margin:0;
+  color:#000000;
+  font-size:12pt;
+  font-family:"Arial",sans-serif;
+  line-height:1.5;
+  text-align:justify;
+}
+h2{
+  margin:0;
+  padding-top:18pt;
+  color:#000000;
+  font-size:14pt;
+  padding-bottom:6pt;
+  font-family:"Arial",sans-serif;
+  line-height:1.5;
+  page-break-after:avoid;
+  orphans:2;
+  widows:2;
+  text-align:left;
+}
+
+.c4{color:#000000;font-weight:700;text-decoration:none;vertical-align:baseline;font-size:12pt;font-family:"Arial",sans-serif;font-style:normal}
+.c11{padding-top:0pt;padding-bottom:0pt;line-height:1.5;orphans:2;widows:2;text-align:justify;text-indent:1.25cm}
+.c17{padding-top:18pt;padding-bottom:4pt;line-height:1.5;orphans:2;widows:2;text-align:left}
 .c3{padding-top:0pt;padding-bottom:0pt;line-height:1.15;orphans:2;widows:2;text-align:center}
-.c1{padding-top:12pt;padding-bottom:12pt;line-height:1.0;orphans:2;widows:2;text-align:left}
-.c10{font-weight:400;text-decoration:none;vertical-align:baseline;font-size:11pt;font-family:"Arial";font-style:normal}
-.c14{padding-top:6pt;padding-bottom:6pt;line-height:1.0;orphans:2;widows:2;text-align:center}
-.c9{font-weight:400;text-decoration:none;vertical-align:baseline;font-size:14pt;font-family:"Arial";font-style:normal}
-.c15{padding-top:24pt;padding-bottom:6pt;line-height:1.0;orphans:2;widows:2;text-align:left}
-.c12{text-decoration:none;vertical-align:baseline;font-size:11pt;font-family:"Arial";font-style:normal}
-.c6{background-color:#ffffff;max-width:451.4pt;padding:72pt 72pt 72pt 72pt}
+.c1{padding-top:0pt;padding-bottom:0pt;line-height:1.5;orphans:2;widows:2;text-align:justify;text-indent:1.25cm}
+.c10{font-weight:400;text-decoration:none;vertical-align:baseline;font-size:12pt;font-family:"Arial",sans-serif;font-style:normal}
+.c14{padding-top:0pt;padding-bottom:0pt;line-height:1.5;orphans:2;widows:2;text-align:center}
+.c9{font-weight:400;text-decoration:none;vertical-align:baseline;font-size:14pt;font-family:"Arial",sans-serif;font-style:normal}
+.c15{padding-top:24pt;padding-bottom:6pt;line-height:1.5;orphans:2;widows:2;text-align:left}
+.c12{text-decoration:none;vertical-align:baseline;font-size:12pt;font-family:"Arial",sans-serif;font-style:normal}
+.c6{background-color:#ffffff;max-width:160mm}
 .c0{color:#434343;font-weight:700}
 .c2{font-style:italic}
 .c5{color:#434343}
 .c7{font-weight:700}
-p{margin:0;color:#000000;font-size:11pt;font-family:"Arial"}
-h2{padding-top:18pt;color:#000000;font-size:16pt;padding-bottom:6pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}
 .doc-content{position:relative}
 .watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.08;pointer-events:none;z-index:0;width:15.9cm;height:13.5cm;object-fit:contain}
 .doc-content > *:not(.watermark){position:relative;z-index:1}
 .signature-block{page-break-inside:avoid}
 .signature-name{font-family:'Great Vibes',cursive;font-size:26pt;color:#000}
 .signature-title{font-size:10pt;color:#000;margin-top:2pt}
-@media print{body{margin:0}.c6{max-width:none}.watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.08}}
+@media print{
+  body{margin:0;padding:0}
+  .c6{max-width:none;padding:0}
+  .watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.08}
+}
 </style>
 </head>
 <body class="c6 doc-content">
