@@ -27,6 +27,7 @@ import { logAudit } from "@/lib/audit-log";
 import { IPM_STATUS_LABEL, IPM_STATUS_COLOR } from "@/lib/corregedoria/constants";
 import type { Ipm, IpmStatus, Indiciado, Enquadramento, Vinculacao, VersaoDocumento } from "@/lib/corregedoria/types";
 import { BRASAO_SP_LOGO, PM_LOGO } from "./ipm-logos";
+import { PMESP_WATERMARK } from "./pmesp-watermark";
 
 interface IpmFormData {
   numero_ipm: string;
@@ -145,15 +146,15 @@ table td,table th{padding:0}
 p{margin:0;color:#000000;font-size:11pt;font-family:"Arial"}
 h2{padding-top:18pt;color:#000000;font-size:16pt;padding-bottom:6pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}
 .doc-content{position:relative}
-.watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.06;pointer-events:none;z-index:0;width:400px;height:400px}
+.watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-15deg);opacity:0.08;pointer-events:none;z-index:0;width:350px;height:350px}
 .doc-content > *:not(.watermark){position:relative;z-index:1}
-@media print{body{margin:0}.c6{max-width:none}.watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.06}}
+@media print{body{margin:0}.c6{max-width:none}.watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-15deg);opacity:0.08}}
 </style>
 </head>
 <body class="c6 doc-content">
 
   <!-- MARCA D'AGUA -->
-  <img class="watermark" src="${PM_LOGO}" alt="">
+  <img class="watermark" src="${PMESP_WATERMARK}" alt="">
 
 
   <!-- CABECALHO -->
