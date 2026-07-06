@@ -1,10 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { format } from "date-fns";
 import { 
   Shield, FileText, Loader2, Plus, FileSignature, LayoutDashboard, 
   Users, UserPlus, LogOut, Activity, Link as LinkIcon, Trash2, Edit, Pencil,
-  MessageSquare, Printer, Menu, X, ClipboardList, Gavel
+  MessageSquare, Printer, Menu, X, ClipboardList, Gavel, ScrollText, UserCheck, Eye, Clock
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,6 +30,7 @@ import { StatCard } from "@/components/corregedoria/StatCard";
 import { Field } from "@/components/corregedoria/Field";
 import { AfastamentosTab } from "@/components/corregedoria/AfastamentosTab";
 import { IpmTab } from "@/components/corregedoria/IpmTab";
+import { Pagination } from "@/components/pagination";
 import { STATUS_LABEL, STATUS_COLOR } from "@/lib/corregedoria/constants";
 import { formatDateSafe, printRelatorio, printDepoimento } from "@/lib/corregedoria/utils";
 import type { Status, Tab, Denuncia, Relatorio, Investigacao, InvestigacaoRelatorio, DenunciaRelatorio, DenunciaInvestigacao, DenunciaDepoimento, Depoimento, RelatorioGeralVinculo, Profile, PendingUser, Ipm, IpmVinculo } from "@/lib/corregedoria/types";
@@ -652,6 +653,34 @@ function Corregedoria() {
   const [oficiais, setOficiais] = useState<Profile[]>([]);
   const [fetching, setFetching] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  // Admin panel state (membros + auditoria)
+  const [adminMembers, setAdminMembers] = useState<{ id: string; full_name: string; badge_number: string | null; roles: ("admin" | "corregedor" | "pending")[] }[]>([]);
+  const [adminFetching, setAdminFetching] = useState(false);
+  const [auditLogs, setAuditLogs] = useState<{ id: string; user_id: string; user_name: string; action: string; entity_type: string; entity_id: string; details: Record<string, unknown>; created_at: string }[]>([]);
+  const [auditLoading, setAuditLoading] = useState(false);
+  const [auditPage, setAuditPage] = useState(1);
+  const [auditTotal, setAuditTotal] = useState(0);
+  const AUDIT_PAGE_SIZE = 20;
+
+  const ACTION_LABEL: Record<string, string> = {
+    create: "Criação",
+    update: "Atualização",
+    delete: "Exclusão",
+    login: "Login",
+    link: "Vinculação",
+    unlink: "Desvinculação",
+    status_change: "Mudança de Status",
+  };
+  const ACTION_COLOR: Record<string, string> = {
+    create: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10",
+    update: "text-amber-400 border-amber-500/30 bg-amber-500/10",
+    delete: "text-red-400 border-red-500/30 bg-red-500/10",
+    login: "text-blue-400 border-blue-500/30 bg-blue-500/10",
+    link: "text-purple-400 border-purple-500/30 bg-purple-500/10",
+    unlink: "text-muted-foreground border-border bg-muted/50",
+    status_change: "text-cyan-400 border-cyan-500/30 bg-cyan-500/10",
+  };
 
   // Relatório Geral State
   const [relatorioGeralVinculos, setRelatorioGeralVinculos] = useState<RelatorioGeralVinculo[]>([]);
@@ -2144,6 +2173,77 @@ function Corregedoria() {
     navigate({ to: "/" });
   };
 
+  // --- Admin Panel Functions (Membros + Auditoria) ---
+
+  const loadAdminMembers = useCallback(async () => {
+    if (!isAdmin) return;
+    setAdminFetching(true);
+    const [{ data: profiles }, { data: roles }] = await Promise.all([
+      supabase.from("profiles").select("*"),
+      supabase.from("user_roles").select("user_id, role"),
+    ]);
+    const map = new Map<string, ("admin" | "corregedor" | "pending")[]>();
+    (roles ?? []).forEach((r) => {
+      const arr = map.get(r.user_id) ?? [];
+      arr.push(r.role as "admin" | "corregedor" | "pending");
+      map.set(r.user_id, arr);
+    });
+    setAdminMembers(
+      (profiles ?? []).map((p) => ({
+        id: p.id,
+        full_name: p.full_name,
+        badge_number: p.badge_number,
+        roles: map.get(p.id) ?? [],
+      })),
+    );
+    setAdminFetching(false);
+  }, [isAdmin]);
+
+  const loadAuditLogs = useCallback(async (page: number) => {
+    setAuditLoading(true);
+    const from = (page - 1) * AUDIT_PAGE_SIZE;
+    const to = from + AUDIT_PAGE_SIZE - 1;
+    const { data, count } = await supabase
+      .from("audit_logs")
+      .select("*", { count: "exact" })
+      .order("created_at", { ascending: false })
+      .range(from, to);
+    if (data) {
+      setAuditLogs(data as any[]);
+      setAuditTotal(count || 0);
+    }
+    setAuditLoading(false);
+  }, []);
+
+  const adminSetRole = async (userId: string, role: "admin" | "corregedor" | "pending", enabled: boolean) => {
+    if (enabled) {
+      const { error } = await supabase.from("user_roles").insert({ user_id: userId, role });
+      if (error) return toast.error(error.message);
+    } else {
+      const { error } = await supabase.from("user_roles").delete()
+        .eq("user_id", userId).eq("role", role);
+      if (error) return toast.error(error.message);
+    }
+    logAudit({
+      user_id: user?.id,
+      user_name: user?.user_metadata?.full_name,
+      action: enabled ? "create" : "delete",
+      entity_type: "user_role",
+      entity_id: userId,
+      details: { role },
+    });
+    toast.success("Permissões atualizadas");
+    loadAdminMembers();
+  };
+
+  useEffect(() => {
+    if (isAdmin && activeTab === "membros") loadAdminMembers();
+  }, [isAdmin, activeTab, loadAdminMembers]);
+
+  useEffect(() => {
+    if (isAdmin && activeTab === "auditoria") loadAuditLogs(auditPage);
+  }, [isAdmin, activeTab, auditPage, loadAuditLogs]);
+
   if (loading || fetching) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background p-6">
@@ -2279,18 +2379,30 @@ function Corregedoria() {
             label="Oficiais" 
           />
 
-          {isAdmin && (
-            <>
-              <p className="px-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2 mt-8">Administrativo</p>
-              <SidebarItem 
-                active={activeTab === "solicitacoes"} 
-                onClick={() => handleTabChange("solicitacoes")} 
-                icon={UserPlus} 
-                label="Solicitações" 
-                badge={pendingUsers.length > 0 ? pendingUsers.length : undefined}
-              />
-            </>
-          )}
+    {isAdmin && (
+      <>
+        <p className="px-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2 mt-8">Administrativo</p>
+        <SidebarItem 
+          active={activeTab === "solicitacoes"} 
+          onClick={() => handleTabChange("solicitacoes")} 
+          icon={UserPlus} 
+          label="Solicitações" 
+          badge={pendingUsers.length > 0 ? pendingUsers.length : undefined}
+        />
+        <SidebarItem 
+          active={activeTab === "membros"} 
+          onClick={() => handleTabChange("membros")} 
+          icon={UserCheck} 
+          label="Membros"
+        />
+        <SidebarItem 
+          active={activeTab === "auditoria"} 
+          onClick={() => handleTabChange("auditoria")} 
+          icon={ScrollText} 
+          label="Log de Auditoria"
+        />
+      </>
+    )}
         </nav>
 
         <div className="border-t border-border p-4">
@@ -5122,6 +5234,131 @@ function Corregedoria() {
               handleLinkAfastamentoDepoimento={handleLinkAfastamentoDepoimento}
               handleUnlinkAfastamentoDepoimento={handleUnlinkAfastamentoDepoimento}
             />
+          )}
+
+          {/* MEMBROS TAB (Admin only) */}
+          {activeTab === "membros" && isAdmin && (
+            <div className="space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              {adminFetching ? (
+                <div className="space-y-3">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div key={i} className="flex items-center gap-4 rounded-lg border border-border bg-card p-5 animate-pulse">
+                      <div className="h-10 w-10 rounded-full bg-muted" />
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 w-48 rounded bg-muted" />
+                        <div className="h-3 w-24 rounded bg-muted" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                adminMembers.map((m) => (
+                  <div
+                    key={m.id}
+                    className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-card p-5 shadow-elegant transition-all duration-200 hover:border-primary/20"
+                  >
+                    <div>
+                      <h3 className="font-display text-lg font-bold uppercase tracking-wide">{m.full_name}</h3>
+                      <p className="text-xs text-muted-foreground">Placa: {m.badge_number ?? "—"}</p>
+                      <div className="mt-2 flex gap-1.5">
+                        {m.roles.length === 0 && <Badge variant="outline" className="text-muted-foreground">sem cargo</Badge>}
+                        {m.roles.map((r) => (
+                          <Badge key={r} variant="outline" className="border-gold/40 text-gold">{r}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        variant={m.roles.includes("corregedor") ? "default" : "outline"}
+                        onClick={() => adminSetRole(m.id, "corregedor", !m.roles.includes("corregedor"))}
+                        className={`transition-all duration-200 ${m.roles.includes("corregedor") ? "bg-badge-gradient" : ""} hover:scale-[1.03] active:scale-[0.97]`}
+                      >
+                        {m.roles.includes("corregedor") ? "✓ Corregedor" : "+ Corregedor"}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant={m.roles.includes("admin") ? "default" : "outline"}
+                        disabled={m.id === user?.id}
+                        onClick={() => adminSetRole(m.id, "admin", !m.roles.includes("admin"))}
+                        className={`transition-all duration-200 ${m.roles.includes("admin") ? "bg-badge-gradient" : ""} hover:scale-[1.03] active:scale-[0.97]`}
+                      >
+                        {m.roles.includes("admin") ? "✓ Admin" : "+ Admin"}
+                      </Button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
+          {/* AUDITORIA TAB (Admin only) */}
+          {activeTab === "auditoria" && isAdmin && (
+            <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              {auditLoading ? (
+                <div className="space-y-3">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <div key={i} className="flex items-center gap-4 rounded-lg border border-border bg-card p-4 animate-pulse">
+                      <div className="h-8 w-8 rounded-full bg-muted" />
+                      <div className="flex-1 space-y-2">
+                        <div className="h-3 w-3/5 rounded bg-muted" />
+                        <div className="h-2 w-2/5 rounded bg-muted" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : auditLogs.length === 0 ? (
+                <div className="flex flex-col items-center py-16 text-muted-foreground">
+                  <Clock className="h-12 w-12 mb-4 opacity-20" />
+                  <p className="text-xs uppercase tracking-widest">Nenhum registro de auditoria encontrado</p>
+                </div>
+              ) : (
+                <>
+                  <div className="space-y-2">
+                    {auditLogs.map((log) => (
+                      <div
+                        key={log.id}
+                        className="flex items-start gap-4 rounded-lg border border-border bg-card p-4 transition-all duration-200 hover:bg-muted/30"
+                      >
+                        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+                          ACTION_COLOR[log.action] || "bg-muted/50 border-border"
+                        }`}>
+                          {log.action === "create" ? <Clock className="h-4 w-4" /> :
+                           log.action === "delete" ? <Clock className="h-4 w-4" /> :
+                           <Eye className="h-4 w-4" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs font-semibold text-foreground">{log.user_name || "Sistema"}</span>
+                            <span className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border ${
+                              ACTION_COLOR[log.action] || "text-muted-foreground border-border bg-muted/50"
+                            }`}>
+                              {ACTION_LABEL[log.action] || log.action}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground uppercase">{log.entity_type}</span>
+                            {log.entity_id && (
+                              <span className="text-[10px] font-mono text-muted-foreground/50">#{log.entity_id.slice(0, 8)}</span>
+                            )}
+                          </div>
+                          <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
+                            {log.details ? JSON.stringify(log.details).slice(0, 120) : ""}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground/50 mt-1">
+                            {format(new Date(log.created_at), "dd/MM/yyyy 'às' HH:mm")}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <Pagination
+                    current={auditPage}
+                    total={auditTotal}
+                    pageSize={AUDIT_PAGE_SIZE}
+                    onChange={setAuditPage}
+                  />
+                </>
+              )}
+            </div>
           )}
 
         </div>
