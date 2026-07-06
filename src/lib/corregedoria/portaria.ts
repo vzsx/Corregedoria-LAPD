@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { BRASAO_SP_LOGO, PM_LOGO } from "@/components/corregedoria/ipm-logos";
+import { PMESP_WATERMARK } from "@/components/corregedoria/pmesp-watermark";
 
 export interface PortariaData {
   numero_portaria: string;
@@ -81,10 +82,18 @@ table td,table th{padding:0}
 .c14{padding-top:12pt;padding-bottom:12pt;line-height:1.0;text-align:justify}
 p{margin:0;color:#000000;font-size:11pt;font-family:"Arial"}
 h3{padding-top:14pt;color:#434343;font-size:14pt;padding-bottom:4pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}
-@media print{body{margin:0}.c8{max-width:none}}
+.doc-content{position:relative}
+.watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.08;pointer-events:none;z-index:0;width:15.9cm;height:13.5cm;object-fit:contain}
+.doc-content > *:not(.watermark){position:relative;z-index:1}
+.signature-block{page-break-inside:avoid}
+.signature-name{font-family:"Luxurious Script",cursive;font-size:22pt;color:#000}
+@media print{body{margin:0}.c8{max-width:none}.watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.08}}
 </style>
 </head>
 <body class="c8 doc-content">
+
+  <!-- MARCA D'AGUA -->
+  <img class="watermark" src="${PMESP_WATERMARK}" alt="">
 
   <!-- CABECALHO: tabela com logos laterais -->
   <table style="width:100%;border-collapse:collapse;margin-bottom:0;">
@@ -175,17 +184,25 @@ h3{padding-top:14pt;color:#434343;font-size:14pt;padding-bottom:4pt;font-family:
   </p>
 
   <!-- DATA + ASSINATURA -->
-  <p class="c11">
-    <span class="c5 c3">São Paulo, ${dataEmissao}.<br></span>
-  </p>
+  <div class="signature-block">
+    <p class="c11">
+      <span class="c5 c3">São Paulo, ${dataEmissao}.<br></span>
+    </p>
 
-  <!-- ESPACO -->
-  <p class="c9"><span class="c5 c3"></span></p>
+    <!-- ESPACO -->
+    <p class="c9"><span class="c5 c3"></span></p>
+    <p class="c9"><span class="c5 c3"></span></p>
 
-  <!-- ASS: -->
-  <p class="c11"><span class="c5 c3">Ass: ${data.responsavel_nome || "___________________________"}</span></p>
-  ${data.responsavel_posto ? `<p class="c11"><span class="c5 c3">${data.responsavel_posto}</span></p>` : ""}
-  <p class="c11"><span class="c5 c3">Corregedor da Polícia Militar do Estado de São Paulo</span></p>
+    <!-- ASS: -->
+    <p class="c11">
+      <span class="c5 c3">Ass: </span><span class="signature-name">${data.responsavel_nome || "___________________________"}</span>
+    </p>
+    <p class="c9"><span class="c5 c3"></span></p>
+    <p class="c11">
+      <span class="c5 c3">${data.responsavel_posto ? data.responsavel_posto + " " : ""}${data.responsavel_nome || "___________________________"}</span>
+    </p>
+    <p class="c11"><span class="c5 c3">Corregedor da Polícia Militar do Estado de São Paulo</span></p>
+  </div>
 
   <!-- NUMERO DA PAGINA -->
   <div><p class="c12"><span class="c5 c13">1</span></p></div>

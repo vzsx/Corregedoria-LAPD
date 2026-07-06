@@ -39,13 +39,37 @@ table td,table th{padding:0}
 p{margin:0;color:#000000;font-size:11pt;font-family:"Arial"}
 h2{padding-top:18pt;color:#000000;font-size:16pt;padding-bottom:6pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}
 .doc-content{position:relative}
-.watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.08;pointer-events:none;z-index:0;width:350px;height:350px}
+.watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.08;pointer-events:none;z-index:0;width:15.9cm;height:13.5cm;object-fit:contain}
 .doc-content > *:not(.watermark){position:relative;z-index:1}
+.signature-block{page-break-inside:avoid}
+.signature-name{font-family:"Luxurious Script",cursive;font-size:22pt;color:#000}
 @media print{body{margin:0}.c6{max-width:none}.watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.08}}
 </style>
 `;
 
-function wrapWithIpmLayout(title: string, bodyContent: string): string {
+function generateSignatureBlock(autorNome?: string, autorPosto?: string): string {
+  const dataFormatada = format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+  const nome = autorNome || "___________________________";
+  const posto = autorPosto || "";
+  return `
+  <div class="signature-block">
+    <p class="c14"><span class="c4">São Paulo, ${dataFormatada}.</span></p>
+    <p class="c14 c16"><span class="c4"></span></p>
+    <p class="c14 c16"><span class="c4"></span></p>
+    <p class="c14">
+      <span class="c4">Ass: </span><span class="signature-name">${nome}</span>
+    </p>
+    <p class="c14 c16"><span class="c4"></span></p>
+    <p class="c14">
+      <span class="c4">${posto ? posto + " " : ""}${nome}</span>
+    </p>
+    <p class="c14">
+      <span class="c4">Corregedor da Polícia Militar do Estado de São Paulo</span>
+    </p>
+  </div>`;
+}
+
+function wrapWithIpmLayout(title: string, bodyContent: string, autorNome?: string, autorPosto?: string): string {
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -85,14 +109,17 @@ ${IPM_BASE_CSS}
   <!-- CONTEUDO -->
   ${bodyContent}
 
+  <!-- ASSINATURA -->
+  ${generateSignatureBlock(autorNome, autorPosto)}
+
 </body>
 </html>`;
 }
 
-function printGeneric(title: string, bodyContent: string) {
+function printGeneric(title: string, bodyContent: string, autorNome?: string, autorPosto?: string) {
   const w = window.open("", "_blank");
   if (!w) return;
-  w.document.write(wrapWithIpmLayout(title, bodyContent));
+  w.document.write(wrapWithIpmLayout(title, bodyContent, autorNome, autorPosto));
   w.document.close();
   setTimeout(() => w.print(), 500);
 }
@@ -144,10 +171,7 @@ export const printRelatorio = (relatorio: Relatorio) => {
     sections.push(`<p class="c1"><span class="c0">Provas:</span> <span class="c5">${data.provas_descricao}</span></p>`);
   }
 
-  sections.push(`<hr>`);
-  sections.push(`<p class="c14"><span class="c4">São Paulo, ${format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}.</span></p>`);
-
-  printGeneric(title, sections.join("\n"));
+  printGeneric(title, sections.join("\n"), relatorio.oficial);
 };
 
 export const printDenuncia = (denuncia: Denuncia) => {
@@ -205,9 +229,6 @@ export const printDenuncia = (denuncia: Denuncia) => {
     sections.push(`<p class="c1"><span class="c5">${data.provas_descricao}</span></p>`);
   }
 
-  sections.push(`<hr>`);
-  sections.push(`<p class="c14"><span class="c4">São Paulo, ${format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}.</span></p>`);
-
   printGeneric(title, sections.join("\n"));
 };
 
@@ -258,9 +279,6 @@ export const printInvestigacao = (investigacao: Investigacao) => {
     sections.push(`<p class="c1"><span class="c0">Detalhes Adicionais:</span> <span class="c5">${investigacao.detalhes_adicionais}</span></p>`);
   }
 
-  sections.push(`<hr>`);
-  sections.push(`<p class="c14"><span class="c4">São Paulo, ${format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}.</span></p>`);
-
   printGeneric(title, sections.join("\n"));
 };
 
@@ -287,9 +305,6 @@ export const printDepoimento = (depoimento: Depoimento) => {
     sections.push(`<p class="c11"><span class="c4">OBSERVAÇÕES</span></p>`);
     sections.push(`<p class="c1"><span class="c5">${depoimento.observacao}</span></p>`);
   }
-
-  sections.push(`<hr>`);
-  sections.push(`<p class="c14"><span class="c4">São Paulo, ${format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}.</span></p>`);
 
   printGeneric(title, sections.join("\n"));
 };

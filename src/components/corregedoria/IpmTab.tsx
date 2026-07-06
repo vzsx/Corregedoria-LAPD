@@ -147,8 +147,10 @@ table td,table th{padding:0}
 p{margin:0;color:#000000;font-size:11pt;font-family:"Arial"}
 h2{padding-top:18pt;color:#000000;font-size:16pt;padding-bottom:6pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}
 .doc-content{position:relative}
-.watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.08;pointer-events:none;z-index:0;width:350px;height:350px}
+.watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.08;pointer-events:none;z-index:0;width:15.9cm;height:13.5cm;object-fit:contain}
 .doc-content > *:not(.watermark){position:relative;z-index:1}
+.signature-block{page-break-inside:avoid}
+.signature-name{font-family:"Luxurious Script",cursive;font-size:22pt;color:#000}
 @media print{body{margin:0}.c6{max-width:none}.watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.08}}
 </style>
 </head>
@@ -234,23 +236,25 @@ h2{padding-top:18pt;color:#000000;font-size:16pt;padding-bottom:6pt;font-family:
   <p class="c1 c16"><span class="c4"></span></p>
 
   <!-- DATA + ASSINATURA -->
-  <p class="c14">
-    <span class="c4">São Paulo, ${dataFormatada}.<br></span>
-  </p>
+  <div class="signature-block">
+    <p class="c14">
+      <span class="c4">São Paulo, ${dataFormatada}.<br></span>
+    </p>
 
-  <!-- ESPACO EM BRANCO -->
-  <p class="c14 c16"><span class="c4"></span></p>
-  <p class="c14 c16"><span class="c4"></span></p>
+    <!-- ESPACO EM BRANCO -->
+    <p class="c14 c16"><span class="c4"></span></p>
+    <p class="c14 c16"><span class="c4"></span></p>
 
-  <!-- ASS: -->
-  <p class="c14">
-    <span class="c4">Ass:___________________________</span>
-  </p>
-  <p class="c14">
-    <span class="c4">${autorNomeFinal || "___________________________"}</span>
-  </p>
-  ${autorPostoFinal ? `<p class="c14"><span class="c4">${autorPostoFinal}</span></p>` : ""}
-  <p class="c14"><span class="c4">Corregedor da Polícia Militar do Estado de São Paulo</span></p>
+    <!-- ASS: -->
+    <p class="c14">
+      <span class="c4">Ass: </span><span class="signature-name">${autorNomeFinal || "___________________________"}</span>
+    </p>
+    <p class="c14 c16"><span class="c4"></span></p>
+    <p class="c14">
+      <span class="c4">${autorPostoFinal ? autorPostoFinal + " " : ""}${autorNomeFinal || "___________________________"}</span>
+    </p>
+    <p class="c14"><span class="c4">Corregedor da Polícia Militar do Estado de São Paulo</span></p>
+  </div>
 
 </body>
 </html>`;
