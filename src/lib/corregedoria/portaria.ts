@@ -62,6 +62,7 @@ export function generatePortariaHTML(data: PortariaData, inqueritoNumero?: strin
 <head>
 <meta charset="UTF-8">
 <style type="text/css">
+@page { margin: 0; }
 ol{margin:0;padding:0}
 table td,table th{padding:0}
 .c0{color:#000000;font-weight:400;font-size:10pt;font-family:"Arial";font-style:normal}

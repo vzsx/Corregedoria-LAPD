@@ -125,6 +125,7 @@ function generateIpmHtml(data: IpmFormData, autorNome?: string, autorPosto?: str
 <head>
 <meta charset="UTF-8">
 <style type="text/css">
+@page { margin: 0; }
 ol{margin:0;padding:0}
 table td,table th{padding:0}
 .c4{color:#000000;font-weight:700;text-decoration:none;vertical-align:baseline;font-size:11pt;font-family:"Arial";font-style:normal}

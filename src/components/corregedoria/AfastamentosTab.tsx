@@ -1224,7 +1224,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
                   const html = `<!DOCTYPE html>
 <html><head><meta charset="UTF-8"><title>Portaria nº ${previewData.numero_portaria}</title>
 <style>
-@page{margin:2.5cm 2cm}
+@page{margin:0}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Times New Roman',Times,serif;font-size:12pt;line-height:1.6;color:#000;padding:0}
 .header{text-align:center;margin-bottom:30px;padding-bottom:20px;border-bottom:2px solid #000}

@@ -17,6 +17,7 @@ export function PortariaPreview({ data, inqueritoNumero }: PortariaPreviewProps)
   return (
     <div className="bg-white text-black rounded-lg shadow-lg overflow-hidden print:shadow-none" id="portaria-document">
       <style>{`
+        @page { margin: 0; }
         ol{margin:0;padding:0}
         table td,table th{padding:0}
         .pc0{color:#000000;font-weight:400;font-size:10pt;font-family:"Arial";font-style:normal}
