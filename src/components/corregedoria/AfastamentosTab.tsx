@@ -51,6 +51,7 @@ interface PortariaFormData {
   unidade: string;
   data_inicio: string;
   data_termino: string;
+  artigos: string;
   observacoes: string;
   inquerito_id: string;
   responsavel_nome: string;
@@ -71,6 +72,7 @@ function toPortariaData(form: PortariaFormData, inqueritoNumero?: string): Porta
     unidade: form.unidade,
     data_inicio: form.data_inicio,
     data_termino: form.data_termino,
+    artigos: form.artigos,
     inquerito_numero: inqueritoNumero || "",
     responsavel_nome: form.responsavel_nome,
     responsavel_posto: form.responsavel_posto,
@@ -86,6 +88,7 @@ const defaultForm: PortariaFormData = {
   unidade: "",
   data_inicio: format(new Date(), "yyyy-MM-dd"),
   data_termino: format(new Date(), "yyyy-MM-dd"),
+  artigos: "",
   observacoes: "",
   inquerito_id: "",
   responsavel_nome: "",
@@ -234,6 +237,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
       unidade: form.unidade,
       data_inicio: form.data_inicio,
       data_termino: form.data_termino,
+      artigos: form.artigos || null,
       observacoes: form.observacoes || null,
       inquerito_id: form.inquerito_id || null,
       responsavel_nome: form.responsavel_nome,
@@ -435,6 +439,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
       unidade: a.unidade,
       data_inicio: a.data_inicio,
       data_termino: a.data_termino,
+      artigos: a.artigos || "",
       observacoes: a.observacoes || "",
       inquerito_id: a.inquerito_id || "",
       responsavel_nome: a.responsavel_nome,
@@ -491,6 +496,10 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
           <div>
             <Label className="text-xs font-semibold">Data de Término do Afastamento *</Label>
             <Input type="date" value={afastamentoForm.data_termino} onChange={e => setAfastamentoForm(f => ({ ...f, data_termino: e.target.value }))} required />
+          </div>
+          <div className="md:col-span-2 lg:col-span-1">
+            <Label className="text-xs font-semibold">Artigos (CPM/RDPM) *</Label>
+            <Input value={afastamentoForm.artigos} onChange={e => setAfastamentoForm(f => ({ ...f, artigos: e.target.value }))} placeholder="Ex: Art. 187, 188 do CPM" required />
           </div>
           <div className="md:col-span-2 lg:col-span-1">
             <Label className="text-xs font-semibold">Observações</Label>
@@ -787,6 +796,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
                           unidade: a.unidade,
                           data_inicio: a.data_inicio,
                           data_termino: a.data_termino,
+                          artigos: a.artigos || "",
                           observacoes: a.observacoes || "",
                           inquerito_id: a.inquerito_id || "",
                           responsavel_nome: a.responsavel_nome,
@@ -813,6 +823,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
                           unidade: a.unidade,
                           data_inicio: a.data_inicio,
                           data_termino: a.data_termino,
+                          artigos: a.artigos || "",
                           observacoes: a.observacoes || "",
                           inquerito_id: a.inquerito_id || "",
                           responsavel_nome: a.responsavel_nome,
@@ -1100,6 +1111,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
                                 unidade: r.unidade,
                                 data_inicio: r.data_inicio,
                                 data_termino: r.data_termino,
+                                artigos: r.artigos || "",
                                 observacoes: r.observacoes || "",
                                 inquerito_id: r.inquerito_id || "",
                                 responsavel_nome: r.responsavel_nome,

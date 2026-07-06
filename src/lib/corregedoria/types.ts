@@ -126,6 +126,7 @@ export interface Afastamento {
   unidade: string;
   data_inicio: string;
   data_termino: string;
+  artigos: string | null;
   observacoes: string | null;
   inquerito_id: string | null;
   responsavel_nome: string;

@@ -11,6 +11,7 @@ export interface PortariaData {
   unidade: string;
   data_inicio: string;
   data_termino: string;
+  artigos: string;
   inquerito_numero: string;
   responsavel_nome: string;
   responsavel_posto: string;
@@ -119,7 +120,7 @@ h3{padding-top:14pt;color:#434343;font-size:14pt;padding-bottom:4pt;font-family:
     <span class="c4 c3">CONSIDERANDO</span>
     <span class="c4">&nbsp;a necessidade de assegurar a regular, isenta e eficaz apuração dos fatos constantes de procedimento apuratório instaurado para verificar </span>
     <span class="c3 c4">suposta prática dos artigos: </span>
-    <span class="c3">.____________<br></span>
+    <span class="c3">${data.artigos || "____________"}</span>
     <span><br></span>
     <span class="c2">RESOLVE:</span>
   </p>
