@@ -84,21 +84,23 @@ h3{padding-top:14pt;color:#434343;font-size:14pt;padding-bottom:4pt;font-family:
 </head>
 <body class="c8 doc-content">
 
-  <!-- CABECALHO -->
-  <div>
-    <p class="c6">
-      <span class="c3 c5">GOVERNO DO ESTADO DE SÃO PAULO &nbsp;</span>
-      <span style="overflow:hidden;display:inline-block;margin:0;border:0;width:80.95px;height:93.01px;">
-        <img src="${BRASAO_SP_LOGO}" style="width:80.95px;height:93.01px;" title="">
-      </span>
-      <span style="overflow:hidden;display:inline-block;margin:0;border:0;width:92.58px;height:107.00px;">
-        <img src="${PM_LOGO}" style="width:92.58px;height:107.00px;" title="">
-      </span>
-    </p>
-    <p class="c6"><span class="c5 c3">SECRETARIA DE ESTADO DA SEGURANÇA PÚBLICA &nbsp;</span></p>
-    <p class="c6"><span class="c5 c3">POLÍCIA MILITAR DO ESTADO DE SÃO PAULO &nbsp;</span></p>
-    <p class="c6"><span class="c3">QUARTEL DA CORREGEDORIA-GERAL DA POLÍCIA MILITAR<br></span></p>
-  </div>
+  <!-- CABECALHO: tabela com logos laterais -->
+  <table style="width:100%;border-collapse:collapse;margin-bottom:0;">
+    <tr>
+      <td style="width:80px;vertical-align:middle;padding:0;text-align:center;">
+        <img src="${BRASAO_SP_LOGO}" style="width:75px;height:auto;" title="">
+      </td>
+      <td style="vertical-align:middle;padding:0 8px;text-align:center;">
+        <p class="c6"><span class="c3 c5">GOVERNO DO ESTADO DE SÃO PAULO</span></p>
+        <p class="c6"><span class="c3 c5">SECRETARIA DE ESTADO DA SEGURANÇA PÚBLICA</span></p>
+        <p class="c6"><span class="c3 c5">POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</span></p>
+        <p class="c6"><span class="c3">QUARTEL DA CORREGEDORIA-GERAL DA POLÍCIA MILITAR</span></p>
+      </td>
+      <td style="width:92px;vertical-align:middle;padding:0;text-align:center;">
+        <img src="${PM_LOGO}" style="width:88px;height:auto;" title="">
+      </td>
+    </tr>
+  </table>
 
   <!-- TITULOS -->
   <p class="c14"><span class="c5 c3">POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</span></p>
