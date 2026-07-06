@@ -63,24 +63,53 @@ const defaultForm: IpmFormData = {
   enquadramentos: [],
 };
 
-const PORTARIA_TEMPLATE = (data: IpmFormData) => `PORTARIA DE INSTAURAÇÃO
+const PORTARIA_TEMPLATE = (data: IpmFormData, autorNome?: string, autorPosto?: string) => {
+  const nomeCompleto = `${autorPosto || data.autoridade_posto || ""} ${autorNome || data.autoridade_nome || ""}`.trim();
+  const indiciadosStr = data.indiciados.length > 0
+    ? data.indiciados.map(i => `${i.posto_graduacao} ${i.nome}`).join(", ")
+    : "os policial(is) militar(es) indiciado(s)";
 
-O ${data.autoridade_nome || "CORREGEDOR DA POLÍCIA MILITAR"}, ${data.autoridade_posto || "Corregedor da Polícia Militar do Estado de São Paulo"}, no uso de suas atribuições legais e regulamentares, especialmente nos termos do Código de Processo Penal Militar,
+  const dataFormatada = data.data_instauracao
+    ? format(new Date(data.data_instauracao), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
+    : "____/____/______";
 
-CONSIDERANDO a necessidade de apuração dos fatos ocorridos envolvendo o(s) policial(is) militar(es) indiciado(s), que, em tese, configuram infrações penais militares;
+  return `GOVERNO DO ESTADO DE SÃO PAULO
+SECRETARIA DE ESTADO DA SEGURANÇA PÚBLICA
+POLÍCIA MILITAR DO ESTADO DE SÃO PAULO
+QUARTEL DA CORREGEDORIA-GERAL DA POLÍCIA MILITAR
+
+
+POLÍCIA MILITAR DO ESTADO DE SÃO PAULO
+CORREGEDORIA DA POLÍCIA MILITAR
+
+PORTARIA Nº ${data.numero_ipm || "____"}/2026 – CPM
+
+O CORREGEDOR DA POLÍCIA MILITAR DO ESTADO DE SÃO PAULO no uso de suas atribuições legais e regulamentares, especialmente nos termos do Regulamento Disciplinar da Polícia Militar do Estado de São Paulo (RDPM),
+
+CONSIDERANDO a necessidade de apurar, de forma ampla, imparcial e fundamentada, os fatos constantes da notícia de possível transgressão disciplinar e/ou crime militar,
+
+CONSIDERANDO que os elementos iniciais indicam a necessidade da produção de provas, oitivas e demais diligências indispensáveis ao completo esclarecimento dos fatos,
 
 RESOLVE:
 
-Art. 1º Instaurar o presente INQUÉRITO POLICIAL MILITAR com a finalidade de apurar possível prática das infrações previstas nos artigos ${data.artigos_cpm || "do CPM"} e ${data.artigos_rdpm || "do RDPM"}.
+Art. 1º Instaurar INQUÉRITO POLICIAL MILITAR (IPM) para apurar os fatos ocorridos em /2026, envolvendo o(s) policial(is) militar(es) ${indiciadosStr}.
 
-Art. 2º Designar como Encarregado do IPM o(a) ${data.encarregado_posto} ${data.encarregado_nome}, que deverá conduzir os trabalhos na forma da lei.
+Art. 2º Designar como Encarregado do Inquérito Policial Militar o(a) ${data.encarregado_posto || "________"} ${data.encarregado_nome || "________"}, que deverá conduzir os trabalhos observando rigorosamente a legislação vigente, bem como os princípios da legalidade, imparcialidade e devido processo.
 
-Art. 3º Esta Portaria entra em vigor na data de sua publicação.
+Art. 3º O Encarregado do IPM poderá requisitar documentos, determinar diligências, proceder à inquirição de testemunhas e requerer todos os autres necessários à completa elucidação dos fatos.
+
+Art. 4º O prazo para conclusão do presente Inquérito Policial Militar será de ____ dias, podendo ser prorrogado mediante autorização da Corregedoria, quando devidamente justificada.
+
+Art. 5º Concluído o inquérito, os autos deverão ser encaminhados à Corregedoria da Polícia Militar para análise, manifestação e adoção das providências cabíveis.
+
+Art. 6º Esta Portaria entra em vigor na data de sua publicação.
 
 Publique-se. Registre-se. Cumpra-se.`;
+};
 
-function generateIpmDoc(data: IpmFormData): string {
+function generateIpmDoc(data: IpmFormData, autorNome?: string, autorPosto?: string): string {
   const dataEmissao = format(new Date(data.data_instauracao), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+  const dataCurta = format(new Date(data.data_instauracao), "dd/MM/yyyy");
   const indiciadosStr = data.indiciados.map((i, idx) =>
     `${idx + 1}. ${i.posto_graduacao} ${i.nome} – RG PM nº ${i.rg_pm} – ${i.unidade}`
   ).join("\n");
@@ -89,32 +118,27 @@ function generateIpmDoc(data: IpmFormData): string {
     `  - Indiciado: ${e.indiciado_nome}\n    CPM: ${e.artigos_cpm}\n    CPPM: ${e.artigos_cppm}\n    RDPM: ${e.artigos_rdpm}\n    Obs: ${e.observacoes}`
   ).join("\n\n");
 
+  const nomePosto = `${autorPosto || data.autoridade_posto || ""} ${autorNome || data.autoridade_nome || ""}`.trim();
+
   return [
-    `POLÍCIA MILITAR DO ESTADO DE SÃO PAULO`,
-    `CORREGEDORIA DA POLÍCIA MILITAR`,
-    `INQUÉRITO POLICIAL MILITAR – IPM nº ${data.numero_ipm}`,
+    PORTARIA_TEMPLATE(data, autorNome, autorPosto),
     ``,
     `─`.repeat(60),
     ``,
-    `IPM nº ${data.numero_ipm}`,
-    `Encarregado: ${data.encarregado_posto} ${data.encarregado_nome}`,
-    `Unidade: ${data.unidade}`,
-    `Data de Instauração: ${dataEmissao}`,
+    `São Paulo, ${dataEmissao}.`,
     ``,
-    `Indiciado(s):`,
+    ``,
+    `                        ________________________________________`,
+    `                        Ass.: ${autorNome || data.autoridade_nome || "________"}`,
+    ``,
+    `                        ${autorPosto || data.autoridade_posto || "________"}`,
+    `                        Corregedor da Polícia Militar do Estado de São Paulo`,
+    ``,
+    `─`.repeat(60),
+    ``,
+    `INDICIADO(S):`,
+    ``,
     indiciadosStr || `  Nenhum indiciado cadastrado.`,
-    ``,
-    `─`.repeat(60),
-    ``,
-    `PORTARIA DE INSTAURAÇÃO`,
-    ``,
-    PORTARIA_TEMPLATE(data),
-    ``,
-    `─`.repeat(60),
-    ``,
-    `RELATÓRIO DOS FATOS`,
-    ``,
-    data.relatorio_fatos || `(Aguardando relatório)`,
     ``,
     `─`.repeat(60),
     ``,
@@ -124,17 +148,17 @@ function generateIpmDoc(data: IpmFormData): string {
     ``,
     `─`.repeat(60),
     ``,
+    `RELATÓRIO DOS FATOS`,
+    ``,
+    data.relatorio_fatos || `(Aguardando relatório)`,
+    ``,
+    `─`.repeat(60),
+    ``,
     `CONCLUSÃO PARCIAL`,
     ``,
     data.conclusao_parcial || `(Aguardando conclusão)`,
     ``,
     `─`.repeat(60),
-    ``,
-    `São Paulo, ${dataEmissao}.`,
-    ``,
-    `____________________________________`,
-    `${data.autoridade_nome || "Corregedor da Polícia Militar"}`,
-    `${data.autoridade_posto || "Corregedor da Polícia Militar do Estado de São Paulo"}`,
     ``,
     `Documento gerado eletronicamente – ID único: ${crypto.randomUUID?.() || Date.now().toString(36)}`,
   ].join("\n");
@@ -319,7 +343,7 @@ export function IpmTab({ denuncias, investigacoes, relatorios, depoimentos, ipmV
   };
 
   const openDocPreview = (data: IpmFormData) => {
-    setDocPreviewContent(generateIpmDoc(data));
+    setDocPreviewContent(generateIpmDoc(data, user?.user_metadata?.full_name, user?.user_metadata?.patente));
     setDocPreviewOpen(true);
   };
 
@@ -525,7 +549,7 @@ export function IpmTab({ denuncias, investigacoes, relatorios, depoimentos, ipmV
           </div>
           <div className="bg-muted/20 border border-border rounded-lg p-4">
             <p className="text-xs font-semibold text-muted-foreground mb-2">PRÉ-VISUALIZAÇÃO DA PORTARIA</p>
-            <pre className="text-xs font-mono whitespace-pre-wrap leading-relaxed text-muted-foreground">{PORTARIA_TEMPLATE(form)}</pre>
+            <pre className="text-xs font-mono whitespace-pre-wrap leading-relaxed text-muted-foreground">{PORTARIA_TEMPLATE(form, user?.user_metadata?.full_name, user?.user_metadata?.patente)}</pre>
           </div>
         </div>
       </section>
@@ -694,7 +718,7 @@ export function IpmTab({ denuncias, investigacoes, relatorios, depoimentos, ipmV
                         conclusao_parcial: ipm.conclusao_parcial,
                         indiciados,
                         enquadramentos,
-                      }));
+                      }, user?.user_metadata?.full_name, user?.user_metadata?.patente));
                     }}><Printer className="h-4 w-4" /></Button>
                     {canDelete && <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" title="Excluir" onClick={e => { e.stopPropagation(); setDeleteConfirmId(ipm.id); }}><Trash2 className="h-4 w-4" /></Button>}
                     <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform ${isExpanded ? "rotate-90" : ""}`} />
@@ -744,7 +768,7 @@ export function IpmTab({ denuncias, investigacoes, relatorios, depoimentos, ipmV
                           conclusao_parcial: ipm.conclusao_parcial,
                           indiciados,
                           enquadramentos,
-                        })}</pre>
+                        }, user?.user_metadata?.full_name, user?.user_metadata?.patente)}</pre>
                       </div>
                       <div>
                         <h5 className="text-xs font-bold uppercase text-muted-foreground mb-1">Conclusão</h5>
