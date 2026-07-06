@@ -32,7 +32,7 @@ import { AfastamentosTab } from "@/components/corregedoria/AfastamentosTab";
 import { IpmTab } from "@/components/corregedoria/IpmTab";
 import { Pagination } from "@/components/pagination";
 import { STATUS_LABEL, STATUS_COLOR } from "@/lib/corregedoria/constants";
-import { formatDateSafe, printRelatorio, printDepoimento } from "@/lib/corregedoria/utils";
+import { formatDateSafe, printRelatorio, printDepoimento, printInvestigacao, printDenuncia } from "@/lib/corregedoria/utils";
 import type { Status, Tab, Denuncia, Relatorio, Investigacao, InvestigacaoRelatorio, DenunciaRelatorio, DenunciaInvestigacao, DenunciaDepoimento, Depoimento, RelatorioGeralVinculo, Profile, PendingUser, Ipm, IpmVinculo } from "@/lib/corregedoria/types";
 
 export const Route = createFileRoute("/corregedoria")({
@@ -2590,6 +2590,17 @@ function Corregedoria() {
                               {d.policial_denunciado && ` · Acusado: ${d.policial_denunciado}`}
                             </p>
                           </div>
+                          <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                            <Button 
+                              size="icon" 
+                              variant="ghost" 
+                              className="h-8 w-8 text-foreground hover:text-foreground hover:bg-muted/50"
+                              onClick={() => printDenuncia(d)}
+                              title="Imprimir / Exportar PDF"
+                            >
+                              <Printer className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </button>
 
                         {expanded && (
@@ -3602,6 +3613,15 @@ function Corregedoria() {
                                   onClick={() => confirmDeleteInvestigacao(inv.id)}
                                 >
                                   <Trash2 className="h-4 w-4" />
+                                </Button>
+                                <Button 
+                                  size="icon" 
+                                  variant="ghost" 
+                                  className="h-8 w-8 text-foreground hover:text-foreground hover:bg-muted/50"
+                                  onClick={() => printInvestigacao(inv)}
+                                  title="Imprimir / Exportar PDF"
+                                >
+                                  <Printer className="h-4 w-4" />
                                 </Button>
                               </div>
                             )}

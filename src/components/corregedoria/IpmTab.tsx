@@ -115,6 +115,10 @@ function generateIpmHtml(data: IpmFormData, autorNome?: string, autorPosto?: str
   const autorNomeFinal = autorNome || data.autoridade_nome || "";
   const autorPostoFinal = autorPosto || data.autoridade_posto || "";
 
+  const relatorioFatos = data.relatorio_fatos || "(de acordo com o questionário)";
+  const enquadramentoLegal = enquadramentosStr || "(de acordo com o questionário)";
+  const conclusao = data.conclusao_parcial || "Os fatos narrados indicam, em tese, infração disciplinar e possível crime militar, razão pela qual o presente IPM deverá prosseguir até sua conclusão, com posterior remessa à autoridade competente para análise e aplicação das providências legais cabíveis. Nada mais.";
+
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -146,52 +150,79 @@ h2{padding-top:18pt;color:#000000;font-size:16pt;padding-bottom:6pt;font-family:
 <body class="c6 doc-content">
 
   <!-- CABECALHO -->
-  <div>
-    <p class="c3">
-      <span class="c4">GOVERNO DO ESTADO DE SÃO PAULO &nbsp;</span>
-      <span style="overflow:hidden;display:inline-block;margin:0;border:0;width:80.95px;height:93.01px;">
-        <img src="${BRASAO_SP_LOGO}" style="width:80.95px;height:93.01px;" title="">
-      </span>
-      <span style="overflow:hidden;display:inline-block;margin:0;border:0;width:92.58px;height:107.00px;">
-        <img src="${PM_LOGO}" style="width:92.58px;height:107.00px;" title="">
-      </span>
-    </p>
-    <p class="c3"><span class="c4">SECRETARIA DE ESTADO DA SEGURANÇA PÚBLICA &nbsp;</span></p>
-    <p class="c3"><span class="c4">POLÍCIA MILITAR DO ESTADO DE SÃO PAULO &nbsp;</span></p>
-    <p class="c3"><span class="c7">QUARTEL DA CORREGEDORIA-GERAL DA POLÍCIA MILITAR<br></span></p>
-  </div>
+  <table style="width:100%;border-collapse:collapse;margin-bottom:0;">
+    <tr>
+      <td style="width:80px;vertical-align:middle;padding:0;text-align:center;">
+        <img src="${BRASAO_SP_LOGO}" style="width:75px;height:auto;" title="">
+      </td>
+      <td style="vertical-align:middle;padding:0 8px;text-align:center;">
+        <p class="c3"><span class="c4">GOVERNO DO ESTADO DE SÃO PAULO</span></p>
+        <p class="c3"><span class="c4">SECRETARIA DE ESTADO DA SEGURANÇA PÚBLICA</span></p>
+        <p class="c3"><span class="c4">POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</span></p>
+        <p class="c3"><span class="c7">QUARTEL DA CORREGEDORIA-GERAL DA POLÍCIA MILITAR</span></p>
+      </td>
+      <td style="width:92px;vertical-align:middle;padding:0;text-align:center;">
+        <img src="${PM_LOGO}" style="width:88px;height:auto;" title="">
+      </td>
+    </tr>
+  </table>
 
   <!-- TITULOS -->
   <p class="c11"><span class="c4">POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</span></p>
   <p class="c11"><span class="c4">CORREGEDORIA DA POLÍCIA MILITAR</span></p>
 
-  <!-- PORTARIA -->
-  <h1 class="c15"><span class="c12 c0">PORTARIA Nº ${data.numero_ipm || "____"}/2026 – CPM</span></h1>
-
-  <!-- TEXTOS -->
-  <p class="c1"><span class="c5">O </span><span class="c0">CORREGEDOR DA POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</span><span class="c10 c5">, no uso de suas atribuições legais e regulamentares, especialmente nos termos do Regulamento Disciplinar da Polícia Militar do Estado de São Paulo (RDPM),</span></p>
-  <p class="c1"><span class="c0">CONSIDERANDO</span><span class="c5">&nbsp;a necessidade de apurar, de forma ampla, imparcial e fundamentada, os fatos constantes da notícia de possível transgressão disciplinar e/ou crime militar</span><span class="c5 c9">;</span></p>
-  <p class="c1"><span class="c0">CONSIDERANDO</span><span class="c10 c5">&nbsp;que os elementos iniciais indicam a necessidade de produção de provas, oitivas e demais diligências indispensáveis ao completo esclarecimento dos fatos;</span></p>
-
-  <!-- RESOLVE -->
-  <h2 class="c17"><span class="c12 c0">RESOLVE:</span></h2>
-
-  <!-- ARTIGOS -->
-  <p class="c1"><span class="c0">Art. 1º</span><span class="c5">&nbsp;Instaurar </span><span class="c0">INQUÉRITO POLICIAL MILITAR (IPM)</span><span class="c5">&nbsp;para apurar os fatos ocorridos em ${data.data_instauracao ? format(new Date(data.data_instauracao), "dd/MM/yyyy") : "//2026"}, envolvendo o(s) policial(is) militar(es): ${indiciadosMatriculas}, matrícula(s): ${matriculas}.</span></p>
-  <p class="c1"><span class="c0">Art. 2º</span><span class="c5">&nbsp;Designar como </span><span class="c0">Encarregado do Inquérito Policial Militar</span><span class="c5 c10">&nbsp;o(a) ${data.encarregado_posto || "__________________________"} ${data.encarregado_nome || "__________________________"}, que deverá conduzir os trabalhos observando rigorosamente a legislação vigente, bem como os princípios da legalidade, imparcialidade e devido processo.</span></p>
-  <p class="c1"><span class="c0">Art. 3º</span><span class="c10 c5">&nbsp;O Encarregado do IPM poderá requisitar documentos, determinar diligências, proceder à oitiva de testemunhas, realizar interrogatórios e praticar todos os atos necessários à completa elucidação dos fatos.</span></p>
-  <p class="c1"><span class="c0">Art. 4º</span><span class="c10 c5">&nbsp;O prazo para conclusão do presente Inquérito Policial Militar será de __________ dias, podendo ser prorrogado mediante autorização da Corregedoria, quando devidamente justificado.</span></p>
-  <p class="c1"><span class="c0">Art. 5º</span><span class="c10 c5">&nbsp;Concluído o Inquérito, os autos deverão ser encaminhados à Corregedoria da Polícia Militar para análise, manifestação e adoção das providências cabíveis.</span></p>
-  <p class="c1"><span class="c0">Art. 6º</span><span class="c10 c5">&nbsp;Esta Portaria entra em vigor na data de sua publicação.</span></p>
-
-  <!-- PUBLIQUE-SE -->
-  <p class="c1"><span class="c0 c12">Publique-se. Registre-se. Cumpra-se.</span></p>
+  <!-- IPM HEADER -->
+  <p class="c11"><span class="c4 c7">INQUÉRITO POLICIAL MILITAR – IPM</span></p>
+  <p class="c11"><span class="c4">IPM nº ${data.numero_ipm || "____"}</span></p>
+  <p class="c11"><span class="c4">Encarregado: ${data.encarregado_posto || "____"} ${data.encarregado_nome || "____"}</span></p>
+  <p class="c11"><span class="c4">Indiciados: ${indiciadosMatriculas}</span></p>
+  <p class="c11"><span class="c4">Unidade: ${data.unidade || "____"}</span></p>
 
   <!-- LINHA -->
   <hr>
 
+  <!-- PORTARIA DE INSTAURACAO -->
+  <p class="c11"><span class="c4 c7">PORTARIA DE INSTAURAÇÃO</span></p>
+
+  <p class="c1"><span class="c4">O CORREGEDOR DA POLÍCIA MILITAR DO ESTADO DE SÃO PAULO, no uso de suas atribuições legais e regulamentares, especialmente nos termos do Código de Processo Penal Militar,</span></p>
+
+  <p class="c1"><span class="c4 c7">CONSIDERANDO</span><span class="c4"> a necessidade de apuração dos fatos ocorridos envolvendo o(a) ${indiciadosMatriculas}, que, em tese, configuram infrações penais militares;</span></p>
+
+  <p class="c1"><span class="c4 c7">RESOLVE:</span></p>
+
+  <p class="c1"><span class="c4">Art. 1º Instaurar o presente </span><span class="c4 c7">INQUÉRITO POLICIAL MILITAR</span><span class="c4"> com a finalidade de apurar possível prática das infrações previstas nos artigos do Código Penal Militar e nos itens do art. do RDPM.</span></p>
+
+  <p class="c1"><span class="c4">Art. 2º Designar como </span><span class="c4 c7">Encarregado do IPM</span><span class="c4"> o(a) ${data.encarregado_posto || "____"} ${data.encarregado_nome || "____"}, que deverá conduzir os trabalhos na forma da lei.</span></p>
+
+  <p class="c1"><span class="c4">Art. 3º Esta Portaria entra em vigor na data de sua publicação.</span></p>
+
+  <p class="c1"><span class="c4 c7">Publique-se. Registre-se. Cumpra-se.</span></p>
+
+  <!-- LINHA -->
+  <hr>
+
+  <!-- RELATORIO DOS FATOS -->
+  <p class="c11"><span class="c4 c7">RELATÓRIO DOS FATOS:</span></p>
+  <p class="c1"><span class="c4">${relatorioFatos}</span></p>
+  <p class="c1"><span class="c4">Nada mais a relatar.</span></p>
+
+  <!-- LINHA -->
+  <hr>
+
+  <!-- ENQUADRAMENTO LEGAL -->
+  <p class="c11"><span class="c4 c7">ENQUADRAMENTO LEGAL (EM TESE)</span></p>
+  <p class="c1"><span class="c4">${enquadramentoLegal}</span></p>
+
   <!-- ESPACO -->
-  <p class="c1 c16"><span class="c9 c5"></span></p>
+  <p class="c1 c16"><span class="c4"></span></p>
+
+  <!-- CONCLUSAO PARCIAL -->
+  <p class="c11"><span class="c4 c7">CONCLUSÃO PARCIAL:</span></p>
+  <p class="c1"><span class="c4">${conclusao}</span></p>
+
+  <!-- ESPACO -->
+  <p class="c1 c16"><span class="c4"></span></p>
+  <p class="c1 c16"><span class="c4"></span></p>
 
   <!-- DATA + ASSINATURA -->
   <p class="c14">
@@ -200,16 +231,17 @@ h2{padding-top:18pt;color:#000000;font-size:16pt;padding-bottom:6pt;font-family:
 
   <!-- ESPACO EM BRANCO -->
   <p class="c14 c16"><span class="c4"></span></p>
+  <p class="c14 c16"><span class="c4"></span></p>
 
   <!-- ASS: -->
   <p class="c14">
-    <span class="c4">Ass: ${autorNomeFinal || "___________________________"}</span>
+    <span class="c4">Ass:___________________________</span>
+  </p>
+  <p class="c14">
+    <span class="c4">${autorNomeFinal || "___________________________"}</span>
   </p>
   ${autorPostoFinal ? `<p class="c14"><span class="c4">${autorPostoFinal}</span></p>` : ""}
   <p class="c14"><span class="c4">Corregedor da Polícia Militar do Estado de São Paulo</span></p>
-
-  <!-- NUMERO DA PAGINA -->
-  <div><p class="c8"><span class="c4">1</span></p></div>
 
 </body>
 </html>`;

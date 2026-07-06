@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import type { Depoimento, Relatorio } from "./types";
+import type { Depoimento, Relatorio, Investigacao, Denuncia } from "./types";
 
 export const formatDateSafe = (dateStr: any, formatStr: string) => {
   if (!dateStr) return "-";
@@ -163,6 +163,242 @@ export const printDepoimento = (depoimento: Depoimento) => {
         <div class="content-block">${depoimento.depoimento}</div>
       </div>
       ${depoimento.observacao ? `<div class="section"><h3>Observações</h3><div class="content-block">${depoimento.observacao}</div></div>` : ""}
+      <div class="footer">PMESP · Corregedoria Geral · Documento Oficial · ${format(new Date(), "dd/MM/yyyy HH:mm")}</div>
+      <script>window.print();window.close();<\u002fscript>
+    </body>
+    </html>
+  `);
+  w.document.close();
+};
+
+export const printInvestigacao = (investigacao: Investigacao) => {
+  const w = window.open("", "_blank");
+  if (!w) return;
+
+  const medidasIniciais = Array.isArray(investigacao.medidas_iniciais)
+    ? investigacao.medidas_iniciais.join(", ")
+    : investigacao.medidas_iniciais || "-";
+
+  w.document.write(`
+    <html>
+    <head>
+      <title>Investigação - ${investigacao.titulo}</title>
+      <style>
+        @page { margin: 20mm 15mm; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+          font-family: 'Courier New', monospace;
+          font-size: 11px;
+          color: #1a1a1a;
+          line-height: 1.6;
+          padding: 20px;
+        }
+        .header { text-align: center; border-bottom: 2px solid #C9A03A; padding-bottom: 15px; margin-bottom: 20px; }
+        .header h1 { font-size: 16px; text-transform: uppercase; letter-spacing: 2px; color: #C9A03A; }
+        .header p { font-size: 10px; color: #666; margin-top: 4px; }
+        .badge { display: inline-block; padding: 2px 8px; border: 1px solid #ccc; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; margin: 2px; }
+        .section { margin-bottom: 15px; }
+        .section h3 { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; border-left: 3px solid #C9A03A; padding-left: 8px; margin-bottom: 8px; color: #333; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .field { margin-bottom: 4px; }
+        .field label { font-size: 9px; text-transform: uppercase; color: #999; letter-spacing: 1px; display: block; }
+        .field span { font-size: 11px; color: #1a1a1a; }
+        .content-block { border: 1px solid #ddd; padding: 12px; border-radius: 4px; margin-top: 8px; white-space: pre-wrap; font-size: 11px; line-height: 1.8; }
+        .footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; font-size: 9px; color: #999; text-transform: uppercase; letter-spacing: 1px; }
+        hr { border: none; border-top: 1px dashed #ddd; margin: 12px 0; }
+        @media print { body { padding: 0; } }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>Investigação Interna</h1>
+        <p>PMESP · Corregedoria Geral · #${investigacao.numero_registro?.toString().padStart(4, '0') || '???'}</p>
+        <p style="margin-top:4px;"><span class="badge">${(investigacao.status || "pendente").toUpperCase()}</span></p>
+      </div>
+
+      <div class="section">
+        <h3>Identificação do Procedimento</h3>
+        <div class="grid">
+          <div class="field"><label>Título</label><span>${investigacao.titulo || "-"}</span></div>
+          <div class="field"><label>Nº Registro</label><span>#${investigacao.numero_registro?.toString().padStart(4, '0') || '???'}</span></div>
+          <div class="field"><label>Tipo</label><span>${investigacao.tipo_procedimento || "-"}</span></div>
+          <div class="field"><label>Data de Abertura</label><span>${formatDateSafe(investigacao.created_at, "dd/MM/yyyy")}</span></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Autoridade Responsável</h3>
+        <div class="grid">
+          <div class="field"><label>Nome</label><span>${investigacao.autoridade_responsavel || "-"}</span></div>
+          <div class="field"><label>Patente</label><span>${investigacao.autoridade_patente || "-"}</span></div>
+          <div class="field"><label>Departamento</label><span>${investigacao.autoridade_departamento || "Corregedoria Geral (PMESP)"}</span></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Policial Investigado</h3>
+        <div class="grid">
+          <div class="field"><label>Nome</label><span>${investigacao.investigado || "-"}</span></div>
+          <div class="field"><label>Badge</label><span>#${investigacao.investigado_badge || "-"}</span></div>
+          <div class="field"><label>Patente</label><span>${investigacao.investigado_patente || "-"}</span></div>
+          <div class="field"><label>Unidade</label><span>${investigacao.investigado_unidade || "-"}</span></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Origem da Investigação</h3>
+        <div class="grid">
+          <div class="field"><label>Origem</label><span>${investigacao.origem_caso || "-"}</span></div>
+          ${investigacao.origem_outro ? `<div class="field"><label>Outra Origem</label><span>${investigacao.origem_outro}</span></div>` : ""}
+        </div>
+      </div>
+
+      ${investigacao.descricao ? `
+      <div class="section">
+        <h3>Descrição Sumária dos Fatos</h3>
+        <div class="content-block">${investigacao.descricao}</div>
+      </div>` : ""}
+
+      ${investigacao.fundamentacao ? `
+      <div class="section">
+        <h3>Fundamentação para Abertura</h3>
+        <div class="content-block">${investigacao.fundamentacao}</div>
+      </div>` : ""}
+
+      <div class="section">
+        <h3>Medidas Iniciais Adotadas</h3>
+        <div class="content-block">${medidasIniciais}</div>
+        ${investigacao.medidas_outro ? `<div class="content-block" style="margin-top:8px;"><strong>Outra medida:</strong> ${investigacao.medidas_outro}</div>` : ""}
+      </div>
+
+      ${investigacao.detalhes_adicionais ? `
+      <div class="section">
+        <h3>Detalhes Adicionais</h3>
+        <div class="content-block">${investigacao.detalhes_adicionais}</div>
+      </div>` : ""}
+
+      ${investigacao.notas_internas ? `
+      <div class="section">
+        <h3>Notas Internas</h3>
+        <div class="content-block">${investigacao.notas_internas}</div>
+      </div>` : ""}
+
+      <div class="footer">PMESP · Corregedoria Geral · Documento Oficial · ${format(new Date(), "dd/MM/yyyy HH:mm")}</div>
+      <script>window.print();window.close();<\u002fscript>
+    </body>
+    </html>
+  `);
+  w.document.close();
+};
+
+export const printDenuncia = (denuncia: Denuncia) => {
+  const w = window.open("", "_blank");
+  if (!w) return;
+  const data = denuncia.dados_detalhados || {};
+
+  w.document.write(`
+    <html>
+    <head>
+      <title>Denúncia - ${denuncia.titulo}</title>
+      <style>
+        @page { margin: 20mm 15mm; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+          font-family: 'Courier New', monospace;
+          font-size: 11px;
+          color: #1a1a1a;
+          line-height: 1.6;
+          padding: 20px;
+        }
+        .header { text-align: center; border-bottom: 2px solid #C9A03A; padding-bottom: 15px; margin-bottom: 20px; }
+        .header h1 { font-size: 16px; text-transform: uppercase; letter-spacing: 2px; color: #C9A03A; }
+        .header p { font-size: 10px; color: #666; margin-top: 4px; }
+        .badge { display: inline-block; padding: 2px 8px; border: 1px solid #ccc; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; margin: 2px; }
+        .section { margin-bottom: 15px; }
+        .section h3 { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; border-left: 3px solid #C9A03A; padding-left: 8px; margin-bottom: 8px; color: #333; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .field { margin-bottom: 4px; }
+        .field label { font-size: 9px; text-transform: uppercase; color: #999; letter-spacing: 1px; display: block; }
+        .field span { font-size: 11px; color: #1a1a1a; }
+        .content-block { border: 1px solid #ddd; padding: 12px; border-radius: 4px; margin-top: 8px; white-space: pre-wrap; font-size: 11px; line-height: 1.8; }
+        .footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; font-size: 9px; color: #999; text-transform: uppercase; letter-spacing: 1px; }
+        hr { border: none; border-top: 1px dashed #ddd; margin: 12px 0; }
+        @media print { body { padding: 0; } }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>Denúncia</h1>
+        <p>PMESP · Corregedoria Geral · #${denuncia.numero_registro?.toString().padStart(4, '0') || '???'}</p>
+        <p style="margin-top:4px;"><span class="badge">${(denuncia.status || "pendente").toUpperCase()}</span></p>
+      </div>
+
+      <div class="section">
+        <h3>Identificação</h3>
+        <div class="grid">
+          <div class="field"><label>Título</label><span>${denuncia.titulo}</span></div>
+          <div class="field"><label>Nº Registro</label><span>#${denuncia.numero_registro?.toString().padStart(4, '0') || '???'}</span></div>
+          <div class="field"><label>Data de Abertura</label><span>${formatDateSafe(denuncia.created_at, "dd/MM/yyyy HH:mm")}</span></div>
+          <div class="field"><label>Status</label><span>${(denuncia.status || "pendente").toUpperCase()}</span></div>
+        </div>
+      </div>
+
+      ${denuncia.policial_denunciado ? `
+      <div class="section">
+        <h3>Policial Denunciado</h3>
+        <div class="grid">
+          <div class="field"><label>Nome</label><span>${denuncia.policial_denunciado}</span></div>
+        </div>
+      </div>` : ""}
+
+      ${data.reclamante_nome ? `
+      <div class="section">
+        <h3>Reclamante</h3>
+        <div class="grid">
+          <div class="field"><label>Nome</label><span>${data.reclamante_nome}</span></div>
+          <div class="field"><label>ID</label><span>${data.reclamante_id || "-"}</span></div>
+          <div class="field"><label>Anônimo</label><span>${data.reclamante_anonimo || "-"}</span></div>
+        </div>
+      </div>` : ""}
+
+      ${data.denunciado_nome ? `
+      <div class="section">
+        <h3>Policial Denunciado (Detalhes)</h3>
+        <div class="grid">
+          <div class="field"><label>Nome</label><span>${data.denunciado_nome}</span></div>
+          <div class="field"><label>Badge</label><span>#${data.denunciado_badge || "-"}</span></div>
+          <div class="field"><label>Patente</label><span>${data.denunciado_patente || "-"}</span></div>
+        </div>
+      </div>` : ""}
+
+      ${data.incidente_data ? `
+      <div class="section">
+        <h3>Incidente</h3>
+        <div class="grid">
+          <div class="field"><label>Data</label><span>${data.incidente_data || "-"}</span></div>
+          <div class="field"><label>Horário</label><span>${data.incidente_horario || "-"}</span></div>
+          <div class="field"><label>Local</label><span>${data.incidente_local || "-"}</span></div>
+        </div>
+      </div>` : ""}
+
+      ${denuncia.descricao ? `
+      <div class="section">
+        <h3>Descrição da Denúncia</h3>
+        <div class="content-block">${denuncia.descricao}</div>
+      </div>` : ""}
+
+      ${denuncia.data_ocorrido ? `
+      <div class="section">
+        <h3>Data do Ocorrido</h3>
+        <div class="field"><span>${denuncia.data_ocorrido}</span></div>
+      </div>` : ""}
+
+      ${denuncia.notas_internas ? `
+      <div class="section">
+        <h3>Notas Internas</h3>
+        <div class="content-block">${denuncia.notas_internas}</div>
+      </div>` : ""}
+
       <div class="footer">PMESP · Corregedoria Geral · Documento Oficial · ${format(new Date(), "dd/MM/yyyy HH:mm")}</div>
       <script>window.print();window.close();<\u002fscript>
     </body>
