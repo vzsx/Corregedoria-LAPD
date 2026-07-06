@@ -136,7 +136,7 @@ function generateIpmHtml(data: IpmFormData, autorNome?: string, autorPosto?: str
   .header-center { text-align: center; padding: 0; line-height: 1.15; }
   .header-bold { font-weight: 700; font-size: 11pt; font-family: "Arial"; }
   .header-bold-br { font-weight: 700; }
-  .body-left { padding: 12pt 0; line-height: 1.0; text-align: left; }
+  .body-left { padding: 12pt 0; line-height: 1.0; text-align: justify; }
   .body-left-bold { font-weight: 700; }
   .title-h1 {
     padding-top: 24pt;
@@ -236,7 +236,7 @@ function generateIpmHtml(data: IpmFormData, autorNome?: string, autorPosto?: str
 
   <!-- PUBLIQUE-SE -->
   <div style="padding: 12pt 0; line-height: 1.0;">
-    <p><strong>Publique-se. Registre-se. Cumpra-se.</strong></p>
+    <p>Publique-se. Registre-se. Cumpra-se.</p>
   </div>
 
   <!-- LINHA -->
@@ -247,12 +247,12 @@ function generateIpmHtml(data: IpmFormData, autorNome?: string, autorPosto?: str
 
   <!-- DATA E ASSINATURA -->
   <div class="center-text">
-    <p class="center-text"><strong>São Paulo, ${dataFormatada}.<br><br><br><br><br></strong></p>
+    <p class="center-text">São Paulo, ${dataFormatada}.<br><br><br><br><br></p>
   </div>
 
   <!-- ASSINATURA -->
   <div class="center-text">
-    <p class="center-text"><strong>Ass:___________________________</strong></p>
+    <p class="center-text">Ass:___________________________</p>
   </div>
 
   <!-- INDICIADOS -->
