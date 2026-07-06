@@ -11,7 +11,22 @@ interface AuditLogEntry {
 
 export async function logAudit(entry: AuditLogEntry) {
   try {
-    const { error } = await supabase.from("audit_logs").insert([entry]);
+    let userId = entry.user_id;
+    let userName = entry.user_name;
+
+    if (!userId || !userName) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        userId = userId || user.id;
+        userName = userName || user.user_metadata?.full_name || user.email || "Desconhecido";
+      }
+    }
+
+    const { error } = await supabase.from("audit_logs").insert([{
+      ...entry,
+      user_id: userId,
+      user_name: userName,
+    }]);
     if (error) console.error("Audit log error:", error);
   } catch (e) {
     console.error("Audit log exception:", e);

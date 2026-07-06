@@ -1023,6 +1023,7 @@ function Corregedoria() {
       toast.error("Erro ao aprovar usuário");
     } else {
       toast.success("Usuário aprovado com sucesso!");
+      logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "status_change", entity_type: "user_role", entity_id: roleId, details: { novo_role: newRole } });
       // Pegar o ID do usuário que foi aprovado antes de filtrar
       const approvedUser = pendingUsers.find(p => p.role_id === roleId);
       if (approvedUser) {
@@ -1059,6 +1060,7 @@ function Corregedoria() {
       toast.error("Falha ao remover acesso: " + roleError.message);
     } else {
       toast.success("Solicitação rejeitada e removida com sucesso.");
+      logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "delete", entity_type: "user", entity_id: userToReject.user_id, details: { nome: userToReject.full_name, motivo: "rejeicao" } });
       setPendingUsers(prev => prev.filter(p => p.user_id !== userToReject.user_id));
     }
   };
@@ -1067,6 +1069,7 @@ function Corregedoria() {
     const { error } = await supabase.from("denuncias").update({ status }).eq("id", id);
     if (error) return toast.error("Erro ao atualizar");
     setDenuncias((d) => d.map((x) => (x.id === id ? { ...x, status } : x)));
+    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "status_change", entity_type: "denuncia", entity_id: id, details: { para: status } });
     toast.success("Status atualizado");
   };
 
@@ -1074,6 +1077,7 @@ function Corregedoria() {
     const { error } = await supabase.from("investigacoes").update({ status }).eq("id", id);
     if (error) return toast.error("Erro ao atualizar");
     setInvestigacoes((d) => d.map((x) => (x.id === id ? { ...x, status } : x)));
+    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "status_change", entity_type: "investigacao", entity_id: id, details: { para: status } });
     toast.success("Status da investigação atualizado");
   };
 
@@ -1081,18 +1085,21 @@ function Corregedoria() {
     const { error } = await supabase.from("relatorios").update({ status }).eq("id", id);
     if (error) return toast.error("Erro ao atualizar");
     setRelatorios((d) => d.map((x) => (x.id === id ? { ...x, status } : x)));
+    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "status_change", entity_type: "relatorio", entity_id: id, details: { para: status } });
     toast.success("Status do documento atualizado");
   };
 
   const updateNotas = async (id: string, notas_internas: string) => {
     const { error } = await supabase.from("denuncias").update({ notas_internas }).eq("id", id);
     if (error) return toast.error("Erro ao salvar notas");
+    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "update", entity_type: "denuncia", entity_id: id, details: { campo: "notas_internas" } });
     toast.success("Notas salvas");
   };
 
   const updateInvestigacaoNotas = async (id: string, notas_internas: string) => {
     const { error } = await supabase.from("investigacoes").update({ notas_internas }).eq("id", id);
     if (error) return toast.error("Erro ao salvar notas");
+    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "update", entity_type: "investigacao", entity_id: id, details: { campo: "notas_internas" } });
     toast.success("Notas da investigação salvas");
   };
 
@@ -1136,6 +1143,7 @@ function Corregedoria() {
 
     setSubmitting(false);
     toast.success("Documento criado com sucesso!");
+    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "create", entity_type: "relatorio", entity_id: data[0].id, details: { titulo: relatorioForm.titulo, tipo: relatorioForm.tipo_denuncia } });
     setRelatorios([data[0] as Relatorio, ...relatorios]);
     setIsDialogOpen(false);
     setRelatorioForm({ 
@@ -1304,6 +1312,7 @@ function Corregedoria() {
     if (error) return toast.error("Erro ao atualizar depoimento: " + error.message);
 
     toast.success("Depoimento atualizado!");
+    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "update", entity_type: "depoimento", entity_id: editingDepoimentoId, details: { oficial_nome: depoimentoForm.oficial_nome } });
     setIsEditDepoimentoDialogOpen(false);
     setEditingDepoimentoId(null);
     setDepoimentoForm({
@@ -1361,6 +1370,7 @@ function Corregedoria() {
     setRelatorios(prev => [data[0] as Relatorio, ...prev]);
     setRelatorioGeralForm({ titulo: "", conteudo: "", vinculos: [] });
     setIsRelatorioGeralDialogOpen(false);
+    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "create", entity_type: "relatorio_geral", entity_id: newRgId, details: { titulo: relatorioGeralForm.titulo } });
     toast.success("Relatório Geral criado com sucesso!");
   };
 
@@ -1388,6 +1398,7 @@ function Corregedoria() {
     setRelatorios(prev => prev.map(r => r.id === editingRelatorioGeralId ? { ...r, titulo: relatorioGeralForm.titulo, conteudo: relatorioGeralForm.conteudo } : r));
     setEditingRelatorioGeralId(null);
     setIsEditRelatorioGeralDialogOpen(false);
+    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "update", entity_type: "relatorio_geral", entity_id: editingRelatorioGeralId, details: { titulo: relatorioGeralForm.titulo } });
     toast.success("Relatório Geral atualizado!");
   };
 
@@ -1404,6 +1415,7 @@ function Corregedoria() {
         if (error) return toast.error("Erro ao excluir: " + error.message);
         setRelatorios(prev => prev.filter(r => r.id !== id));
         setRelatorioGeralVinculos(prev => prev.filter(v => v.relatorio_id !== id));
+        logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "delete", entity_type: "relatorio_geral", entity_id: id });
         toast.success("Relatório Geral excluído!");
       }
     });
@@ -1413,6 +1425,7 @@ function Corregedoria() {
     const { error } = await supabase.from("relatorio_geral_vinculos").delete().eq("id", vinculoId);
     if (error) return toast.error("Erro ao desanexar: " + error.message);
     setRelatorioGeralVinculos(prev => prev.filter(v => v.id !== vinculoId));
+    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "unlink", entity_type: "relatorio_geral_vinculo", entity_id: vinculoId });
     toast.success("Documento desanexado!");
   };
 
@@ -1478,6 +1491,7 @@ function Corregedoria() {
     setDepoimentos(prev => prev.map(d => investigacaoForm.depoimento_ids.includes(d.id) ? { ...d, investigacao_id: newInvId } : d));
 
     toast.success("Investigação iniciada com sucesso!");
+    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "create", entity_type: "investigacao", entity_id: newInvId, details: { titulo: finalTitle, investigado: investigacaoForm.investigado } });
     setInvestigacoes([data[0] as Investigacao, ...investigacoes]);
     setIsInvestigacaoDialogOpen(false);
     resetInvestigacaoForm();
@@ -1624,6 +1638,7 @@ function Corregedoria() {
     } : i));
 
     toast.success("Investigação atualizada!");
+    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "update", entity_type: "investigacao", entity_id: invId, details: { titulo: investigacaoForm.titulo } });
     setIsInvestigacaoEditDialogOpen(false);
     resetInvestigacaoForm();
   };
@@ -1632,6 +1647,7 @@ function Corregedoria() {
     const { error } = await supabase.from("relatorios").update({ status: "concluida" }).eq("id", id);
     if (error) return toast.error("Erro ao finalizar documento");
     setRelatorios(prev => prev.map(r => r.id === id ? { ...r, status: "concluida" } : r));
+    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "status_change", entity_type: "relatorio", entity_id: id, details: { de: "pendente", para: "concluida" } });
     toast.success("Documento finalizado!");
   };
 
@@ -1662,6 +1678,7 @@ function Corregedoria() {
     } : r));
 
     toast.success("Documento atualizado!");
+    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "update", entity_type: "relatorio", entity_id: editingRelatorioId, details: { titulo: relatorioForm.titulo } });
     setIsEditDialogOpen(false);
     setEditingRelatorioId(null);
     setRelatorioForm({ 
@@ -1731,6 +1748,7 @@ function Corregedoria() {
         setConfirmDialog(prev => ({ ...prev, open: false, loading: false }));
         if (error) return toast.error("Erro ao excluir documento");
         setRelatorios(prev => prev.filter(r => r.id !== id));
+        logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "delete", entity_type: "relatorio", entity_id: id });
         toast.success("Documento excluído com sucesso");
       },
     });
@@ -1747,6 +1765,7 @@ function Corregedoria() {
         setConfirmDialog(prev => ({ ...prev, open: false, loading: false }));
         if (error) return toast.error("Erro ao excluir investigação");
         setInvestigacoes(prev => prev.filter(i => i.id !== id));
+        logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "delete", entity_type: "investigacao", entity_id: id });
         toast.success("Investigação excluída com sucesso");
       },
     });
@@ -1765,6 +1784,7 @@ function Corregedoria() {
       toast.error("Erro ao vincular");
     } else {
       toast.success("Documento anexado à ocorrência!");
+      logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "link", entity_type: "denuncia_relatorio", details: { denuncia_id: denunciaId, relatorio_id: linkRelatorioId } });
       setDenunciaRelatorios(prev => 
         prev.some(dr => dr.denuncia_id === denunciaId && dr.relatorio_id === linkRelatorioId)
           ? prev
@@ -1783,6 +1803,7 @@ function Corregedoria() {
     setLinking(false);
     if (error) return toast.error("Erro ao desanexar");
     setDenunciaRelatorios(prev => prev.filter(dr => !(dr.denuncia_id === denunciaId && dr.relatorio_id === relatorioId)));
+    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "unlink", entity_type: "denuncia_relatorio", details: { denuncia_id: denunciaId, relatorio_id: relatorioId } });
     toast.success("Documento desanexado!");
   };
 
@@ -1813,6 +1834,7 @@ function Corregedoria() {
       toast.error("Erro ao vincular");
     } else {
       toast.success("Documento anexado à investigação!");
+      logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "link", entity_type: "investigacao_relatorio", details: { investigacao_id: investigacaoId, relatorio_id: linkRelatorioId } });
       setInvestigacaoRelatorios([...investigacaoRelatorios, { investigacao_id: investigacaoId, relatorio_id: linkRelatorioId }]);
       setLinkRelatorioId("");
     }
@@ -1831,6 +1853,7 @@ function Corregedoria() {
       toast.error("Erro ao vincular");
     } else {
       toast.success("Denúncia anexada ao documento!");
+      logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "link", entity_type: "denuncia_relatorio", details: { denuncia_id: linkDenunciaId, relatorio_id: relatorioId } });
       setDenunciaRelatorios(prev =>
         prev.some(dr => dr.denuncia_id === linkDenunciaId && dr.relatorio_id === relatorioId)
           ? prev
@@ -1849,6 +1872,7 @@ function Corregedoria() {
     setLinking(false);
     if (error) return toast.error("Erro ao desanexar denúncia");
     setDenunciaRelatorios(prev => prev.filter(dr => !(dr.denuncia_id === denunciaId && dr.relatorio_id === relatorioId)));
+    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "unlink", entity_type: "denuncia_relatorio", details: { denuncia_id: denunciaId, relatorio_id: relatorioId } });
     toast.success("Denúncia desanexada!");
   };
 
@@ -1865,6 +1889,7 @@ function Corregedoria() {
       toast.error("Erro ao vincular");
     } else {
       toast.success("Investigação anexada ao documento!");
+      logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "link", entity_type: "investigacao_relatorio", details: { investigacao_id: linkInvestigacaoId, relatorio_id: relatorioId } });
       setInvestigacaoRelatorios(prev =>
         prev.some(ir => ir.investigacao_id === linkInvestigacaoId && ir.relatorio_id === relatorioId)
           ? prev
@@ -1887,6 +1912,7 @@ function Corregedoria() {
       toast.error("Erro ao vincular Relatório Geral");
     } else {
       toast.success("Relatório Geral anexado!");
+      logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "link", entity_type: "relatorio_geral_vinculo", details: { relatorio_id: linkRelatorioGeralId, entidade_id: entidadeId, entidade_tipo: entidadeTipo } });
       setRelatorioGeralVinculos(prev => [...prev, {
         id: crypto.randomUUID(),
         relatorio_id: linkRelatorioGeralId,
@@ -1907,6 +1933,7 @@ function Corregedoria() {
     setLinking(false);
     if (error) return toast.error("Erro ao desanexar investigação");
     setInvestigacaoRelatorios(prev => prev.filter(ir => !(ir.investigacao_id === investigacaoId && ir.relatorio_id === relatorioId)));
+    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "unlink", entity_type: "investigacao_relatorio", details: { investigacao_id: investigacaoId, relatorio_id: relatorioId } });
     toast.success("Investigação desanexada!");
   };
 
@@ -1919,6 +1946,7 @@ function Corregedoria() {
     await supabase.from("relatorios").update({ dados_detalhados: updated }).eq("id", relatorioId);
     setLinking(false);
     setRelatorios(prev => prev.map(r => r.id === relatorioId ? { ...r, dados_detalhados: updated } as Relatorio : r));
+    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "unlink", entity_type: "depoimento_relatorio", details: { relatorio_id: relatorioId, depoimento_id: depoimentoId } });
     toast.success("Depoimento desanexado!");
   };
 
@@ -1926,6 +1954,7 @@ function Corregedoria() {
     const { error } = await supabase.from("denuncia_investigacao").delete().match({ investigacao_id: investigacaoId, denuncia_id: denunciaId });
     if (error) return toast.error("Erro ao desanexar denúncia");
     setDenunciaInvestigacoes(prev => prev.filter(di => !(di.investigacao_id === investigacaoId && di.denuncia_id === denunciaId)));
+    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "unlink", entity_type: "denuncia_investigacao", details: { investigacao_id: investigacaoId, denuncia_id: denunciaId } });
     toast.success("Denúncia desanexada!");
   };
 
@@ -1933,6 +1962,7 @@ function Corregedoria() {
     const { error } = await supabase.from("depoimentos").update({ investigacao_id: null }).eq("id", depoimentoId);
     if (error) return toast.error("Erro ao desanexar depoimento");
     setDepoimentos(prev => prev.map(d => d.id === depoimentoId ? { ...d, investigacao_id: null } as Depoimento : d));
+    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "unlink", entity_type: "depoimento_investigacao", details: { depoimento_id: depoimentoId } });
     toast.success("Depoimento desanexado!");
   };
 
@@ -1946,6 +1976,7 @@ function Corregedoria() {
     await supabase.from("relatorios").update({ dados_detalhados: updated }).eq("id", relatorioId);
     setLinking(false);
     setRelatorios(prev => prev.map(r => r.id === relatorioId ? { ...r, dados_detalhados: updated } as Relatorio : r));
+    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "unlink", entity_type: "documento_relatorio", details: { relatorio_id: relatorioId, target_id: targetRelatorioId } });
     toast.success("Documento desanexado!");
   };
 
@@ -1953,6 +1984,7 @@ function Corregedoria() {
     const { error } = await supabase.from("depoimentos").update({ [campo]: null }).eq("id", depoimentoId);
     if (error) return toast.error("Erro ao desanexar documento");
     setDepoimentos(prev => prev.map(d => d.id === depoimentoId ? { ...d, [campo]: null } as any : d));
+    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "unlink", entity_type: "depoimento_documento", details: { depoimento_id: depoimentoId, campo } });
     toast.success("Documento desanexado!");
   };
 
@@ -1966,6 +1998,7 @@ function Corregedoria() {
     setLinking(false);
     if (error) { toast.error("Erro ao vincular: " + error.message); return; }
     toast.success("IPM vinculado com sucesso!");
+    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "link", entity_type: "ipm_vinculo", details: { ipm_id: ipmId, entidade_id: entidadeId, entidade_tipo: entidadeTipo } });
     setIpmVinculos(prev => [...prev, { id: crypto.randomUUID?.() || Date.now().toString(), ipm_id: ipmId, entidade_id: entidadeId, entidade_tipo: entidadeTipo as any, created_at: new Date().toISOString() }]);
     setLinkIpmId("");
   };
@@ -1976,6 +2009,7 @@ function Corregedoria() {
     setLinking(false);
     if (error) { toast.error("Erro ao desanexar IPM"); return; }
     setIpmVinculos(prev => prev.filter(v => v.id !== vinculoId));
+    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "unlink", entity_type: "ipm_vinculo", entity_id: vinculoId });
     toast.success("IPM desanexado!");
   };
 
@@ -1986,6 +2020,7 @@ function Corregedoria() {
     setLinking(false);
     if (error) { toast.error("Erro ao vincular denúncia"); return; }
     toast.success("Denúncia anexada!");
+    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "link", entity_type: "afastamento_denuncia", details: { afastamento_id: afastamentoId, denuncia_id: linkAfastamentoDenunciaId } });
     setAfastamentoDenuncias(prev => prev.some((ad: any) => ad.afastamento_id === afastamentoId && ad.denuncia_id === linkAfastamentoDenunciaId) ? prev : [...prev, { afastamento_id: afastamentoId, denuncia_id: linkAfastamentoDenunciaId }]);
     setLinkAfastamentoDenunciaId("");
   };
@@ -1995,6 +2030,7 @@ function Corregedoria() {
     await supabase.from("afastamento_denuncia").delete().match({ afastamento_id: afastamentoId, denuncia_id: denunciaId });
     setLinking(false);
     setAfastamentoDenuncias(prev => prev.filter((ad: any) => !(ad.afastamento_id === afastamentoId && ad.denuncia_id === denunciaId)));
+    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "unlink", entity_type: "afastamento_denuncia", details: { afastamento_id: afastamentoId, denuncia_id: denunciaId } });
     toast.success("Denúncia desanexada!");
   };
 
@@ -2005,6 +2041,7 @@ function Corregedoria() {
     setLinking(false);
     if (error) { toast.error("Erro ao vincular investigação"); return; }
     toast.success("Investigação anexada!");
+    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "link", entity_type: "afastamento_investigacao", details: { afastamento_id: afastamentoId, investigacao_id: linkAfastamentoInvestigacaoId } });
     setAfastamentoInvestigacoes(prev => prev.some((ai: any) => ai.afastamento_id === afastamentoId && ai.investigacao_id === linkAfastamentoInvestigacaoId) ? prev : [...prev, { afastamento_id: afastamentoId, investigacao_id: linkAfastamentoInvestigacaoId }]);
     setLinkAfastamentoInvestigacaoId("");
   };
@@ -2014,6 +2051,7 @@ function Corregedoria() {
     await supabase.from("afastamento_investigacao").delete().match({ afastamento_id: afastamentoId, investigacao_id: investigacaoId });
     setLinking(false);
     setAfastamentoInvestigacoes(prev => prev.filter((ai: any) => !(ai.afastamento_id === afastamentoId && ai.investigacao_id === investigacaoId)));
+    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "unlink", entity_type: "afastamento_investigacao", details: { afastamento_id: afastamentoId, investigacao_id: investigacaoId } });
     toast.success("Investigação desanexada!");
   };
 
@@ -2024,6 +2062,7 @@ function Corregedoria() {
     setLinking(false);
     if (error) { toast.error("Erro ao vincular relatório"); return; }
     toast.success("Relatório anexado!");
+    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "link", entity_type: "afastamento_relatorio", details: { afastamento_id: afastamentoId, relatorio_id: linkAfastamentoRelatorioId } });
     setAfastamentoRelatorios(prev => prev.some((ar: any) => ar.afastamento_id === afastamentoId && ar.relatorio_id === linkAfastamentoRelatorioId) ? prev : [...prev, { afastamento_id: afastamentoId, relatorio_id: linkAfastamentoRelatorioId }]);
     setLinkAfastamentoRelatorioId("");
   };
@@ -2033,6 +2072,7 @@ function Corregedoria() {
     await supabase.from("afastamento_relatorio").delete().match({ afastamento_id: afastamentoId, relatorio_id: relatorioId });
     setLinking(false);
     setAfastamentoRelatorios(prev => prev.filter((ar: any) => !(ar.afastamento_id === afastamentoId && ar.relatorio_id === relatorioId)));
+    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "unlink", entity_type: "afastamento_relatorio", details: { afastamento_id: afastamentoId, relatorio_id: relatorioId } });
     toast.success("Relatório desanexado!");
   };
 
@@ -2043,6 +2083,7 @@ function Corregedoria() {
     setLinking(false);
     if (error) { toast.error("Erro ao vincular depoimento"); return; }
     toast.success("Depoimento anexado!");
+    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "link", entity_type: "afastamento_depoimento", details: { afastamento_id: afastamentoId, depoimento_id: linkAfastamentoDepoimentoId } });
     setAfastamentoDepoimentos(prev => prev.some((ad: any) => ad.afastamento_id === afastamentoId && ad.depoimento_id === linkAfastamentoDepoimentoId) ? prev : [...prev, { afastamento_id: afastamentoId, depoimento_id: linkAfastamentoDepoimentoId }]);
     setLinkAfastamentoDepoimentoId("");
   };
@@ -2052,6 +2093,7 @@ function Corregedoria() {
     await supabase.from("afastamento_depoimento").delete().match({ afastamento_id: afastamentoId, depoimento_id: depoimentoId });
     setLinking(false);
     setAfastamentoDepoimentos(prev => prev.filter((ad: any) => !(ad.afastamento_id === afastamentoId && ad.depoimento_id === depoimentoId)));
+    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "unlink", entity_type: "afastamento_depoimento", details: { afastamento_id: afastamentoId, depoimento_id: depoimentoId } });
     toast.success("Depoimento desanexado!");
   };
 
@@ -2069,6 +2111,7 @@ function Corregedoria() {
           toast.error("Erro ao remover acesso");
         } else {
           toast.success("Acesso removido com sucesso");
+          logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "delete", entity_type: "user_role", entity_id: userId });
           setOficiais(prev => prev.filter(o => o.id !== userId));
         }
       },
@@ -2083,6 +2126,7 @@ function Corregedoria() {
       toast.error("Erro ao mudar cargo");
     } else {
       toast.success(`Cargo atualizado para ${newRole === "admin" ? "Administrador" : "Corregedor"}`);
+      logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "update", entity_type: "user_role", entity_id: userId, details: { novo_role: newRole } });
       setOficiais(prev => prev.map(o => o.id === userId ? { ...o, role: newRole } : o));
     }
   };
@@ -2091,6 +2135,7 @@ function Corregedoria() {
     const { error } = await supabase.from("profiles").update({ patente: novaPatente }).eq("id", id);
     if (error) return toast.error("Erro ao atualizar patente");
     setOficiais(prev => prev.map(p => p.id === id ? { ...p, patente: novaPatente } : p));
+    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "update", entity_type: "profile", entity_id: id, details: { campo: "patente", valor: novaPatente } });
     toast.success("Patente atualizada com sucesso!");
   };
 

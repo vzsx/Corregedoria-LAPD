@@ -44,6 +44,7 @@ const ACTION_LABEL: Record<string, string> = {
   login: "Login",
   link: "Vinculação",
   unlink: "Desvinculação",
+  status_change: "Mudança de Status",
 };
 const ACTION_COLOR: Record<string, string> = {
   create: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10",
@@ -52,6 +53,7 @@ const ACTION_COLOR: Record<string, string> = {
   login: "text-blue-400 border-blue-500/30 bg-blue-500/10",
   link: "text-purple-400 border-purple-500/30 bg-purple-500/10",
   unlink: "text-muted-foreground border-border bg-muted/50",
+  status_change: "text-cyan-400 border-cyan-500/30 bg-cyan-500/10",
 };
 
 function AdminPage() {

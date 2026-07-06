@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Shield, Lock, User, BadgeCheck, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { logAudit } from "@/lib/audit-log";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -100,6 +101,7 @@ function AuthPage() {
       }
 
       toast.success("Cadastro realizado. Aguarde aprovação de um administrador.");
+      logAudit({ user_id: data.user?.id, user_name: fullName, action: "create", entity_type: "user", details: { email: emailFormatted, nome: fullName } });
     }
 
     setLoading(false);

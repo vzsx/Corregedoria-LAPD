@@ -275,7 +275,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
       toast.success("Afastamento cadastrado com sucesso!");
       setAfastamentoDialogOpen(false);
       resetForm();
-      logAudit({ action: "create", entity_type: "afastamentos", entity_id: undefined, details: { nome: afastamentoForm.nome_policial } });
+      logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "create", entity_type: "afastamentos", details: { nome: afastamentoForm.nome_policial, rg_pm: afastamentoForm.rg_pm } });
       await loadAfastamentos();
     }
     setSubmitting(false);
@@ -327,7 +327,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
       setAfastamentoEditDialogOpen(false);
       setEditingAfastamentoId(null);
       resetForm();
-      logAudit({ action: "update", entity_type: "afastamentos", entity_id: editingAfastamentoId, details: { id: editingAfastamentoId } });
+      logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "update", entity_type: "afastamentos", entity_id: editingAfastamentoId, details: { nome: afastamentoForm.nome_policial } });
       await loadAfastamentos();
     }
     setSubmitting(false);
@@ -342,7 +342,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
     if (error) { toast.error("Erro ao excluir: " + error.message); }
     else {
       toast.success("Afastamento excluído!");
-      logAudit({ action: "delete", entity_type: "afastamentos", entity_id: id, details: { id } });
+      logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "delete", entity_type: "afastamentos", entity_id: id, details: { id } });
       await loadAfastamentos();
     }
     setDeleteConfirmId(null);
@@ -364,7 +364,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
       .update({ status, historico_versoes: versoes })
       .eq("id", id);
     if (error) toast.error("Erro ao atualizar status");
-    else { toast.success("Status atualizado!"); await loadAfastamentos(); }
+    else { toast.success("Status atualizado!"); logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "status_change", entity_type: "afastamentos", entity_id: id, details: { de: existing?.status, para: status } }); await loadAfastamentos(); }
   };
 
   const duplicateAfastamento = async (a: Afastamento) => {
@@ -401,7 +401,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
       autor_nome: user?.user_metadata?.full_name || a.responsavel_nome,
     });
     if (error) toast.error("Erro ao duplicar: " + error.message);
-    else { toast.success("Documento duplicado!"); await loadAfastamentos(); }
+    else { toast.success("Documento duplicado!"); logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "create", entity_type: "afastamentos", details: { nome: a.nome_completo, duplicado_de: a.numero_portaria } }); await loadAfastamentos(); }
   };
 
   const openPreview = (form: PortariaFormData) => {
@@ -1326,7 +1326,7 @@ function LinkedTables({ afastamentoId, investigacoes, inqueritos, advertencias, 
     e.preventDefault(); if (!canEdit) return;
     setSubmitting(true);
     const { error } = await supabase.from("investigacoes_policial").insert({ ...invForm, afastamento_id: afastamentoId, status: "em_andamento" });
-    if (error) toast.error("Erro: " + error.message); else { toast.success("Investigação registrada!"); setInvDialogOpen(false); setInvForm({ numero_investigacao: "", data_instauracao: format(new Date(), "yyyy-MM-dd"), encarregado: "", descricao_fatos: "", provas_anexadas: "", testemunhas: "" }); onReload(); }
+    if (error) toast.error("Erro: " + error.message); else { toast.success("Investigação registrada!"); logAudit({ action: "create", entity_type: "investigacao_policial", details: { numero: invForm.numero_investigacao, afastamento_id: afastamentoId } }); setInvDialogOpen(false); setInvForm({ numero_investigacao: "", data_instauracao: format(new Date(), "yyyy-MM-dd"), encarregado: "", descricao_fatos: "", provas_anexadas: "", testemunhas: "" }); onReload(); }
     setSubmitting(false);
   };
 
@@ -1334,7 +1334,7 @@ function LinkedTables({ afastamentoId, investigacoes, inqueritos, advertencias, 
     e.preventDefault(); if (!canEdit) return;
     setSubmitting(true);
     const { error } = await supabase.from("inqueritos_policial").insert({ ...inqForm, afastamento_id: afastamentoId, status: "em_andamento" });
-    if (error) toast.error("Erro: " + error.message); else { toast.success("Inquérito registrado!"); setInqDialogOpen(false); setInqForm({ numero_inquerito: "", data_instauracao: format(new Date(), "yyyy-MM-dd"), autoridade_responsavel: "", relatorio: "", parecer: "", resultado: "" }); onReload(); }
+    if (error) toast.error("Erro: " + error.message); else { toast.success("Inquérito registrado!"); logAudit({ action: "create", entity_type: "inquerito_policial", details: { numero: inqForm.numero_inquerito, afastamento_id: afastamentoId } }); setInqDialogOpen(false); setInqForm({ numero_inquerito: "", data_instauracao: format(new Date(), "yyyy-MM-dd"), autoridade_responsavel: "", relatorio: "", parecer: "", resultado: "" }); onReload(); }
     setSubmitting(false);
   };
 
@@ -1342,7 +1342,7 @@ function LinkedTables({ afastamentoId, investigacoes, inqueritos, advertencias, 
     e.preventDefault(); if (!canEdit) return;
     setSubmitting(true);
     const { error } = await supabase.from("advertencias").insert({ ...advForm, afastamento_id: afastamentoId });
-    if (error) toast.error("Erro: " + error.message); else { toast.success("Advertência registrada!"); setAdvDialogOpen(false); setAdvForm({ descricao: "", data_advertencia: format(new Date(), "yyyy-MM-dd"), autoridade_responsavel: "" }); onReload(); }
+    if (error) toast.error("Erro: " + error.message); else { toast.success("Advertência registrada!"); logAudit({ action: "create", entity_type: "advertencia", details: { descricao: advForm.descricao, afastamento_id: afastamentoId } }); setAdvDialogOpen(false); setAdvForm({ descricao: "", data_advertencia: format(new Date(), "yyyy-MM-dd"), autoridade_responsavel: "" }); onReload(); }
     setSubmitting(false);
   };
 
@@ -1359,7 +1359,7 @@ function LinkedTables({ afastamentoId, investigacoes, inqueritos, advertencias, 
               {investigacoes.map(i => (
                 <div key={i.id} className="text-xs p-1.5 bg-muted/30 rounded flex items-center justify-between">
                   <span>{i.numero_investigacao} - <Badge variant="outline" className="text-[10px] px-1 py-0">{INVESTIGACAO_POLICIAL_STATUS_LABEL[i.status]}</Badge></span>
-                  {canDelete && <Button variant="ghost" size="icon" className="h-5 w-5 text-destructive" onClick={async () => { await supabase.from("investigacoes_policial").delete().eq("id", i.id); onReload(); }}><Trash2 className="h-3 w-3" /></Button>}
+                  {canDelete && <Button variant="ghost" size="icon" className="h-5 w-5 text-destructive" onClick={async () => { await supabase.from("investigacoes_policial").delete().eq("id", i.id); logAudit({ action: "delete", entity_type: "investigacao_policial", entity_id: i.id }); onReload(); }}><Trash2 className="h-3 w-3" /></Button>}
                 </div>
               ))}
             </div>
@@ -1376,7 +1376,7 @@ function LinkedTables({ afastamentoId, investigacoes, inqueritos, advertencias, 
               {inqueritos.map(i => (
                 <div key={i.id} className="text-xs p-1.5 bg-muted/30 rounded flex items-center justify-between">
                   <span>{i.numero_inquerito} - <Badge variant="outline" className="text-[10px] px-1 py-0">{INQUERITO_POLICIAL_STATUS_LABEL[i.status]}</Badge></span>
-                  {canDelete && <Button variant="ghost" size="icon" className="h-5 w-5 text-destructive" onClick={async () => { await supabase.from("inqueritos_policial").delete().eq("id", i.id); onReload(); }}><Trash2 className="h-3 w-3" /></Button>}
+                  {canDelete && <Button variant="ghost" size="icon" className="h-5 w-5 text-destructive" onClick={async () => { await supabase.from("inqueritos_policial").delete().eq("id", i.id); logAudit({ action: "delete", entity_type: "inquerito_policial", entity_id: i.id }); onReload(); }}><Trash2 className="h-3 w-3" /></Button>}
                 </div>
               ))}
             </div>
@@ -1393,7 +1393,7 @@ function LinkedTables({ afastamentoId, investigacoes, inqueritos, advertencias, 
               {advertencias.map(a => (
                 <div key={a.id} className="text-xs p-1.5 bg-muted/30 rounded flex items-center justify-between">
                   <span className="truncate">{a.descricao}</span>
-                  {canDelete && <Button variant="ghost" size="icon" className="h-5 w-5 text-destructive shrink-0" onClick={async () => { await supabase.from("advertencias").delete().eq("id", a.id); onReload(); }}><Trash2 className="h-3 w-3" /></Button>}
+                  {canDelete && <Button variant="ghost" size="icon" className="h-5 w-5 text-destructive shrink-0" onClick={async () => { await supabase.from("advertencias").delete().eq("id", a.id); logAudit({ action: "delete", entity_type: "advertencia", entity_id: a.id }); onReload(); }}><Trash2 className="h-3 w-3" /></Button>}
                 </div>
               ))}
             </div>

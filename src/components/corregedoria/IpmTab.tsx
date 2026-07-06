@@ -326,7 +326,7 @@ export function IpmTab({ denuncias, investigacoes, relatorios, depoimentos, ipmV
     setSubmitting(true);
     const { error } = await supabase.from("ipm").insert(formToInsert(form));
     if (error) toast.error("Erro: " + error.message);
-    else { toast.success("IPM criado!"); setDialogOpen(false); resetForm(); logAudit({ action: "create", entity_type: "ipm", entity_id: undefined, details: {} }); await loadIpms(); }
+    else { toast.success("IPM criado!"); setDialogOpen(false); resetForm(); logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "create", entity_type: "ipm", details: { numero_ipm: form.numero_ipm, unidade: form.unidade } }); await loadIpms(); }
     setSubmitting(false);
   };
 
@@ -349,7 +349,7 @@ export function IpmTab({ denuncias, investigacoes, relatorios, depoimentos, ipmV
     delete (data as any).autor_nome;
     const { error } = await supabase.from("ipm").update(data).eq("id", editingId);
     if (error) toast.error("Erro: " + error.message);
-    else { toast.success("IPM atualizado!"); setEditDialogOpen(false); setEditingId(null); resetForm(); logAudit({ action: "update", entity_type: "ipm", entity_id: editingId, details: { id: editingId } }); await loadIpms(); }
+    else { toast.success("IPM atualizado!"); setEditDialogOpen(false); setEditingId(null); resetForm(); logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "update", entity_type: "ipm", entity_id: editingId, details: { numero_ipm: form.numero_ipm } }); await loadIpms(); }
     setSubmitting(false);
   };
 
@@ -357,7 +357,7 @@ export function IpmTab({ denuncias, investigacoes, relatorios, depoimentos, ipmV
     if (!canDelete) { toast.error("Apenas admin pode excluir."); return; }
     const { error } = await supabase.from("ipm").delete().eq("id", id);
     if (error) toast.error("Erro: " + error.message);
-    else { toast.success("IPM excluído!"); logAudit({ action: "delete", entity_type: "ipm", entity_id: editingId ?? undefined, details: { id: editingId } }); await loadIpms(); }
+    else { toast.success("IPM excluído!"); logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "delete", entity_type: "ipm", entity_id: id, details: { id } }); await loadIpms(); }
     setDeleteConfirmId(null);
   };
 
@@ -367,7 +367,7 @@ export function IpmTab({ denuncias, investigacoes, relatorios, depoimentos, ipmV
     versoes.unshift({ id: crypto.randomUUID?.() || Date.now().toString(), data: new Date().toISOString(), autor: user?.user_metadata?.full_name || "Sistema", documento: "", alteracoes: `Status: ${IPM_STATUS_LABEL[existing?.status || "em_andamento"]} → ${IPM_STATUS_LABEL[status]}`, tipo: "status" });
     const { error } = await supabase.from("ipm").update({ status, historico_versoes: versoes }).eq("id", id);
     if (error) toast.error("Erro ao atualizar status");
-    else { toast.success("Status atualizado!"); await loadIpms(); }
+    else { toast.success("Status atualizado!"); logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "status_change", entity_type: "ipm", entity_id: id, details: { de: existing?.status, para: status } }); await loadIpms(); }
   };
 
   const duplicateIpm = async (ipm: Ipm) => {
@@ -394,7 +394,7 @@ export function IpmTab({ denuncias, investigacoes, relatorios, depoimentos, ipmV
       autor_nome: user?.user_metadata?.full_name || ipm.autoridade_nome,
     });
     if (error) toast.error("Erro ao duplicar: " + error.message);
-    else { toast.success("IPM duplicado!"); await loadIpms(); }
+    else { toast.success("IPM duplicado!"); logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "create", entity_type: "ipm", details: { numero_ipm: ipm.numero_ipm + "-copia", duplicado_de: ipm.numero_ipm } }); await loadIpms(); }
   };
 
   const openDocPreview = (data: IpmFormData) => {

@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { logAudit } from "@/lib/audit-log";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -102,6 +103,7 @@ function Denuncias() {
       console.error("Erro ao enviar denúncia:", error);
       toast.error("Erro ao enviar denúncia. Tente novamente.");
     } else {
+      logAudit({ action: "create", entity_type: "denuncia", details: { titulo: `DENÚNCIA: ${formData.denunciado_nome || "Oficial Desconhecido"}`, reclamante: finalReclamanteNome } });
       toast.success("Denúncia protocolada com sucesso!");
       setSubmitted(true);
     }
