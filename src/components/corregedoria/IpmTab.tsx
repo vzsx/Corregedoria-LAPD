@@ -125,6 +125,7 @@ function generateIpmHtml(data: IpmFormData, autorNome?: string, autorPosto?: str
 <head>
 <meta charset="UTF-8">
 <style type="text/css">
+@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
 @page { margin: 0; }
 ol{margin:0;padding:0}
 table td,table th{padding:0}
@@ -134,14 +135,13 @@ table td,table th{padding:0}
 .c3{padding-top:0pt;padding-bottom:0pt;line-height:1.15;orphans:2;widows:2;text-align:center}
 .c1{padding-top:12pt;padding-bottom:12pt;line-height:1.0;orphans:2;widows:2;text-align:left}
 .c10{font-weight:400;text-decoration:none;vertical-align:baseline;font-size:11pt;font-family:"Arial";font-style:normal}
-.c14{padding-top:12pt;padding-bottom:12pt;line-height:1.0;orphans:2;widows:2;text-align:center}
+.c14{padding-top:6pt;padding-bottom:6pt;line-height:1.0;orphans:2;widows:2;text-align:center}
 .c9{font-weight:400;text-decoration:none;vertical-align:baseline;font-size:14pt;font-family:"Arial";font-style:normal}
 .c15{padding-top:24pt;padding-bottom:6pt;line-height:1.0;orphans:2;widows:2;text-align:left}
 .c12{text-decoration:none;vertical-align:baseline;font-size:11pt;font-family:"Arial";font-style:normal}
 .c6{background-color:#ffffff;max-width:451.4pt;padding:72pt 72pt 72pt 72pt}
 .c0{color:#434343;font-weight:700}
 .c2{font-style:italic}
-.c16{height:11pt}
 .c5{color:#434343}
 .c7{font-weight:700}
 p{margin:0;color:#000000;font-size:11pt;font-family:"Arial"}
@@ -150,7 +150,8 @@ h2{padding-top:18pt;color:#000000;font-size:16pt;padding-bottom:6pt;font-family:
 .watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.08;pointer-events:none;z-index:0;width:15.9cm;height:13.5cm;object-fit:contain}
 .doc-content > *:not(.watermark){position:relative;z-index:1}
 .signature-block{page-break-inside:avoid}
-.signature-name{font-family:"Luxurious Script",cursive;font-size:22pt;color:#000}
+.signature-name{font-family:'Great Vibes',cursive;font-size:26pt;color:#000}
+.signature-title{font-size:10pt;color:#000;margin-top:2pt}
 @media print{body{margin:0}.c6{max-width:none}.watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.08}}
 </style>
 </head>
@@ -236,24 +237,21 @@ h2{padding-top:18pt;color:#000000;font-size:16pt;padding-bottom:6pt;font-family:
   <p class="c1 c16"><span class="c4"></span></p>
 
   <!-- DATA + ASSINATURA -->
-  <div class="signature-block">
+  <div class="signature-block" style="margin-top:48pt;text-align:center;">
     <p class="c14">
-      <span class="c4">São Paulo, ${dataFormatada}.<br></span>
+      <span class="c4">São Paulo, ${dataFormatada}.</span>
     </p>
-
-    <!-- ESPACO EM BRANCO -->
-    <p class="c14 c16"><span class="c4"></span></p>
-    <p class="c14 c16"><span class="c4"></span></p>
-
-    <!-- ASS: -->
+    <p class="c14" style="height:36pt;"><span class="c4"></span></p>
     <p class="c14">
       <span class="c4">Ass: </span><span class="signature-name">${autorNomeFinal || "___________________________"}</span>
     </p>
-    <p class="c14 c16"><span class="c4"></span></p>
-    <p class="c14">
-      <span class="c4">${autorPostoFinal ? autorPostoFinal + " " : ""}${autorNomeFinal || "___________________________"}</span>
+    <p class="c14" style="height:6pt;"><span class="c4"></span></p>
+    <p class="c14" style="margin:0;">
+      <span class="signature-title">${autorPostoFinal ? autorPostoFinal + " PM " : ""}${autorNomeFinal || "___________________________"}</span>
     </p>
-    <p class="c14"><span class="c4">Corregedor da Polícia Militar do Estado de São Paulo</span></p>
+    <p class="c14" style="margin:2pt 0 0 0;">
+      <span class="c4" style="font-size:10pt;">Corregedor da Polícia Militar do Estado de São Paulo</span>
+    </p>
   </div>
 
 </body>
