@@ -81,9 +81,18 @@ function Denuncias() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
+    const finalReclamanteNome = formData.reclamante_anonimo === "Sim" ? "ANÔNIMO" : formData.reclamante_nome.trim();
 
-    const finalReclamanteNome = formData.reclamante_anonimo === "Sim" ? "ANÔNIMO" : (formData.reclamante_nome || "Desconhecido");
+    if (!finalReclamanteNome) {
+      toast.error("Informe o nome completo do denunciante ou marque a denúncia como anônima.");
+      return;
+    }
+
+    setLoading(true);
+    const dadosDetalhados = {
+      ...formData,
+      reclamante_nome: finalReclamanteNome
+    };
 
     const { error } = await supabase
       .from("denuncias")
@@ -94,7 +103,7 @@ function Denuncias() {
         data_ocorrido: `${formData.incidente_data} ${formData.incidente_horario}`,
         contato_opcional: formData.reclamante_contato,
         status: "pendente",
-        dados_detalhados: formData
+        dados_detalhados: dadosDetalhados
       }]);
       
     setLoading(false);
@@ -166,12 +175,14 @@ function Denuncias() {
               
               <div className="grid gap-6 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Nome Completo</Label>
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Nome Completo {formData.reclamante_anonimo === "Não" ? "*" : ""}</Label>
                   <Input 
                     value={formData.reclamante_nome}
                     onChange={(e) => setFormData({...formData, reclamante_nome: e.target.value})}
                     placeholder="Seu nome oficial" 
                     className="bg-background border-input text-foreground" 
+                    required={formData.reclamante_anonimo === "Não"}
+                    disabled={formData.reclamante_anonimo === "Sim"}
                   />
                 </div>
                 <div className="space-y-2">
@@ -194,7 +205,7 @@ function Denuncias() {
                 </div>
                 <div className="space-y-2">
                   <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Deseja permanecer anônimo?</Label>
-                  <RadioGroup value={formData.reclamante_anonimo} onValueChange={(v) => setFormData({...formData, reclamante_anonimo: v})} className="flex gap-4 pt-2">
+                  <RadioGroup value={formData.reclamante_anonimo} onValueChange={(v) => setFormData({...formData, reclamante_anonimo: v, reclamante_nome: v === "Sim" ? "" : formData.reclamante_nome})} className="flex gap-4 pt-2">
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="Sim" id="anon-sim" className="border-input text-red-500" />
                       <Label htmlFor="anon-sim" className="text-sm cursor-pointer">Sim</Label>
