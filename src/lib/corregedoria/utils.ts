@@ -17,7 +17,7 @@ export const formatDateSafe = (dateStr: any, formatStr: string) => {
 
 const IPM_BASE_CSS = `
 <style type="text/css">
-@import url('https://fonts.googleapis.com/css2?family=Pinyon+Script&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
 
 /* Layout oficial compacto em A4, respeitando os limites da pagina */
 @page {
@@ -83,7 +83,7 @@ img{max-width:100%}
 
 /* Assinatura */
 .signature-block{page-break-inside:avoid}
-.signature-name{font-family:'Pinyon Script',cursive;font-size:30pt;color:#000;font-weight:400;line-height:1}
+.signature-name{font-family:'Great Vibes',cursive;font-size:30pt;color:#000;font-weight:400;line-height:1}
 .signature-line{display:inline-block;width:80mm;border-bottom:1px solid #000;height:12pt}
 .signature-title{font-size:10pt;color:#000;margin-top:2pt}
 
@@ -277,12 +277,7 @@ export const printDenuncia = (denuncia: Denuncia) => {
     sections.push(`<p class="c1"><span class="c5">${data.provas_descricao}</span></p>`);
   }
 
-  printGeneric(
-    title,
-    sections.join("\n"),
-    depoimento.registrador_nome || undefined,
-    depoimento.registrador_patente || undefined,
-  );
+  printGeneric(title, sections.join("\n"));
 };
 
 export const printInvestigacao = (investigacao: Investigacao) => {
@@ -337,6 +332,8 @@ export const printInvestigacao = (investigacao: Investigacao) => {
 
 export const printDepoimento = (depoimento: Depoimento) => {
   const title = `DEPOIMENTO – ${depoimento.oficial_nome}`;
+  const registradorNome = depoimento.registrador_nome?.trim() || "";
+  const registradorPatente = depoimento.registrador_patente?.trim() || "";
 
   const sections: string[] = [];
 
@@ -351,6 +348,10 @@ export const printDepoimento = (depoimento: Depoimento) => {
     sections.push(`<p class="c1"><span class="c0">Batalhão:</span> <span class="c5">${depoimento.oficial_batalhao}</span></p>`);
   }
 
+  sections.push(`<p class="c11"><span class="c4">POLICIAL REGISTRADOR</span></p>`);
+  sections.push(`<p class="c1"><span class="c0">Nome:</span> <span class="c5">${registradorNome || "-"}</span></p>`);
+  sections.push(`<p class="c1"><span class="c0">Patente:</span> <span class="c5">${registradorPatente || "-"}</span></p>`);
+
   sections.push(`<p class="c11"><span class="c4">DEPOIMENTO PRESTADO</span></p>`);
   sections.push(`<p class="c1"><span class="c5">${depoimento.depoimento}</span></p>`);
 
@@ -362,7 +363,7 @@ export const printDepoimento = (depoimento: Depoimento) => {
   printGeneric(
     title,
     sections.join("\n"),
-    depoimento.registrador_nome || undefined,
-    depoimento.registrador_patente || undefined,
+    registradorNome || undefined,
+    registradorPatente || undefined,
   );
 };
