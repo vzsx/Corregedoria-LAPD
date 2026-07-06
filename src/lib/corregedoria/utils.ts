@@ -1,4 +1,6 @@
 import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { BRASAO_SP_LOGO, PM_LOGO } from "@/components/corregedoria/ipm-logos";
 import type { Depoimento, Relatorio, Investigacao, Denuncia } from "./types";
 
 export const formatDateSafe = (dateStr: any, formatStr: string) => {
@@ -12,397 +14,272 @@ export const formatDateSafe = (dateStr: any, formatStr: string) => {
   }
 };
 
-export const printRelatorio = (relatorio: Relatorio) => {
+const IPM_BASE_CSS = `
+<style type="text/css">
+ol{margin:0;padding:0}
+table td,table th{padding:0}
+.c4{color:#000000;font-weight:700;text-decoration:none;vertical-align:baseline;font-size:11pt;font-family:"Arial";font-style:normal}
+.c11{padding-top:12pt;padding-bottom:12pt;line-height:1.0;orphans:2;widows:2;text-align:justify}
+.c17{padding-top:18pt;padding-bottom:4pt;line-height:1.0;orphans:2;widows:2;text-align:left}
+.c3{padding-top:0pt;padding-bottom:0pt;line-height:1.15;orphans:2;widows:2;text-align:center}
+.c1{padding-top:12pt;padding-bottom:12pt;line-height:1.0;orphans:2;widows:2;text-align:left}
+.c10{font-weight:400;text-decoration:none;vertical-align:baseline;font-size:11pt;font-family:"Arial";font-style:normal}
+.c14{padding-top:12pt;padding-bottom:12pt;line-height:1.0;orphans:2;widows:2;text-align:center}
+.c9{font-weight:400;text-decoration:none;vertical-align:baseline;font-size:14pt;font-family:"Arial";font-style:normal}
+.c15{padding-top:24pt;padding-bottom:6pt;line-height:1.0;orphans:2;widows:2;text-align:left}
+.c12{text-decoration:none;vertical-align:baseline;font-size:11pt;font-family:"Arial";font-style:normal}
+.c6{background-color:#ffffff;max-width:451.4pt;padding:72pt 72pt 72pt 72pt}
+.c0{color:#434343;font-weight:700}
+.c2{font-style:italic}
+.c16{height:11pt}
+.c5{color:#434343}
+.c7{font-weight:700}
+p{margin:0;color:#000000;font-size:11pt;font-family:"Arial"}
+h2{padding-top:18pt;color:#000000;font-size:16pt;padding-bottom:6pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}
+@media print{body{margin:0}.c6{max-width:none}}
+</style>
+`;
+
+function wrapWithIpmLayout(title: string, bodyContent: string): string {
+  return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+${IPM_BASE_CSS}
+</head>
+<body class="c6 doc-content">
+
+  <!-- CABECALHO -->
+  <div>
+    <p class="c3">
+      <span class="c4">GOVERNO DO ESTADO DE SÃO PAULO &nbsp;</span>
+      <span style="overflow:hidden;display:inline-block;margin:0;border:0;width:80.95px;height:93.01px;">
+        <img src="${BRASAO_SP_LOGO}" style="width:80.95px;height:93.01px;" title="">
+      </span>
+      <span style="overflow:hidden;display:inline-block;margin:0;border:0;width:92.58px;height:107.00px;">
+        <img src="${PM_LOGO}" style="width:92.58px;height:107.00px;" title="">
+      </span>
+    </p>
+    <p class="c3"><span class="c4">SECRETARIA DE ESTADO DA SEGURANÇA PÚBLICA &nbsp;</span></p>
+    <p class="c3"><span class="c4">POLÍCIA MILITAR DO ESTADO DE SÃO PAULO &nbsp;</span></p>
+    <p class="c3"><span class="c7">QUARTEL DA CORREGEDORIA-GERAL DA POLÍCIA MILITAR<br></span></p>
+  </div>
+
+  <!-- TITULOS -->
+  <p class="c11"><span class="c4">POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</span></p>
+  <p class="c11"><span class="c4">CORREGEDORIA DA POLÍCIA MILITAR</span></p>
+
+  <!-- TITULO DO DOCUMENTO -->
+  <h1 class="c15"><span class="c12 c0">${title}</span></h1>
+
+  <!-- CONTEUDO -->
+  ${bodyContent}
+
+</body>
+</html>`;
+}
+
+function printGeneric(title: string, bodyContent: string) {
   const w = window.open("", "_blank");
   if (!w) return;
+  w.document.write(wrapWithIpmLayout(title, bodyContent));
+  w.document.close();
+  setTimeout(() => w.print(), 500);
+}
+
+export const printRelatorio = (relatorio: Relatorio) => {
   const content = relatorio.conteudo || relatorio.dados_detalhados?.relato_fatos || "";
   const data = relatorio.dados_detalhados || {};
+  const title = `${relatorio.tipo_denuncia} – ${relatorio.titulo}`;
+  const regNum = relatorio.numero_registro?.toString().padStart(4, '0') || '???';
 
-  w.document.write(`
-    <html>
-    <head>
-      <title>${relatorio.titulo} - ${relatorio.tipo_denuncia}</title>
-      <style>
-        @page { margin: 20mm 15mm; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-          font-family: 'Courier New', monospace;
-          font-size: 11px;
-          color: #1a1a1a;
-          line-height: 1.6;
-          padding: 20px;
-        }
-        .header { text-align: center; border-bottom: 2px solid #C9A03A; padding-bottom: 15px; margin-bottom: 20px; }
-        .header h1 { font-size: 16px; text-transform: uppercase; letter-spacing: 2px; color: #C9A03A; }
-        .header p { font-size: 10px; color: #666; margin-top: 4px; }
-        .badge { display: inline-block; padding: 2px 8px; border: 1px solid #ccc; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; margin: 2px; }
-        .section { margin-bottom: 15px; }
-        .section h3 { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; border-left: 3px solid #C9A03A; padding-left: 8px; margin-bottom: 8px; color: #333; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .field { margin-bottom: 4px; }
-        .field label { font-size: 9px; text-transform: uppercase; color: #999; letter-spacing: 1px; display: block; }
-        .field span { font-size: 11px; color: #1a1a1a; }
-        .content-block { border: 1px solid #ddd; padding: 12px; border-radius: 4px; margin-top: 8px; white-space: pre-wrap; font-size: 11px; line-height: 1.8; }
-        .footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; font-size: 9px; color: #999; text-transform: uppercase; letter-spacing: 1px; }
-        hr { border: none; border-top: 1px dashed #ddd; margin: 12px 0; }
-        @media print { body { padding: 0; } }
-      </style>
-    </head>
-    <body>
-      <div class="header">
-        <h1>${relatorio.tipo_denuncia}</h1>
-        <p>PMESP · Corregedoria Geral · #${relatorio.numero_registro?.toString().padStart(4, '0') || '???'}</p>
-        <p style="margin-top:4px;"><span class="badge">${relatorio.status.toUpperCase()}</span></p>
-      </div>
-      <div class="section">
-        <h3>Identificação</h3>
-        <div class="grid">
-          <div class="field"><label>Título</label><span>${relatorio.titulo}</span></div>
-          <div class="field"><label>Oficial</label><span>${relatorio.oficial}</span></div>
-          <div class="field"><label>Data</label><span>${format(new Date(relatorio.created_at), "dd/MM/yyyy HH:mm")}</span></div>
-          <div class="field"><label>Status</label><span>${(relatorio.status || "pendente").toUpperCase()}</span></div>
-        </div>
-      </div>
-      ${data.numero_caso ? `
-      <div class="section">
-        <h3>Dados do Corregedor</h3>
-        <div class="grid">
-          <div class="field"><label>Nº do Caso</label><span>${data.numero_caso || "-"}</span></div>
-          <div class="field"><label>Patente</label><span>${data.corregedor_patente || "-"}</span></div>
-          <div class="field"><label>Abertura</label><span>${data.data_abertura || "-"}</span></div>
-          <div class="field"><label>Recebimento</label><span>${data.data_recebimento || "-"}</span></div>
-        </div>
-      </div>` : ""}
-      ${data.reclamante_nome ? `
-      <div class="section">
-        <h3>Reclamante</h3>
-        <div class="grid">
-          <div class="field"><label>Nome</label><span>${data.reclamante_nome}</span></div>
-          <div class="field"><label>ID</label><span>${data.reclamante_id || "-"}</span></div>
-          <div class="field"><label>Anônimo</label><span>${data.reclamante_anonimo || "-"}</span></div>
-        </div>
-      </div>` : ""}
-      ${data.denunciado_nome ? `
-      <div class="section">
-        <h3>Policial Denunciado</h3>
-        <div class="grid">
-          <div class="field"><label>Nome</label><span>${data.denunciado_nome}</span></div>
-          <div class="field"><label>Badge</label><span>#${data.denunciado_badge || "-"}</span></div>
-          <div class="field"><label>Patente</label><span>${data.denunciado_patente || "-"}</span></div>
-        </div>
-      </div>` : ""}
-      ${data.incidente_data ? `
-      <div class="section">
-        <h3>Incidente</h3>
-        <div class="grid">
-          <div class="field"><label>Data</label><span>${data.incidente_data || "-"}</span></div>
-          <div class="field"><label>Horário</label><span>${data.incidente_horario || "-"}</span></div>
-          <div class="field"><label>Local</label><span>${data.incidente_local || "-"}</span></div>
-        </div>
-      </div>` : ""}
-      ${data.relato_fatos ? `<div class="section"><h3>Relato dos Fatos</h3><div class="content-block">${data.relato_fatos}</div></div>` : ""}
-      ${content ? `<div class="section"><h3>Conteúdo</h3><div class="content-block">${content}</div></div>` : ""}
-      ${data.testemunhas_nomes ? `<div class="section"><h3>Testemunhas</h3><p>${data.testemunhas_nomes}</p></div>` : ""}
-      ${data.provas_descricao ? `<div class="section"><h3>Provas</h3><p>${data.provas_descricao}</p></div>` : ""}
-      <div class="footer">PMESP · Corregedoria Geral · Documento Oficial · ${format(new Date(), "dd/MM/yyyy HH:mm")}</div>
-      <script>window.print();window.close();<\u002fscript>
-    </body>
-    </html>
-  `);
-  w.document.close();
-};
+  const sections: string[] = [];
 
-export const printDepoimento = (depoimento: Depoimento) => {
-  const w = window.open("", "_blank");
-  if (!w) return;
-  w.document.write(`
-    <html>
-    <head>
-      <title>Depoimento - ${depoimento.oficial_nome}</title>
-      <style>
-        @page { margin: 20mm 15mm; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-          font-family: 'Courier New', monospace;
-          font-size: 11px;
-          color: #1a1a1a;
-          line-height: 1.6;
-          padding: 20px;
-        }
-        .header { text-align: center; border-bottom: 2px solid #C9A03A; padding-bottom: 15px; margin-bottom: 20px; }
-        .header h1 { font-size: 16px; text-transform: uppercase; letter-spacing: 2px; color: #C9A03A; }
-        .header p { font-size: 10px; color: #666; margin-top: 4px; }
-        .section { margin-bottom: 15px; }
-        .section h3 { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; border-left: 3px solid #C9A03A; padding-left: 8px; margin-bottom: 8px; color: #333; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .field { margin-bottom: 4px; }
-        .field label { font-size: 9px; text-transform: uppercase; color: #999; letter-spacing: 1px; display: block; }
-        .field span { font-size: 11px; color: #1a1a1a; }
-        .content-block { border: 1px solid #ddd; padding: 12px; border-radius: 4px; margin-top: 8px; white-space: pre-wrap; font-size: 11px; line-height: 1.8; }
-        .footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; font-size: 9px; color: #999; text-transform: uppercase; letter-spacing: 1px; }
-        @media print { body { padding: 0; } }
-      </style>
-    </head>
-    <body>
-      <div class="header">
-        <h1>Depoimento</h1>
-        <p>PMESP · Corregedoria Geral · #${depoimento.numero_registro?.toString().padStart(4, '0') || '???'}</p>
-      </div>
-      <div class="section">
-        <h3>Dados do Declarante</h3>
-        <div class="grid">
-          <div class="field"><label>Nome</label><span>${depoimento.oficial_nome}</span></div>
-          <div class="field"><label>Patente</label><span>${depoimento.oficial_patente || "-"}</span></div>
-          <div class="field"><label>R.E.</label><span>${depoimento.oficial_re || "-"}</span></div>
-          <div class="field"><label>Data</label><span>${formatDateSafe(depoimento.data_depoimento, "dd/MM/yyyy")}</span></div>
-          <div class="field"><label>Batalhão</label><span>${depoimento.oficial_batalhao || "-"}</span></div>
-        </div>
-      </div>
-      <div class="section">
-        <h3>Depoimento Prestado</h3>
-        <div class="content-block">${depoimento.depoimento}</div>
-      </div>
-      ${depoimento.observacao ? `<div class="section"><h3>Observações</h3><div class="content-block">${depoimento.observacao}</div></div>` : ""}
-      <div class="footer">PMESP · Corregedoria Geral · Documento Oficial · ${format(new Date(), "dd/MM/yyyy HH:mm")}</div>
-      <script>window.print();window.close();<\u002fscript>
-    </body>
-    </html>
-  `);
-  w.document.close();
-};
+  sections.push(`<p class="c1"><span class="c0">Registro:</span> <span class="c5">#${regNum}</span></p>`);
+  sections.push(`<p class="c1"><span class="c0">Status:</span> <span class="c5">${(relatorio.status || "pendente").toUpperCase()}</span></p>`);
 
-export const printInvestigacao = (investigacao: Investigacao) => {
-  const w = window.open("", "_blank");
-  if (!w) return;
+  if (data.numero_caso) {
+    sections.push(`<p class="c1"><span class="c0">Nº do Caso:</span> <span class="c5">${data.numero_caso || "-"}</span></p>`);
+    sections.push(`<p class="c1"><span class="c0">Patente:</span> <span class="c5">${data.corregedor_patente || "-"}</span></p>`);
+    sections.push(`<p class="c1"><span class="c0">Abertura:</span> <span class="c5">${data.data_abertura || "-"}</span></p>`);
+  }
 
-  const medidasIniciais = Array.isArray(investigacao.medidas_iniciais)
-    ? investigacao.medidas_iniciais.join(", ")
-    : investigacao.medidas_iniciais || "-";
+  if (data.reclamante_nome) {
+    sections.push(`<p class="c1"><span class="c0">Reclamante:</span> <span class="c5">${data.reclamante_nome}</span></p>`);
+  }
 
-  w.document.write(`
-    <html>
-    <head>
-      <title>Investigação - ${investigacao.titulo}</title>
-      <style>
-        @page { margin: 20mm 15mm; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-          font-family: 'Courier New', monospace;
-          font-size: 11px;
-          color: #1a1a1a;
-          line-height: 1.6;
-          padding: 20px;
-        }
-        .header { text-align: center; border-bottom: 2px solid #C9A03A; padding-bottom: 15px; margin-bottom: 20px; }
-        .header h1 { font-size: 16px; text-transform: uppercase; letter-spacing: 2px; color: #C9A03A; }
-        .header p { font-size: 10px; color: #666; margin-top: 4px; }
-        .badge { display: inline-block; padding: 2px 8px; border: 1px solid #ccc; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; margin: 2px; }
-        .section { margin-bottom: 15px; }
-        .section h3 { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; border-left: 3px solid #C9A03A; padding-left: 8px; margin-bottom: 8px; color: #333; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .field { margin-bottom: 4px; }
-        .field label { font-size: 9px; text-transform: uppercase; color: #999; letter-spacing: 1px; display: block; }
-        .field span { font-size: 11px; color: #1a1a1a; }
-        .content-block { border: 1px solid #ddd; padding: 12px; border-radius: 4px; margin-top: 8px; white-space: pre-wrap; font-size: 11px; line-height: 1.8; }
-        .footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; font-size: 9px; color: #999; text-transform: uppercase; letter-spacing: 1px; }
-        hr { border: none; border-top: 1px dashed #ddd; margin: 12px 0; }
-        @media print { body { padding: 0; } }
-      </style>
-    </head>
-    <body>
-      <div class="header">
-        <h1>Investigação Interna</h1>
-        <p>PMESP · Corregedoria Geral · #${investigacao.numero_registro?.toString().padStart(4, '0') || '???'}</p>
-        <p style="margin-top:4px;"><span class="badge">${(investigacao.status || "pendente").toUpperCase()}</span></p>
-      </div>
+  if (data.denunciado_nome) {
+    sections.push(`<p class="c1"><span class="c0">Policial Denunciado:</span> <span class="c5">${data.denunciado_nome} – Badge #${data.denunciado_badge || "-"}</span></p>`);
+  }
 
-      <div class="section">
-        <h3>Identificação do Procedimento</h3>
-        <div class="grid">
-          <div class="field"><label>Título</label><span>${investigacao.titulo || "-"}</span></div>
-          <div class="field"><label>Nº Registro</label><span>#${investigacao.numero_registro?.toString().padStart(4, '0') || '???'}</span></div>
-          <div class="field"><label>Tipo</label><span>${investigacao.tipo_procedimento || "-"}</span></div>
-          <div class="field"><label>Data de Abertura</label><span>${formatDateSafe(investigacao.created_at, "dd/MM/yyyy")}</span></div>
-        </div>
-      </div>
+  if (data.incidente_data) {
+    sections.push(`<p class="c1"><span class="c0">Incidente:</span> <span class="c5">${data.incidente_data || "-"} ${data.incidente_horario || ""} – ${data.incidente_local || ""}</span></p>`);
+  }
 
-      <div class="section">
-        <h3>Autoridade Responsável</h3>
-        <div class="grid">
-          <div class="field"><label>Nome</label><span>${investigacao.autoridade_responsavel || "-"}</span></div>
-          <div class="field"><label>Patente</label><span>${investigacao.autoridade_patente || "-"}</span></div>
-          <div class="field"><label>Departamento</label><span>${investigacao.autoridade_departamento || "Corregedoria Geral (PMESP)"}</span></div>
-        </div>
-      </div>
+  if (data.relato_fatos) {
+    sections.push(`<p class="c11"><span class="c4">RELATO DOS FATOS</span></p>`);
+    sections.push(`<p class="c1"><span class="c5">${data.relato_fatos}</span></p>`);
+  }
 
-      <div class="section">
-        <h3>Policial Investigado</h3>
-        <div class="grid">
-          <div class="field"><label>Nome</label><span>${investigacao.investigado || "-"}</span></div>
-          <div class="field"><label>Badge</label><span>#${investigacao.investigado_badge || "-"}</span></div>
-          <div class="field"><label>Patente</label><span>${investigacao.investigado_patente || "-"}</span></div>
-          <div class="field"><label>Unidade</label><span>${investigacao.investigado_unidade || "-"}</span></div>
-        </div>
-      </div>
+  if (content) {
+    sections.push(`<p class="c11"><span class="c4">CONTEÚDO</span></p>`);
+    sections.push(`<p class="c1"><span class="c5">${content}</span></p>`);
+  }
 
-      <div class="section">
-        <h3>Origem da Investigação</h3>
-        <div class="grid">
-          <div class="field"><label>Origem</label><span>${investigacao.origem_caso || "-"}</span></div>
-          ${investigacao.origem_outro ? `<div class="field"><label>Outra Origem</label><span>${investigacao.origem_outro}</span></div>` : ""}
-        </div>
-      </div>
+  if (data.testemunhas_nomes) {
+    sections.push(`<p class="c1"><span class="c0">Testemunhas:</span> <span class="c5">${data.testemunhas_nomes}</span></p>`);
+  }
 
-      ${investigacao.descricao ? `
-      <div class="section">
-        <h3>Descrição Sumária dos Fatos</h3>
-        <div class="content-block">${investigacao.descricao}</div>
-      </div>` : ""}
+  if (data.provas_descricao) {
+    sections.push(`<p class="c1"><span class="c0">Provas:</span> <span class="c5">${data.provas_descricao}</span></p>`);
+  }
 
-      ${investigacao.fundamentacao ? `
-      <div class="section">
-        <h3>Fundamentação para Abertura</h3>
-        <div class="content-block">${investigacao.fundamentacao}</div>
-      </div>` : ""}
+  sections.push(`<hr>`);
+  sections.push(`<p class="c14"><span class="c4">São Paulo, ${format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}.</span></p>`);
 
-      <div class="section">
-        <h3>Medidas Iniciais Adotadas</h3>
-        <div class="content-block">${medidasIniciais}</div>
-        ${investigacao.medidas_outro ? `<div class="content-block" style="margin-top:8px;"><strong>Outra medida:</strong> ${investigacao.medidas_outro}</div>` : ""}
-      </div>
-
-      ${investigacao.detalhes_adicionais ? `
-      <div class="section">
-        <h3>Detalhes Adicionais</h3>
-        <div class="content-block">${investigacao.detalhes_adicionais}</div>
-      </div>` : ""}
-
-      ${investigacao.notas_internas ? `
-      <div class="section">
-        <h3>Notas Internas</h3>
-        <div class="content-block">${investigacao.notas_internas}</div>
-      </div>` : ""}
-
-      <div class="footer">PMESP · Corregedoria Geral · Documento Oficial · ${format(new Date(), "dd/MM/yyyy HH:mm")}</div>
-      <script>window.print();window.close();<\u002fscript>
-    </body>
-    </html>
-  `);
-  w.document.close();
+  printGeneric(title, sections.join("\n"));
 };
 
 export const printDenuncia = (denuncia: Denuncia) => {
-  const w = window.open("", "_blank");
-  if (!w) return;
   const data = denuncia.dados_detalhados || {};
+  const title = `DENÚNCIA – ${denuncia.titulo}`;
+  const regNum = denuncia.numero_registro?.toString().padStart(4, '0') || '???';
 
-  w.document.write(`
-    <html>
-    <head>
-      <title>Denúncia - ${denuncia.titulo}</title>
-      <style>
-        @page { margin: 20mm 15mm; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-          font-family: 'Courier New', monospace;
-          font-size: 11px;
-          color: #1a1a1a;
-          line-height: 1.6;
-          padding: 20px;
-        }
-        .header { text-align: center; border-bottom: 2px solid #C9A03A; padding-bottom: 15px; margin-bottom: 20px; }
-        .header h1 { font-size: 16px; text-transform: uppercase; letter-spacing: 2px; color: #C9A03A; }
-        .header p { font-size: 10px; color: #666; margin-top: 4px; }
-        .badge { display: inline-block; padding: 2px 8px; border: 1px solid #ccc; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; margin: 2px; }
-        .section { margin-bottom: 15px; }
-        .section h3 { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; border-left: 3px solid #C9A03A; padding-left: 8px; margin-bottom: 8px; color: #333; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .field { margin-bottom: 4px; }
-        .field label { font-size: 9px; text-transform: uppercase; color: #999; letter-spacing: 1px; display: block; }
-        .field span { font-size: 11px; color: #1a1a1a; }
-        .content-block { border: 1px solid #ddd; padding: 12px; border-radius: 4px; margin-top: 8px; white-space: pre-wrap; font-size: 11px; line-height: 1.8; }
-        .footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; font-size: 9px; color: #999; text-transform: uppercase; letter-spacing: 1px; }
-        hr { border: none; border-top: 1px dashed #ddd; margin: 12px 0; }
-        @media print { body { padding: 0; } }
-      </style>
-    </head>
-    <body>
-      <div class="header">
-        <h1>Denúncia</h1>
-        <p>PMESP · Corregedoria Geral · #${denuncia.numero_registro?.toString().padStart(4, '0') || '???'}</p>
-        <p style="margin-top:4px;"><span class="badge">${(denuncia.status || "pendente").toUpperCase()}</span></p>
-      </div>
+  const sections: string[] = [];
 
-      <div class="section">
-        <h3>Identificação</h3>
-        <div class="grid">
-          <div class="field"><label>Título</label><span>${denuncia.titulo}</span></div>
-          <div class="field"><label>Nº Registro</label><span>#${denuncia.numero_registro?.toString().padStart(4, '0') || '???'}</span></div>
-          <div class="field"><label>Data de Abertura</label><span>${formatDateSafe(denuncia.created_at, "dd/MM/yyyy HH:mm")}</span></div>
-          <div class="field"><label>Status</label><span>${(denuncia.status || "pendente").toUpperCase()}</span></div>
-        </div>
-      </div>
+  sections.push(`<p class="c1"><span class="c0">Registro:</span> <span class="c5">#${regNum}</span></p>`);
+  sections.push(`<p class="c1"><span class="c0">Status:</span> <span class="c5">${(denuncia.status || "pendente").toUpperCase()}</span></p>`);
 
-      ${denuncia.policial_denunciado ? `
-      <div class="section">
-        <h3>Policial Denunciado</h3>
-        <div class="grid">
-          <div class="field"><label>Nome</label><span>${denuncia.policial_denunciado}</span></div>
-        </div>
-      </div>` : ""}
+  if (denuncia.policial_denunciado) {
+    sections.push(`<p class="c1"><span class="c0">Policial Denunciado:</span> <span class="c5">${denuncia.policial_denunciado}</span></p>`);
+  }
 
-      ${data.reclamante_nome ? `
-      <div class="section">
-        <h3>Reclamante</h3>
-        <div class="grid">
-          <div class="field"><label>Nome</label><span>${data.reclamante_nome}</span></div>
-          <div class="field"><label>ID</label><span>${data.reclamante_id || "-"}</span></div>
-          <div class="field"><label>Anônimo</label><span>${data.reclamante_anonimo || "-"}</span></div>
-        </div>
-      </div>` : ""}
+  if (data.reclamante_nome) {
+    sections.push(`<p class="c11"><span class="c4">DADOS DO DENUNCIANTE</span></p>`);
+    sections.push(`<p class="c1"><span class="c0">Nome:</span> <span class="c5">${data.reclamante_nome}</span></p>`);
+    if (data.reclamante_id) sections.push(`<p class="c1"><span class="c0">ID:</span> <span class="c5">${data.reclamante_id}</span></p>`);
+    if (data.reclamante_contato) sections.push(`<p class="c1"><span class="c0">Contato:</span> <span class="c5">${data.reclamante_contato}</span></p>`);
+    if (data.reclamante_anonimo) sections.push(`<p class="c1"><span class="c0">Anônimo:</span> <span class="c5">${data.reclamante_anonimo}</span></p>`);
+  }
 
-      ${data.denunciado_nome ? `
-      <div class="section">
-        <h3>Policial Denunciado (Detalhes)</h3>
-        <div class="grid">
-          <div class="field"><label>Nome</label><span>${data.denunciado_nome}</span></div>
-          <div class="field"><label>Badge</label><span>#${data.denunciado_badge || "-"}</span></div>
-          <div class="field"><label>Patente</label><span>${data.denunciado_patente || "-"}</span></div>
-        </div>
-      </div>` : ""}
+  if (data.reclamado_nome) {
+    sections.push(`<p class="c11"><span class="c4">DADOS DO RECLAMADO</span></p>`);
+    sections.push(`<p class="c1"><span class="c0">Nome:</span> <span class="c5">${data.reclamado_nome}</span></p>`);
+    if (data.reclamado_badge) sections.push(`<p class="c1"><span class="c0">Badge:</span> <span class="c5">#${data.reclamado_badge}</span></p>`);
+    if (data.reclamado_patente) sections.push(`<p class="c1"><span class="c0">Patente:</span> <span class="c5">${data.reclamado_patente}</span></p>`);
+    if (data.reclamado_unidade) sections.push(`<p class="c1"><span class="c0">Unidade:</span> <span class="c5">${data.reclamado_unidade}</span></p>`);
+  }
 
-      ${data.incidente_data ? `
-      <div class="section">
-        <h3>Incidente</h3>
-        <div class="grid">
-          <div class="field"><label>Data</label><span>${data.incidente_data || "-"}</span></div>
-          <div class="field"><label>Horário</label><span>${data.incidente_horario || "-"}</span></div>
-          <div class="field"><label>Local</label><span>${data.incidente_local || "-"}</span></div>
-        </div>
-      </div>` : ""}
+  if (data.incidente_data) {
+    sections.push(`<p class="c11"><span class="c4">DADOS DO INCIDENTE</span></p>`);
+    sections.push(`<p class="c1"><span class="c0">Data:</span> <span class="c5">${data.incidente_data || "-"}</span></p>`);
+    if (data.incidente_horario) sections.push(`<p class="c1"><span class="c0">Horário:</span> <span class="c5">${data.incidente_horario}</span></p>`);
+    if (data.incidente_local) sections.push(`<p class="c1"><span class="c0">Local:</span> <span class="c5">${data.incidente_local}</span></p>`);
+  }
 
-      ${denuncia.descricao ? `
-      <div class="section">
-        <h3>Descrição da Denúncia</h3>
-        <div class="content-block">${denuncia.descricao}</div>
-      </div>` : ""}
+  if (data.relato_fatos) {
+    sections.push(`<p class="c11"><span class="c4">RELATO DOS FATOS</span></p>`);
+    sections.push(`<p class="c1"><span class="c5">${data.relato_fatos}</span></p>`);
+  }
 
-      ${denuncia.data_ocorrido ? `
-      <div class="section">
-        <h3>Data do Ocorrido</h3>
-        <div class="field"><span>${denuncia.data_ocorrido}</span></div>
-      </div>` : ""}
+  if (denuncia.descricao) {
+    sections.push(`<p class="c11"><span class="c4">DESCRIÇÃO</span></p>`);
+    sections.push(`<p class="c1"><span class="c5">${denuncia.descricao}</span></p>`);
+  }
 
-      ${denuncia.notas_internas ? `
-      <div class="section">
-        <h3>Notas Internas</h3>
-        <div class="content-block">${denuncia.notas_internas}</div>
-      </div>` : ""}
+  if (data.provas_descricao) {
+    sections.push(`<p class="c11"><span class="c4">PROVAS E EVIDÊNCIAS</span></p>`);
+    if (data.provas_selecionadas?.length) {
+      sections.push(`<p class="c1"><span class="c5">${data.provas_selecionadas.join(", ")}</span></p>`);
+    }
+    sections.push(`<p class="c1"><span class="c5">${data.provas_descricao}</span></p>`);
+  }
 
-      <div class="footer">PMESP · Corregedoria Geral · Documento Oficial · ${format(new Date(), "dd/MM/yyyy HH:mm")}</div>
-      <script>window.print();window.close();<\u002fscript>
-    </body>
-    </html>
-  `);
-  w.document.close();
+  sections.push(`<hr>`);
+  sections.push(`<p class="c14"><span class="c4">São Paulo, ${format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}.</span></p>`);
+
+  printGeneric(title, sections.join("\n"));
+};
+
+export const printInvestigacao = (investigacao: Investigacao) => {
+  const title = `INVESTIGAÇÃO INTERNA – ${investigacao.titulo || "Procedimento Investigatório"}`;
+  const regNum = investigacao.numero_registro?.toString().padStart(4, '0') || '???';
+
+  const sections: string[] = [];
+
+  sections.push(`<p class="c1"><span class="c0">Registro:</span> <span class="c5">#${regNum}</span></p>`);
+  sections.push(`<p class="c1"><span class="c0">Status:</span> <span class="c5">${(investigacao.status || "pendente").toUpperCase()}</span></p>`);
+
+  if (investigacao.tipo_procedimento) {
+    sections.push(`<p class="c1"><span class="c0">Tipo de Procedimento:</span> <span class="c5">${investigacao.tipo_procedimento}</span></p>`);
+  }
+
+  if (investigacao.investigado) {
+    sections.push(`<p class="c1"><span class="c0">Investigado:</span> <span class="c5">${investigacao.investigado_patente || ""} ${investigacao.investigado}</span></p>`);
+    if (investigacao.investigado_badge) sections.push(`<p class="c1"><span class="c0">Badge:</span> <span class="c5">#${investigacao.investigado_badge}</span></p>`);
+    if (investigacao.investigado_unidade) sections.push(`<p class="c1"><span class="c0">Unidade:</span> <span class="c5">${investigacao.investigado_unidade}</span></p>`);
+  }
+
+  if (investigacao.autoridade_responsavel) {
+    sections.push(`<p class="c1"><span class="c0">Autoridade Responsável:</span> <span class="c5">${investigacao.autoridade_patente || ""} ${investigacao.autoridade_responsavel}</span></p>`);
+  }
+
+  if (investigacao.origem_caso) {
+    sections.push(`<p class="c1"><span class="c0">Origem:</span> <span class="c5">${investigacao.origem_caso}${investigacao.origem_outro ? " – " + investigacao.origem_outro : ""}</span></p>`);
+  }
+
+  if (investigacao.descricao) {
+    sections.push(`<p class="c11"><span class="c4">DESCRIÇÃO SUMÁRIA DOS FATOS</span></p>`);
+    sections.push(`<p class="c1"><span class="c5">${investigacao.descricao}</span></p>`);
+  }
+
+  if (investigacao.fundamentacao) {
+    sections.push(`<p class="c11"><span class="c4">FUNDAMENTAÇÃO PARA ABERTURA</span></p>`);
+    sections.push(`<p class="c1"><span class="c5">${investigacao.fundamentacao}</span></p>`);
+  }
+
+  if (investigacao.medidas_iniciais?.length) {
+    sections.push(`<p class="c11"><span class="c4">MEDIDAS INICIAIS ADOTADAS</span></p>`);
+    const medStr = investigacao.medidas_iniciais.map((m: string) => m === "Outro" && investigacao.medidas_outro ? `Outro: ${investigacao.medidas_outro}` : m).join(", ");
+    sections.push(`<p class="c1"><span class="c5">${medStr}</span></p>`);
+  }
+
+  if (investigacao.detalhes_adicionais) {
+    sections.push(`<p class="c1"><span class="c0">Detalhes Adicionais:</span> <span class="c5">${investigacao.detalhes_adicionais}</span></p>`);
+  }
+
+  sections.push(`<hr>`);
+  sections.push(`<p class="c14"><span class="c4">São Paulo, ${format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}.</span></p>`);
+
+  printGeneric(title, sections.join("\n"));
+};
+
+export const printDepoimento = (depoimento: Depoimento) => {
+  const title = `DEPOIMENTO – ${depoimento.oficial_nome}`;
+
+  const sections: string[] = [];
+
+  sections.push(`<p class="c1"><span class="c0">Registro:</span> <span class="c5">#${depoimento.numero_registro?.toString().padStart(4, '0') || '???'}</span></p>`);
+
+  sections.push(`<p class="c11"><span class="c4">DADOS DO DECLARANTE</span></p>`);
+  sections.push(`<p class="c1"><span class="c0">Nome:</span> <span class="c5">${depoimento.oficial_nome}</span></p>`);
+  sections.push(`<p class="c1"><span class="c0">Patente:</span> <span class="c5">${depoimento.oficial_patente || "-"}</span></p>`);
+  sections.push(`<p class="c1"><span class="c0">R.E.:</span> <span class="c5">${depoimento.oficial_re || "-"}</span></p>`);
+  sections.push(`<p class="c1"><span class="c0">Data:</span> <span class="c5">${formatDateSafe(depoimento.data_depoimento, "dd/MM/yyyy")}</span></p>`);
+  if (depoimento.oficial_batalhao) {
+    sections.push(`<p class="c1"><span class="c0">Batalhão:</span> <span class="c5">${depoimento.oficial_batalhao}</span></p>`);
+  }
+
+  sections.push(`<p class="c11"><span class="c4">DEPOIMENTO PRESTADO</span></p>`);
+  sections.push(`<p class="c1"><span class="c5">${depoimento.depoimento}</span></p>`);
+
+  if (depoimento.observacao) {
+    sections.push(`<p class="c11"><span class="c4">OBSERVAÇÕES</span></p>`);
+    sections.push(`<p class="c1"><span class="c5">${depoimento.observacao}</span></p>`);
+  }
+
+  sections.push(`<hr>`);
+  sections.push(`<p class="c14"><span class="c4">São Paulo, ${format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}.</span></p>`);
+
+  printGeneric(title, sections.join("\n"));
 };
