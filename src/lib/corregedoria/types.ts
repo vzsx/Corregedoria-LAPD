@@ -120,6 +120,7 @@ export type InqueritoPolicialStatus = "em_andamento" | "concluido" | "arquivado"
 
 export interface Afastamento {
   id: string;
+  tipo_afastamento: "cautelar" | "disciplinar" | null;
   numero_portaria: string;
   data_emissao: string;
   posto_graduacao: string;

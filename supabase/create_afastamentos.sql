@@ -20,6 +20,7 @@ END $$;
 
 CREATE TABLE IF NOT EXISTS public.afastamentos (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tipo_afastamento TEXT NOT NULL DEFAULT 'cautelar',
     numero_portaria TEXT NOT NULL,
     data_emissao DATE NOT NULL,
     posto_graduacao TEXT NOT NULL,

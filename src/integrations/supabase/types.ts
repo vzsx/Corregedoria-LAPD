@@ -245,6 +245,7 @@ export type Database = {
       afastamentos: {
         Row: {
           id: string
+          tipo_afastamento: string | null
           numero_portaria: string
           data_emissao: string
           posto_graduacao: string

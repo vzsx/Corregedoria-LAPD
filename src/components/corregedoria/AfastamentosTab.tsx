@@ -43,6 +43,7 @@ import { PortariaPreview } from "@/components/corregedoria/PortariaPreview";
 type AfastamentoSubTab = "dashboard" | "listagem" | "historico";
 
 interface PortariaFormData {
+  tipo_afastamento: "cautelar" | "disciplinar";
   numero_portaria: string;
   data_emissao: string;
   posto_graduacao: string;
@@ -64,6 +65,7 @@ const MOTIVO_PADRAO = "Art. 4º O afastamento de que trata esta Portaria possui 
 
 function toPortariaData(form: PortariaFormData, inqueritoNumero?: string): PortariaData {
   return {
+    tipo_afastamento: form.tipo_afastamento,
     numero_portaria: form.numero_portaria,
     data_emissao: form.data_emissao,
     posto_graduacao: form.posto_graduacao,
@@ -80,6 +82,7 @@ function toPortariaData(form: PortariaFormData, inqueritoNumero?: string): Porta
 }
 
 const defaultForm: PortariaFormData = {
+  tipo_afastamento: "cautelar",
   numero_portaria: "",
   data_emissao: format(new Date(), "yyyy-MM-dd"),
   posto_graduacao: "",
@@ -160,6 +163,11 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
   const [historyTitle, setHistoryTitle] = useState("");
   const [historicoSearch, setHistoricoSearch] = useState("");
 
+  const openCreateAfastamento = (tipo: "cautelar" | "disciplinar") => {
+    resetForm(tipo);
+    setAfastamentoDialogOpen(true);
+  };
+
   const loadAfastamentos = async () => {
     const { data, error } = await supabase
       .from("afastamentos")
@@ -213,9 +221,10 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
   const getInqueritosForAfastamento = (afastamentoId: string) => inqueritos.filter(i => i.afastamento_id === afastamentoId);
   const getAdvertencias = (afastamentoId: string) => advertencias.filter(a => a.afastamento_id === afastamentoId);
 
-  const resetForm = () => {
+  const resetForm = (tipo: "cautelar" | "disciplinar" = "cautelar") => {
     setAfastamentoForm({
       ...defaultForm,
+      tipo_afastamento: tipo,
       data_emissao: format(new Date(), "yyyy-MM-dd"),
       data_inicio: format(new Date(), "yyyy-MM-dd"),
       data_termino: format(new Date(), "yyyy-MM-dd"),
@@ -247,6 +256,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
       status: form.status,
       autor_id: user?.id || null,
       autor_nome: user?.user_metadata?.full_name || form.responsavel_nome,
+      tipo_afastamento: form.tipo_afastamento,
     };
   };
 
@@ -375,6 +385,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
     if (!canCreate) return;
     const inq = a.inquerito_id ? getInquerito(a.inquerito_id) : null;
     const docText = generatePortariaText({
+      tipo_afastamento: (a as any).tipo_afastamento || "cautelar",
       numero_portaria: a.numero_portaria + "-copia",
       data_emissao: format(new Date(), "yyyy-MM-dd"),
       posto_graduacao: a.posto_graduacao,
@@ -403,6 +414,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
       status: a.status,
       autor_id: user?.id || null,
       autor_nome: user?.user_metadata?.full_name || a.responsavel_nome,
+      tipo_afastamento: (a as any).tipo_afastamento || "cautelar",
     });
     if (error) toast.error("Erro ao duplicar: " + error.message);
     else { toast.success("Documento duplicado!"); logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "create", entity_type: "afastamentos", details: { nome: a.nome_completo, duplicado_de: a.numero_portaria } }); await loadAfastamentos(); }
@@ -431,6 +443,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
 
   const editAfastamento = async (a: Afastamento) => {
     setAfastamentoForm({
+      tipo_afastamento: ((a as any).tipo_afastamento || "cautelar") as "cautelar" | "disciplinar",
       numero_portaria: a.numero_portaria,
       data_emissao: a.data_emissao,
       posto_graduacao: a.posto_graduacao,
@@ -686,8 +699,11 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
               <FileSignature className="h-4 w-4" /> Ações Rápidas
             </h4>
             <div className="flex flex-wrap gap-3">
-              <Button onClick={() => { resetForm(); setAfastamentoDialogOpen(true); }} className="gap-2">
-                <Plus className="h-4 w-4" /> Nova Portaria de Afastamento
+              <Button onClick={() => openCreateAfastamento("cautelar")} className="gap-2">
+                <Plus className="h-4 w-4" /> Afastamento Cautelar
+              </Button>
+              <Button onClick={() => openCreateAfastamento("disciplinar")} variant="outline" className="gap-2">
+                <Plus className="h-4 w-4" /> Afastamento como Medida Disciplinar
               </Button>
             </div>
           </div>
@@ -741,11 +757,14 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
               </SelectContent>
             </Select>
           </div>
-          {canCreate && (
-            <Button onClick={() => { resetForm(); setAfastamentoDialogOpen(true); }} className="gap-2 shrink-0">
-              <Plus className="h-4 w-4" /> Nova Portaria
+          {canCreate && (<>
+            <Button onClick={() => openCreateAfastamento("cautelar")} className="gap-2 shrink-0">
+              <Plus className="h-4 w-4" /> Afastamento Cautelar
             </Button>
-          )}
+            <Button onClick={() => openCreateAfastamento("disciplinar")} variant="outline" className="gap-2 shrink-0">
+              <Plus className="h-4 w-4" /> Afastamento como Medida Disciplinar
+            </Button>
+          </>)}
         </div>
 
         {filteredAfastamentos.length === 0 ? (
@@ -788,6 +807,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
                       <Button variant="ghost" size="icon" className="h-8 w-8" title="Visualizar documento" onClick={e => {
                         e.stopPropagation();
                         setPreviewData(toPortariaData({
+                          tipo_afastamento: ((a as any).tipo_afastamento || "cautelar") as "cautelar" | "disciplinar",
                           numero_portaria: a.numero_portaria,
                           data_emissao: a.data_emissao,
                           posto_graduacao: a.posto_graduacao,
@@ -815,6 +835,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
                       <Button variant="ghost" size="icon" className="h-8 w-8" title="Imprimir" onClick={e => {
                         e.stopPropagation();
                         printPortaria(toPortariaData({
+                          tipo_afastamento: ((a as any).tipo_afastamento || "cautelar") as "cautelar" | "disciplinar",
                           numero_portaria: a.numero_portaria,
                           data_emissao: a.data_emissao,
                           posto_graduacao: a.posto_graduacao,
@@ -1103,6 +1124,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
                           <div className="flex gap-2 mt-2">
                             <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={() => {
                               setPreviewData(toPortariaData({
+                                tipo_afastamento: ((r as any).tipo_afastamento || "cautelar") as "cautelar" | "disciplinar",
                                 numero_portaria: r.numero_portaria,
                                 data_emissao: r.data_emissao,
                                 posto_graduacao: r.posto_graduacao,
@@ -1162,10 +1184,10 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <FileSignature className="h-5 w-5" /> Nova Portaria de Afastamento
+              <FileSignature className="h-5 w-5" /> {afastamentoForm.tipo_afastamento === "disciplinar" ? "Afastamento como Medida Disciplinar" : "Afastamento Cautelar"}
             </DialogTitle>
             <DialogDescription>
-              Preencha os dados para gerar a Portaria de Afastamento Cautelar.
+              Preencha os dados para gerar o documento de {afastamentoForm.tipo_afastamento === "disciplinar" ? "Afastamento como Medida Disciplinar" : "Afastamento Cautelar"}.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={createAfastamento} className="space-y-6">
