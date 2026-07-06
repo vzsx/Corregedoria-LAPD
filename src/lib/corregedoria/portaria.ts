@@ -1,5 +1,6 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { BRASAO_SP_LOGO, PM_LOGO } from "@/components/corregedoria/ipm-logos";
 
 export interface PortariaData {
   numero_portaria: string;
@@ -55,155 +56,135 @@ export function generatePortariaHTML(data: PortariaData, inqueritoNumero?: strin
   const dataInicio = format(new Date(data.data_inicio), "dd/MM/yyyy");
   const dataTermino = format(new Date(data.data_termino), "dd/MM/yyyy");
 
-  return `
-<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Portaria nº ${data.numero_portaria} - CPM</title>
-  <style>
-    @page { margin: 2.5cm 2cm 2cm 2cm; }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Times New Roman', Times, serif;
-      font-size: 12pt;
-      line-height: 1.6;
-      color: #000;
-      padding: 0;
-    }
-    .header {
-      text-align: center;
-      margin-bottom: 30px;
-      padding-bottom: 20px;
-      border-bottom: 2px solid #000;
-    }
-    .header .gov { font-size: 10pt; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
-    .header .org { font-size: 9pt; margin-top: 2px; }
-    .header .title { font-size: 14pt; font-weight: bold; text-transform: uppercase; margin-top: 8px; letter-spacing: 2px; }
-    .header .subtitle { font-size: 11pt; font-weight: bold; text-transform: uppercase; margin-top: 4px; }
-    .portaria-num {
-      text-align: center;
-      font-size: 13pt;
-      font-weight: bold;
-      text-transform: uppercase;
-      margin: 30px 0 20px 0;
-    }
-    .info-box {
-      border: 1px solid #999;
-      padding: 12px 16px;
-      margin-bottom: 20px;
-      font-size: 10pt;
-      background: #f9f9f9;
-    }
-    .info-box table { width: 100%; border-collapse: collapse; }
-    .info-box td { padding: 3px 8px; }
-    .info-box td:first-child { font-weight: bold; width: 180px; }
-    .ementa {
-      text-align: justify;
-      font-size: 11pt;
-      margin-bottom: 25px;
-      font-style: italic;
-    }
-    .resolve {
-      text-align: center;
-      font-size: 12pt;
-      font-weight: bold;
-      text-transform: uppercase;
-      margin: 25px 0 20px 0;
-      letter-spacing: 3px;
-    }
-    .artigo {
-      text-align: justify;
-      font-size: 12pt;
-      margin-bottom: 12px;
-      text-indent: 2cm;
-    }
-    .artigo strong { font-weight: bold; }
-    .final {
-      text-align: center;
-      font-size: 11pt;
-      font-weight: bold;
-      text-transform: uppercase;
-      margin: 25px 0 30px 0;
-      letter-spacing: 2px;
-    }
-    .rodape {
-      text-align: center;
-      margin-top: 50px;
-    }
-    .rodape .local-data { font-size: 11pt; margin-bottom: 15px; }
-    .rodape .linha { font-size: 11pt; margin-bottom: 5px; }
-    .rodape .nome { font-size: 11pt; font-weight: bold; }
-    .rodape .cargo { font-size: 10pt; }
-    .footer-note {
-      text-align: center;
-      font-size: 8pt;
-      color: #666;
-      margin-top: 40px;
-      padding-top: 10px;
-      border-top: 1px solid #999;
-    }
-    @media print {
-      body { padding: 0; }
-      .no-print { display: none; }
-    }
-  </style>
+<meta charset="UTF-8">
+<style type="text/css">
+ol{margin:0;padding:0}
+table td,table th{padding:0}
+.c3{color:#000000;font-weight:700;text-decoration:none;vertical-align:baseline;font-size:11pt;font-family:"Arial";font-style:normal}
+.c14{padding-top:12pt;padding-bottom:12pt;line-height:1.0;orphans:2;widows:2;text-align:justify}
+.c6{padding-top:0pt;padding-bottom:0pt;line-height:1.15;orphans:2;widows:2;text-align:center}
+.c7{padding-top:12pt;padding-bottom:12pt;line-height:1.0;orphans:2;widows:2;text-align:left}
+.c8{background-color:#ffffff;max-width:451.4pt;padding:72pt 72pt 72pt 72pt}
+.c0{color:#000000;font-weight:400;font-size:10pt;font-family:"Arial";font-style:normal}
+.c2{color:#000000;font-weight:700;font-size:10pt;font-family:"Arial";font-style:normal}
+.c4{font-size:10pt}
+.c5{color:#000000;font-size:11pt;font-family:"Arial";font-style:normal}
+.c9{padding-top:12pt;padding-bottom:12pt;line-height:1.0;text-align:center;height:11pt}
+.c11{padding-top:12pt;padding-bottom:12pt;line-height:1.0;text-align:center}
+.c12{padding-top:0pt;padding-bottom:0pt;line-height:1.15;text-align:right;height:11pt}
+.c13{font-weight:400}
+p{margin:0;color:#000000;font-size:11pt;font-family:"Arial"}
+h3{padding-top:14pt;color:#434343;font-size:14pt;padding-bottom:4pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}
+@media print{body{margin:0}.c8{max-width:none}}
+</style>
 </head>
-<body>
-  <div class="header">
-    <div class="gov">Governo do Estado de São Paulo</div>
-    <div class="org">Secretaria de Estado da Segurança Pública</div>
-    <div class="org">Polícia Militar do Estado de São Paulo</div>
-    <div class="title">Quartel da Corregedoria-Geral da Polícia Militar</div>
-    <div class="subtitle">Corregedoria da Polícia Militar</div>
+<body class="c8 doc-content">
+
+  <!-- CABECALHO -->
+  <div>
+    <p class="c6">
+      <span class="c3 c5">GOVERNO DO ESTADO DE SÃO PAULO &nbsp;</span>
+      <span style="overflow:hidden;display:inline-block;margin:0;border:0;width:80.95px;height:93.01px;">
+        <img src="${BRASAO_SP_LOGO}" style="width:80.95px;height:93.01px;" title="">
+      </span>
+      <span style="overflow:hidden;display:inline-block;margin:0;border:0;width:92.58px;height:107.00px;">
+        <img src="${PM_LOGO}" style="width:92.58px;height:107.00px;" title="">
+      </span>
+    </p>
+    <p class="c6"><span class="c5 c3">SECRETARIA DE ESTADO DA SEGURANÇA PÚBLICA &nbsp;</span></p>
+    <p class="c6"><span class="c5 c3">POLÍCIA MILITAR DO ESTADO DE SÃO PAULO &nbsp;</span></p>
+    <p class="c6"><span class="c3">QUARTEL DA CORREGEDORIA-GERAL DA POLÍCIA MILITAR<br></span></p>
   </div>
 
-  <div class="portaria-num">PORTARIA Nº ${data.numero_portaria} – CPM</div>
+  <!-- TITULOS -->
+  <p class="c14"><span class="c5 c3">POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</span></p>
+  <p class="c14"><span class="c5 c3">CORREGEDORIA DA POLÍCIA MILITAR</span></p>
 
-  ${inqueritoNumero ? `<div class="info-box"><table><tr><td>Inquérito Vinculado:</td><td>${inqueritoNumero}</td></tr><tr><td>Policial:</td><td>${data.posto_graduacao} ${data.nome_policial} – RG PM nº ${data.rg_pm}</td></tr><tr><td>Período:</td><td>${dataInicio} a ${dataTermino}</td></tr></table></div>` : ''}
+  <!-- PORTARIA -->
+  <h3 class="c1"><span class="c2">PORTARIA Nº${data.numero_portaria || "____"}/2026 – CPM</span></h3>
 
-  <div class="ementa">
-    O ${data.responsavel_nome || "CORREGEDOR GERAL"}, ${data.responsavel_posto || "Corregedor Geral da Polícia Militar"}, no uso de suas atribuições legais e com fundamento no disposto na legislação vigente,
-  </div>
+  <!-- TEXTO -->
+  <p class="c7">
+    <span class="c4 c3">O CORREGEDOR DA POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</span>
+    <span class="c0">, no uso de suas atribuições legais e regulamentares, especialmente nos termos do Regulamento Disciplinar da Polícia Militar do Estado de São Paulo (RDPM),</span>
+  </p>
 
-  <div class="resolve">R E S O L V E:</div>
+  <p class="c7">
+    <span class="c4 c3">CONSIDERANDO</span>
+    <span class="c4">&nbsp;a necessidade de assegurar a regular, isenta e eficaz apuração dos fatos constantes de procedimento apuratório instaurado para verificar </span>
+    <span class="c3 c4">suposta prática dos artigos: </span>
+    <span class="c3">.____________<br></span>
+    <span><br></span>
+    <span class="c2">RESOLVE:</span>
+  </p>
 
-  <div class="artigo">
-    <strong>Art. 1º</strong> Determinar o afastamento cautelar do serviço operacional, no período de ${dataInicio} a ${dataTermino}, do seguinte policial militar:
-  </div>
+  <!-- ARTIGOS -->
+  <p class="c7">
+    <span class="c4 c3">Art. 1º</span>
+    <span class="c4">&nbsp;Determinar o </span>
+    <span class="c4 c3">afastamento cautelar do serviço operacional</span>
+    <span class="c4">, pelo prazo </span>
+    <span class="c4 c3">${dataInicio} a ${dataTermino}</span>
+    <span class="c4">, dos seguintes policiais militares, a contar de </span>
+    <span class="c2">${dataInicio}</span>
+  </p>
 
-  <div class="artigo" style="text-indent: 3cm;">
-    <strong>I –</strong> ${data.posto_graduacao} ${data.nome_policial}, RG PM nº ${data.rg_pm}, lotado(a) no(a) ${data.unidade}.
-  </div>
+  <p class="c7">
+    <span class="c4">I – ${data.posto_graduacao || "________"} ${data.nome_policial || "________"}, RG PM nº ${data.rg_pm || "________"}, lotado(a) no(a) ${data.unidade || "________"};<br><br></span>
+    <span class="c4 c3">Art. 2º</span>
+    <span class="c4">&nbsp;Durante o afastamento, os policiais militares permanecerão </span>
+    <span class="c4 c3">à disposição da Corregedoria da Polícia Militar</span>
+    <span class="c4">, devendo cumprir rigorosamente as determinações administrativas que lhes forem expedidas, manter seus dados de contato atualizados e </span>
+    <span class="c4 c3">abster-se de frequentar dependências operacionais</span>
+    <span class="c0">, salvo mediante autorização expressa.</span>
+  </p>
 
-  <div class="artigo">
-    <strong>Art. 2º</strong> Durante o afastamento, o policial militar permanecerá à disposição da Corregedoria da Polícia Militar, devendo cumprir rigorosamente as determinações administrativas que lhe forem expedidas, manter seus dados de contato atualizados e abster-se de frequentar dependências operacionais, salvo mediante autorização expressa.
-  </div>
+  <p class="c7">
+    <span class="c4 c3">Art. 3º</span>
+    <span class="c4">&nbsp;Os policiais militares ficam </span>
+    <span class="c4 c3">temporariamente impedidos de exercer atividade operacional</span>
+    <span class="c4">&nbsp;e de </span>
+    <span class="c4 c3">portar arma de fogo institucional</span>
+    <span class="c0">, devendo o armamento ser recolhido na forma da legislação e normas internas vigentes.</span>
+  </p>
 
-  <div class="artigo">
-    <strong>Art. 3º</strong> O policial militar fica temporariamente impedido de exercer atividade operacional e de portar arma de fogo institucional, devendo o armamento ser recolhido na forma da legislação e normas internas vigentes.
-  </div>
+  <p class="c7">
+    <span class="c4 c3">Art. 4º</span>
+    <span class="c4">&nbsp;O afastamento de que trata esta Portaria possui </span>
+    <span class="c4 c3">caráter meramente cautelar e não punitivo</span>
+    <span class="c0">, podendo ser revisto ou revogado a qualquer tempo, conforme o andamento do procedimento apuratório.</span>
+  </p>
 
-  <div class="artigo">
-    <strong>Art. 4º</strong> O afastamento de que trata esta Portaria possui caráter meramente cautelar e não punitivo, podendo ser revisto ou revogado a qualquer tempo, conforme o andamento do procedimento apuratório.
-  </div>
+  <p class="c7">
+    <span class="c4 c3">Art. 5º</span>
+    <span class="c0">&nbsp;Esta Portaria entra em vigor na data de sua publicação.</span>
+  </p>
 
-  <div class="artigo">
-    <strong>Art. 5º</strong> Esta Portaria entra em vigor na data de sua publicação.
-  </div>
+  <!-- PUBLIQUE-SE -->
+  <p class="c7">
+    <span class="c4 c3">Publique-se. Registre-se. Cumpra-se.</span>
+    <hr>
+  </p>
 
-  <div class="final">REGISTRE-SE, PUBLIQUE-SE E CUMPRA-SE.</div>
+  <!-- DATA + ASSINATURA -->
+  <p class="c11">
+    <span class="c5 c3">São Paulo, ${dataEmissao}.<br></span>
+  </p>
 
-  <div class="rodape">
-    <div class="local-data">São Paulo, ${dataEmissao}.</div>
-    <div class="linha">____________________________________</div>
-    <div class="nome">${data.responsavel_nome || "Corregedor Geral"}</div>
-    <div class="cargo">${data.responsavel_posto || "Corregedor Geral da Polícia Militar"}</div>
-  </div>
+  <!-- ESPACO -->
+  <p class="c9"><span class="c5 c3"></span></p>
 
-  <div class="footer-note">
-    Documento gerado eletronicamente em ${format(new Date(), "dd/MM/yyyy 'às' HH:mm")} - Corregedoria Geral PMESP
-  </div>
+  <!-- ASS: -->
+  <p class="c11"><span class="c5 c3">Ass: ${data.responsavel_nome || "___________________________"}</span></p>
+  ${data.responsavel_posto ? `<p class="c11"><span class="c5 c3">${data.responsavel_posto}</span></p>` : ""}
+  <p class="c11"><span class="c5 c3">Corregedor da Polícia Militar do Estado de São Paulo</span></p>
+
+  <!-- NUMERO DA PAGINA -->
+  <div><p class="c12"><span class="c5 c13">1</span></p></div>
+
 </body>
 </html>`;
 }

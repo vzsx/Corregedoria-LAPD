@@ -2,6 +2,7 @@ import React from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { PortariaData } from "@/lib/corregedoria/portaria";
+import { BRASAO_SP_LOGO, PM_LOGO } from "./ipm-logos";
 
 interface PortariaPreviewProps {
   data: PortariaData;
@@ -16,97 +17,129 @@ export function PortariaPreview({ data, inqueritoNumero }: PortariaPreviewProps)
   return (
     <div className="bg-white text-black rounded-lg shadow-lg overflow-hidden print:shadow-none" id="portaria-document">
       <style>{`
-        .portaria-doc { font-family: 'Times New Roman', Times, serif; }
-        .portaria-doc .header { text-align: center; padding: 30px 20px 20px; border-bottom: 2px solid #000; }
-        .portaria-doc .header .gov { font-size: 13px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #1a1a2e; }
-        .portaria-doc .header .org { font-size: 12px; margin-top: 2px; color: #333; }
-        .portaria-doc .header .title { font-size: 15px; font-weight: bold; text-transform: uppercase; margin-top: 8px; letter-spacing: 2px; color: #1a1a2e; }
-        .portaria-doc .header .subtitle { font-size: 12px; font-weight: bold; text-transform: uppercase; margin-top: 4px; color: #1a1a2e; }
-        .portaria-doc .content { padding: 25px 30px; }
-        .portaria-doc .portaria-num { text-align: center; font-size: 14px; font-weight: bold; text-transform: uppercase; margin: 20px 0; }
-        .portaria-doc .info-box { border: 1px solid #ccc; padding: 10px 14px; margin-bottom: 20px; font-size: 11px; background: #f8f9fa; border-radius: 4px; }
-        .portaria-doc .info-box table { width: 100%; border-collapse: collapse; }
-        .portaria-doc .info-box td { padding: 2px 6px; }
-        .portaria-doc .info-box td:first-child { font-weight: bold; width: 160px; color: #555; }
-        .portaria-doc .ementa { text-align: justify; font-size: 12px; margin-bottom: 20px; font-style: italic; padding: 10px 15px; background: #f8f9fa; border-left: 3px solid #1a1a2e; }
-        .portaria-doc .resolve { text-align: center; font-size: 13px; font-weight: bold; text-transform: uppercase; margin: 20px 0; letter-spacing: 4px; }
-        .portaria-doc .artigo { text-align: justify; font-size: 12px; margin-bottom: 12px; text-indent: 1.5cm; line-height: 1.8; }
-        .portaria-doc .final { text-align: center; font-size: 12px; font-weight: bold; text-transform: uppercase; margin: 25px 0; letter-spacing: 2px; }
-        .portaria-doc .rodape { text-align: center; margin-top: 50px; }
-        .portaria-doc .rodape .local-data { font-size: 12px; margin-bottom: 10px; }
-        .portaria-doc .rodape .linha { font-size: 12px; margin: 8px 0 4px; }
-        .portaria-doc .rodape .nome { font-size: 12px; font-weight: bold; }
-        .portaria-doc .rodape .cargo { font-size: 11px; }
-        .portaria-doc .footer-note { text-align: center; font-size: 9px; color: #888; margin-top: 30px; padding-top: 10px; border-top: 1px solid #ddd; }
-        .portaria-doc .brasao { font-size: 28px; margin-bottom: 8px; letter-spacing: 4px; }
+        ol{margin:0;padding:0}
+        table td,table th{padding:0}
+        .pc3{color:#000000;font-weight:700;text-decoration:none;vertical-align:baseline;font-size:11pt;font-family:"Arial";font-style:normal}
+        .pc14{padding-top:12pt;padding-bottom:12pt;line-height:1.0;orphans:2;widows:2;text-align:justify}
+        .pc6{padding-top:0pt;padding-bottom:0pt;line-height:1.15;orphans:2;widows:2;text-align:center}
+        .pc7{padding-top:12pt;padding-bottom:12pt;line-height:1.0;orphans:2;widows:2;text-align:left}
+        .pc8{background-color:#ffffff;max-width:451.4pt;padding:72pt 72pt 72pt 72pt;margin:0 auto}
+        .pc0{color:#000000;font-weight:400;font-size:10pt;font-family:"Arial";font-style:normal}
+        .pc2{color:#000000;font-weight:700;font-size:10pt;font-family:"Arial";font-style:normal}
+        .pc4{font-size:10pt}
+        .pc5{color:#000000;font-size:11pt;font-family:"Arial";font-style:normal}
+        .pc9{padding-top:12pt;padding-bottom:12pt;line-height:1.0;text-align:center;height:11pt}
+        .pc11{padding-top:12pt;padding-bottom:12pt;line-height:1.0;text-align:center}
+        .pc12{padding-top:0pt;padding-bottom:0pt;line-height:1.15;text-align:right;height:11pt}
+        .pc13{font-weight:400}
+        .portaria-doc p{margin:0;color:#000000;font-size:11pt;font-family:"Arial"}
+        .portaria-doc h3{padding-top:14pt;color:#434343;font-size:14pt;padding-bottom:4pt;font-family:"Arial";line-height:1.15;text-align:left}
+        @media print{.pc8{max-width:none}}
       `}</style>
 
       <div className="portaria-doc">
-        <div className="header">
-          <div className="brasao">⚜️</div>
-          <div className="gov">Governo do Estado de São Paulo</div>
-          <div className="org">Secretaria de Estado da Segurança Pública</div>
-          <div className="org">Polícia Militar do Estado de São Paulo</div>
-          <div className="title">Quartel da Corregedoria-Geral da Polícia Militar</div>
-          <div className="subtitle">Corregedoria da Polícia Militar</div>
-        </div>
-
-        <div className="content">
-          <div className="portaria-num">PORTARIA Nº {data.numero_portaria} – CPM</div>
-
-          <div className="info-box">
-            <table>
-              <tbody>
-                {inqueritoNumero && <tr><td>Inquérito Vinculado:</td><td>{inqueritoNumero}</td></tr>}
-                <tr><td>Policial:</td><td>{data.posto_graduacao} {data.nome_policial} – RG PM nº {data.rg_pm}</td></tr>
-                <tr><td>Unidade:</td><td>{data.unidade}</td></tr>
-                <tr><td>Período:</td><td>{dataInicio} a {dataTermino}</td></tr>
-              </tbody>
-            </table>
+        <div className="pc8">
+          {/* CABECALHO */}
+          <div>
+            <p className="pc6">
+              <span className="pc3 pc5">GOVERNO DO ESTADO DE SÃO PAULO &nbsp;</span>
+              <span style={{overflow:"hidden",display:"inline-block",margin:0,border:0,width:"80.95px",height:"93.01px" as any}}>
+                <img src={BRASAO_SP_LOGO} style={{width:"80.95px",height:"93.01px"}} title="" />
+              </span>
+              <span style={{overflow:"hidden",display:"inline-block",margin:0,border:0,width:"92.58px",height:"107.00px" as any}}>
+                <img src={PM_LOGO} style={{width:"92.58px",height:"107.00px"}} title="" />
+              </span>
+            </p>
+            <p className="pc6"><span className="pc5 pc3">SECRETARIA DE ESTADO DA SEGURANÇA PÚBLICA &nbsp;</span></p>
+            <p className="pc6"><span className="pc5 pc3">POLÍCIA MILITAR DO ESTADO DE SÃO PAULO &nbsp;</span></p>
+            <p className="pc6"><span className="pc3">QUARTEL DA CORREGEDORIA-GERAL DA POLÍCIA MILITAR<br /></span></p>
           </div>
 
-          <div className="ementa">
-            O {data.responsavel_nome || "CORREGEDOR GERAL DA POLÍCIA MILITAR"}, {data.responsavel_posto || "Corregedor Geral da Polícia Militar"}, no uso de suas atribuições legais e com fundamento no disposto na legislação vigente,
-          </div>
+          {/* TITULOS */}
+          <p className="pc14"><span className="pc5 pc3">POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</span></p>
+          <p className="pc14"><span className="pc5 pc3">CORREGEDORIA DA POLÍCIA MILITAR</span></p>
 
-          <div className="resolve">R E S O L V E:</div>
+          {/* PORTARIA */}
+          <h3><span className="pc2">PORTARIA Nº{data.numero_portaria || "____"}/2026 – CPM</span></h3>
 
-          <div className="artigo">
-            <b>Art. 1º</b> Determinar o afastamento cautelar do serviço operacional, no período de {dataInicio} a {dataTermino}, do seguinte policial militar:
-          </div>
+          {/* TEXTO */}
+          <p className="pc7">
+            <span className="pc4 pc3">O CORREGEDOR DA POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</span>
+            <span className="pc0">, no uso de suas atribuições legais e regulamentares, especialmente nos termos do Regulamento Disciplinar da Polícia Militar do Estado de São Paulo (RDPM),</span>
+          </p>
 
-          <div className="artigo" style={{ textIndent: "2.5cm" }}>
-            <b>I –</b> {data.posto_graduacao} {data.nome_policial}, RG PM nº {data.rg_pm}, lotado(a) no(a) {data.unidade}.
-          </div>
+          <p className="pc7">
+            <span className="pc4 pc3">CONSIDERANDO</span>
+            <span className="pc4">&nbsp;a necessidade de assegurar a regular, isenta e eficaz apuração dos fatos constantes de procedimento apuratório instaurado para verificar </span>
+            <span className="pc3 pc4">suposta prática dos artigos: </span>
+            <span className="pc3">.____________<br /></span>
+            <span><br /></span>
+            <span className="pc2">RESOLVE:</span>
+          </p>
 
-          <div className="artigo">
-            <b>Art. 2º</b> Durante o afastamento, o policial militar permanecerá à disposição da Corregedoria da Polícia Militar, devendo cumprir rigorosamente as determinações administrativas que lhe forem expedidas, manter seus dados de contato atualizados e abster-se de frequentar dependências operacionais, salvo mediante autorização expressa.
-          </div>
+          {/* ARTIGOS */}
+          <p className="pc7">
+            <span className="pc4 pc3">Art. 1º</span>
+            <span className="pc4">&nbsp;Determinar o </span>
+            <span className="pc4 pc3">afastamento cautelar do serviço operacional</span>
+            <span className="pc4">, pelo prazo </span>
+            <span className="pc4 pc3">{dataInicio} a {dataTermino}</span>
+            <span className="pc4">, dos seguintes policiais militares, a contar de </span>
+            <span className="pc2">{dataInicio}</span>
+          </p>
 
-          <div className="artigo">
-            <b>Art. 3º</b> O policial militar fica temporariamente impedido de exercer atividade operacional e de portar arma de fogo institucional, devendo o armamento ser recolhido na forma da legislação e normas internas vigentes.
-          </div>
+          <p className="pc7">
+            <span className="pc4">I – {data.posto_graduacao || "________"} {data.nome_policial || "________"}, RG PM nº {data.rg_pm || "________"}, lotado(a) no(a) {data.unidade || "________"};<br /><br /></span>
+            <span className="pc4 pc3">Art. 2º</span>
+            <span className="pc4">&nbsp;Durante o afastamento, os policiais militares permanecerão </span>
+            <span className="pc4 pc3">à disposição da Corregedoria da Polícia Militar</span>
+            <span className="pc4">, devendo cumprir rigorosamente as determinações administrativas que lhes forem expedidas, manter seus dados de contato atualizados e </span>
+            <span className="pc4 pc3">abster-se de frequentar dependências operacionais</span>
+            <span className="pc0">, salvo mediante autorização expressa.</span>
+          </p>
 
-          <div className="artigo">
-            <b>Art. 4º</b> O afastamento de que trata esta Portaria possui caráter meramente cautelar e não punitivo, podendo ser revisto ou revogado a qualquer tempo, conforme o andamento do procedimento apuratório.
-          </div>
+          <p className="pc7">
+            <span className="pc4 pc3">Art. 3º</span>
+            <span className="pc4">&nbsp;Os policiais militares ficam </span>
+            <span className="pc4 pc3">temporariamente impedidos de exercer atividade operacional</span>
+            <span className="pc4">&nbsp;e de </span>
+            <span className="pc4 pc3">portar arma de fogo institucional</span>
+            <span className="pc0">, devendo o armamento ser recolhido na forma da legislação e normas internas vigentes.</span>
+          </p>
 
-          <div className="artigo">
-            <b>Art. 5º</b> Esta Portaria entra em vigor na data de sua publicação.
-          </div>
+          <p className="pc7">
+            <span className="pc4 pc3">Art. 4º</span>
+            <span className="pc4">&nbsp;O afastamento de que trata esta Portaria possui </span>
+            <span className="pc4 pc3">caráter meramente cautelar e não punitivo</span>
+            <span className="pc0">, podendo ser revisto ou revogado a qualquer tempo, conforme o andamento do procedimento apuratório.</span>
+          </p>
 
-          <div className="final">REGISTRE-SE, PUBLIQUE-SE E CUMPRA-SE.</div>
+          <p className="pc7">
+            <span className="pc4 pc3">Art. 5º</span>
+            <span className="pc0">&nbsp;Esta Portaria entra em vigor na data de sua publicação.</span>
+          </p>
 
-          <div className="rodape">
-            <div className="local-data">São Paulo, {dataEmissao}.</div>
-            <div className="linha">____________________________________</div>
-            <div className="nome">{data.responsavel_nome || "Corregedor Geral"}</div>
-            <div className="cargo">{data.responsavel_posto || "Corregedor Geral da Polícia Militar"}</div>
-          </div>
+          {/* PUBLIQUE-SE */}
+          <p className="pc7">
+            <span className="pc4 pc3">Publique-se. Registre-se. Cumpra-se.</span>
+            <hr />
+          </p>
 
-          <div className="footer-note">
-            Documento gerado eletronicamente em {format(new Date(), "dd/MM/yyyy 'às' HH:mm")} por {data.responsavel_nome || "Sistema"} — Corregedoria Geral PMESP
-          </div>
+          {/* DATA */}
+          <p className="pc11">
+            <span className="pc5 pc3">São Paulo, {dataEmissao}.<br /></span>
+          </p>
+
+          {/* ESPACO */}
+          <p className="pc9"><span className="pc5 pc3"></span></p>
+
+          {/* ASS: */}
+          <p className="pc11"><span className="pc5 pc3">Ass: {data.responsavel_nome || "___________________________"}</span></p>
+          {data.responsavel_posto && <p className="pc11"><span className="pc5 pc3">{data.responsavel_posto}</span></p>}
+          <p className="pc11"><span className="pc5 pc3">Corregedor da Polícia Militar do Estado de São Paulo</span></p>
+
+          {/* NUMERO DA PAGINA */}
+          <div><p className="pc12"><span className="pc5 pc13">1</span></p></div>
         </div>
       </div>
     </div>
