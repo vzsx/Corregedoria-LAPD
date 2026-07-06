@@ -154,9 +154,10 @@ interface IpmTabProps {
 }
 
 export function IpmTab({ denuncias, investigacoes, relatorios, depoimentos, ipmVinculos, linkIpmId, setLinkIpmId, linking: parentLinking, handleLinkIpm, handleUnlinkIpm }: IpmTabProps) {
-  const { user, isAdmin } = useAuth();
-  const canDelete = isAdmin;
-  const canEdit = !!(user && (isAdmin || user.role === "corregedor"));
+  const { user, isAdmin, roles } = useAuth();
+  const currentRole: string = (roles[0] || "consulta") as string;
+  const canDelete = currentRole === "corregedor_geral" || currentRole === "subcorregedor" || isAdmin;
+  const canEdit = currentRole === "corregedor_geral" || currentRole === "subcorregedor" || currentRole === "corregedor" || currentRole === "investigador" || isAdmin;
   const canCreate = canEdit;
 
   const [loading, setLoading] = useState(true);
