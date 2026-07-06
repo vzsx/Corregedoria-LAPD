@@ -112,6 +112,9 @@ function generateIpmHtml(data: IpmFormData, autorNome?: string, autorPosto?: str
     `<strong>Indiciado:</strong> ${e.indiciado_nome}<br>CPM: ${e.artigos_cpm}<br>CPPM: ${e.artigos_cppm}<br>RDPM: ${e.artigos_rdpm}<br>Obs: ${e.observacoes}`
   ).join("<br><br>");
 
+  const autorNomeFinal = autorNome || data.autoridade_nome || "";
+  const autorPostoFinal = autorPosto || data.autoridade_posto || "";
+
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -131,168 +134,168 @@ function generateIpmHtml(data: IpmFormData, autorNome?: string, autorPosto?: str
     max-width: 451.4pt;
     padding: 72pt;
     margin: 0 auto;
+    position: relative;
+    overflow: hidden;
   }
+  .watermark {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 500px;
+    height: 500px;
+    opacity: 0.06;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .watermark svg { width: 100%; height: 100%; }
+  .content { position: relative; z-index: 1; }
   p { margin: 0; color: #000; font-size: 11pt; font-family: "Arial"; }
-  .header-center { text-align: center; padding: 0; line-height: 1.15; }
-  .header-bold { font-weight: 700; font-size: 11pt; font-family: "Arial"; }
-  .header-bold-br { font-weight: 700; }
-  .body-left { padding: 12pt 0; line-height: 1.0; text-align: justify; }
+  .header-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 0;
+  }
+  .header-table td {
+    vertical-align: middle;
+    padding: 0;
+  }
+  .header-table .logo-cell {
+    width: 80px;
+    text-align: center;
+  }
+  .header-table .logo-cell img {
+    display: block;
+    margin: 0 auto;
+  }
+  .header-table .text-cell {
+    text-align: center;
+    padding: 0 8px;
+  }
+  .header-table .text-cell p {
+    font-size: 11pt;
+    font-weight: 700;
+    line-height: 1.35;
+    text-align: center;
+  }
+  .body-left {
+    padding: 14pt 0 2pt;
+    line-height: 1.0;
+    text-align: justify;
+  }
   .body-left-bold { font-weight: 700; }
   .title-h1 {
-    padding-top: 24pt;
-    padding-bottom: 6pt;
+    padding-top: 18pt;
+    padding-bottom: 4pt;
     line-height: 1.0;
     text-align: left;
     font-size: 14pt;
     font-weight: 700;
     color: #434343;
   }
-  .body-justify { padding: 12pt 0; line-height: 1.0; text-align: justify; }
-  .spacer-12 { padding: 12pt 0; line-height: 1.0; height: 11pt; }
+  .body-justify { padding: 6pt 0; line-height: 1.15; text-align: justify; }
+  .spacer { height: 6pt; }
   .center-text { text-align: center; line-height: 1.15; }
-  .right-text { text-align: right; line-height: 1.15; }
-  .bold { font-weight: 700; }
-  .logo-img {
-    overflow: hidden;
-    display: inline-block;
-    margin: 0;
-    border: 0;
-    transform: rotate(0.00rad) translateZ(0px);
-    -webkit-transform: rotate(0.00rad) translateZ(0px);
-  }
-  .resolve-spacer { padding: 18pt 0 4pt; line-height: 1.0; text-align: left; }
-  .artigo { padding: 12pt 0; line-height: 1.0; text-align: justify; margin-bottom: 0; }
+  .artigo { padding: 4pt 0; line-height: 1.15; text-align: justify; }
   .divider { border: none; border-top: 1px solid #000; margin: 0; }
-  .section-title { font-weight: bold; text-transform: uppercase; font-size: 11pt; margin: 20px 0 10px; }
   .footer-doc {
     text-align: center;
-    font-size: 8pt;
-    color: #666;
-    border-top: 1px solid #ccc;
+    font-size: 10pt;
     padding-top: 10px;
-    margin-top: 30px;
+    margin-top: 20px;
   }
   @media print {
     body { margin: 0; }
     .doc-content { padding: 72pt; max-width: none; }
+    .watermark { position: fixed; }
   }
 </style>
 </head>
 <body class="doc-content">
-  <!-- CABECALHO OFICIAL -->
-  <div>
-    <p class="header-center">
-      <span class="header-bold">GOVERNO DO ESTADO DE SÃO PAULO &nbsp;</span>
-      <span class="logo-img" style="width:80.95px;height:93.01px;">
-        <img src="${BRASAO_SP_LOGO}" style="width:80.95px;height:93.01px;" title="">
-      </span>
-      <span class="logo-img" style="width:92.58px;height:107.00px;">
-        <img src="${PM_LOGO}" style="width:92.58px;height:107.00px;" title="">
-      </span>
-    </p>
-    <p class="header-center">
-      <span class="header-bold">SECRETARIA DE ESTADO DA SEGURANÇA PÚBLICA &nbsp;</span>
-    </p>
-    <p class="header-center">
-      <span class="header-bold">POLÍCIA MILITAR DO ESTADO DE SÃO PAULO &nbsp;</span>
-    </p>
-    <p class="header-center">
-      <span class="header-bold-br">QUARTEL DA CORREGEDORIA-GERAL DA POLÍCIA MILITAR<br></span>
-    </p>
+  <!-- MARCA D'AGUA -->
+  <div class="watermark">
+    <svg viewBox="0 0 600 700" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <path id="topArc" d="M 80,310 A 240,240 0 0,1 520,310"/>
+        <path id="bottomArc" d="M 130,380 A 200,200 0 0,0 470,380"/>
+      </defs>
+      <circle cx="300" cy="330" r="270" fill="none" stroke="#000" stroke-width="4"/>
+      <circle cx="300" cy="330" r="248" fill="none" stroke="#000" stroke-width="1.5"/>
+      <circle cx="300" cy="330" r="155" fill="none" stroke="#000" stroke-width="3"/>
+      <circle cx="300" cy="330" r="138" fill="none" stroke="#000" stroke-width="1.5"/>
+      <polygon points="300,200 318,270 390,270 332,310 350,380 300,342 250,380 268,310 210,270 282,270" fill="none" stroke="#000" stroke-width="1"/>
+      <text font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#000" letter-spacing="16">
+        <textPath href="#topArc" startOffset="50%" text-anchor="middle">POLICIA MILITAR</textPath>
+      </text>
+      <text font-family="Arial, sans-serif" font-size="36" fill="#000" letter-spacing="10">
+        <textPath href="#bottomArc" startOffset="50%" text-anchor="middle">SAO PAULO</textPath>
+      </text>
+    </svg>
   </div>
 
-  <!-- CORPO DO DOCUMENTO -->
-  <div>
-    <p class="body-left">
-      <span class="body-left-bold">POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</span>
-    </p>
-    <p class="body-left">
-      <span class="body-left-bold">CORREGEDORIA DA POLÍCIA MILITAR</span>
-    </p>
-  </div>
+  <div class="content">
+    <!-- CABECALHO: logos laterais + texto centralizado -->
+    <table class="header-table">
+      <tr>
+        <td class="logo-cell" style="width:80px;">
+          <img src="${BRASAO_SP_LOGO}" style="width:75px;height:auto;" title="">
+        </td>
+        <td class="text-cell">
+          <p>GOVERNO DO ESTADO DE SÃO PAULO</p>
+          <p>SECRETARIA DE ESTADO DA SEGURANÇA PÚBLICA</p>
+          <p>POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</p>
+          <p>QUARTEL DA CORREGEDORIA-GERAL DA POLÍCIA MILITAR</p>
+        </td>
+        <td class="logo-cell" style="width:92px;">
+          <img src="${PM_LOGO}" style="width:88px;height:auto;" title="">
+        </td>
+      </tr>
+    </table>
 
-  <!-- TITULO DA PORTARIA -->
-  <h1 class="title-h1">PORTARIA Nº ${data.numero_ipm || "____"}/2026 – CPM</h1>
+    <!-- CORPO DO DOCUMENTO -->
+    <p class="body-left"><span class="body-left-bold">POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</span></p>
+    <p class="body-left"><span class="body-left-bold">CORREGEDORIA DA POLÍCIA MILITAR</span></p>
 
-  <!-- TEXTOS DE CONSIDERACAO -->
-  <div>
+    <!-- TITULO DA PORTARIA -->
+    <h1 class="title-h1">PORTARIA Nº ${data.numero_ipm || "____"}/2026 – CPM</h1>
+
+    <!-- TEXTOS DE CONSIDERACAO -->
     <p class="body-justify">O CORREGEDOR DA POLÍCIA MILITAR DO ESTADO DE SÃO PAULO, no uso de suas atribuições legais e regulamentares, especialmente nos termos do Regulamento Disciplinar da Polícia Militar do Estado de São Paulo (RDPM),</p>
     <p class="body-justify">CONSIDERANDO a necessidade de apurar, de forma ampla, imparcial e fundamentada, os fatos constantes da notícia de possível transgressão disciplinar e/ou crime militar;</p>
     <p class="body-justify">CONSIDERANDO que os elementos iniciais indicam a necessidade de produção de provas, oitivas e demais diligências indispensáveis ao completo esclarecimento dos fatos;</p>
-  </div>
 
-  <!-- RESOLVE -->
-  <p class="resolve-spacer"><span class="bold">RESOLVE:</span></p>
+    <!-- RESOLVE -->
+    <p style="padding:10pt 0 4pt;line-height:1.0;"><strong>RESOLVE:</strong></p>
 
-  <!-- ARTIGOS -->
-  <div>
+    <!-- ARTIGOS -->
     <p class="artigo"><strong>Art. 1º</strong> Instaurar INQUÉRITO POLICIAL MILITAR (IPM) para apurar os fatos ocorridos em ${data.data_instauracao ? format(new Date(data.data_instauracao), "dd/MM/yyyy") : "//2026"}, envolvendo o(s) policial(is) militar(es): ${indiciadosMatriculas}, matrícula(s): ${matriculas}.</p>
     <p class="artigo"><strong>Art. 2º</strong> Designar como Encarregado do Inquérito Policial Militar o(a) ${data.encarregado_posto || "__________________________"} ${data.encarregado_nome || "__________________________"}, que deverá conduzir os trabalhos observando rigorosamente a legislação vigente, bem como os princípios da legalidade, imparcialidade e devido processo.</p>
     <p class="artigo"><strong>Art. 3º</strong> O Encarregado do IPM poderá requisitar documentos, determinar diligências, proceder à oitiva de testemunhas, realizar interrogatórios e praticar todos os atos necessários à completa elucidação dos fatos.</p>
     <p class="artigo"><strong>Art. 4º</strong> O prazo para conclusão do presente Inquérito Policial Militar será de __________ dias, podendo ser prorrogado mediante autorização da Corregedoria, quando devidamente justificado.</p>
     <p class="artigo"><strong>Art. 5º</strong> Concluído o Inquérito, os autos deverão ser encaminhados à Corregedoria da Polícia Militar para análise, manifestação e adoção das providências cabíveis.</p>
     <p class="artigo"><strong>Art. 6º</strong> Esta Portaria entra em vigor na data de sua publicação.</p>
-  </div>
 
-  <!-- PUBLIQUE-SE -->
-  <div style="padding: 12pt 0; line-height: 1.0;">
-    <p>Publique-se. Registre-se. Cumpra-se.</p>
-  </div>
+    <!-- PUBLIQUE-SE -->
+    <p style="padding:8pt 0;line-height:1.15;">Publique-se. Registre-se. Cumpra-se.</p>
 
-  <!-- LINHA -->
-  <hr class="divider">
+    <!-- LINHA -->
+    <hr class="divider">
 
-  <!-- ESPACO -->
-  <p class="spacer-12"></p>
+    <!-- DATA -->
+    <p style="text-align:center;padding:14pt 0 0;line-height:1.15;">São Paulo, ${dataFormatada}.</p>
 
-  <!-- DATA E ASSINATURA -->
-  <div class="center-text">
-    <p class="center-text">São Paulo, ${dataFormatada}.<br><br><br><br><br></p>
-  </div>
+    <!-- ESPACO PARA ASSINATURA -->
+    <p style="text-align:center;padding:0;line-height:1.15;"><br><br><br><br><br></p>
 
-  <!-- ASSINATURA -->
-  <div class="center-text">
-    <p class="center-text">Ass:___________________________</p>
-  </div>
+    <!-- ASSINATURA -->
+    <p style="text-align:center;padding:0;line-height:1.15;">Ass: ${autorNomeFinal || "___________________________"}</p>
+    ${autorPostoFinal ? `<p style="text-align:center;padding:2pt 0 0;line-height:1.15;font-size:10pt;">${autorPostoFinal}</p>` : ""}
+    <p style="text-align:center;padding:2pt 0 0;line-height:1.15;font-size:10pt;">Corregedor da Polícia Militar do Estado de São Paulo</p>
 
-  <!-- INDICIADOS -->
-  <hr class="divider">
-  <div>
-    <p class="body-left"><strong>INDICIADO(S):</strong></p>
-    <div style="margin-bottom:20px;">
-      ${indiciadosStr || "<em>Nenhum indiciado cadastrado.</em>"}
+    <!-- RODAPE -->
+    <div class="footer-doc">
+      <p>Corregedor da Polícia Militar do Estado de São Paulo</p>
     </div>
-  </div>
-
-  <!-- ENQUADRAMENTO LEGAL -->
-  <hr class="divider">
-  <div>
-    <p class="body-left"><strong>ENQUADRAMENTO LEGAL</strong></p>
-    <div style="margin-bottom:20px;">
-      ${enquadramentosStr || "<em>(Nenhum enquadramento registrado)</em>"}
-    </div>
-  </div>
-
-  <!-- RELATORIO DOS FATOS -->
-  <hr class="divider">
-  <div>
-    <p class="body-left"><strong>RELATÓRIO DOS FATOS</strong></p>
-    <div style="text-align:justify;margin-bottom:20px;">
-      ${data.relatorio_fatos || "<em>(Aguardando relatório)</em>"}
-    </div>
-  </div>
-
-  <!-- CONCLUSAO PARCIAL -->
-  <hr class="divider">
-  <div>
-    <p class="body-left"><strong>CONCLUSÃO PARCIAL</strong></p>
-    <div style="text-align:justify;margin-bottom:20px;">
-      ${data.conclusao_parcial || "<em>(Aguardando conclusão)</em>"}
-    </div>
-  </div>
-
-  <div class="footer-doc">
-    PMESP · CORREGEDORIA GERAL · DOCUMENTO OFICIAL · ${format(new Date(), "dd/MM/yyyy HH:mm")}
   </div>
 </body>
 </html>`;
