@@ -63,19 +63,20 @@ export function generatePortariaHTML(data: PortariaData, inqueritoNumero?: strin
 <style type="text/css">
 ol{margin:0;padding:0}
 table td,table th{padding:0}
-.c3{color:#000000;font-weight:700;text-decoration:none;vertical-align:baseline;font-size:11pt;font-family:"Arial";font-style:normal}
-.c14{padding-top:12pt;padding-bottom:12pt;line-height:1.0;orphans:2;widows:2;text-align:justify}
+.c0{color:#000000;font-weight:400;font-size:10pt;font-family:"Arial";font-style:normal}
+.c1{padding-top:14pt;padding-bottom:4pt;line-height:1.0;orphans:2;widows:2;text-align:left}
+.c2{color:#000000;font-weight:700;font-size:10pt;font-family:"Arial";font-style:normal}
+.c3{font-weight:700}
+.c4{font-size:10pt}
+.c5{color:#000000;font-size:11pt;font-family:"Arial";font-style:normal}
 .c6{padding-top:0pt;padding-bottom:0pt;line-height:1.15;orphans:2;widows:2;text-align:center}
 .c7{padding-top:12pt;padding-bottom:12pt;line-height:1.0;orphans:2;widows:2;text-align:left}
 .c8{background-color:#ffffff;max-width:451.4pt;padding:72pt 72pt 72pt 72pt}
-.c0{color:#000000;font-weight:400;font-size:10pt;font-family:"Arial";font-style:normal}
-.c2{color:#000000;font-weight:700;font-size:10pt;font-family:"Arial";font-style:normal}
-.c4{font-size:10pt}
-.c5{color:#000000;font-size:11pt;font-family:"Arial";font-style:normal}
 .c9{padding-top:12pt;padding-bottom:12pt;line-height:1.0;text-align:center;height:11pt}
 .c11{padding-top:12pt;padding-bottom:12pt;line-height:1.0;text-align:center}
 .c12{padding-top:0pt;padding-bottom:0pt;line-height:1.15;text-align:right;height:11pt}
 .c13{font-weight:400}
+.c14{padding-top:12pt;padding-bottom:12pt;line-height:1.0;text-align:justify}
 p{margin:0;color:#000000;font-size:11pt;font-family:"Arial"}
 h3{padding-top:14pt;color:#434343;font-size:14pt;padding-bottom:4pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}
 @media print{body{margin:0}.c8{max-width:none}}

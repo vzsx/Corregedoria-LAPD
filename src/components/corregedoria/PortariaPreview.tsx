@@ -19,21 +19,22 @@ export function PortariaPreview({ data, inqueritoNumero }: PortariaPreviewProps)
       <style>{`
         ol{margin:0;padding:0}
         table td,table th{padding:0}
-        .pc3{color:#000000;font-weight:700;text-decoration:none;vertical-align:baseline;font-size:11pt;font-family:"Arial";font-style:normal}
-        .pc14{padding-top:12pt;padding-bottom:12pt;line-height:1.0;orphans:2;widows:2;text-align:justify}
+        .pc0{color:#000000;font-weight:400;font-size:10pt;font-family:"Arial";font-style:normal}
+        .pc1{padding-top:14pt;padding-bottom:4pt;line-height:1.0;orphans:2;widows:2;text-align:left}
+        .pc2{color:#000000;font-weight:700;font-size:10pt;font-family:"Arial";font-style:normal}
+        .pc3{font-weight:700}
+        .pc4{font-size:10pt}
+        .pc5{color:#000000;font-size:11pt;font-family:"Arial";font-style:normal}
         .pc6{padding-top:0pt;padding-bottom:0pt;line-height:1.15;orphans:2;widows:2;text-align:center}
         .pc7{padding-top:12pt;padding-bottom:12pt;line-height:1.0;orphans:2;widows:2;text-align:left}
         .pc8{background-color:#ffffff;max-width:451.4pt;padding:72pt 72pt 72pt 72pt;margin:0 auto}
-        .pc0{color:#000000;font-weight:400;font-size:10pt;font-family:"Arial";font-style:normal}
-        .pc2{color:#000000;font-weight:700;font-size:10pt;font-family:"Arial";font-style:normal}
-        .pc4{font-size:10pt}
-        .pc5{color:#000000;font-size:11pt;font-family:"Arial";font-style:normal}
         .pc9{padding-top:12pt;padding-bottom:12pt;line-height:1.0;text-align:center;height:11pt}
         .pc11{padding-top:12pt;padding-bottom:12pt;line-height:1.0;text-align:center}
         .pc12{padding-top:0pt;padding-bottom:0pt;line-height:1.15;text-align:right;height:11pt}
         .pc13{font-weight:400}
+        .pc14{padding-top:12pt;padding-bottom:12pt;line-height:1.0;text-align:justify}
         .portaria-doc p{margin:0;color:#000000;font-size:11pt;font-family:"Arial"}
-        .portaria-doc h3{padding-top:14pt;color:#434343;font-size:14pt;padding-bottom:4pt;font-family:"Arial";line-height:1.15;text-align:left}
+        .portaria-doc h3{padding-top:14pt;color:#434343;font-size:14pt;padding-bottom:4pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}
         @media print{.pc8{max-width:none}}
       `}</style>
 
