@@ -97,12 +97,16 @@ img{max-width:100%}
 </style>
 `;
 
-function generateSignatureBlock(autorNome?: string, autorPosto?: string): string {
+function generateSignatureBlock(autorNome?: string, autorPosto?: string, cargoTitulo = "Corregedor da Polícia Militar do Estado de São Paulo"): string {
   const dataFormatada = format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
   const nome = autorNome?.trim() || "";
   const posto = autorPosto?.trim() || "";
   const assinatura = nome ? `<span class="signature-name">${nome}</span>` : `<span class="signature-line"></span>`;
   const identificacao = nome ? `${posto ? posto + " " : ""}${nome}` : `<span class="signature-line" style="width:46mm;height:8pt;"></span>`;
+  const cargo = cargoTitulo ? `
+    <p class="c14" style="margin:2pt 0 0 0;">
+      <span class="c4" style="font-size:11pt;">${cargoTitulo}</span>
+    </p>` : "";
   return `
   <div class="signature-block" style="margin-top:30pt;text-align:center;">
     <p class="c14" style="margin:0 0 18pt 0;"><span class="c4">São Paulo, ${dataFormatada}.</span></p>
@@ -112,13 +116,11 @@ function generateSignatureBlock(autorNome?: string, autorPosto?: string): string
     <p class="c14" style="margin:0;line-height:1;">
       <span class="signature-title">${identificacao}</span>
     </p>
-    <p class="c14" style="margin:2pt 0 0 0;">
-      <span class="c4" style="font-size:11pt;">Corregedor da Polícia Militar do Estado de São Paulo</span>
-    </p>
+    ${cargo}
   </div>`;
 }
 
-function wrapWithIpmLayout(title: string, bodyContent: string, autorNome?: string, autorPosto?: string): string {
+function wrapWithIpmLayout(title: string, bodyContent: string, autorNome?: string, autorPosto?: string, cargoTitulo?: string): string {
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -159,16 +161,16 @@ ${IPM_BASE_CSS}
   ${bodyContent}
 
   <!-- ASSINATURA -->
-  ${generateSignatureBlock(autorNome, autorPosto)}
+  ${generateSignatureBlock(autorNome, autorPosto, cargoTitulo)}
 
 </body>
 </html>`;
 }
 
-function printGeneric(title: string, bodyContent: string, autorNome?: string, autorPosto?: string) {
+function printGeneric(title: string, bodyContent: string, autorNome?: string, autorPosto?: string, cargoTitulo?: string) {
   const w = window.open("", "_blank");
   if (!w) return;
-  w.document.write(wrapWithIpmLayout(title, bodyContent, autorNome, autorPosto));
+  w.document.write(wrapWithIpmLayout(title, bodyContent, autorNome, autorPosto, cargoTitulo));
   w.document.close();
   setTimeout(() => w.print(), 500);
 }
@@ -277,12 +279,12 @@ export const printDenuncia = (denuncia: Denuncia) => {
 
   if (data.relato_fatos) {
     sections.push(`<p class="c11"><span class="c4">RELATO DOS FATOS</span></p>`);
-    sections.push(`<p class="c1"><span class="c5">${data.relato_fatos}</span></p>`);
+    sections.push(`<p class="c1">${preserveText(data.relato_fatos)}</p>`);
   }
 
   if (denuncia.descricao) {
     sections.push(`<p class="c11"><span class="c4">DESCRIÇÃO</span></p>`);
-    sections.push(`<p class="c1"><span class="c5">${denuncia.descricao}</span></p>`);
+    sections.push(`<p class="c1">${preserveText(denuncia.descricao)}</p>`);
   }
 
   if (data.provas_descricao) {
@@ -290,10 +292,10 @@ export const printDenuncia = (denuncia: Denuncia) => {
     if (data.provas_selecionadas?.length) {
       sections.push(`<p class="c1"><span class="c5">${data.provas_selecionadas.join(", ")}</span></p>`);
     }
-    sections.push(`<p class="c1"><span class="c5">${data.provas_descricao}</span></p>`);
+    sections.push(`<p class="c1">${preserveText(data.provas_descricao)}</p>`);
   }
 
-  printGeneric(title, sections.join("\n"));
+  printGeneric(title, sections.join("\n"), data.reclamante_nome, undefined, "");
 };
 
 export const printInvestigacao = (investigacao: Investigacao) => {
