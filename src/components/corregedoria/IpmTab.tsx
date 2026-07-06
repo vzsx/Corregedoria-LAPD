@@ -119,134 +119,98 @@ function generateIpmHtml(data: IpmFormData, autorNome?: string, autorPosto?: str
 <html>
 <head>
 <meta charset="UTF-8">
-<style>
-  @page { margin: 72pt; size: A4; }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: "Arial", sans-serif;
-    font-size: 11pt;
-    line-height: 1.15;
-    color: #000;
-    background: #fff;
-  }
-  .doc-content {
-    background-color: #fff;
-    max-width: 451.4pt;
-    padding: 72pt;
-    margin: 0 auto;
-  }
-  p { margin: 0; color: #000; font-size: 11pt; font-family: "Arial"; }
-  .header-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 0;
-  }
-  .header-table td {
-    vertical-align: middle;
-    padding: 0;
-  }
-  .header-table .logo-cell {
-    width: 80px;
-    text-align: center;
-  }
-  .header-table .logo-cell img {
-    display: block;
-    margin: 0 auto;
-  }
-  .header-table .text-cell {
-    text-align: center;
-    padding: 0 8px;
-  }
-  .header-table .text-cell p {
-    font-size: 11pt;
-    font-weight: 700;
-    line-height: 1.35;
-    text-align: center;
-  }
-  .body-justify { padding: 12pt 0; line-height: 1.0; text-align: justify; }
-  .title-h1 {
-    padding-top: 24pt;
-    padding-bottom: 6pt;
-    line-height: 1.0;
-    text-align: left;
-    font-size: 11pt;
-    font-weight: 700;
-    color: #434343;
-  }
-  .artigo { padding: 12pt 0; line-height: 1.0; text-align: justify; }
-  .divider { border: none; border-top: 1px solid #000; margin: 0; }
-  .page-number {
-    text-align: right;
-    font-size: 9pt;
-    padding-top: 10px;
-  }
-  @media print {
-    body { margin: 0; }
-    .doc-content { padding: 72pt; max-width: none; }
-  }
+<style type="text/css">
+ol{margin:0;padding:0}
+table td,table th{padding:0}
+.c4{color:#000000;font-weight:700;text-decoration:none;vertical-align:baseline;font-size:11pt;font-family:"Arial";font-style:normal}
+.c11{padding-top:12pt;padding-bottom:12pt;line-height:1.0;orphans:2;widows:2;text-align:justify}
+.c17{padding-top:18pt;padding-bottom:4pt;line-height:1.0;orphans:2;widows:2;text-align:left}
+.c3{padding-top:0pt;padding-bottom:0pt;line-height:1.15;orphans:2;widows:2;text-align:center}
+.c1{padding-top:12pt;padding-bottom:12pt;line-height:1.0;orphans:2;widows:2;text-align:left}
+.c10{font-weight:400;text-decoration:none;vertical-align:baseline;font-size:11pt;font-family:"Arial";font-style:normal}
+.c14{padding-top:12pt;padding-bottom:12pt;line-height:1.0;orphans:2;widows:2;text-align:center}
+.c9{font-weight:400;text-decoration:none;vertical-align:baseline;font-size:14pt;font-family:"Arial";font-style:normal}
+.c15{padding-top:24pt;padding-bottom:6pt;line-height:1.0;orphans:2;widows:2;text-align:left}
+.c12{text-decoration:none;vertical-align:baseline;font-size:11pt;font-family:"Arial";font-style:normal}
+.c6{background-color:#ffffff;max-width:451.4pt;padding:72pt 72pt 72pt 72pt}
+.c0{color:#434343;font-weight:700}
+.c2{font-style:italic}
+.c16{height:11pt}
+.c5{color:#434343}
+.c7{font-weight:700}
+p{margin:0;color:#000000;font-size:11pt;font-family:"Arial"}
+h2{padding-top:18pt;color:#000000;font-size:16pt;padding-bottom:6pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}
+@media print{body{margin:0}.c6{max-width:none}}
 </style>
 </head>
-<body class="doc-content">
-  <!-- CABECALHO: logos laterais + texto centralizado -->
-  <table class="header-table">
-    <tr>
-      <td class="logo-cell" style="width:80px;">
-        <img src="${BRASAO_SP_LOGO}" style="width:75px;height:auto;" title="">
-      </td>
-      <td class="text-cell">
-        <p>GOVERNO DO ESTADO DE SÃO PAULO</p>
-        <p>SECRETARIA DE ESTADO DA SEGURANÇA PÚBLICA</p>
-        <p>POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</p>
-        <p>QUARTEL DA CORREGEDORIA-GERAL DA POLÍCIA MILITAR</p>
-      </td>
-      <td class="logo-cell" style="width:92px;">
-        <img src="${PM_LOGO}" style="width:88px;height:auto;" title="">
-      </td>
-    </tr>
-  </table>
+<body class="c6 doc-content">
 
-  <!-- CORPO DO DOCUMENTO -->
-  <p class="body-justify"><strong>POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</strong></p>
-  <p class="body-justify"><strong>CORREGEDORIA DA POLÍCIA MILITAR</strong></p>
+  <!-- CABECALHO -->
+  <div>
+    <p class="c3">
+      <span class="c4">GOVERNO DO ESTADO DE SÃO PAULO &nbsp;</span>
+      <span style="overflow:hidden;display:inline-block;margin:0;border:0;width:80.95px;height:93.01px;">
+        <img src="${BRASAO_SP_LOGO}" style="width:80.95px;height:93.01px;" title="">
+      </span>
+      <span style="overflow:hidden;display:inline-block;margin:0;border:0;width:92.58px;height:107.00px;">
+        <img src="${PM_LOGO}" style="width:92.58px;height:107.00px;" title="">
+      </span>
+    </p>
+    <p class="c3"><span class="c4">SECRETARIA DE ESTADO DA SEGURANÇA PÚBLICA &nbsp;</span></p>
+    <p class="c3"><span class="c4">POLÍCIA MILITAR DO ESTADO DE SÃO PAULO &nbsp;</span></p>
+    <p class="c3"><span class="c7">QUARTEL DA CORREGEDORIA-GERAL DA POLÍCIA MILITAR<br></span></p>
+  </div>
 
-  <!-- TITULO DA PORTARIA -->
-  <h1 class="title-h1">PORTARIA Nº ${data.numero_ipm || "____"}/2026 – CPM</h1>
+  <!-- TITULOS -->
+  <p class="c11"><span class="c4">POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</span></p>
+  <p class="c11"><span class="c4">CORREGEDORIA DA POLÍCIA MILITAR</span></p>
 
-  <!-- TEXTOS DE CONSIDERACAO -->
-  <p class="body-justify">O CORREGEDOR DA POLÍCIA MILITAR DO ESTADO DE SÃO PAULO, no uso de suas atribuições legais e regulamentares, especialmente nos termos do Regulamento Disciplinar da Polícia Militar do Estado de São Paulo (RDPM),</p>
-  <p class="body-justify">CONSIDERANDO a necessidade de apurar, de forma ampla, imparcial e fundamentada, os fatos constantes da notícia de possível transgressão disciplinar e/ou crime militar;</p>
-  <p class="body-justify">CONSIDERANDO que os elementos iniciais indicam a necessidade de produção de provas, oitivas e demais diligências indispensáveis ao completo esclarecimento dos fatos;</p>
+  <!-- PORTARIA -->
+  <h1 class="c15"><span class="c12 c0">PORTARIA Nº ${data.numero_ipm || "____"}/2026 – CPM</span></h1>
+
+  <!-- TEXTOS -->
+  <p class="c1"><span class="c5">O </span><span class="c0">CORREGEDOR DA POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</span><span class="c10 c5">, no uso de suas atribuições legais e regulamentares, especialmente nos termos do Regulamento Disciplinar da Polícia Militar do Estado de São Paulo (RDPM),</span></p>
+  <p class="c1"><span class="c0">CONSIDERANDO</span><span class="c5">&nbsp;a necessidade de apurar, de forma ampla, imparcial e fundamentada, os fatos constantes da notícia de possível transgressão disciplinar e/ou crime militar</span><span class="c5 c9">;</span></p>
+  <p class="c1"><span class="c0">CONSIDERANDO</span><span class="c10 c5">&nbsp;que os elementos iniciais indicam a necessidade de produção de provas, oitivas e demais diligências indispensáveis ao completo esclarecimento dos fatos;</span></p>
 
   <!-- RESOLVE -->
-  <p style="padding:18pt 0 4pt;line-height:1.0;text-align:left;"><strong>RESOLVE:</strong></p>
+  <h2 class="c17"><span class="c12 c0">RESOLVE:</span></h2>
 
   <!-- ARTIGOS -->
-  <p class="artigo"><strong>Art. 1º</strong> Instaurar INQUÉRITO POLICIAL MILITAR (IPM) para apurar os fatos ocorridos em ${data.data_instauracao ? format(new Date(data.data_instauracao), "dd/MM/yyyy") : "//2026"}, envolvendo o(s) policial(is) militar(es): ${indiciadosMatriculas}, matrícula(s): ${matriculas}.</p>
-  <p class="artigo"><strong>Art. 2º</strong> Designar como Encarregado do Inquérito Policial Militar o(a) ${data.encarregado_posto || "__________________________"} ${data.encarregado_nome || "__________________________"}, que deverá conduzir os trabalhos observando rigorosamente a legislação vigente, bem como os princípios da legalidade, imparcialidade e devido processo.</p>
-  <p class="artigo"><strong>Art. 3º</strong> O Encarregado do IPM poderá requisitar documentos, determinar diligências, proceder à oitiva de testemunhas, realizar interrogatórios e praticar todos os atos necessários à completa elucidação dos fatos.</p>
-  <p class="artigo"><strong>Art. 4º</strong> O prazo para conclusão do presente Inquérito Policial Militar será de __________ dias, podendo ser prorrogado mediante autorização da Corregedoria, quando devidamente justificado.</p>
-  <p class="artigo"><strong>Art. 5º</strong> Concluído o Inquérito, os autos deverão ser encaminhados à Corregedoria da Polícia Militar para análise, manifestação e adoção das providências cabíveis.</p>
-  <p class="artigo"><strong>Art. 6º</strong> Esta Portaria entra em vigor na data de sua publicação.</p>
+  <p class="c1"><span class="c0">Art. 1º</span><span class="c5">&nbsp;Instaurar </span><span class="c0">INQUÉRITO POLICIAL MILITAR (IPM)</span><span class="c5">&nbsp;para apurar os fatos ocorridos em ${data.data_instauracao ? format(new Date(data.data_instauracao), "dd/MM/yyyy") : "//2026"}, envolvendo o(s) policial(is) militar(es): ${indiciadosMatriculas}, matrícula(s): ${matriculas}.</span></p>
+  <p class="c1"><span class="c0">Art. 2º</span><span class="c5">&nbsp;Designar como </span><span class="c0">Encarregado do Inquérito Policial Militar</span><span class="c5 c10">&nbsp;o(a) ${data.encarregado_posto || "__________________________"} ${data.encarregado_nome || "__________________________"}, que deverá conduzir os trabalhos observando rigorosamente a legislação vigente, bem como os princípios da legalidade, imparcialidade e devido processo.</span></p>
+  <p class="c1"><span class="c0">Art. 3º</span><span class="c10 c5">&nbsp;O Encarregado do IPM poderá requisitar documentos, determinar diligências, proceder à oitiva de testemunhas, realizar interrogatórios e praticar todos os atos necessários à completa elucidação dos fatos.</span></p>
+  <p class="c1"><span class="c0">Art. 4º</span><span class="c10 c5">&nbsp;O prazo para conclusão do presente Inquérito Policial Militar será de __________ dias, podendo ser prorrogado mediante autorização da Corregedoria, quando devidamente justificado.</span></p>
+  <p class="c1"><span class="c0">Art. 5º</span><span class="c10 c5">&nbsp;Concluído o Inquérito, os autos deverão ser encaminhados à Corregedoria da Polícia Militar para análise, manifestação e adoção das providências cabíveis.</span></p>
+  <p class="c1"><span class="c0">Art. 6º</span><span class="c10 c5">&nbsp;Esta Portaria entra em vigor na data de sua publicação.</span></p>
 
   <!-- PUBLIQUE-SE -->
-  <p style="padding:12pt 0;line-height:1.0;">Publique-se. Registre-se. Cumpra-se.</p>
+  <p class="c1"><span class="c0 c12">Publique-se. Registre-se. Cumpra-se.</span></p>
 
   <!-- LINHA -->
-  <hr class="divider">
+  <hr>
 
-  <!-- DATA -->
-  <p style="text-align:center;padding:12pt 0 0;line-height:1.0;">São Paulo, ${dataFormatada}.</p>
+  <!-- ESPACO -->
+  <p class="c1 c16"><span class="c9 c5"></span></p>
 
-  <!-- ESPACO PARA ASSINATURA -->
-  <p style="text-align:center;padding:0;line-height:1.0;"><br><br><br><br><br></p>
+  <!-- DATA + ASSINATURA -->
+  <p class="c14">
+    <span class="c4">São Paulo, ${dataFormatada}.<br></span>
+  </p>
 
-  <!-- ASSINATURA -->
-  <p style="text-align:center;padding:0;line-height:1.15;">Ass: ${autorNomeFinal || "___________________________"}</p>
-  ${autorPostoFinal ? `<p style="text-align:center;padding:0;line-height:1.15;font-size:10pt;">${autorPostoFinal}</p>` : ""}
-  <p style="text-align:center;padding:0;line-height:1.15;font-size:10pt;">Corregedor da Polícia Militar do Estado de São Paulo</p>
+  <!-- ESPACO EM BRANCO -->
+  <p class="c14 c16"><span class="c4"></span></p>
+
+  <!-- ASS: -->
+  <p class="c14">
+    <span class="c4">Ass: ${autorNomeFinal || "___________________________"}</span>
+  </p>
+  ${autorPostoFinal ? `<p class="c14"><span class="c4">${autorPostoFinal}</span></p>` : ""}
+  <p class="c14"><span class="c4">Corregedor da Polícia Militar do Estado de São Paulo</span></p>
 
   <!-- NUMERO DA PAGINA -->
-  <div class="page-number">1</div>
+  <div><p class="c8"><span class="c4">1</span></p></div>
+
 </body>
 </html>`;
 }
