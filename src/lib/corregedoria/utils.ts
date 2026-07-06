@@ -17,7 +17,7 @@ export const formatDateSafe = (dateStr: any, formatStr: string) => {
 
 const IPM_BASE_CSS = `
 <style type="text/css">
-@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Pinyon+Script&display=swap');
 
 /* Layout oficial compacto em A4, respeitando os limites da pagina */
 @page {
@@ -83,7 +83,8 @@ img{max-width:100%}
 
 /* Assinatura */
 .signature-block{page-break-inside:avoid}
-.signature-name{font-family:'Dancing Script',cursive;font-size:24pt;color:#000;font-weight:600}
+.signature-name{font-family:'Pinyon Script',cursive;font-size:30pt;color:#000;font-weight:400;line-height:1}
+.signature-line{display:inline-block;width:80mm;border-bottom:1px solid #000;height:12pt}
 .signature-title{font-size:10pt;color:#000;margin-top:2pt}
 
 /* Impressao */
@@ -97,18 +98,18 @@ img{max-width:100%}
 
 function generateSignatureBlock(autorNome?: string, autorPosto?: string): string {
   const dataFormatada = format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
-  const nome = autorNome || "___________________________";
-  const posto = autorPosto || "";
+  const nome = autorNome?.trim() || "";
+  const posto = autorPosto?.trim() || "";
+  const assinatura = nome ? `<span class="signature-name">${nome}</span>` : `<span class="signature-line"></span>`;
+  const identificacao = nome ? `${posto ? posto + " " : ""}${nome}` : `<span class="signature-line" style="width:46mm;height:8pt;"></span>`;
   return `
-  <div class="signature-block" style="margin-top:18pt;text-align:center;">
-    <p class="c14"><span class="c4">São Paulo, ${dataFormatada}.</span></p>
-    <p class="c14" style="height:14pt;margin:0;"><span class="c4"></span></p>
-    <p class="c14">
-      <span class="c4">Ass: </span><span class="signature-name">${nome}</span>
+  <div class="signature-block" style="margin-top:8pt;text-align:center;">
+    <p class="c14" style="margin:0 0 6pt 0;"><span class="c4">São Paulo, ${dataFormatada}.</span></p>
+    <p class="c14" style="margin:0 0 2pt 0;line-height:1;">
+      <span class="c4">Ass: </span>${assinatura}
     </p>
-    <p class="c14" style="height:2pt;margin:0;"><span class="c4"></span></p>
-    <p class="c14" style="margin:0;">
-      <span class="signature-title">${posto ? posto + " " : ""}${nome}</span>
+    <p class="c14" style="margin:0;line-height:1;">
+      <span class="signature-title">${identificacao}</span>
     </p>
     <p class="c14" style="margin:2pt 0 0 0;">
       <span class="c4" style="font-size:10pt;">Corregedor da Polícia Militar do Estado de São Paulo</span>
@@ -353,5 +354,5 @@ export const printDepoimento = (depoimento: Depoimento) => {
     sections.push(`<p class="c1"><span class="c5">${depoimento.observacao}</span></p>`);
   }
 
-  printGeneric(title, sections.join("\n"));
+  printGeneric(title, sections.join("\n"), depoimento.oficial_nome, depoimento.oficial_patente || undefined);
 };

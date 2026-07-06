@@ -63,7 +63,7 @@ export function generatePortariaHTML(data: PortariaData, inqueritoNumero?: strin
 <head>
 <meta charset="UTF-8">
 <style type="text/css">
-@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Pinyon+Script&display=swap');
 
 @page {
   size: A4 portrait;
@@ -107,7 +107,8 @@ img{max-width:100%}
 .watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.08;pointer-events:none;z-index:0;width:15.9cm;height:13.5cm;object-fit:contain}
 .doc-content > *:not(.watermark){position:relative;z-index:1}
 .signature-block{page-break-inside:avoid}
-.signature-name{font-family:'Dancing Script',cursive;font-size:24pt;color:#000;font-weight:600}
+.signature-name{font-family:'Pinyon Script',cursive;font-size:30pt;color:#000;font-weight:400;line-height:1}
+.signature-line{display:inline-block;width:80mm;border-bottom:1px solid #000;height:12pt}
 .signature-title{font-size:10pt;color:#000;margin-top:2pt}
 @media print{
   body{margin:0;padding:0}
@@ -210,17 +211,15 @@ img{max-width:100%}
   </p>
 
   <!-- DATA + ASSINATURA -->
-  <div class="signature-block" style="margin-top:18pt;text-align:center;">
-    <p class="c11">
+  <div class="signature-block" style="margin-top:8pt;text-align:center;">
+    <p class="c11" style="margin:0 0 6pt 0;">
       <span class="c5 c3">São Paulo, ${dataEmissao}.</span>
     </p>
-    <p class="c11" style="height:14pt;margin:0;"><span class="c5 c3"></span></p>
-    <p class="c11">
-      <span class="c5 c3">Ass: </span><span class="signature-name">${data.responsavel_nome || "___________________________"}</span>
+    <p class="c11" style="margin:0 0 2pt 0;line-height:1;">
+      <span class="c5 c3">Ass: </span>${data.responsavel_nome ? `<span class="signature-name">${data.responsavel_nome}</span>` : `<span class="signature-line"></span>`}
     </p>
-    <p class="c11" style="height:2pt;margin:0;"><span class="c5 c3"></span></p>
-    <p class="c11" style="margin:0;">
-      <span class="signature-title">${data.responsavel_posto ? data.responsavel_posto + " " : ""}${data.responsavel_nome || "___________________________"}</span>
+    <p class="c11" style="margin:0;line-height:1;">
+      <span class="signature-title">${data.responsavel_nome ? `${data.responsavel_posto ? data.responsavel_posto + " " : ""}${data.responsavel_nome}` : `<span class="signature-line" style="width:46mm;height:8pt;"></span>`}</span>
     </p>
     <p class="c11" style="margin:2pt 0 0 0;">
       <span class="c5 c3" style="font-size:10pt;">Corregedor da Polícia Militar do Estado de São Paulo</span>
