@@ -126,12 +126,12 @@ function generateIpmHtml(data: IpmFormData, autorNome?: string, autorPosto?: str
   }
   .watermark {
     position: fixed;
-    top: 50%;
+    top: 45%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 580px;
-    height: 580px;
-    opacity: 0.10;
+    width: 520px;
+    height: 600px;
+    opacity: 0.12;
     pointer-events: none;
     z-index: 0;
   }
@@ -235,52 +235,60 @@ function generateIpmHtml(data: IpmFormData, autorNome?: string, autorPosto?: str
 <body>
 <div class="page">
   <div class="watermark">
-    <svg viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
-      <!-- Outer ring -->
-      <circle cx="300" cy="300" r="280" fill="none" stroke="#aaa" stroke-width="4"/>
-      <circle cx="300" cy="300" r="260" fill="none" stroke="#bbb" stroke-width="1.5"/>
-
-      <!-- Wings left -->
-      <g transform="translate(300,300)" fill="#bbb" opacity="0.5">
-        <ellipse cx="-200" cy="0" rx="80" ry="15" transform="rotate(-15)"/>
-        <ellipse cx="-210" cy="20" rx="75" ry="14" transform="rotate(-8)"/>
-        <ellipse cx="-215" cy="40" rx="70" ry="13" transform="rotate(-2)"/>
-        <ellipse cx="-210" cy="60" rx="72" ry="12" transform="rotate(4)"/>
-        <ellipse cx="-200" cy="78" rx="65" ry="11" transform="rotate(10)"/>
-        <ellipse cx="-185" cy="95" rx="55" ry="10" transform="rotate(16)"/>
-        <ellipse cx="-165" cy="110" rx="45" ry="9" transform="rotate(22)"/>
-      </g>
-
-      <!-- Wings right -->
-      <g transform="translate(300,300)" fill="#bbb" opacity="0.5">
-        <ellipse cx="200" cy="0" rx="80" ry="15" transform="rotate(15)"/>
-        <ellipse cx="210" cy="20" rx="75" ry="14" transform="rotate(8)"/>
-        <ellipse cx="215" cy="40" rx="70" ry="13" transform="rotate(2)"/>
-        <ellipse cx="210" cy="60" rx="72" ry="12" transform="rotate(-4)"/>
-        <ellipse cx="200" cy="78" rx="65" ry="11" transform="rotate(-10)"/>
-        <ellipse cx="185" cy="95" rx="55" ry="10" transform="rotate(-16)"/>
-        <ellipse cx="165" cy="110" rx="45" ry="9" transform="rotate(-22)"/>
-      </g>
-
-      <!-- Inner circle with star -->
-      <circle cx="300" cy="300" r="140" fill="none" stroke="#aaa" stroke-width="3"/>
-      <circle cx="300" cy="300" r="120" fill="none" stroke="#bbb" stroke-width="1.5"/>
-
-      <!-- Star -->
-      <polygon points="300,185 320,260 395,260 335,305 355,380 300,340 245,380 265,305 205,260 280,260"
-        fill="#ccc" opacity="0.35" stroke="#bbb" stroke-width="1"/>
-
-      <!-- Top arc text: POLICIA MILITAR -->
+    <svg viewBox="0 0 600 700" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <path id="topTextArc" d="M 100,300 A 200,200 0 0,1 500,300"/>
-        <path id="bottomTextArc" d="M 120,320 A 190,190 0 0,0 480,320"/>
+        <path id="topTextArc" d="M 80,310 A 240,240 0 0,1 520,310"/>
+        <path id="bottomTextArc" d="M 130,380 A 200,200 0 0,0 470,380"/>
+        <radialGradient id="starGrad" cx="50%" cy="50%">
+          <stop offset="0%" stop-color="#d4a" stop-opacity="0.4"/>
+          <stop offset="50%" stop-color="#c96" stop-opacity="0.3"/>
+          <stop offset="100%" stop-color="#da8" stop-opacity="0.15"/>
+        </radialGradient>
       </defs>
-      <text font-family="Times New Roman, serif" font-size="38" font-weight="bold" fill="#999" letter-spacing="14">
+
+      <!-- Outer circles -->
+      <circle cx="300" cy="330" r="270" fill="none" stroke="#bbb" stroke-width="4"/>
+      <circle cx="300" cy="330" r="248" fill="none" stroke="#ccc" stroke-width="1.5"/>
+
+      <!-- Wings left - laurel branches -->
+      <g transform="translate(300,330)" fill="#bbb" stroke="#bbb" stroke-width="0.5">
+        <ellipse cx="-185" cy="-30" rx="55" ry="12" transform="rotate(-35)"/>
+        <ellipse cx="-210" cy="-5" rx="58" ry="12" transform="rotate(-22)"/>
+        <ellipse cx="-220" cy="22" rx="58" ry="12" transform="rotate(-12)"/>
+        <ellipse cx="-222" cy="50" rx="56" ry="11" transform="rotate(-2)"/>
+        <ellipse cx="-215" cy="76" rx="52" ry="11" transform="rotate(8)"/>
+        <ellipse cx="-200" cy="100" rx="48" ry="10" transform="rotate(16)"/>
+        <ellipse cx="-178" cy="120" rx="42" ry="9" transform="rotate(24)"/>
+        <ellipse cx="-152" cy="136" rx="35" ry="8" transform="rotate(32)"/>
+      </g>
+
+      <!-- Wings right - laurel branches -->
+      <g transform="translate(300,330)" fill="#bbb" stroke="#bbb" stroke-width="0.5">
+        <ellipse cx="185" cy="-30" rx="55" ry="12" transform="rotate(35)"/>
+        <ellipse cx="210" cy="-5" rx="58" ry="12" transform="rotate(22)"/>
+        <ellipse cx="220" cy="22" rx="58" ry="12" transform="rotate(12)"/>
+        <ellipse cx="222" cy="50" rx="56" ry="11" transform="rotate(2)"/>
+        <ellipse cx="215" cy="76" rx="52" ry="11" transform="rotate(-8)"/>
+        <ellipse cx="200" cy="100" rx="48" ry="10" transform="rotate(-16)"/>
+        <ellipse cx="178" cy="120" rx="42" ry="9" transform="rotate(-24)"/>
+        <ellipse cx="152" cy="136" rx="35" ry="8" transform="rotate(-32)"/>
+      </g>
+
+      <!-- Inner circles -->
+      <circle cx="300" cy="330" r="155" fill="none" stroke="#bbb" stroke-width="3"/>
+      <circle cx="300" cy="330" r="138" fill="none" stroke="#ccc" stroke-width="1.5"/>
+
+      <!-- Star with gradient -->
+      <polygon points="300,200 318,270 390,270 332,310 350,380 300,342 250,380 268,310 210,270 282,270"
+        fill="url(#starGrad)" stroke="#bbb" stroke-width="1"/>
+
+      <!-- Top arc text -->
+      <text font-family="Georgia, 'Times New Roman', serif" font-size="48" font-weight="bold" fill="#aaa" letter-spacing="16">
         <textPath href="#topTextArc" startOffset="50%" text-anchor="middle">POLICIA MILITAR</textPath>
       </text>
 
-      <!-- Bottom arc text: SAO PAULO -->
-      <text font-family="Times New Roman, serif" font-size="28" fill="#999" letter-spacing="8">
+      <!-- Bottom arc text -->
+      <text font-family="Georgia, 'Times New Roman', serif" font-size="36" fill="#aaa" letter-spacing="10">
         <textPath href="#bottomTextArc" startOffset="50%" text-anchor="middle">SAO PAULO</textPath>
       </text>
     </svg>
@@ -291,13 +299,11 @@ function generateIpmHtml(data: IpmFormData, autorNome?: string, autorPosto?: str
         <td class="logo-cell">
           <div style="width:70px;height:80px;display:flex;align-items:center;justify-content:center;">
             <svg viewBox="0 0 70 80" xmlns="http://www.w3.org/2000/svg" width="70" height="80">
-              <!-- Brasão SP简化版 -->
-              <rect x="5" y="5" width="60" height="70" rx="3" fill="none" stroke="#003366" stroke-width="2"/>
-              <rect x="10" y="10" width="50" height="35" fill="#003366"/>
-              <rect x="10" y="45" width="50" height="25" fill="#003366"/>
-              <line x1="10" y1="45" x2="60" y2="45" stroke="#fff" stroke-width="1"/>
-              <text x="35" y="32" text-anchor="middle" font-family="Times New Roman" font-size="8" fill="#fff" font-weight="bold">GOVERNO</text>
-              <text x="35" y="62" text-anchor="middle" font-family="Times New Roman" font-size="6" fill="#fff">ESTADO DE SP</text>
+              <rect x="5" y="5" width="60" height="70" rx="2" fill="#002776" stroke="#002776"/>
+              <rect x="5" y="35" width="60" height="5" fill="#fff"/>
+              <rect x="32" y="5" width="6" height="70" fill="#fff"/>
+              <rect x="15" y="45" width="40" height="25" rx="2" fill="#009c3b"/>
+              <circle cx="35" cy="57" r="8" fill="#ffdf00" stroke="#002776" stroke-width="1"/>
             </svg>
           </div>
         </td>
@@ -310,11 +316,10 @@ function generateIpmHtml(data: IpmFormData, autorNome?: string, autorPosto?: str
         <td class="logo-cell">
           <div style="width:70px;height:80px;display:flex;align-items:center;justify-content:center;">
             <svg viewBox="0 0 70 80" xmlns="http://www.w3.org/2000/svg" width="70" height="80">
-              <!-- PMPM sigla -->
-              <circle cx="35" cy="40" r="30" fill="none" stroke="#8B0000" stroke-width="2"/>
-              <circle cx="35" cy="40" r="25" fill="none" stroke="#8B0000" stroke-width="1"/>
-              <text x="35" y="36" text-anchor="middle" font-family="Times New Roman" font-size="10" fill="#8B0000" font-weight="bold">ST°P</text>
-              <text x="35" y="50" text-anchor="middle" font-family="Times New Roman" font-size="6" fill="#8B0000">PMESP</text>
+              <circle cx="35" cy="40" r="30" fill="#8B0000" stroke="#8B0000"/>
+              <circle cx="35" cy="40" r="26" fill="none" stroke="#fff" stroke-width="1.5"/>
+              <text x="35" y="36" text-anchor="middle" font-family="Georgia, serif" font-size="14" fill="#fff" font-weight="bold">ST°P</text>
+              <text x="35" y="52" text-anchor="middle" font-family="Georgia, serif" font-size="7" fill="#fff" letter-spacing="1">PMESP</text>
             </svg>
           </div>
         </td>
