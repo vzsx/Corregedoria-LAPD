@@ -135,44 +135,47 @@ function generateIpmHtml(data: IpmFormData, autorNome?: string, autorPosto?: str
 ol{margin:0;padding:0}
 table td,table th{padding:0}
 
+*{box-sizing:border-box}
+
 p{
-  margin:0;
+  margin:0 0 8pt 0;
+  color:#000000;
+  font-size:10pt;
+  font-family:"Arial",sans-serif;
+  line-height:1.15;
+  text-align:justify;
+  overflow-wrap:break-word;
+}
+h2{
+  margin:14pt 0 8pt 0;
   color:#000000;
   font-size:12pt;
   font-family:"Arial",sans-serif;
-  line-height:1.5;
-  text-align:justify;
-}
-h2{
-  margin:0;
-  padding-top:18pt;
-  color:#000000;
-  font-size:14pt;
-  padding-bottom:6pt;
-  font-family:"Arial",sans-serif;
-  line-height:1.5;
+  line-height:1.15;
   page-break-after:avoid;
   orphans:2;
   widows:2;
   text-align:left;
 }
 
-.c4{color:#000000;font-weight:700;text-decoration:none;vertical-align:baseline;font-size:12pt;font-family:"Arial",sans-serif;font-style:normal}
-.c11{padding-top:0pt;padding-bottom:0pt;line-height:1.5;orphans:2;widows:2;text-align:justify;text-indent:1.25cm}
-.c17{padding-top:18pt;padding-bottom:4pt;line-height:1.5;orphans:2;widows:2;text-align:left}
-.c3{padding-top:0pt;padding-bottom:0pt;line-height:1.15;orphans:2;widows:2;text-align:center}
-.c1{padding-top:0pt;padding-bottom:0pt;line-height:1.5;orphans:2;widows:2;text-align:justify;text-indent:1.25cm}
-.c10{font-weight:400;text-decoration:none;vertical-align:baseline;font-size:12pt;font-family:"Arial",sans-serif;font-style:normal}
-.c14{padding-top:0pt;padding-bottom:0pt;line-height:1.5;orphans:2;widows:2;text-align:center}
-.c9{font-weight:400;text-decoration:none;vertical-align:baseline;font-size:14pt;font-family:"Arial",sans-serif;font-style:normal}
-.c15{padding-top:24pt;padding-bottom:6pt;line-height:1.5;orphans:2;widows:2;text-align:left}
-.c12{text-decoration:none;vertical-align:baseline;font-size:12pt;font-family:"Arial",sans-serif;font-style:normal}
+.c4{color:#000000;font-weight:700;text-decoration:none;vertical-align:baseline;font-size:10pt;font-family:"Arial",sans-serif;font-style:normal}
+.c11{padding:0;margin:0 0 8pt 0;line-height:1.15;orphans:2;widows:2;text-align:justify}
+.c17{padding:0;margin:8pt 0;line-height:1.15;orphans:2;widows:2;text-align:left}
+.c3{padding:0;margin:0;line-height:1.15;orphans:2;widows:2;text-align:center}
+.c1{padding:0;margin:0 0 8pt 0;line-height:1.15;orphans:2;widows:2;text-align:justify}
+.c10{font-weight:400;text-decoration:none;vertical-align:baseline;font-size:10pt;font-family:"Arial",sans-serif;font-style:normal}
+.c14{padding:0;margin:0 0 8pt 0;line-height:1.15;orphans:2;widows:2;text-align:center}
+.c9{font-weight:400;text-decoration:none;vertical-align:baseline;font-size:12pt;font-family:"Arial",sans-serif;font-style:normal}
+.c15{padding:0;margin:14pt 0 8pt 0;line-height:1.15;orphans:2;widows:2;text-align:left;page-break-after:avoid}
+.c12{text-decoration:none;vertical-align:baseline;font-size:10pt;font-family:"Arial",sans-serif;font-style:normal}
 .c6{background-color:#ffffff;max-width:160mm}
 .c0{color:#434343;font-weight:700}
 .c2{font-style:italic}
 .c5{color:#434343}
 .c7{font-weight:700}
 .doc-content{position:relative}
+table{max-width:100%;page-break-inside:avoid}
+img{max-width:100%}
 .watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.08;pointer-events:none;z-index:0;width:15.9cm;height:13.5cm;object-fit:contain}
 .doc-content > *:not(.watermark){position:relative;z-index:1}
 .signature-block{page-break-inside:avoid}

@@ -73,32 +73,37 @@ export function generatePortariaHTML(data: PortariaData, inqueritoNumero?: strin
 ol{margin:0;padding:0}
 table td,table th{padding:0}
 
+*{box-sizing:border-box}
+
 p{
-  margin:0;
+  margin:0 0 8pt 0;
   color:#000000;
-  font-size:12pt;
+  font-size:10pt;
   font-family:"Arial",sans-serif;
-  line-height:1.5;
+  line-height:1.15;
   text-align:justify;
+  overflow-wrap:break-word;
 }
 
-/* Classes portaria */
-.c0{color:#000000;font-weight:400;font-size:12pt;font-family:"Arial",sans-serif;font-style:normal}
-.c1{padding-top:0pt;padding-bottom:0pt;line-height:1.5;orphans:2;widows:2;text-align:left;text-indent:1.25cm}
-.c2{color:#000000;font-weight:700;font-size:12pt;font-family:"Arial",sans-serif;font-style:normal}
+/* Classes portaria — sem recuo, espacamento compacto */
+.c0{color:#000000;font-weight:400;font-size:10pt;font-family:"Arial",sans-serif;font-style:normal}
+.c1{padding:0;margin:0 0 8pt 0;line-height:1.15;orphans:2;widows:2;text-align:justify}
+.c2{color:#000000;font-weight:700;font-size:10pt;font-family:"Arial",sans-serif;font-style:normal}
 .c3{font-weight:700}
-.c4{font-size:12pt}
-.c5{color:#000000;font-size:12pt;font-family:"Arial",sans-serif;font-style:normal}
-.c6{padding-top:0pt;padding-bottom:0pt;line-height:1.15;orphans:2;widows:2;text-align:center}
-.c7{padding-top:0pt;padding-bottom:0pt;line-height:1.5;orphans:2;widows:2;text-align:justify;text-indent:1.25cm}
+.c4{font-size:10pt}
+.c5{color:#000000;font-size:10pt;font-family:"Arial",sans-serif;font-style:normal}
+.c6{padding:0;margin:0;line-height:1.15;orphans:2;widows:2;text-align:center}
+.c7{padding:0;margin:0 0 8pt 0;line-height:1.15;orphans:2;widows:2;text-align:justify}
 .c8{background-color:#ffffff;max-width:160mm}
-.c9{padding-top:0pt;padding-bottom:0pt;line-height:1.5;text-align:center}
-.c11{padding-top:0pt;padding-bottom:0pt;line-height:1.5;text-align:center}
-.c12{padding-top:0pt;padding-bottom:0pt;line-height:1.15;text-align:right;height:11pt}
+.c9{padding:0;margin:0 0 8pt 0;line-height:1.15;text-align:center}
+.c11{padding:0;margin:0 0 8pt 0;line-height:1.15;text-align:center}
+.c12{padding:0;margin:0;line-height:1.15;text-align:right;height:11pt}
 .c13{font-weight:400}
-.c14{padding-top:0pt;padding-bottom:0pt;line-height:1.5;text-align:justify;text-indent:1.25cm}
-h3{padding-top:14pt;color:#434343;font-size:14pt;padding-bottom:4pt;font-family:"Arial",sans-serif;line-height:1.5;page-break-after:avoid;orphans:2;widows:2;text-align:left}
+.c14{padding:0;margin:0 0 8pt 0;line-height:1.15;text-align:justify}
+h3{margin:14pt 0 8pt 0;color:#434343;font-size:12pt;font-family:"Arial",sans-serif;line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}
 .doc-content{position:relative}
+table{max-width:100%;page-break-inside:avoid}
+img{max-width:100%}
 .watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.08;pointer-events:none;z-index:0;width:15.9cm;height:13.5cm;object-fit:contain}
 .doc-content > *:not(.watermark){position:relative;z-index:1}
 .signature-block{page-break-inside:avoid}

@@ -19,7 +19,7 @@ const IPM_BASE_CSS = `
 <style type="text/css">
 @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
 
-/* ABNT NBR 14724:2011 — A4, margens: esq 3cm dir 2cm sup 3cm inf 2cm */
+/* Layout oficial compacto em A4, respeitando os limites da pagina */
 @page {
   size: A4 portrait;
   margin: 3cm 2cm 3cm 2cm;
@@ -29,40 +29,41 @@ const IPM_BASE_CSS = `
 ol{margin:0;padding:0}
 table td,table th{padding:0}
 
-/* Tipografia ABNT: Arial 12pt, espaçamento 1,5 */
+*{box-sizing:border-box}
+
+/* Tipografia oficial: Arial compacto, conforme modelo visual */
 p{
-  margin:0;
+  margin:0 0 8pt 0;
+  color:#000000;
+  font-size:10pt;
+  font-family:"Arial",sans-serif;
+  line-height:1.15;
+  text-align:justify;
+  overflow-wrap:break-word;
+}
+h2{
+  margin:14pt 0 8pt 0;
   color:#000000;
   font-size:12pt;
   font-family:"Arial",sans-serif;
-  line-height:1.5;
-  text-align:justify;
-}
-h2{
-  margin:0;
-  padding-top:18pt;
-  color:#000000;
-  font-size:14pt;
-  padding-bottom:6pt;
-  font-family:"Arial",sans-serif;
-  line-height:1.5;
+  line-height:1.15;
   page-break-after:avoid;
   orphans:2;
   widows:2;
   text-align:left;
 }
 
-/* Classes de parágrafo */
-.c4{color:#000000;font-weight:700;text-decoration:none;vertical-align:baseline;font-size:12pt;font-family:"Arial",sans-serif;font-style:normal}
-.c11{padding-top:0pt;padding-bottom:0pt;line-height:1.5;orphans:2;widows:2;text-align:justify;text-indent:1.25cm}
-.c17{padding-top:18pt;padding-bottom:4pt;line-height:1.5;orphans:2;widows:2;text-align:left}
-.c3{padding-top:0pt;padding-bottom:0pt;line-height:1.15;orphans:2;widows:2;text-align:center}
-.c1{padding-top:0pt;padding-bottom:0pt;line-height:1.5;orphans:2;widows:2;text-align:justify;text-indent:1.25cm}
-.c10{font-weight:400;text-decoration:none;vertical-align:baseline;font-size:12pt;font-family:"Arial",sans-serif;font-style:normal}
-.c14{padding-top:0pt;padding-bottom:0pt;line-height:1.5;orphans:2;widows:2;text-align:center}
-.c9{font-weight:400;text-decoration:none;vertical-align:baseline;font-size:14pt;font-family:"Arial",sans-serif;font-style:normal}
-.c15{padding-top:24pt;padding-bottom:6pt;line-height:1.5;orphans:2;widows:2;text-align:left}
-.c12{text-decoration:none;vertical-align:baseline;font-size:12pt;font-family:"Arial",sans-serif;font-style:normal}
+/* Classes de paragrafo — sem recuo, espacamento compacto */
+.c4{color:#000000;font-weight:700;text-decoration:none;vertical-align:baseline;font-size:10pt;font-family:"Arial",sans-serif;font-style:normal}
+.c11{padding:0;margin:0 0 8pt 0;line-height:1.15;orphans:2;widows:2;text-align:justify}
+.c17{padding:0;margin:8pt 0;line-height:1.15;orphans:2;widows:2;text-align:left}
+.c3{padding:0;margin:0;line-height:1.15;orphans:2;widows:2;text-align:center}
+.c1{padding:0;margin:0 0 8pt 0;line-height:1.15;orphans:2;widows:2;text-align:justify}
+.c10{font-weight:400;text-decoration:none;vertical-align:baseline;font-size:10pt;font-family:"Arial",sans-serif;font-style:normal}
+.c14{padding:0;margin:0 0 8pt 0;line-height:1.15;orphans:2;widows:2;text-align:center}
+.c9{font-weight:400;text-decoration:none;vertical-align:baseline;font-size:12pt;font-family:"Arial",sans-serif;font-style:normal}
+.c15{padding:0;margin:14pt 0 8pt 0;line-height:1.15;orphans:2;widows:2;text-align:left;page-break-after:avoid}
+.c12{text-decoration:none;vertical-align:baseline;font-size:10pt;font-family:"Arial",sans-serif;font-style:normal}
 .c6{background-color:#ffffff;max-width:160mm}
 
 /* Texto bold e italic */
@@ -73,6 +74,8 @@ h2{
 
 /* Container do documento */
 .doc-content{position:relative}
+table{max-width:100%;page-break-inside:avoid}
+img{max-width:100%}
 
 /* Marca d'agua */
 .watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.08;pointer-events:none;z-index:0;width:15.9cm;height:13.5cm;object-fit:contain}
