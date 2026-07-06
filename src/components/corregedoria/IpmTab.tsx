@@ -144,10 +144,17 @@ table td,table th{padding:0}
 .c7{font-weight:700}
 p{margin:0;color:#000000;font-size:11pt;font-family:"Arial"}
 h2{padding-top:18pt;color:#000000;font-size:16pt;padding-bottom:6pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}
-@media print{body{margin:0}.c6{max-width:none}}
+.doc-content{position:relative}
+.watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.06;pointer-events:none;z-index:0;width:400px;height:400px}
+.doc-content > *:not(.watermark){position:relative;z-index:1}
+@media print{body{margin:0}.c6{max-width:none}.watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.06}}
 </style>
 </head>
 <body class="c6 doc-content">
+
+  <!-- MARCA D'AGUA -->
+  <img class="watermark" src="${PM_LOGO}" alt="">
+
 
   <!-- CABECALHO -->
   <table style="width:100%;border-collapse:collapse;margin-bottom:0;">
