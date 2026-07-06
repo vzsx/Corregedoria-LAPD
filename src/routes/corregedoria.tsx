@@ -690,6 +690,8 @@ function Corregedoria() {
   const [relatorioGeralForm, setRelatorioGeralForm] = useState({
     titulo: "",
     conteudo: "",
+    elaborador_nome: "",
+    elaborador_patente: "",
     vinculos: [] as { entidade_id: string; entidade_tipo: "denuncia" | "investigacao" | "depoimento" | "inquerito" | "ato" }[]
   });
   const [submittingRelatorioGeral, setSubmittingRelatorioGeral] = useState(false);
@@ -1376,17 +1378,20 @@ function Corregedoria() {
 
   const submitRelatorioGeral = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!relatorioGeralForm.titulo || !relatorioGeralForm.conteudo) {
-      return toast.error("Preencha título e conteúdo do relatório");
+    if (!relatorioGeralForm.titulo || !relatorioGeralForm.conteudo || !relatorioGeralForm.elaborador_nome || !relatorioGeralForm.elaborador_patente) {
+      return toast.error("Preencha título, conteúdo e dados de quem elaborou o relatório");
     }
     setSubmittingRelatorioGeral(true);
     const { data, error } = await supabase.from("relatorios").insert([{
       titulo: relatorioGeralForm.titulo,
       tipo_denuncia: "Relatório Geral",
-      oficial: user?.user_metadata?.full_name || user?.email || "Oficial",
+      oficial: relatorioGeralForm.elaborador_nome,
       conteudo: relatorioGeralForm.conteudo,
       status: "pendente",
-      dados_detalhados: {}
+      dados_detalhados: {
+        elaborador_nome: relatorioGeralForm.elaborador_nome,
+        elaborador_patente: relatorioGeralForm.elaborador_patente
+      }
     }]).select();
 
     setSubmittingRelatorioGeral(false);
@@ -1411,7 +1416,7 @@ function Corregedoria() {
     }))]);
 
     setRelatorios(prev => [data[0] as Relatorio, ...prev]);
-    setRelatorioGeralForm({ titulo: "", conteudo: "", vinculos: [] });
+    setRelatorioGeralForm({ titulo: "", conteudo: "", elaborador_nome: "", elaborador_patente: "", vinculos: [] });
     setIsRelatorioGeralDialogOpen(false);
     logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "create", entity_type: "relatorio_geral", entity_id: newRgId, details: { titulo: relatorioGeralForm.titulo } });
     toast.success("Relatório Geral criado com sucesso!");
@@ -1422,6 +1427,8 @@ function Corregedoria() {
     setRelatorioGeralForm({
       titulo: rg.titulo,
       conteudo: rg.conteudo,
+      elaborador_nome: rg.dados_detalhados?.elaborador_nome || rg.oficial || "",
+      elaborador_patente: rg.dados_detalhados?.elaborador_patente || rg.dados_detalhados?.corregedor_patente || "",
       vinculos: vinculos.map(v => ({ entidade_id: v.entidade_id, entidade_tipo: v.entidade_tipo }))
     });
     setEditingRelatorioGeralId(rg.id);
@@ -1431,14 +1438,22 @@ function Corregedoria() {
   const updateRelatorioGeral = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingRelatorioGeralId) return;
+    if (!relatorioGeralForm.titulo || !relatorioGeralForm.conteudo || !relatorioGeralForm.elaborador_nome || !relatorioGeralForm.elaborador_patente) {
+      return toast.error("Preencha título, conteúdo e dados de quem elaborou o relatório");
+    }
     setSubmittingRelatorioGeral(true);
     const { error } = await supabase.from("relatorios").update({
       titulo: relatorioGeralForm.titulo,
-      conteudo: relatorioGeralForm.conteudo
+      oficial: relatorioGeralForm.elaborador_nome,
+      conteudo: relatorioGeralForm.conteudo,
+      dados_detalhados: {
+        elaborador_nome: relatorioGeralForm.elaborador_nome,
+        elaborador_patente: relatorioGeralForm.elaborador_patente
+      }
     }).eq("id", editingRelatorioGeralId);
     setSubmittingRelatorioGeral(false);
     if (error) return toast.error("Erro ao atualizar: " + error.message);
-    setRelatorios(prev => prev.map(r => r.id === editingRelatorioGeralId ? { ...r, titulo: relatorioGeralForm.titulo, conteudo: relatorioGeralForm.conteudo } : r));
+    setRelatorios(prev => prev.map(r => r.id === editingRelatorioGeralId ? { ...r, titulo: relatorioGeralForm.titulo, oficial: relatorioGeralForm.elaborador_nome, conteudo: relatorioGeralForm.conteudo, dados_detalhados: { ...(r.dados_detalhados || {}), elaborador_nome: relatorioGeralForm.elaborador_nome, elaborador_patente: relatorioGeralForm.elaborador_patente } } : r));
     setEditingRelatorioGeralId(null);
     setIsEditRelatorioGeralDialogOpen(false);
     logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "update", entity_type: "relatorio_geral", entity_id: editingRelatorioGeralId, details: { titulo: relatorioGeralForm.titulo } });
@@ -4830,7 +4845,7 @@ function Corregedoria() {
                 <Dialog open={isRelatorioGeralDialogOpen} onOpenChange={setIsRelatorioGeralDialogOpen}>
                   <DialogTrigger asChild>
                     <Button onClick={() => {
-                      setRelatorioGeralForm({ titulo: "", conteudo: "", vinculos: [] });
+                      setRelatorioGeralForm({ titulo: "", conteudo: "", elaborador_nome: "", elaborador_patente: "", vinculos: [] });
                       setSelectedEntidadeTipo("denuncia");
                       setSelectedEntidadeId("");
                     }} className="bg-zinc-700 hover:bg-zinc-600 text-white text-[10px] uppercase tracking-widest">
@@ -4845,6 +4860,16 @@ function Corregedoria() {
                       <div className="space-y-2">
                         <Label className="text-[10px] uppercase text-muted-foreground">Título do Relatório *</Label>
                         <Input value={relatorioGeralForm.titulo} onChange={(e) => setRelatorioGeralForm({...relatorioGeralForm, titulo: e.target.value})} className="bg-background border-border text-foreground" placeholder="Ex: Relatório Consolidado - Operação X" required />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label className="text-[10px] uppercase text-muted-foreground">Nome de Quem Elaborou *</Label>
+                          <Input value={relatorioGeralForm.elaborador_nome} onChange={(e) => setRelatorioGeralForm({...relatorioGeralForm, elaborador_nome: e.target.value})} className="bg-background border-border text-foreground" placeholder="Nome do policial" required />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-[10px] uppercase text-muted-foreground">Patente de Quem Elaborou *</Label>
+                          <Input value={relatorioGeralForm.elaborador_patente} onChange={(e) => setRelatorioGeralForm({...relatorioGeralForm, elaborador_patente: e.target.value})} className="bg-background border-border text-foreground" placeholder="Ex: Ten Cel PM" required />
+                        </div>
                       </div>
                       <div className="space-y-2">
                         <Label className="text-[10px] uppercase text-muted-foreground">Conteúdo / Descrição *</Label>
@@ -4936,6 +4961,16 @@ function Corregedoria() {
                       <div className="space-y-2">
                         <Label className="text-[10px] uppercase text-muted-foreground">Título do Relatório *</Label>
                         <Input value={relatorioGeralForm.titulo} onChange={(e) => setRelatorioGeralForm({...relatorioGeralForm, titulo: e.target.value})} className="bg-background border-border text-foreground" required />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label className="text-[10px] uppercase text-muted-foreground">Nome de Quem Elaborou *</Label>
+                          <Input value={relatorioGeralForm.elaborador_nome} onChange={(e) => setRelatorioGeralForm({...relatorioGeralForm, elaborador_nome: e.target.value})} className="bg-background border-border text-foreground" required />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-[10px] uppercase text-muted-foreground">Patente de Quem Elaborou *</Label>
+                          <Input value={relatorioGeralForm.elaborador_patente} onChange={(e) => setRelatorioGeralForm({...relatorioGeralForm, elaborador_patente: e.target.value})} className="bg-background border-border text-foreground" required />
+                        </div>
                       </div>
                       <div className="space-y-2">
                         <Label className="text-[10px] uppercase text-muted-foreground">Conteúdo / Descrição *</Label>

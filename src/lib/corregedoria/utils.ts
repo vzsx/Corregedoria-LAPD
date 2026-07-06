@@ -71,6 +71,7 @@ h2{
 .c2{font-style:italic}
 .c5{color:#434343}
 .c7{font-weight:700}
+.preserve-text{white-space:pre-wrap;overflow-wrap:anywhere}
 
 /* Container do documento */
 .doc-content{position:relative}
@@ -172,6 +173,19 @@ function printGeneric(title: string, bodyContent: string, autorNome?: string, au
   setTimeout(() => w.print(), 500);
 }
 
+function escapeHtml(value: any): string {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function preserveText(value: any): string {
+  return `<span class="c5 preserve-text">${escapeHtml(value)}</span>`;
+}
+
 export const printRelatorio = (relatorio: Relatorio) => {
   const content = relatorio.conteudo || relatorio.dados_detalhados?.relato_fatos || "";
   const data = relatorio.dados_detalhados || {};
@@ -179,6 +193,8 @@ export const printRelatorio = (relatorio: Relatorio) => {
   const regNum = relatorio.numero_registro?.toString().padStart(4, '0') || '???';
 
   const sections: string[] = [];
+  const assinaturaNome = data.elaborador_nome || data.registrador_nome || data.ato_autoridade_nome || relatorio.oficial;
+  const assinaturaPosto = data.elaborador_patente || data.registrador_patente || data.corregedor_patente || data.ato_autoridade_cargo;
 
   sections.push(`<p class="c1"><span class="c0">Registro:</span> <span class="c5">#${regNum}</span></p>`);
   sections.push(`<p class="c1"><span class="c0">Status:</span> <span class="c5">${(relatorio.status || "pendente").toUpperCase()}</span></p>`);
@@ -203,12 +219,12 @@ export const printRelatorio = (relatorio: Relatorio) => {
 
   if (data.relato_fatos) {
     sections.push(`<p class="c11"><span class="c4">RELATO DOS FATOS</span></p>`);
-    sections.push(`<p class="c1"><span class="c5">${data.relato_fatos}</span></p>`);
+    sections.push(`<p class="c1">${preserveText(data.relato_fatos)}</p>`);
   }
 
   if (content) {
     sections.push(`<p class="c11"><span class="c4">CONTEÚDO</span></p>`);
-    sections.push(`<p class="c1"><span class="c5">${content}</span></p>`);
+    sections.push(`<p class="c1">${preserveText(content)}</p>`);
   }
 
   if (data.testemunhas_nomes) {
@@ -216,10 +232,10 @@ export const printRelatorio = (relatorio: Relatorio) => {
   }
 
   if (data.provas_descricao) {
-    sections.push(`<p class="c1"><span class="c0">Provas:</span> <span class="c5">${data.provas_descricao}</span></p>`);
+    sections.push(`<p class="c1"><span class="c0">Provas:</span> ${preserveText(data.provas_descricao)}</p>`);
   }
 
-  printGeneric(title, sections.join("\n"), relatorio.oficial, relatorio.dados_detalhados?.corregedor_patente);
+  printGeneric(title, sections.join("\n"), assinaturaNome, assinaturaPosto);
 };
 
 export const printDenuncia = (denuncia: Denuncia) => {
