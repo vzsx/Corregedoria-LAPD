@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { BRASAO_SP_LOGO, PM_LOGO } from "@/components/corregedoria/ipm-logos";
+import { PMESP_WATERMARK } from "@/components/corregedoria/pmesp-watermark";
 import type { Depoimento, Relatorio, Investigacao, Denuncia } from "./types";
 
 export const formatDateSafe = (dateStr: any, formatStr: string) => {
@@ -36,7 +37,10 @@ table td,table th{padding:0}
 .c7{font-weight:700}
 p{margin:0;color:#000000;font-size:11pt;font-family:"Arial"}
 h2{padding-top:18pt;color:#000000;font-size:16pt;padding-bottom:6pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}
-@media print{body{margin:0}.c6{max-width:none}}
+.doc-content{position:relative}
+.watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.08;pointer-events:none;z-index:0;width:350px;height:350px}
+.doc-content > *:not(.watermark){position:relative;z-index:1}
+@media print{body{margin:0}.c6{max-width:none}.watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.08}}
 </style>
 `;
 
@@ -49,21 +53,26 @@ ${IPM_BASE_CSS}
 </head>
 <body class="c6 doc-content">
 
+  <!-- MARCA D'AGUA -->
+  <img class="watermark" src="${PMESP_WATERMARK}" alt="">
+
   <!-- CABECALHO -->
-  <div>
-    <p class="c3">
-      <span class="c4">GOVERNO DO ESTADO DE SÃO PAULO &nbsp;</span>
-      <span style="overflow:hidden;display:inline-block;margin:0;border:0;width:80.95px;height:93.01px;">
-        <img src="${BRASAO_SP_LOGO}" style="width:80.95px;height:93.01px;" title="">
-      </span>
-      <span style="overflow:hidden;display:inline-block;margin:0;border:0;width:92.58px;height:107.00px;">
-        <img src="${PM_LOGO}" style="width:92.58px;height:107.00px;" title="">
-      </span>
-    </p>
-    <p class="c3"><span class="c4">SECRETARIA DE ESTADO DA SEGURANÇA PÚBLICA &nbsp;</span></p>
-    <p class="c3"><span class="c4">POLÍCIA MILITAR DO ESTADO DE SÃO PAULO &nbsp;</span></p>
-    <p class="c3"><span class="c7">QUARTEL DA CORREGEDORIA-GERAL DA POLÍCIA MILITAR<br></span></p>
-  </div>
+  <table style="width:100%;border-collapse:collapse;margin-bottom:0;">
+    <tr>
+      <td style="width:80px;vertical-align:middle;padding:0;text-align:center;">
+        <img src="${BRASAO_SP_LOGO}" style="width:75px;height:auto;" title="">
+      </td>
+      <td style="vertical-align:middle;padding:0 8px;text-align:center;">
+        <p class="c3"><span class="c4">GOVERNO DO ESTADO DE SÃO PAULO</span></p>
+        <p class="c3"><span class="c4">SECRETARIA DE ESTADO DA SEGURANÇA PÚBLICA</span></p>
+        <p class="c3"><span class="c4">POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</span></p>
+        <p class="c3"><span class="c7">QUARTEL DA CORREGEDORIA-GERAL DA POLÍCIA MILITAR</span></p>
+      </td>
+      <td style="width:92px;vertical-align:middle;padding:0;text-align:center;">
+        <img src="${PM_LOGO}" style="width:88px;height:auto;" title="">
+      </td>
+    </tr>
+  </table>
 
   <!-- TITULOS -->
   <p class="c11"><span class="c4">POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</span></p>
