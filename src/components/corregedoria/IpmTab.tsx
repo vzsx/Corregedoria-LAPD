@@ -122,15 +122,16 @@ function generateIpmHtml(data: IpmFormData, autorNome?: string, autorPosto?: str
     position: relative;
     min-height: 100vh;
     padding: 2cm 2.5cm;
+    background: #fff;
   }
   .watermark {
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 500px;
-    height: 500px;
-    opacity: 0.06;
+    width: 550px;
+    height: 550px;
+    opacity: 0.07;
     pointer-events: none;
     z-index: 0;
   }
@@ -234,30 +235,47 @@ function generateIpmHtml(data: IpmFormData, autorNome?: string, autorPosto?: str
 <body>
 <div class="page">
   <div class="watermark">
-    <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="200" cy="200" r="180" fill="none" stroke="#999" stroke-width="8"/>
-      <circle cx="200" cy="200" r="150" fill="none" stroke="#999" stroke-width="3"/>
-      <polygon points="200,60 215,140 295,140 230,185 250,265 200,220 150,265 170,185 105,140 185,140" fill="#ccc" opacity="0.3"/>
-      <text x="200" y="330" text-anchor="middle" font-family="Times New Roman" font-size="28" font-weight="bold" fill="#999" letter-spacing="4">POLICIA MILITAR</text>
-      <text x="200" y="365" text-anchor="middle" font-family="Times New Roman" font-size="16" fill="#999">SAO PAULO</text>
-      <path d="M 50,200 A 150,150 0 0,1 350,200" fill="none" stroke="#999" stroke-width="2" id="topArc"/>
-      <path d="M 50,200 A 150,150 0 0,0 350,200" fill="none" stroke="#999" stroke-width="2" id="bottomArc"/>
-      <text font-family="Times New Roman" font-size="14" fill="#999" letter-spacing="8">
-        <textPath href="#topArc" startOffset="50%" text-anchor="middle">CORREGEDORIA GERAL</textPath>
+    <svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+      <!-- Outer circle -->
+      <circle cx="250" cy="250" r="230" fill="none" stroke="#666" stroke-width="6"/>
+      <!-- Inner circle -->
+      <circle cx="250" cy="250" r="195" fill="none" stroke="#666" stroke-width="2"/>
+      <!-- Star -->
+      <polygon points="250,80 270,170 360,170 290,225 310,315 250,260 190,315 210,225 140,170 230,170" fill="#888" opacity="0.4"/>
+      <!-- Inner star circle -->
+      <circle cx="250" cy="250" r="80" fill="none" stroke="#666" stroke-width="2"/>
+      <!-- Top text arc -->
+      <defs>
+        <path id="topArc" d="M 70,250 A 180,180 0 0,1 430,250" fill="none"/>
+        <path id="bottomArc" d="M 80,270 A 175,175 0 0,0 420,270" fill="none"/>
+      </defs>
+      <text font-family="Times New Roman, serif" font-size="32" font-weight="bold" fill="#666" letter-spacing="12">
+        <textPath href="#topArc" startOffset="50%" text-anchor="middle">POLICIA MILITAR</textPath>
       </text>
+      <!-- Bottom text arc -->
+      <text font-family="Times New Roman, serif" font-size="26" fill="#666" letter-spacing="6">
+        <textPath href="#bottomArc" startOffset="50%" text-anchor="middle">SAO PAULO</textPath>
+      </text>
+      <!-- Side wings left -->
+      <path d="M 30,250 Q 50,220 80,230 Q 60,250 80,270 Q 50,280 30,250" fill="#888" opacity="0.3"/>
+      <!-- Side wings right -->
+      <path d="M 470,250 Q 450,220 420,230 Q 440,250 420,270 Q 450,280 470,250" fill="#888" opacity="0.3"/>
     </svg>
   </div>
   <div class="content">
     <table class="header-table">
       <tr>
         <td class="logo-cell">
-          <div style="width:70px;height:80px;border:2px solid #003366;display:flex;align-items:center;justify-content:center;background:#fff3cd;">
-            <div style="text-align:center;font-size:8pt;font-weight:bold;color:#003366;">
-              <div style="font-size:7pt;">GOVERNO</div>
-              <div style="font-size:7pt;">DO ESTADO</div>
-              <div style="font-size:7pt;">DE SÃO PAULO</div>
-              <div style="font-size:14pt;margin:2px 0;">⚔️</div>
-            </div>
+          <div style="width:70px;height:80px;display:flex;align-items:center;justify-content:center;">
+            <svg viewBox="0 0 70 80" xmlns="http://www.w3.org/2000/svg" width="70" height="80">
+              <!-- Brasão SP简化版 -->
+              <rect x="5" y="5" width="60" height="70" rx="3" fill="none" stroke="#003366" stroke-width="2"/>
+              <rect x="10" y="10" width="50" height="35" fill="#003366"/>
+              <rect x="10" y="45" width="50" height="25" fill="#003366"/>
+              <line x1="10" y1="45" x2="60" y2="45" stroke="#fff" stroke-width="1"/>
+              <text x="35" y="32" text-anchor="middle" font-family="Times New Roman" font-size="8" fill="#fff" font-weight="bold">GOVERNO</text>
+              <text x="35" y="62" text-anchor="middle" font-family="Times New Roman" font-size="6" fill="#fff">ESTADO DE SP</text>
+            </svg>
           </div>
         </td>
         <td class="text-cell">
@@ -267,20 +285,39 @@ function generateIpmHtml(data: IpmFormData, autorNome?: string, autorPosto?: str
           <div class="qrt">QUARTEL DA CORREGEDORIA-GERAL DA POLÍCIA MILITAR</div>
         </td>
         <td class="logo-cell">
-          <div style="width:70px;height:80px;border:2px solid #8B0000;display:flex;align-items:center;justify-content:center;background:#fff0f0;border-radius:50%;">
-            <div style="text-align:center;font-size:8pt;font-weight:bold;color:#8B0000;">
-              <div style="font-size:10pt;">⚔️</div>
-              <div style="font-size:7pt;">SÃO</div>
-              <div style="font-size:7pt;">PAULO</div>
-            </div>
+          <div style="width:70px;height:80px;display:flex;align-items:center;justify-content:center;">
+            <svg viewBox="0 0 70 80" xmlns="http://www.w3.org/2000/svg" width="70" height="80">
+              <!-- PMPM sigla -->
+              <circle cx="35" cy="40" r="30" fill="none" stroke="#8B0000" stroke-width="2"/>
+              <circle cx="35" cy="40" r="25" fill="none" stroke="#8B0000" stroke-width="1"/>
+              <text x="35" y="36" text-anchor="middle" font-family="Times New Roman" font-size="10" fill="#8B0000" font-weight="bold">ST°P</text>
+              <text x="35" y="50" text-anchor="middle" font-family="Times New Roman" font-size="6" fill="#8B0000">PMESP</text>
+            </svg>
           </div>
         </td>
       </tr>
     </table>
 
-    <div class="doc-title">POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</div>
-    <div class="doc-subtitle">CORREGEDORIA DA POLÍCIA MILITAR</div>
-    <div class="portaria-number">PORTARIA Nº ${data.numero_ipm || "____"}/2026 – CPM</div>
+    <div style="text-align:center;margin-top:10px;">
+      <div style="font-size:14pt;font-weight:bold;letter-spacing:2px;">POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</div>
+      <div style="font-size:11pt;letter-spacing:1px;">CORREGEDORIA DA POLÍCIA MILITAR</div>
+    </div>
+
+    <hr class="divider" style="border-top:3px solid #000;margin:20px 0;">
+
+    <div style="margin:20px 0;line-height:2;">
+      <div>GOVERNO DO ESTADO DE SÃO PAULO</div>
+      <div>SECRETARIA DE ESTADO DA SEGURANÇA PÚBLICA</div>
+      <div>POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</div>
+      <div>QUARTEL DA CORREGEDORIA-GERAL DA POLÍCIA MILITAR</div>
+    </div>
+
+    <div style="text-align:center;margin:30px 0 20px;">
+      <div style="font-size:13pt;font-weight:bold;letter-spacing:2px;">POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</div>
+      <div style="font-size:11pt;letter-spacing:1px;">CORREGEDORIA DA POLÍCIA MILITAR</div>
+    </div>
+
+    <div class="portaria-number">PORTARIA Nº IPM - Nº${data.numero_ipm || "____"}/2026 – CPM</div>
 
     <div class="section">
       <p>O CORREGEDOR DA POLÍCIA MILITAR DO ESTADO DE SÃO PAULO no uso de suas atribuições legais e regulamentares, especialmente nos termos do Regulamento Disciplinar da Polícia Militar do Estado de São Paulo (RDPM),</p>
