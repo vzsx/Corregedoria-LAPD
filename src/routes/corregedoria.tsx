@@ -822,6 +822,8 @@ function Corregedoria() {
     depoimento: "",
     data_depoimento: format(new Date(), "yyyy-MM-dd"),
     oficial_batalhao: "",
+    registrador_nome: "",
+    registrador_patente: "",
     relatorio_id_ip: "",
     relatorio_id_ato: "",
     investigacao_id: "",
@@ -1234,8 +1236,8 @@ function Corregedoria() {
 
   const submitDepoimento = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!depoimentoForm.oficial_nome || !depoimentoForm.depoimento) {
-      return toast.error("Preencha nome do oficial e o depoimento");
+    if (!depoimentoForm.oficial_nome || !depoimentoForm.depoimento || !depoimentoForm.registrador_nome || !depoimentoForm.registrador_patente) {
+      return toast.error("Preencha o declarante, o depoimento e os dados do policial registrador");
     }
     setSubmittingDepoimento(true);
     const { data, error } = await supabase.from("depoimentos").insert([{
@@ -1245,6 +1247,8 @@ function Corregedoria() {
       depoimento: depoimentoForm.depoimento,
       data_depoimento: depoimentoForm.data_depoimento,
       oficial_batalhao: depoimentoForm.oficial_batalhao || null,
+      registrador_nome: depoimentoForm.registrador_nome || null,
+      registrador_patente: depoimentoForm.registrador_patente || null,
       relatorio_id_ip: depoimentoForm.relatorio_id_ip && depoimentoForm.relatorio_id_ip !== "none" ? depoimentoForm.relatorio_id_ip : null,
       relatorio_id_ato: depoimentoForm.relatorio_id_ato && depoimentoForm.relatorio_id_ato !== "none" ? depoimentoForm.relatorio_id_ato : null,
       investigacao_id: depoimentoForm.investigacao_id && depoimentoForm.investigacao_id !== "none" ? depoimentoForm.investigacao_id : null,
@@ -1272,6 +1276,8 @@ function Corregedoria() {
       depoimento: "",
       data_depoimento: format(new Date(), "yyyy-MM-dd"),
       oficial_batalhao: "",
+      registrador_nome: "",
+      registrador_patente: "",
       relatorio_id_ip: "",
       relatorio_id_ato: "",
       investigacao_id: "",
@@ -1310,6 +1316,8 @@ function Corregedoria() {
       depoimento: dep.depoimento || "",
       data_depoimento: dep.data_depoimento || format(new Date(), "yyyy-MM-dd"),
       oficial_batalhao: dep.oficial_batalhao || "",
+      registrador_nome: dep.registrador_nome || "",
+      registrador_patente: dep.registrador_patente || "",
       relatorio_id_ip: dep.relatorio_id_ip || "",
       relatorio_id_ato: dep.relatorio_id_ato || "",
       investigacao_id: dep.investigacao_id || "",
@@ -1322,7 +1330,9 @@ function Corregedoria() {
   const updateDepoimento = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingDepoimentoId) return;
-    if (!depoimentoForm.depoimento) return toast.error("Preencha o depoimento");
+    if (!depoimentoForm.oficial_nome || !depoimentoForm.depoimento || !depoimentoForm.registrador_nome || !depoimentoForm.registrador_patente) {
+      return toast.error("Preencha o declarante, o depoimento e os dados do policial registrador");
+    }
     setSubmittingDepoimento(true);
     const { error } = await supabase.from("depoimentos").update({
       oficial_nome: depoimentoForm.oficial_nome,
@@ -1331,6 +1341,8 @@ function Corregedoria() {
       depoimento: depoimentoForm.depoimento,
       data_depoimento: depoimentoForm.data_depoimento,
       oficial_batalhao: depoimentoForm.oficial_batalhao || null,
+      registrador_nome: depoimentoForm.registrador_nome || null,
+      registrador_patente: depoimentoForm.registrador_patente || null,
       relatorio_id_ip: depoimentoForm.relatorio_id_ip && depoimentoForm.relatorio_id_ip !== "none" ? depoimentoForm.relatorio_id_ip : null,
       relatorio_id_ato: depoimentoForm.relatorio_id_ato && depoimentoForm.relatorio_id_ato !== "none" ? depoimentoForm.relatorio_id_ato : null,
       investigacao_id: depoimentoForm.investigacao_id && depoimentoForm.investigacao_id !== "none" ? depoimentoForm.investigacao_id : null,
@@ -1351,6 +1363,8 @@ function Corregedoria() {
       depoimento: "",
       data_depoimento: format(new Date(), "yyyy-MM-dd"),
       oficial_batalhao: "",
+      registrador_nome: "",
+      registrador_patente: "",
       relatorio_id_ip: "",
       relatorio_id_ato: "",
       investigacao_id: "",
@@ -4345,6 +4359,8 @@ function Corregedoria() {
                       depoimento: "",
                       data_depoimento: format(new Date(), "yyyy-MM-dd"),
                       oficial_batalhao: "",
+                      registrador_nome: "",
+                      registrador_patente: "",
                       relatorio_id_ip: "",
                       relatorio_id_ato: "",
                       investigacao_id: "",
@@ -4360,11 +4376,11 @@ function Corregedoria() {
                     <form onSubmit={submitDepoimento} className="space-y-5">
                       <div className="grid grid-cols-3 gap-4">
                         <div className="space-y-1">
-                          <Label className="text-[9px] uppercase text-muted-foreground">Nome do Oficial *</Label>
-                          <Input value={depoimentoForm.oficial_nome} onChange={(e) => setDepoimentoForm({...depoimentoForm, oficial_nome: e.target.value})} className="h-8 bg-background border-border text-foreground text-xs" placeholder="Nome do oficial" />
+                          <Label className="text-[9px] uppercase text-muted-foreground">Nome do Declarante *</Label>
+                          <Input value={depoimentoForm.oficial_nome} onChange={(e) => setDepoimentoForm({...depoimentoForm, oficial_nome: e.target.value})} className="h-8 bg-background border-border text-foreground text-xs" placeholder="Nome de quem presta depoimento" />
                         </div>
                         <div className="space-y-1">
-                          <Label className="text-[9px] uppercase text-muted-foreground">Patente</Label>
+                          <Label className="text-[9px] uppercase text-muted-foreground">Patente do Declarante</Label>
                           <Input value={depoimentoForm.oficial_patente} onChange={(e) => setDepoimentoForm({...depoimentoForm, oficial_patente: e.target.value})} className="h-8 bg-background border-border text-foreground text-xs" placeholder="Ex: 3º Sargento" />
                         </div>
                         <div className="space-y-1">
@@ -4380,6 +4396,19 @@ function Corregedoria() {
                         <div className="space-y-1">
                           <Label className="text-[9px] uppercase text-muted-foreground">Batalhão</Label>
                           <Input value={depoimentoForm.oficial_batalhao} onChange={(e) => setDepoimentoForm({...depoimentoForm, oficial_batalhao: e.target.value})} className="h-8 bg-background border-border text-foreground text-xs" placeholder="Ex: 1º BPM" />
+                        </div>
+                      </div>
+                      <div className="pt-2 border-t border-border space-y-3">
+                        <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Policial Registrador</h4>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <Label className="text-[9px] uppercase text-muted-foreground">Nome do Registrador *</Label>
+                            <Input value={depoimentoForm.registrador_nome} onChange={(e) => setDepoimentoForm({...depoimentoForm, registrador_nome: e.target.value})} className="h-8 bg-background border-border text-foreground text-xs" placeholder="Nome do policial que registra" />
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-[9px] uppercase text-muted-foreground">Patente do Registrador *</Label>
+                            <Input value={depoimentoForm.registrador_patente} onChange={(e) => setDepoimentoForm({...depoimentoForm, registrador_patente: e.target.value})} className="h-8 bg-background border-border text-foreground text-xs" placeholder="Ex: Ten Cel PM" />
+                          </div>
                         </div>
                       </div>
                       <div className="space-y-1">
@@ -4465,6 +4494,8 @@ function Corregedoria() {
                       depoimento: "",
                       data_depoimento: format(new Date(), "yyyy-MM-dd"),
                       oficial_batalhao: "",
+                      registrador_nome: "",
+                      registrador_patente: "",
                       relatorio_id_ip: "",
                       relatorio_id_ato: "",
                       investigacao_id: "",
@@ -4479,11 +4510,11 @@ function Corregedoria() {
                     <form onSubmit={updateDepoimento} className="space-y-5">
                       <div className="grid grid-cols-3 gap-4">
                         <div className="space-y-1">
-                          <Label className="text-[9px] uppercase text-muted-foreground">Nome do Oficial *</Label>
-                          <Input value={depoimentoForm.oficial_nome} onChange={(e) => setDepoimentoForm({...depoimentoForm, oficial_nome: e.target.value})} className="h-8 bg-background border-border text-foreground text-xs" placeholder="Nome do oficial" />
+                          <Label className="text-[9px] uppercase text-muted-foreground">Nome do Declarante *</Label>
+                          <Input value={depoimentoForm.oficial_nome} onChange={(e) => setDepoimentoForm({...depoimentoForm, oficial_nome: e.target.value})} className="h-8 bg-background border-border text-foreground text-xs" placeholder="Nome de quem presta depoimento" />
                         </div>
                         <div className="space-y-1">
-                          <Label className="text-[9px] uppercase text-muted-foreground">Patente</Label>
+                          <Label className="text-[9px] uppercase text-muted-foreground">Patente do Declarante</Label>
                           <Input value={depoimentoForm.oficial_patente} onChange={(e) => setDepoimentoForm({...depoimentoForm, oficial_patente: e.target.value})} className="h-8 bg-background border-border text-foreground text-xs" placeholder="Ex: 3º Sargento" />
                         </div>
                         <div className="space-y-1">
@@ -4499,6 +4530,19 @@ function Corregedoria() {
                         <div className="space-y-1">
                           <Label className="text-[9px] uppercase text-muted-foreground">Batalhão</Label>
                           <Input value={depoimentoForm.oficial_batalhao} onChange={(e) => setDepoimentoForm({...depoimentoForm, oficial_batalhao: e.target.value})} className="h-8 bg-background border-border text-foreground text-xs" placeholder="Ex: 1º BPM" />
+                        </div>
+                      </div>
+                      <div className="pt-2 border-t border-border space-y-3">
+                        <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Policial Registrador</h4>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <Label className="text-[9px] uppercase text-muted-foreground">Nome do Registrador *</Label>
+                            <Input value={depoimentoForm.registrador_nome} onChange={(e) => setDepoimentoForm({...depoimentoForm, registrador_nome: e.target.value})} className="h-8 bg-background border-border text-foreground text-xs" placeholder="Nome do policial que registra" />
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-[9px] uppercase text-muted-foreground">Patente do Registrador *</Label>
+                            <Input value={depoimentoForm.registrador_patente} onChange={(e) => setDepoimentoForm({...depoimentoForm, registrador_patente: e.target.value})} className="h-8 bg-background border-border text-foreground text-xs" placeholder="Ex: Ten Cel PM" />
+                          </div>
                         </div>
                       </div>
                       <div className="space-y-1">

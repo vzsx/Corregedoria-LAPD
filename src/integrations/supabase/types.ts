@@ -168,6 +168,8 @@ export type Database = {
           depoimento: string
           data_depoimento: string
           oficial_batalhao: string | null
+          registrador_nome: string | null
+          registrador_patente: string | null
           relatorio_id_ip: string | null
           relatorio_id_ato: string | null
           investigacao_id: string | null

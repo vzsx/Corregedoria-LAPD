@@ -277,7 +277,12 @@ export const printDenuncia = (denuncia: Denuncia) => {
     sections.push(`<p class="c1"><span class="c5">${data.provas_descricao}</span></p>`);
   }
 
-  printGeneric(title, sections.join("\n"), depoimento.oficial_nome, depoimento.oficial_patente || undefined);
+  printGeneric(
+    title,
+    sections.join("\n"),
+    depoimento.registrador_nome || undefined,
+    depoimento.registrador_patente || undefined,
+  );
 };
 
 export const printInvestigacao = (investigacao: Investigacao) => {
@@ -354,5 +359,10 @@ export const printDepoimento = (depoimento: Depoimento) => {
     sections.push(`<p class="c1"><span class="c5">${depoimento.observacao}</span></p>`);
   }
 
-  printGeneric(title, sections.join("\n"), depoimento.oficial_nome, depoimento.oficial_patente || undefined);
+  printGeneric(
+    title,
+    sections.join("\n"),
+    depoimento.registrador_nome || undefined,
+    depoimento.registrador_patente || undefined,
+  );
 };

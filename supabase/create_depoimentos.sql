@@ -8,6 +8,8 @@ CREATE TABLE IF NOT EXISTS public.depoimentos (
     depoimento TEXT NOT NULL,
     data_depoimento DATE DEFAULT CURRENT_DATE,
     oficial_batalhao TEXT,
+    registrador_nome TEXT,
+    registrador_patente TEXT,
     relatorio_id_ip UUID REFERENCES public.relatorios(id) ON DELETE SET NULL,
     relatorio_id_ato UUID REFERENCES public.relatorios(id) ON DELETE SET NULL,
     investigacao_id UUID REFERENCES public.investigacoes(id) ON DELETE SET NULL,
