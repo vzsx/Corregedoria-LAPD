@@ -140,7 +140,7 @@ table td,table th{padding:0}
 p{
   margin:0 0 8pt 0;
   color:#000000;
-  font-size:10pt;
+  font-size:11pt;
   font-family:"Arial",sans-serif;
   line-height:1.15;
   text-align:justify;
@@ -149,7 +149,7 @@ p{
 h2{
   margin:14pt 0 8pt 0;
   color:#000000;
-  font-size:12pt;
+  font-size:11pt;
   font-family:"Arial",sans-serif;
   line-height:1.15;
   page-break-after:avoid;
@@ -158,16 +158,16 @@ h2{
   text-align:left;
 }
 
-.c4{color:#000000;font-weight:700;text-decoration:none;vertical-align:baseline;font-size:10pt;font-family:"Arial",sans-serif;font-style:normal}
+.c4{color:#000000;font-weight:700;text-decoration:none;vertical-align:baseline;font-size:11pt;font-family:"Arial",sans-serif;font-style:normal}
 .c11{padding:0;margin:0 0 8pt 0;line-height:1.15;orphans:2;widows:2;text-align:justify}
 .c17{padding:0;margin:8pt 0;line-height:1.15;orphans:2;widows:2;text-align:left}
 .c3{padding:0;margin:0;line-height:1.15;orphans:2;widows:2;text-align:center}
 .c1{padding:0;margin:0 0 8pt 0;line-height:1.15;orphans:2;widows:2;text-align:justify}
-.c10{font-weight:400;text-decoration:none;vertical-align:baseline;font-size:10pt;font-family:"Arial",sans-serif;font-style:normal}
+.c10{font-weight:400;text-decoration:none;vertical-align:baseline;font-size:11pt;font-family:"Arial",sans-serif;font-style:normal}
 .c14{padding:0;margin:0 0 8pt 0;line-height:1.15;orphans:2;widows:2;text-align:center}
-.c9{font-weight:400;text-decoration:none;vertical-align:baseline;font-size:12pt;font-family:"Arial",sans-serif;font-style:normal}
+.c9{font-weight:400;text-decoration:none;vertical-align:baseline;font-size:11pt;font-family:"Arial",sans-serif;font-style:normal}
 .c15{padding:0;margin:14pt 0 8pt 0;line-height:1.15;orphans:2;widows:2;text-align:left;page-break-after:avoid}
-.c12{text-decoration:none;vertical-align:baseline;font-size:10pt;font-family:"Arial",sans-serif;font-style:normal}
+.c12{text-decoration:none;vertical-align:baseline;font-size:11pt;font-family:"Arial",sans-serif;font-style:normal}
 .c6{background-color:#ffffff;max-width:160mm}
 .c0{color:#434343;font-weight:700}
 .c2{font-style:italic}
@@ -181,7 +181,7 @@ img{max-width:100%}
 .signature-block{page-break-inside:avoid}
 .signature-name{font-family:'Pinyon Script',cursive;font-size:30pt;color:#000;font-weight:400;line-height:1}
 .signature-line{display:inline-block;width:80mm;border-bottom:1px solid #000;height:12pt}
-.signature-title{font-size:10pt;color:#000;margin-top:2pt}
+.signature-title{font-size:11pt;color:#000;margin-top:2pt}
 @media print{
   body{margin:0;padding:0}
   .c6{max-width:none;padding:0}
@@ -271,18 +271,18 @@ img{max-width:100%}
   <p class="c1 c16"><span class="c4"></span></p>
 
   <!-- DATA + ASSINATURA -->
-  <div class="signature-block" style="margin-top:8pt;text-align:center;">
-    <p class="c14" style="margin:0 0 6pt 0;">
+  <div class="signature-block" style="margin-top:30pt;text-align:center;">
+    <p class="c14" style="margin:0 0 18pt 0;">
       <span class="c4">São Paulo, ${dataFormatada}.</span>
     </p>
-    <p class="c14" style="margin:0 0 2pt 0;line-height:1;">
+    <p class="c14" style="margin:0 0 6pt 0;line-height:1;">
       <span class="c4">Ass: </span>${autorNomeFinal ? `<span class="signature-name">${autorNomeFinal}</span>` : `<span class="signature-line"></span>`}
     </p>
     <p class="c14" style="margin:0;line-height:1;">
       <span class="signature-title">${autorNomeFinal ? `${autorPostoFinal ? autorPostoFinal + " " : ""}${autorNomeFinal}` : `<span class="signature-line" style="width:46mm;height:8pt;"></span>`}</span>
     </p>
     <p class="c14" style="margin:2pt 0 0 0;">
-      <span class="c4" style="font-size:10pt;">Corregedor da Polícia Militar do Estado de São Paulo</span>
+      <span class="c4" style="font-size:11pt;">Corregedor da Polícia Militar do Estado de São Paulo</span>
     </p>
   </div>
 

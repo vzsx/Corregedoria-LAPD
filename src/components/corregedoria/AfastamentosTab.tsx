@@ -1226,26 +1226,26 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
 <style>
 @page{margin:0}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Times New Roman',Times,serif;font-size:12pt;line-height:1.6;color:#000;padding:0}
+body{font-family:Arial,sans-serif;font-size:11pt;line-height:1.15;color:#000;padding:0}
 .header{text-align:center;margin-bottom:30px;padding-bottom:20px;border-bottom:2px solid #000}
-.header .gov{font-size:10pt;font-weight:bold;text-transform:uppercase;letter-spacing:1px}
-.header .org{font-size:9pt;margin-top:2px}
-.header .title{font-size:14pt;font-weight:bold;text-transform:uppercase;margin-top:8px;letter-spacing:2px}
+.header .gov{font-size:11pt;font-weight:bold;text-transform:uppercase;letter-spacing:1px}
+.header .org{font-size:11pt;margin-top:2px}
+.header .title{font-size:11pt;font-weight:bold;text-transform:uppercase;margin-top:8px;letter-spacing:2px}
 .header .subtitle{font-size:11pt;font-weight:bold;text-transform:uppercase;margin-top:4px}
-.portaria-num{text-align:center;font-size:13pt;font-weight:bold;text-transform:uppercase;margin:30px 0 20px}
-.info-box{border:1px solid #999;padding:12px 16px;margin-bottom:20px;font-size:10pt;background:#f9f9f9}
+.portaria-num{text-align:center;font-size:11pt;font-weight:bold;text-transform:uppercase;margin:30px 0 20px}
+.info-box{border:1px solid #999;padding:12px 16px;margin-bottom:20px;font-size:11pt;background:#f9f9f9}
 .info-box table{width:100%;border-collapse:collapse}
 .info-box td{padding:3px 8px}
 .info-box td:first-child{font-weight:bold;width:180px}
 .ementa{text-align:justify;font-size:11pt;margin-bottom:25px;font-style:italic}
-.resolve{text-align:center;font-size:12pt;font-weight:bold;text-transform:uppercase;margin:25px 0 20px;letter-spacing:3px}
-.artigo{text-align:justify;font-size:12pt;margin-bottom:12px;text-indent:2cm}
+.resolve{text-align:center;font-size:11pt;font-weight:bold;text-transform:uppercase;margin:25px 0 20px;letter-spacing:3px}
+.artigo{text-align:justify;font-size:11pt;margin-bottom:12px;text-indent:2cm}
 .final{text-align:center;font-size:11pt;font-weight:bold;text-transform:uppercase;margin:25px 0 30px;letter-spacing:2px}
-.rodape{text-align:center;margin-top:50px}
-.rodape .local-data{font-size:11pt;margin-bottom:15px}
-.rodape .linha{font-size:11pt;margin-bottom:5px}
+.rodape{text-align:center;margin-top:70px}
+.rodape .local-data{font-size:11pt;margin-bottom:28px}
+.rodape .linha{font-size:11pt;margin-bottom:10px}
 .rodape .nome{font-size:11pt;font-weight:bold}
-.rodape .cargo{font-size:10pt}
+.rodape .cargo{font-size:11pt}
 @media print{body{padding:0}.no-print{display:none}}
 </style></head><body>${el?.innerHTML || ""}</body></html>`;
                   const blob = new Blob([html], { type: "text/html" });

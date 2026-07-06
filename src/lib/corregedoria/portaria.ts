@@ -78,7 +78,7 @@ table td,table th{padding:0}
 p{
   margin:0 0 8pt 0;
   color:#000000;
-  font-size:10pt;
+  font-size:11pt;
   font-family:"Arial",sans-serif;
   line-height:1.15;
   text-align:justify;
@@ -86,12 +86,12 @@ p{
 }
 
 /* Classes portaria — sem recuo, espacamento compacto */
-.c0{color:#000000;font-weight:400;font-size:10pt;font-family:"Arial",sans-serif;font-style:normal}
+.c0{color:#000000;font-weight:400;font-size:11pt;font-family:"Arial",sans-serif;font-style:normal}
 .c1{padding:0;margin:0 0 8pt 0;line-height:1.15;orphans:2;widows:2;text-align:justify}
-.c2{color:#000000;font-weight:700;font-size:10pt;font-family:"Arial",sans-serif;font-style:normal}
+.c2{color:#000000;font-weight:700;font-size:11pt;font-family:"Arial",sans-serif;font-style:normal}
 .c3{font-weight:700}
-.c4{font-size:10pt}
-.c5{color:#000000;font-size:10pt;font-family:"Arial",sans-serif;font-style:normal}
+.c4{font-size:11pt}
+.c5{color:#000000;font-size:11pt;font-family:"Arial",sans-serif;font-style:normal}
 .c6{padding:0;margin:0;line-height:1.15;orphans:2;widows:2;text-align:center}
 .c7{padding:0;margin:0 0 8pt 0;line-height:1.15;orphans:2;widows:2;text-align:justify}
 .c8{background-color:#ffffff;max-width:160mm}
@@ -109,7 +109,7 @@ img{max-width:100%}
 .signature-block{page-break-inside:avoid}
 .signature-name{font-family:'Pinyon Script',cursive;font-size:30pt;color:#000;font-weight:400;line-height:1}
 .signature-line{display:inline-block;width:80mm;border-bottom:1px solid #000;height:12pt}
-.signature-title{font-size:10pt;color:#000;margin-top:2pt}
+.signature-title{font-size:11pt;color:#000;margin-top:2pt}
 @media print{
   body{margin:0;padding:0}
   .c8{max-width:none;padding:0}
@@ -211,18 +211,18 @@ img{max-width:100%}
   </p>
 
   <!-- DATA + ASSINATURA -->
-  <div class="signature-block" style="margin-top:8pt;text-align:center;">
-    <p class="c11" style="margin:0 0 6pt 0;">
+  <div class="signature-block" style="margin-top:30pt;text-align:center;">
+    <p class="c11" style="margin:0 0 18pt 0;">
       <span class="c5 c3">São Paulo, ${dataEmissao}.</span>
     </p>
-    <p class="c11" style="margin:0 0 2pt 0;line-height:1;">
+    <p class="c11" style="margin:0 0 6pt 0;line-height:1;">
       <span class="c5 c3">Ass: </span>${data.responsavel_nome ? `<span class="signature-name">${data.responsavel_nome}</span>` : `<span class="signature-line"></span>`}
     </p>
     <p class="c11" style="margin:0;line-height:1;">
       <span class="signature-title">${data.responsavel_nome ? `${data.responsavel_posto ? data.responsavel_posto + " " : ""}${data.responsavel_nome}` : `<span class="signature-line" style="width:46mm;height:8pt;"></span>`}</span>
     </p>
     <p class="c11" style="margin:2pt 0 0 0;">
-      <span class="c5 c3" style="font-size:10pt;">Corregedor da Polícia Militar do Estado de São Paulo</span>
+      <span class="c5 c3" style="font-size:11pt;">Corregedor da Polícia Militar do Estado de São Paulo</span>
     </p>
   </div>
 
