@@ -17,7 +17,7 @@ export const formatDateSafe = (dateStr: any, formatStr: string) => {
 
 const IPM_BASE_CSS = `
 <style type="text/css">
-@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&display=swap');
 
 /* Layout oficial compacto em A4, respeitando os limites da pagina */
 @page {
@@ -83,7 +83,7 @@ img{max-width:100%}
 
 /* Assinatura */
 .signature-block{page-break-inside:avoid}
-.signature-name{font-family:'Great Vibes',cursive;font-size:26pt;color:#000}
+.signature-name{font-family:'Dancing Script',cursive;font-size:24pt;color:#000;font-weight:600}
 .signature-title{font-size:10pt;color:#000;margin-top:2pt}
 
 /* Impressao */
@@ -100,15 +100,15 @@ function generateSignatureBlock(autorNome?: string, autorPosto?: string): string
   const nome = autorNome || "___________________________";
   const posto = autorPosto || "";
   return `
-  <div class="signature-block" style="margin-top:48pt;text-align:center;">
+  <div class="signature-block" style="margin-top:18pt;text-align:center;">
     <p class="c14"><span class="c4">São Paulo, ${dataFormatada}.</span></p>
-    <p class="c14" style="height:36pt;"><span class="c4"></span></p>
+    <p class="c14" style="height:14pt;margin:0;"><span class="c4"></span></p>
     <p class="c14">
       <span class="c4">Ass: </span><span class="signature-name">${nome}</span>
     </p>
-    <p class="c14" style="height:6pt;"><span class="c4"></span></p>
+    <p class="c14" style="height:2pt;margin:0;"><span class="c4"></span></p>
     <p class="c14" style="margin:0;">
-      <span class="signature-title">${posto ? posto + " PM " : ""}${nome}</span>
+      <span class="signature-title">${posto ? posto + " " : ""}${nome}</span>
     </p>
     <p class="c14" style="margin:2pt 0 0 0;">
       <span class="c4" style="font-size:10pt;">Corregedor da Polícia Militar do Estado de São Paulo</span>
@@ -276,7 +276,7 @@ export const printDenuncia = (denuncia: Denuncia) => {
     sections.push(`<p class="c1"><span class="c5">${data.provas_descricao}</span></p>`);
   }
 
-  printGeneric(title, sections.join("\n"));
+  printGeneric(title, sections.join("\n"), depoimento.oficial_nome, depoimento.oficial_patente || undefined);
 };
 
 export const printInvestigacao = (investigacao: Investigacao) => {
