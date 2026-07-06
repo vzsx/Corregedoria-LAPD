@@ -643,6 +643,10 @@ function Corregedoria() {
   const [investigacaoRelatorios, setInvestigacaoRelatorios] = useState<InvestigacaoRelatorio[]>([]);
   const [denunciaInvestigacoes, setDenunciaInvestigacoes] = useState<DenunciaInvestigacao[]>([]);
   const [denunciaDepoimentos, setDenunciaDepoimentos] = useState<DenunciaDepoimento[]>([]);
+  const [afastamentoDenuncias, setAfastamentoDenuncias] = useState<any[]>([]);
+  const [afastamentoInvestigacoes, setAfastamentoInvestigacoes] = useState<any[]>([]);
+  const [afastamentoRelatorios, setAfastamentoRelatorios] = useState<any[]>([]);
+  const [afastamentoDepoimentos, setAfastamentoDepoimentos] = useState<any[]>([]);
   const [depoimentos, setDepoimentos] = useState<Depoimento[]>([]);
   const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
   const [oficiais, setOficiais] = useState<Profile[]>([]);
@@ -819,6 +823,10 @@ function Corregedoria() {
   const [linkInvestigacaoDenunciaId, setLinkInvestigacaoDenunciaId] = useState<string>("");
   const [linkDepoimentoDenunciaId, setLinkDepoimentoDenunciaId] = useState<string>("");
   const [linkIpmId, setLinkIpmId] = useState<string>("");
+  const [linkAfastamentoDenunciaId, setLinkAfastamentoDenunciaId] = useState<string>("");
+  const [linkAfastamentoInvestigacaoId, setLinkAfastamentoInvestigacaoId] = useState<string>("");
+  const [linkAfastamentoRelatorioId, setLinkAfastamentoRelatorioId] = useState<string>("");
+  const [linkAfastamentoDepoimentoId, setLinkAfastamentoDepoimentoId] = useState<string>("");
   const [linking, setLinking] = useState(false);
   const [ipmVinculos, setIpmVinculos] = useState<IpmVinculo[]>([]);
 
@@ -837,7 +845,7 @@ function Corregedoria() {
       return;
     }
     const load = async () => {
-      const [denunciasRes, investigacoesRes, relatoriosRes, drRes, irRes, diRes, depoimentosRes, ddRes, perfisRes, rgvRes, ivRes, ipmsRes] = await Promise.all([
+      const [denunciasRes, investigacoesRes, relatoriosRes, drRes, irRes, diRes, depoimentosRes, ddRes, perfisRes, rgvRes, ivRes, ipmsRes, adRes, aiRes, arRes, adeRes] = await Promise.all([
         supabase.from("denuncias").select("*").order("created_at", { ascending: false }),
         supabase.from("investigacoes").select("*").order("created_at", { ascending: false }),
         supabase.from("relatorios").select("*").order("created_at", { ascending: false }),
@@ -849,7 +857,11 @@ function Corregedoria() {
         supabase.from("profiles").select("*").order("full_name", { ascending: true }),
         supabase.from("relatorio_geral_vinculos").select("*"),
         supabase.from("ipm_vinculos").select("*"),
-        supabase.from("ipm").select("*").order("created_at", { ascending: false })
+        supabase.from("ipm").select("*").order("created_at", { ascending: false }),
+        supabase.from("afastamento_denuncia").select("*"),
+        supabase.from("afastamento_investigacao").select("*"),
+        supabase.from("afastamento_relatorio").select("*"),
+        supabase.from("afastamento_depoimento").select("*")
       ]);
       
       if (denunciasRes.data) setDenuncias(denunciasRes.data as Denuncia[]);
@@ -863,6 +875,10 @@ function Corregedoria() {
       if (rgvRes.data) setRelatorioGeralVinculos(rgvRes.data as RelatorioGeralVinculo[]);
       if (ivRes.data) setIpmVinculos(ivRes.data as IpmVinculo[]);
       if (ipmsRes.data) setIpms(ipmsRes.data as unknown as Ipm[]);
+      if (adRes.data) setAfastamentoDenuncias(adRes.data);
+      if (aiRes.data) setAfastamentoInvestigacoes(aiRes.data);
+      if (arRes.data) setAfastamentoRelatorios(arRes.data);
+      if (adeRes.data) setAfastamentoDepoimentos(adeRes.data);
       
       // Filtrar oficiais para mostrar apenas os aprovados (não pendentes)
       if (perfisRes.data) {
@@ -1961,6 +1977,82 @@ function Corregedoria() {
     if (error) { toast.error("Erro ao desanexar IPM"); return; }
     setIpmVinculos(prev => prev.filter(v => v.id !== vinculoId));
     toast.success("IPM desanexado!");
+  };
+
+  const handleLinkAfastamentoDenuncia = async (afastamentoId: string): Promise<void> => {
+    if (!linkAfastamentoDenunciaId) { toast.error("Selecione uma denúncia"); return; }
+    setLinking(true);
+    const { error } = await supabase.from("afastamento_denuncia").insert({ afastamento_id: afastamentoId, denuncia_id: linkAfastamentoDenunciaId });
+    setLinking(false);
+    if (error) { toast.error("Erro ao vincular denúncia"); return; }
+    toast.success("Denúncia anexada!");
+    setAfastamentoDenuncias(prev => prev.some((ad: any) => ad.afastamento_id === afastamentoId && ad.denuncia_id === linkAfastamentoDenunciaId) ? prev : [...prev, { afastamento_id: afastamentoId, denuncia_id: linkAfastamentoDenunciaId }]);
+    setLinkAfastamentoDenunciaId("");
+  };
+
+  const handleUnlinkAfastamentoDenuncia = async (afastamentoId: string, denunciaId: string): Promise<void> => {
+    setLinking(true);
+    await supabase.from("afastamento_denuncia").delete().match({ afastamento_id: afastamentoId, denuncia_id: denunciaId });
+    setLinking(false);
+    setAfastamentoDenuncias(prev => prev.filter((ad: any) => !(ad.afastamento_id === afastamentoId && ad.denuncia_id === denunciaId)));
+    toast.success("Denúncia desanexada!");
+  };
+
+  const handleLinkAfastamentoInvestigacao = async (afastamentoId: string): Promise<void> => {
+    if (!linkAfastamentoInvestigacaoId) { toast.error("Selecione uma investigação"); return; }
+    setLinking(true);
+    const { error } = await supabase.from("afastamento_investigacao").insert({ afastamento_id: afastamentoId, investigacao_id: linkAfastamentoInvestigacaoId });
+    setLinking(false);
+    if (error) { toast.error("Erro ao vincular investigação"); return; }
+    toast.success("Investigação anexada!");
+    setAfastamentoInvestigacoes(prev => prev.some((ai: any) => ai.afastamento_id === afastamentoId && ai.investigacao_id === linkAfastamentoInvestigacaoId) ? prev : [...prev, { afastamento_id: afastamentoId, investigacao_id: linkAfastamentoInvestigacaoId }]);
+    setLinkAfastamentoInvestigacaoId("");
+  };
+
+  const handleUnlinkAfastamentoInvestigacao = async (afastamentoId: string, investigacaoId: string): Promise<void> => {
+    setLinking(true);
+    await supabase.from("afastamento_investigacao").delete().match({ afastamento_id: afastamentoId, investigacao_id: investigacaoId });
+    setLinking(false);
+    setAfastamentoInvestigacoes(prev => prev.filter((ai: any) => !(ai.afastamento_id === afastamentoId && ai.investigacao_id === investigacaoId)));
+    toast.success("Investigação desanexada!");
+  };
+
+  const handleLinkAfastamentoRelatorio = async (afastamentoId: string): Promise<void> => {
+    if (!linkAfastamentoRelatorioId) { toast.error("Selecione um relatório"); return; }
+    setLinking(true);
+    const { error } = await supabase.from("afastamento_relatorio").insert({ afastamento_id: afastamentoId, relatorio_id: linkAfastamentoRelatorioId });
+    setLinking(false);
+    if (error) { toast.error("Erro ao vincular relatório"); return; }
+    toast.success("Relatório anexado!");
+    setAfastamentoRelatorios(prev => prev.some((ar: any) => ar.afastamento_id === afastamentoId && ar.relatorio_id === linkAfastamentoRelatorioId) ? prev : [...prev, { afastamento_id: afastamentoId, relatorio_id: linkAfastamentoRelatorioId }]);
+    setLinkAfastamentoRelatorioId("");
+  };
+
+  const handleUnlinkAfastamentoRelatorio = async (afastamentoId: string, relatorioId: string): Promise<void> => {
+    setLinking(true);
+    await supabase.from("afastamento_relatorio").delete().match({ afastamento_id: afastamentoId, relatorio_id: relatorioId });
+    setLinking(false);
+    setAfastamentoRelatorios(prev => prev.filter((ar: any) => !(ar.afastamento_id === afastamentoId && ar.relatorio_id === relatorioId)));
+    toast.success("Relatório desanexado!");
+  };
+
+  const handleLinkAfastamentoDepoimento = async (afastamentoId: string): Promise<void> => {
+    if (!linkAfastamentoDepoimentoId) { toast.error("Selecione um depoimento"); return; }
+    setLinking(true);
+    const { error } = await supabase.from("afastamento_depoimento").insert({ afastamento_id: afastamentoId, depoimento_id: linkAfastamentoDepoimentoId });
+    setLinking(false);
+    if (error) { toast.error("Erro ao vincular depoimento"); return; }
+    toast.success("Depoimento anexado!");
+    setAfastamentoDepoimentos(prev => prev.some((ad: any) => ad.afastamento_id === afastamentoId && ad.depoimento_id === linkAfastamentoDepoimentoId) ? prev : [...prev, { afastamento_id: afastamentoId, depoimento_id: linkAfastamentoDepoimentoId }]);
+    setLinkAfastamentoDepoimentoId("");
+  };
+
+  const handleUnlinkAfastamentoDepoimento = async (afastamentoId: string, depoimentoId: string): Promise<void> => {
+    setLinking(true);
+    await supabase.from("afastamento_depoimento").delete().match({ afastamento_id: afastamentoId, depoimento_id: depoimentoId });
+    setLinking(false);
+    setAfastamentoDepoimentos(prev => prev.filter((ad: any) => !(ad.afastamento_id === afastamentoId && ad.depoimento_id === depoimentoId)));
+    toast.success("Depoimento desanexado!");
   };
 
   const confirmDeleteOficial = (userId: string) => {
@@ -4958,7 +5050,33 @@ function Corregedoria() {
           )}
 
           {activeTab === "afastamentos" && (
-            <AfastamentosTab />
+            <AfastamentosTab
+              denuncias={denuncias}
+              investigacoes={investigacoes}
+              relatorios={relatorios}
+              depoimentos={depoimentos}
+              afastamentoDenuncias={afastamentoDenuncias}
+              afastamentoInvestigacoes={afastamentoInvestigacoes}
+              afastamentoRelatorios={afastamentoRelatorios}
+              afastamentoDepoimentos={afastamentoDepoimentos}
+              linking={linking}
+              linkAfastamentoDenunciaId={linkAfastamentoDenunciaId}
+              setLinkAfastamentoDenunciaId={setLinkAfastamentoDenunciaId}
+              linkAfastamentoInvestigacaoId={linkAfastamentoInvestigacaoId}
+              setLinkAfastamentoInvestigacaoId={setLinkAfastamentoInvestigacaoId}
+              linkAfastamentoRelatorioId={linkAfastamentoRelatorioId}
+              setLinkAfastamentoRelatorioId={setLinkAfastamentoRelatorioId}
+              linkAfastamentoDepoimentoId={linkAfastamentoDepoimentoId}
+              setLinkAfastamentoDepoimentoId={setLinkAfastamentoDepoimentoId}
+              handleLinkAfastamentoDenuncia={handleLinkAfastamentoDenuncia}
+              handleUnlinkAfastamentoDenuncia={handleUnlinkAfastamentoDenuncia}
+              handleLinkAfastamentoInvestigacao={handleLinkAfastamentoInvestigacao}
+              handleUnlinkAfastamentoInvestigacao={handleUnlinkAfastamentoInvestigacao}
+              handleLinkAfastamentoRelatorio={handleLinkAfastamentoRelatorio}
+              handleUnlinkAfastamentoRelatorio={handleUnlinkAfastamentoRelatorio}
+              handleLinkAfastamentoDepoimento={handleLinkAfastamentoDepoimento}
+              handleUnlinkAfastamentoDepoimento={handleUnlinkAfastamentoDepoimento}
+            />
           )}
 
         </div>

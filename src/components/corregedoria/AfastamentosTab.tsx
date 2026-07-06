@@ -34,6 +34,7 @@ import type {
   Afastamento, AfastamentoStatus,
   InvestigacaoPolicial, InqueritoPolicial,
   Advertencia, VersaoDocumento,
+  Denuncia, Investigacao, Relatorio, Depoimento,
 } from "@/lib/corregedoria/types";
 import { generatePortariaText, printPortaria } from "@/lib/corregedoria/portaria";
 import type { PortariaData } from "@/lib/corregedoria/portaria";
@@ -93,7 +94,36 @@ const defaultForm: PortariaFormData = {
   status: "ativo",
 };
 
-export function AfastamentosTab(_props: Record<string, never>) {
+export interface AfastamentosTabProps {
+  denuncias: Denuncia[];
+  investigacoes: Investigacao[];
+  relatorios: Relatorio[];
+  depoimentos: Depoimento[];
+  afastamentoDenuncias: any[];
+  afastamentoInvestigacoes: any[];
+  afastamentoRelatorios: any[];
+  afastamentoDepoimentos: any[];
+  linking: boolean;
+  linkAfastamentoDenunciaId: string;
+  setLinkAfastamentoDenunciaId: (v: string) => void;
+  linkAfastamentoInvestigacaoId: string;
+  setLinkAfastamentoInvestigacaoId: (v: string) => void;
+  linkAfastamentoRelatorioId: string;
+  setLinkAfastamentoRelatorioId: (v: string) => void;
+  linkAfastamentoDepoimentoId: string;
+  setLinkAfastamentoDepoimentoId: (v: string) => void;
+  handleLinkAfastamentoDenuncia: (afastamentoId: string) => Promise<void>;
+  handleUnlinkAfastamentoDenuncia: (afastamentoId: string, denunciaId: string) => Promise<void>;
+  handleLinkAfastamentoInvestigacao: (afastamentoId: string) => Promise<void>;
+  handleUnlinkAfastamentoInvestigacao: (afastamentoId: string, investigacaoId: string) => Promise<void>;
+  handleLinkAfastamentoRelatorio: (afastamentoId: string) => Promise<void>;
+  handleUnlinkAfastamentoRelatorio: (afastamentoId: string, relatorioId: string) => Promise<void>;
+  handleLinkAfastamentoDepoimento: (afastamentoId: string) => Promise<void>;
+  handleUnlinkAfastamentoDepoimento: (afastamentoId: string, depoimentoId: string) => Promise<void>;
+  onReload?: () => void;
+}
+
+export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimentos, afastamentoDenuncias, afastamentoInvestigacoes, afastamentoRelatorios, afastamentoDepoimentos, linking, linkAfastamentoDenunciaId, setLinkAfastamentoDenunciaId, linkAfastamentoInvestigacaoId, setLinkAfastamentoInvestigacaoId, linkAfastamentoRelatorioId, setLinkAfastamentoRelatorioId, linkAfastamentoDepoimentoId, setLinkAfastamentoDepoimentoId, handleLinkAfastamentoDenuncia, handleUnlinkAfastamentoDenuncia, handleLinkAfastamentoInvestigacao, handleUnlinkAfastamentoInvestigacao, handleLinkAfastamentoRelatorio, handleUnlinkAfastamentoRelatorio, handleLinkAfastamentoDepoimento, handleUnlinkAfastamentoDepoimento, onReload }: AfastamentosTabProps) {
   const { user, isAdmin, roles } = useAuth();
   const currentRole: string = (roles[0] || "consulta") as string;
   const canDelete = currentRole === "corregedor_geral" || currentRole === "subcorregedor" || isAdmin;
@@ -102,7 +132,7 @@ export function AfastamentosTab(_props: Record<string, never>) {
 
   const [loading, setLoading] = useState(true);
   const [afastamentos, setAfastamentos] = useState<Afastamento[]>([]);
-  const [investigacoes, setInvestigacoes] = useState<InvestigacaoPolicial[]>([]);
+  const [investigacoesPolicial, setInvestigacoesPolicial] = useState<InvestigacaoPolicial[]>([]);
   const [inqueritos, setInqueritos] = useState<InqueritoPolicial[]>([]);
   const [advertencias, setAdvertencias] = useState<Advertencia[]>([]);
 
@@ -142,7 +172,7 @@ export function AfastamentosTab(_props: Record<string, never>) {
       supabase.from("inqueritos_policial").select("*"),
       supabase.from("advertencias").select("*"),
     ]);
-    if (invRes.data) setInvestigacoes((invRes.data as any));
+    if (invRes.data) setInvestigacoesPolicial((invRes.data as any));
     if (inqRes.data) setInqueritos((inqRes.data as any));
     if (advRes.data) setAdvertencias((advRes.data as any));
   };
@@ -176,7 +206,7 @@ export function AfastamentosTab(_props: Record<string, never>) {
     return matchesSearch && matchesFilter;
   });
 
-  const getInvestigacoes = (afastamentoId: string) => investigacoes.filter(i => i.afastamento_id === afastamentoId);
+  const getInvestigacoes = (afastamentoId: string) => investigacoesPolicial.filter(i => i.afastamento_id === afastamentoId);
   const getInqueritosForAfastamento = (afastamentoId: string) => inqueritos.filter(i => i.afastamento_id === afastamentoId);
   const getAdvertencias = (afastamentoId: string) => advertencias.filter(a => a.afastamento_id === afastamentoId);
 
@@ -830,6 +860,178 @@ export function AfastamentosTab(_props: Record<string, never>) {
                         canDelete={canDelete}
                         onReload={() => loadLinkedData()}
                       />
+
+                      {/* Denúncias Vinculadas */}
+                      <div className="rounded border border-border bg-muted p-4">
+                        <div className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                          <FileText className="h-4 w-4" /> Denúncias Vinculadas
+                        </div>
+                        {(() => {
+                          const linked = afastamentoDenuncias.filter((ad: any) => ad.afastamento_id === a.id).map((ad: any) => denuncias.find(d => d.id === ad.denuncia_id)).filter(Boolean) as Denuncia[];
+                          const available = denuncias.filter(d => !afastamentoDenuncias.some((ad: any) => ad.afastamento_id === a.id && ad.denuncia_id === d.id));
+                          return (
+                            <>
+                              {linked.length > 0 ? (
+                                <div className="space-y-2 mb-4">
+                                  {linked.map(d => (
+                                    <div key={d.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
+                                      <div className="flex items-center gap-3">
+                                        <FileText className="h-4 w-4 text-foreground" />
+                                        <span className="text-foreground font-bold">#{d.numero_registro} - {d.titulo}</span>
+                                      </div>
+                                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-950/30" onClick={() => handleUnlinkAfastamentoDenuncia(a.id, d.id)} title="Desanexar">
+                                        <X className="h-3.5 w-3.5" />
+                                      </Button>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <p className="text-xs text-muted-foreground mb-4">Nenhuma denúncia anexada.</p>
+                              )}
+                              <div className="flex gap-2 items-end">
+                                <div className="flex-1">
+                                  <select value={linkAfastamentoDenunciaId} onChange={e => setLinkAfastamentoDenunciaId(e.target.value)} className="w-full h-9 bg-muted border border-border text-foreground text-xs rounded px-2">
+                                    <option value="">Selecione uma denúncia para vincular...</option>
+                                    {available.map(d => (<option key={d.id} value={d.id}>#{d.numero_registro} - {d.titulo}</option>))}
+                                  </select>
+                                </div>
+                                <Button size="sm" onClick={() => handleLinkAfastamentoDenuncia(a.id)} disabled={linking || !linkAfastamentoDenunciaId} className="bg-card hover:bg-slate-700 text-white text-xs h-9">
+                                  {linking ? "Vinculando..." : "Vincular"}
+                                </Button>
+                              </div>
+                            </>
+                          );
+                        })()}
+                      </div>
+
+                      {/* Investigações Vinculadas */}
+                      <div className="rounded border border-border bg-muted p-4">
+                        <div className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                          <Shield className="h-4 w-4" /> Investigações Vinculadas
+                        </div>
+                        {(() => {
+                          const linked = afastamentoInvestigacoes.filter((ai: any) => ai.afastamento_id === a.id).map((ai: any) => investigacoes.find(i => i.id === ai.investigacao_id)).filter(Boolean) as Investigacao[];
+                          const available = investigacoes.filter(i => !afastamentoInvestigacoes.some((ai: any) => ai.afastamento_id === a.id && ai.investigacao_id === i.id));
+                          return (
+                            <>
+                              {linked.length > 0 ? (
+                                <div className="space-y-2 mb-4">
+                                  {linked.map(i => (
+                                    <div key={i.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
+                                      <div className="flex items-center gap-3">
+                                        <Shield className="h-4 w-4 text-foreground" />
+                                        <span className="text-foreground font-bold">{i.titulo}</span>
+                                      </div>
+                                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-950/30" onClick={() => handleUnlinkAfastamentoInvestigacao(a.id, i.id)} title="Desanexar">
+                                        <X className="h-3.5 w-3.5" />
+                                      </Button>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <p className="text-xs text-muted-foreground mb-4">Nenhuma investigação vinculada.</p>
+                              )}
+                              <div className="flex gap-2 items-end">
+                                <div className="flex-1">
+                                  <select value={linkAfastamentoInvestigacaoId} onChange={e => setLinkAfastamentoInvestigacaoId(e.target.value)} className="w-full h-9 bg-muted border border-border text-foreground text-xs rounded px-2">
+                                    <option value="">Selecione uma investigação...</option>
+                                    {available.map(i => (<option key={i.id} value={i.id}>{i.titulo}</option>))}
+                                  </select>
+                                </div>
+                                <Button size="sm" onClick={() => handleLinkAfastamentoInvestigacao(a.id)} disabled={linking || !linkAfastamentoInvestigacaoId} className="bg-card hover:bg-slate-700 text-white text-xs h-9">
+                                  {linking ? "Vinculando..." : "Vincular"}
+                                </Button>
+                              </div>
+                            </>
+                          );
+                        })()}
+                      </div>
+
+                      {/* Relatórios Vinculados */}
+                      <div className="rounded border border-border bg-muted p-4">
+                        <div className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                          <ScrollText className="h-4 w-4" /> Relatórios Vinculados
+                        </div>
+                        {(() => {
+                          const linked = afastamentoRelatorios.filter((ar: any) => ar.afastamento_id === a.id).map((ar: any) => relatorios.find(r => r.id === ar.relatorio_id)).filter(Boolean) as Relatorio[];
+                          const available = relatorios.filter(r => !afastamentoRelatorios.some((ar: any) => ar.afastamento_id === a.id && ar.relatorio_id === r.id));
+                          return (
+                            <>
+                              {linked.length > 0 ? (
+                                <div className="space-y-2 mb-4">
+                                  {linked.map(r => (
+                                    <div key={r.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
+                                      <div className="flex items-center gap-3">
+                                        <ScrollText className="h-4 w-4 text-foreground" />
+                                        <span className="text-foreground font-bold">#{r.numero_registro} - {r.titulo}</span>
+                                      </div>
+                                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-950/30" onClick={() => handleUnlinkAfastamentoRelatorio(a.id, r.id)} title="Desanexar">
+                                        <X className="h-3.5 w-3.5" />
+                                      </Button>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <p className="text-xs text-muted-foreground mb-4">Nenhum relatório anexado.</p>
+                              )}
+                              <div className="flex gap-2 items-end">
+                                <div className="flex-1">
+                                  <select value={linkAfastamentoRelatorioId} onChange={e => setLinkAfastamentoRelatorioId(e.target.value)} className="w-full h-9 bg-muted border border-border text-foreground text-xs rounded px-2">
+                                    <option value="">Selecione um relatório...</option>
+                                    {available.map(r => (<option key={r.id} value={r.id}>#{r.numero_registro} - {r.titulo}</option>))}
+                                  </select>
+                                </div>
+                                <Button size="sm" onClick={() => handleLinkAfastamentoRelatorio(a.id)} disabled={linking || !linkAfastamentoRelatorioId} className="bg-card hover:bg-slate-700 text-white text-xs h-9">
+                                  {linking ? "Vinculando..." : "Vincular"}
+                                </Button>
+                              </div>
+                            </>
+                          );
+                        })()}
+                      </div>
+
+                      {/* Depoimentos Vinculados */}
+                      <div className="rounded border border-border bg-muted p-4">
+                        <div className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                          <Users className="h-4 w-4" /> Depoimentos Vinculados
+                        </div>
+                        {(() => {
+                          const linked = afastamentoDepoimentos.filter((ad: any) => ad.afastamento_id === a.id).map((ad: any) => depoimentos.find(dep => dep.id === ad.depoimento_id)).filter(Boolean) as Depoimento[];
+                          const available = depoimentos.filter(dep => !afastamentoDepoimentos.some((ad: any) => ad.afastamento_id === a.id && ad.depoimento_id === dep.id));
+                          return (
+                            <>
+                              {linked.length > 0 ? (
+                                <div className="space-y-2 mb-4">
+                                  {linked.map(dep => (
+                                    <div key={dep.id} className="flex items-center justify-between rounded bg-muted px-3 py-2 text-sm border border-border">
+                                      <div className="flex items-center gap-3">
+                                        <Users className="h-4 w-4 text-foreground" />
+                                        <span className="text-foreground font-bold">{dep.oficial_nome} - {dep.depoimento?.substring(0, 60)}...</span>
+                                      </div>
+                                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-950/30" onClick={() => handleUnlinkAfastamentoDepoimento(a.id, dep.id)} title="Desanexar">
+                                        <X className="h-3.5 w-3.5" />
+                                      </Button>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <p className="text-xs text-muted-foreground mb-4">Nenhum depoimento vinculado.</p>
+                              )}
+                              <div className="flex gap-2 items-end">
+                                <div className="flex-1">
+                                  <select value={linkAfastamentoDepoimentoId} onChange={e => setLinkAfastamentoDepoimentoId(e.target.value)} className="w-full h-9 bg-muted border border-border text-foreground text-xs rounded px-2">
+                                    <option value="">Selecione um depoimento...</option>
+                                    {available.map(dep => (<option key={dep.id} value={dep.id}>{dep.oficial_nome} - {dep.depoimento?.substring(0, 50)}...</option>))}
+                                  </select>
+                                </div>
+                                <Button size="sm" onClick={() => handleLinkAfastamentoDepoimento(a.id)} disabled={linking || !linkAfastamentoDepoimentoId} className="bg-card hover:bg-slate-700 text-white text-xs h-9">
+                                  {linking ? "Vinculando..." : "Vincular"}
+                                </Button>
+                              </div>
+                            </>
+                          );
+                        })()}
+                      </div>
                     </div>
                   )}
                 </div>

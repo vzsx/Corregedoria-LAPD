@@ -309,6 +309,22 @@ export type Database = {
         }
         Insert: any; Update: any; Relationships: []
       }
+      afastamento_denuncia: {
+        Row: { afastamento_id: string; denuncia_id: string; created_at: string }
+        Insert: any; Update: any; Relationships: []
+      }
+      afastamento_investigacao: {
+        Row: { afastamento_id: string; investigacao_id: string; created_at: string }
+        Insert: any; Update: any; Relationships: []
+      }
+      afastamento_relatorio: {
+        Row: { afastamento_id: string; relatorio_id: string; created_at: string }
+        Insert: any; Update: any; Relationships: []
+      }
+      afastamento_depoimento: {
+        Row: { afastamento_id: string; depoimento_id: string; created_at: string }
+        Insert: any; Update: any; Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

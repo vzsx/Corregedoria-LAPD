@@ -243,3 +243,23 @@ export interface Advertencia {
   afastamento_id: string;
   created_at: string;
 }
+
+export interface AfastamentoDenuncia {
+  afastamento_id: string;
+  denuncia_id: string;
+}
+
+export interface AfastamentoInvestigacao {
+  afastamento_id: string;
+  investigacao_id: string;
+}
+
+export interface AfastamentoRelatorio {
+  afastamento_id: string;
+  relatorio_id: string;
+}
+
+export interface AfastamentoDepoimento {
+  afastamento_id: string;
+  depoimento_id: string;
+}
