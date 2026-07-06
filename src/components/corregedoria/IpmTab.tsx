@@ -129,9 +129,9 @@ function generateIpmHtml(data: IpmFormData, autorNome?: string, autorPosto?: str
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 550px;
-    height: 550px;
-    opacity: 0.07;
+    width: 580px;
+    height: 580px;
+    opacity: 0.10;
     pointer-events: none;
     z-index: 0;
   }
@@ -235,31 +235,54 @@ function generateIpmHtml(data: IpmFormData, autorNome?: string, autorPosto?: str
 <body>
 <div class="page">
   <div class="watermark">
-    <svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
-      <!-- Outer circle -->
-      <circle cx="250" cy="250" r="230" fill="none" stroke="#666" stroke-width="6"/>
-      <!-- Inner circle -->
-      <circle cx="250" cy="250" r="195" fill="none" stroke="#666" stroke-width="2"/>
+    <svg viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
+      <!-- Outer ring -->
+      <circle cx="300" cy="300" r="280" fill="none" stroke="#aaa" stroke-width="4"/>
+      <circle cx="300" cy="300" r="260" fill="none" stroke="#bbb" stroke-width="1.5"/>
+
+      <!-- Wings left -->
+      <g transform="translate(300,300)" fill="#bbb" opacity="0.5">
+        <ellipse cx="-200" cy="0" rx="80" ry="15" transform="rotate(-15)"/>
+        <ellipse cx="-210" cy="20" rx="75" ry="14" transform="rotate(-8)"/>
+        <ellipse cx="-215" cy="40" rx="70" ry="13" transform="rotate(-2)"/>
+        <ellipse cx="-210" cy="60" rx="72" ry="12" transform="rotate(4)"/>
+        <ellipse cx="-200" cy="78" rx="65" ry="11" transform="rotate(10)"/>
+        <ellipse cx="-185" cy="95" rx="55" ry="10" transform="rotate(16)"/>
+        <ellipse cx="-165" cy="110" rx="45" ry="9" transform="rotate(22)"/>
+      </g>
+
+      <!-- Wings right -->
+      <g transform="translate(300,300)" fill="#bbb" opacity="0.5">
+        <ellipse cx="200" cy="0" rx="80" ry="15" transform="rotate(15)"/>
+        <ellipse cx="210" cy="20" rx="75" ry="14" transform="rotate(8)"/>
+        <ellipse cx="215" cy="40" rx="70" ry="13" transform="rotate(2)"/>
+        <ellipse cx="210" cy="60" rx="72" ry="12" transform="rotate(-4)"/>
+        <ellipse cx="200" cy="78" rx="65" ry="11" transform="rotate(-10)"/>
+        <ellipse cx="185" cy="95" rx="55" ry="10" transform="rotate(-16)"/>
+        <ellipse cx="165" cy="110" rx="45" ry="9" transform="rotate(-22)"/>
+      </g>
+
+      <!-- Inner circle with star -->
+      <circle cx="300" cy="300" r="140" fill="none" stroke="#aaa" stroke-width="3"/>
+      <circle cx="300" cy="300" r="120" fill="none" stroke="#bbb" stroke-width="1.5"/>
+
       <!-- Star -->
-      <polygon points="250,80 270,170 360,170 290,225 310,315 250,260 190,315 210,225 140,170 230,170" fill="#888" opacity="0.4"/>
-      <!-- Inner star circle -->
-      <circle cx="250" cy="250" r="80" fill="none" stroke="#666" stroke-width="2"/>
-      <!-- Top text arc -->
+      <polygon points="300,185 320,260 395,260 335,305 355,380 300,340 245,380 265,305 205,260 280,260"
+        fill="#ccc" opacity="0.35" stroke="#bbb" stroke-width="1"/>
+
+      <!-- Top arc text: POLICIA MILITAR -->
       <defs>
-        <path id="topArc" d="M 70,250 A 180,180 0 0,1 430,250" fill="none"/>
-        <path id="bottomArc" d="M 80,270 A 175,175 0 0,0 420,270" fill="none"/>
+        <path id="topTextArc" d="M 100,300 A 200,200 0 0,1 500,300"/>
+        <path id="bottomTextArc" d="M 120,320 A 190,190 0 0,0 480,320"/>
       </defs>
-      <text font-family="Times New Roman, serif" font-size="32" font-weight="bold" fill="#666" letter-spacing="12">
-        <textPath href="#topArc" startOffset="50%" text-anchor="middle">POLICIA MILITAR</textPath>
+      <text font-family="Times New Roman, serif" font-size="38" font-weight="bold" fill="#999" letter-spacing="14">
+        <textPath href="#topTextArc" startOffset="50%" text-anchor="middle">POLICIA MILITAR</textPath>
       </text>
-      <!-- Bottom text arc -->
-      <text font-family="Times New Roman, serif" font-size="26" fill="#666" letter-spacing="6">
-        <textPath href="#bottomArc" startOffset="50%" text-anchor="middle">SAO PAULO</textPath>
+
+      <!-- Bottom arc text: SAO PAULO -->
+      <text font-family="Times New Roman, serif" font-size="28" fill="#999" letter-spacing="8">
+        <textPath href="#bottomTextArc" startOffset="50%" text-anchor="middle">SAO PAULO</textPath>
       </text>
-      <!-- Side wings left -->
-      <path d="M 30,250 Q 50,220 80,230 Q 60,250 80,270 Q 50,280 30,250" fill="#888" opacity="0.3"/>
-      <!-- Side wings right -->
-      <path d="M 470,250 Q 450,220 420,230 Q 440,250 420,270 Q 450,280 470,250" fill="#888" opacity="0.3"/>
     </svg>
   </div>
   <div class="content">
