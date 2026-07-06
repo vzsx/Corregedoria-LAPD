@@ -64,27 +64,11 @@ const defaultForm: IpmFormData = {
 };
 
 const PORTARIA_TEMPLATE = (data: IpmFormData, autorNome?: string, autorPosto?: string) => {
-  const nomeCompleto = `${autorPosto || data.autoridade_posto || ""} ${autorNome || data.autoridade_nome || ""}`.trim();
   const indiciadosStr = data.indiciados.length > 0
     ? data.indiciados.map(i => `${i.posto_graduacao} ${i.nome}`).join(", ")
     : "os policial(is) militar(es) indiciado(s)";
 
-  const dataFormatada = data.data_instauracao
-    ? format(new Date(data.data_instauracao), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
-    : "____/____/______";
-
-  return `GOVERNO DO ESTADO DE SÃO PAULO
-SECRETARIA DE ESTADO DA SEGURANÇA PÚBLICA
-POLÍCIA MILITAR DO ESTADO DE SÃO PAULO
-QUARTEL DA CORREGEDORIA-GERAL DA POLÍCIA MILITAR
-
-
-POLÍCIA MILITAR DO ESTADO DE SÃO PAULO
-CORREGEDORIA DA POLÍCIA MILITAR
-
-PORTARIA Nº ${data.numero_ipm || "____"}/2026 – CPM
-
-O CORREGEDOR DA POLÍCIA MILITAR DO ESTADO DE SÃO PAULO no uso de suas atribuições legais e regulamentares, especialmente nos termos do Regulamento Disciplinar da Polícia Militar do Estado de São Paulo (RDPM),
+  return `O CORREGEDOR DA POLÍCIA MILITAR DO ESTADO DE SÃO PAULO no uso de suas atribuições legais e regulamentares, especialmente nos termos do Regulamento Disciplinar da Polícia Militar do Estado de São Paulo (RDPM),
 
 CONSIDERANDO a necessidade de apurar, de forma ampla, imparcial e fundamentada, os fatos constantes da notícia de possível transgressão disciplinar e/ou crime militar,
 
@@ -96,7 +80,7 @@ Art. 1º Instaurar INQUÉRITO POLICIAL MILITAR (IPM) para apurar os fatos ocorri
 
 Art. 2º Designar como Encarregado do Inquérito Policial Militar o(a) ${data.encarregado_posto || "________"} ${data.encarregado_nome || "________"}, que deverá conduzir os trabalhos observando rigorosamente a legislação vigente, bem como os princípios da legalidade, imparcialidade e devido processo.
 
-Art. 3º O Encarregado do IPM poderá requisitar documentos, determinar diligências, proceder à inquirição de testemunhas e requerer todos os autres necessários à completa elucidação dos fatos.
+Art. 3º O Encarregado do IPM poderá requisitar documentos, determinar diligências, proceder à inquirição de testemunhas e requerer todos os outros necessários à completa elucidação dos fatos.
 
 Art. 4º O prazo para conclusão do presente Inquérito Policial Militar será de ____ dias, podendo ser prorrogado mediante autorização da Corregedoria, quando devidamente justificada.
 
@@ -107,61 +91,276 @@ Art. 6º Esta Portaria entra em vigor na data de sua publicação.
 Publique-se. Registre-se. Cumpra-se.`;
 };
 
-function generateIpmDoc(data: IpmFormData, autorNome?: string, autorPosto?: string): string {
-  const dataEmissao = format(new Date(data.data_instauracao), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
-  const dataCurta = format(new Date(data.data_instauracao), "dd/MM/yyyy");
+function generateIpmHtml(data: IpmFormData, autorNome?: string, autorPosto?: string): string {
+  const dataFormatada = data.data_instauracao
+    ? format(new Date(data.data_instauracao), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
+    : "____/____/______";
+
   const indiciadosStr = data.indiciados.map((i, idx) =>
     `${idx + 1}. ${i.posto_graduacao} ${i.nome} – RG PM nº ${i.rg_pm} – ${i.unidade}`
-  ).join("\n");
+  ).join("<br>");
 
   const enquadramentosStr = data.enquadramentos.map(e =>
-    `  - Indiciado: ${e.indiciado_nome}\n    CPM: ${e.artigos_cpm}\n    CPPM: ${e.artigos_cppm}\n    RDPM: ${e.artigos_rdpm}\n    Obs: ${e.observacoes}`
-  ).join("\n\n");
+    `<strong>Indiciado:</strong> ${e.indiciado_nome}<br>CPM: ${e.artigos_cpm}<br>CPPM: ${e.artigos_cppm}<br>RDPM: ${e.artigos_rdpm}<br>Obs: ${e.observacoes}`
+  ).join("<br><br>");
 
-  const nomePosto = `${autorPosto || data.autoridade_posto || ""} ${autorNome || data.autoridade_nome || ""}`.trim();
+  return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @page { margin: 2cm 2.5cm; size: A4; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 12pt;
+    line-height: 1.8;
+    color: #000;
+    background: #fff;
+  }
+  .page {
+    position: relative;
+    min-height: 100vh;
+    padding: 2cm 2.5cm;
+  }
+  .watermark {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 500px;
+    height: 500px;
+    opacity: 0.06;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .watermark svg { width: 100%; height: 100%; }
+  .content { position: relative; z-index: 1; }
+  .header-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+  .header-table td { vertical-align: top; }
+  .header-table .logo-cell { width: 80px; text-align: center; }
+  .header-table .logo-cell img { width: 70px; height: auto; }
+  .header-table .text-cell { text-align: center; padding: 0 10px; }
+  .header-table .text-cell .gov { font-size: 10pt; font-weight: bold; }
+  .header-table .text-cell .sec { font-size: 9pt; }
+  .header-table .text-cell .pmpm { font-size: 9pt; font-weight: bold; }
+  .header-table .text-cell .qrt { font-size: 9pt; font-weight: bold; }
+  .doc-title {
+    text-align: center;
+    font-size: 13pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 30px 0 5px;
+  }
+  .doc-subtitle {
+    text-align: center;
+    font-size: 12pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 25px;
+  }
+  .portaria-number {
+    text-align: center;
+    font-size: 11pt;
+    font-weight: bold;
+    margin-bottom: 25px;
+  }
+  .section { margin-bottom: 20px; text-align: justify; }
+  .section p { margin-bottom: 12px; text-indent: 2cm; }
+  .resolve-title {
+    font-weight: bold;
+    text-transform: uppercase;
+    margin: 20px 0 15px;
+  }
+  .artigo { margin-bottom: 10px; text-align: justify; }
+  .artigo strong { text-transform: uppercase; }
+  .publique {
+    font-weight: bold;
+    text-align: left;
+    margin-top: 20px;
+  }
+  .signature-area {
+    margin-top: 60px;
+    text-align: center;
+  }
+  .signature-line {
+    width: 250px;
+    border-top: 1px solid #000;
+    margin: 0 auto;
+    padding-top: 5px;
+  }
+  .signature-name {
+    font-weight: bold;
+    font-size: 12pt;
+  }
+  .signature-posto {
+    font-size: 11pt;
+  }
+  .signature-title {
+    font-size: 10pt;
+    font-style: italic;
+    margin-top: 5px;
+  }
+  .divider {
+    border: none;
+    border-top: 1px solid #000;
+    margin: 25px 0;
+  }
+  .section-title {
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 11pt;
+    margin: 20px 0 10px;
+  }
+  .footer-doc {
+    text-align: center;
+    font-size: 8pt;
+    color: #666;
+    border-top: 1px solid #ccc;
+    padding-top: 10px;
+    margin-top: 30px;
+  }
+  @media print {
+    .page { padding: 0; min-height: auto; }
+    .watermark { position: fixed; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="watermark">
+    <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="200" cy="200" r="180" fill="none" stroke="#999" stroke-width="8"/>
+      <circle cx="200" cy="200" r="150" fill="none" stroke="#999" stroke-width="3"/>
+      <polygon points="200,60 215,140 295,140 230,185 250,265 200,220 150,265 170,185 105,140 185,140" fill="#ccc" opacity="0.3"/>
+      <text x="200" y="330" text-anchor="middle" font-family="Times New Roman" font-size="28" font-weight="bold" fill="#999" letter-spacing="4">POLICIA MILITAR</text>
+      <text x="200" y="365" text-anchor="middle" font-family="Times New Roman" font-size="16" fill="#999">SAO PAULO</text>
+      <path d="M 50,200 A 150,150 0 0,1 350,200" fill="none" stroke="#999" stroke-width="2" id="topArc"/>
+      <path d="M 50,200 A 150,150 0 0,0 350,200" fill="none" stroke="#999" stroke-width="2" id="bottomArc"/>
+      <text font-family="Times New Roman" font-size="14" fill="#999" letter-spacing="8">
+        <textPath href="#topArc" startOffset="50%" text-anchor="middle">CORREGEDORIA GERAL</textPath>
+      </text>
+    </svg>
+  </div>
+  <div class="content">
+    <table class="header-table">
+      <tr>
+        <td class="logo-cell">
+          <div style="width:70px;height:80px;border:2px solid #003366;display:flex;align-items:center;justify-content:center;background:#fff3cd;">
+            <div style="text-align:center;font-size:8pt;font-weight:bold;color:#003366;">
+              <div style="font-size:7pt;">GOVERNO</div>
+              <div style="font-size:7pt;">DO ESTADO</div>
+              <div style="font-size:7pt;">DE SÃO PAULO</div>
+              <div style="font-size:14pt;margin:2px 0;">⚔️</div>
+            </div>
+          </div>
+        </td>
+        <td class="text-cell">
+          <div class="gov">GOVERNO DO ESTADO DE SÃO PAULO</div>
+          <div class="sec">SECRETARIA DE ESTADO DA SEGURANÇA PÚBLICA</div>
+          <div class="pmpm">POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</div>
+          <div class="qrt">QUARTEL DA CORREGEDORIA-GERAL DA POLÍCIA MILITAR</div>
+        </td>
+        <td class="logo-cell">
+          <div style="width:70px;height:80px;border:2px solid #8B0000;display:flex;align-items:center;justify-content:center;background:#fff0f0;border-radius:50%;">
+            <div style="text-align:center;font-size:8pt;font-weight:bold;color:#8B0000;">
+              <div style="font-size:10pt;">⚔️</div>
+              <div style="font-size:7pt;">SÃO</div>
+              <div style="font-size:7pt;">PAULO</div>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </table>
 
-  return [
-    PORTARIA_TEMPLATE(data, autorNome, autorPosto),
-    ``,
-    `─`.repeat(60),
-    ``,
-    `São Paulo, ${dataEmissao}.`,
-    ``,
-    ``,
-    `                        ________________________________________`,
-    `                        Ass.: ${autorNome || data.autoridade_nome || "________"}`,
-    ``,
-    `                        ${autorPosto || data.autoridade_posto || "________"}`,
-    `                        Corregedor da Polícia Militar do Estado de São Paulo`,
-    ``,
-    `─`.repeat(60),
-    ``,
-    `INDICIADO(S):`,
-    ``,
-    indiciadosStr || `  Nenhum indiciado cadastrado.`,
-    ``,
-    `─`.repeat(60),
-    ``,
-    `ENQUADRAMENTO LEGAL`,
-    ``,
-    enquadramentosStr || `(Nenhum enquadramento registrado)`,
-    ``,
-    `─`.repeat(60),
-    ``,
-    `RELATÓRIO DOS FATOS`,
-    ``,
-    data.relatorio_fatos || `(Aguardando relatório)`,
-    ``,
-    `─`.repeat(60),
-    ``,
-    `CONCLUSÃO PARCIAL`,
-    ``,
-    data.conclusao_parcial || `(Aguardando conclusão)`,
-    ``,
-    `─`.repeat(60),
-    ``,
-    `Documento gerado eletronicamente – ID único: ${crypto.randomUUID?.() || Date.now().toString(36)}`,
-  ].join("\n");
+    <div class="doc-title">POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</div>
+    <div class="doc-subtitle">CORREGEDORIA DA POLÍCIA MILITAR</div>
+    <div class="portaria-number">PORTARIA Nº ${data.numero_ipm || "____"}/2026 – CPM</div>
+
+    <div class="section">
+      <p>O CORREGEDOR DA POLÍCIA MILITAR DO ESTADO DE SÃO PAULO no uso de suas atribuições legais e regulamentares, especialmente nos termos do Regulamento Disciplinar da Polícia Militar do Estado de São Paulo (RDPM),</p>
+      <p>CONSIDERANDO a necessidade de apurar, de forma ampla, imparcial e fundamentada, os fatos constantes da notícia de possível transgressão disciplinar e/ou crime militar,</p>
+      <p>CONSIDERANDO que os elementos iniciais indicam a necessidade da produção de provas, oitivas e demais diligências indispensáveis ao completo esclarecimento dos fatos,</p>
+    </div>
+
+    <div class="resolve-title">RESOLVE:</div>
+
+    <div class="artigo">
+      <p><strong>Art. 1º</strong> Instaurar INQUÉRITO POLICIAL MILITAR (IPM) para apurar os fatos ocorridos em /2026, envolvendo o(s) policial(is) militar(es) ${data.indiciados.length > 0 ? data.indiciados.map(i => `${i.posto_graduacao} ${i.nome}`).join(", ") : "os policial(is) militar(es) indiciado(s)"}.</p>
+    </div>
+    <div class="artigo">
+      <p><strong>Art. 2º</strong> Designar como Encarregado do Inquérito Policial Militar o(a) ${data.encarregado_posto || "________"} ${data.encarregado_nome || "________"}, que deverá conduzir os trabalhos observando rigorosamente a legislação vigente, bem como os princípios da legalidade, imparcialidade e devido processo.</p>
+    </div>
+    <div class="artigo">
+      <p><strong>Art. 3º</strong> O Encarregado do IPM poderá requisitar documentos, determinar diligências, proceder à inquirição de testemunhas e requerer todos os outros necessários à completa elucidação dos fatos.</p>
+    </div>
+    <div class="artigo">
+      <p><strong>Art. 4º</strong> O prazo para conclusão do presente Inquérito Policial Militar será de ____ dias, podendo ser prorrogado mediante autorização da Corregedoria, quando devidamente justificada.</p>
+    </div>
+    <div class="artigo">
+      <p><strong>Art. 5º</strong> Concluído o inquérito, os autos deverão ser encaminhados à Corregedoria da Polícia Militar para análise, manifestação e adoção das providências cabíveis.</p>
+    </div>
+    <div class="artigo">
+      <p><strong>Art. 6º</strong> Esta Portaria entra em vigor na data de sua publicação.</p>
+    </div>
+
+    <div class="publique">Publique-se. Registre-se. Cumpra-se.</div>
+
+    <hr class="divider">
+
+    <div style="text-align:left;margin:20px 0;">São Paulo, ${dataFormatada}.</div>
+
+    <div class="signature-area">
+      <div class="signature-line"></div>
+      <div class="signature-name">Ass.: ${autorNome || data.autoridade_nome || "________"}</div>
+      <div class="signature-posto">${autorPosto || data.autoridade_posto || "________"}</div>
+      <div class="signature-title">Corregedor da Polícia Militar do Estado de São Paulo</div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="section-title">INDICIADO(S):</div>
+    <div style="margin-bottom:20px;">
+      ${indiciadosStr || "<em>Nenhum indiciado cadastrado.</em>"}
+    </div>
+
+    <hr class="divider">
+
+    <div class="section-title">ENQUADRAMENTO LEGAL</div>
+    <div style="margin-bottom:20px;">
+      ${enquadramentosStr || "<em>(Nenhum enquadramento registrado)</em>"}
+    </div>
+
+    <hr class="divider">
+
+    <div class="section-title">RELATÓRIO DOS FATOS</div>
+    <div style="text-align:justify;margin-bottom:20px;">
+      ${data.relatorio_fatos || "<em>(Aguardando relatório)</em>"}
+    </div>
+
+    <hr class="divider">
+
+    <div class="section-title">CONCLUSÃO PARCIAL</div>
+    <div style="text-align:justify;margin-bottom:20px;">
+      ${data.conclusao_parcial || "<em>(Aguardando conclusão)</em>"}
+    </div>
+
+    <div class="footer-doc">
+      PMESP · CORREGEDORIA GERAL · DOCUMENTO OFICIAL · ${format(new Date(), "dd/MM/yyyy HH:mm")}
+    </div>
+  </div>
+</div>
+</body>
+</html>`;
+}
+
+function generateIpmDoc(data: IpmFormData, autorNome?: string, autorPosto?: string): string {
+  return generateIpmHtml(data, autorNome, autorPosto);
 }
 
 interface IpmTabProps {
@@ -402,27 +601,10 @@ export function IpmTab({ denuncias, investigacoes, relatorios, depoimentos, ipmV
     toast.success("Vinculação adicionada!");
   };
 
-  const printDoc = (content: string) => {
+  const printDoc = (htmlContent: string) => {
     const win = window.open("", "_blank");
     if (!win) return;
-    win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>IPM</title><style>
-      @page{margin:2.5cm 2cm}
-      *{margin:0;padding:0;box-sizing:border-box}
-      body{font-family:'Times New Roman',Times,serif;font-size:12pt;line-height:1.6;color:#000}
-      .header{text-align:center;margin-bottom:30px;border-bottom:2px solid #000;padding-bottom:20px}
-      .header .title{font-size:14pt;font-weight:bold;text-transform:uppercase;letter-spacing:2px}
-      .header .sub{font-size:11pt;text-transform:uppercase;margin-top:4px}
-      pre{font-family:'Times New Roman',Times,serif;white-space:pre-wrap;font-size:12pt;line-height:1.8}
-      .footer-note{text-align:center;font-size:8pt;color:#666;margin-top:30px;border-top:1px solid #ccc;padding-top:10px}
-      @media print{body{padding:0}}
-    </style></head><body>
-    <div class="header">
-      <div class="title">Polícia Militar do Estado de São Paulo</div>
-      <div class="sub">Corregedoria da Polícia Militar</div>
-    </div>
-    <pre>${content}</pre>
-    <div class="footer-note">Documento gerado eletronicamente - Corregedoria Geral PMESP</div>
-    </body></html>`);
+    win.document.write(htmlContent);
     win.document.close();
     setTimeout(() => win.print(), 500);
   };
@@ -549,7 +731,14 @@ export function IpmTab({ denuncias, investigacoes, relatorios, depoimentos, ipmV
           </div>
           <div className="bg-muted/20 border border-border rounded-lg p-4">
             <p className="text-xs font-semibold text-muted-foreground mb-2">PRÉ-VISUALIZAÇÃO DA PORTARIA</p>
-            <pre className="text-xs font-mono whitespace-pre-wrap leading-relaxed text-muted-foreground">{PORTARIA_TEMPLATE(form, user?.user_metadata?.full_name, user?.user_metadata?.patente)}</pre>
+            <div className="bg-white rounded border border-border overflow-hidden" style={{ height: "400px" }}>
+              <iframe
+                srcDoc={generateIpmHtml(form, user?.user_metadata?.full_name, user?.user_metadata?.patente)}
+                title="Pré-visualização"
+                className="w-full border-0"
+                style={{ height: "400px", transform: "scale(0.7)", transformOrigin: "top left", width: "143%" }}
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -1072,27 +1261,24 @@ export function IpmTab({ denuncias, investigacoes, relatorios, depoimentos, ipmV
       <Dialog open={docPreviewOpen} onOpenChange={setDocPreviewOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle className="flex items-center gap-2"><Eye className="h-5 w-5" /> Documento do IPM</DialogTitle></DialogHeader>
-          <div className="bg-white text-black rounded-lg p-6" id="ipm-document">
-            <pre className="font-['Times_New_Roman',Times,serif] text-sm whitespace-pre-wrap leading-relaxed">{docPreviewContent}</pre>
+          <div className="bg-white text-black rounded-lg overflow-hidden border" style={{ minHeight: "800px" }}>
+            <iframe
+              srcDoc={docPreviewContent}
+              title="Pré-visualização IPM"
+              className="w-full border-0"
+              style={{ minHeight: "800px" }}
+            />
           </div>
           <div className="flex justify-end gap-2 pt-2 border-t border-border">
             <Button variant="outline" onClick={() => printDoc(docPreviewContent)} className="gap-2"><Printer className="h-4 w-4" /> Imprimir</Button>
             <Button variant="outline" onClick={() => {
-              const el = document.getElementById("ipm-document");
-              if (!el) return;
-              const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>IPM</title><style>
-                @page{margin:2.5cm 2cm} *{margin:0;padding:0;box-sizing:border-box}
-                body{font-family:'Times New Roman',Times,serif;font-size:12pt;line-height:1.6;color:#000}
-                .header{text-align:center;margin-bottom:30px;border-bottom:2px solid #000;padding-bottom:20px}
-                .header .title{font-size:14pt;font-weight:bold;text-transform:uppercase;letter-spacing:2px}
-                .header .sub{font-size:11pt;text-transform:uppercase;margin-top:4px}
-                pre{font-family:'Times New Roman',Times,serif;white-space:pre-wrap;font-size:12pt;line-height:1.8}
-              </style></head><body><div class="header"><div class="title">Polícia Militar do Estado de São Paulo</div><div class="sub">Corregedoria da Polícia Militar</div></div>${el.innerHTML}</body></html>`;
-              const blob = new Blob([html], { type: "text/html" });
+              const blob = new Blob([docPreviewContent], { type: "text/html" });
               const url = URL.createObjectURL(blob);
               const a = document.createElement("a");
-              a.href = url; a.download = `IPM_${(docPreviewContent.match(/IPM nº (\S+)/)?.[1] || "documento").replace(/\//g, "-")}.html`;
-              a.click(); URL.revokeObjectURL(url);
+              a.href = url;
+              a.download = `IPM_documento.html`;
+              a.click();
+              URL.revokeObjectURL(url);
               toast.success("Documento exportado!");
             }} className="gap-2"><FileText className="h-4 w-4" /> Exportar HTML</Button>
           </div>
