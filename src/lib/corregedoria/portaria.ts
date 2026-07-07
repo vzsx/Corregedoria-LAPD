@@ -226,14 +226,7 @@ img{max-width:100%}
   <p class="c7"><span class="c4 c3">O Corregedor ${data.responsavel_nome || "________________"} da Polícia Militar do Estado de São Paulo</span><span class="c0">, no exercício de suas atribuições legais e regulamentares, com fundamento nos princípios da legalidade, disciplina, hierarquia e moralidade administrativa, bem como nas disposições do Regulamento Disciplinar da Polícia Militar e demais normas institucionais vigentes,</span></p>
 
   ${data.relato_fatos
-    ? (() => {
-        const normalized = data.relato_fatos
-          .replace(/<br\s*\/?>/gi, "\n")
-          .replace(/\\n/g, "\n")
-          .replace(/\r\n/g, "\n")
-          .replace(/\r/g, "\n");
-        return normalized.split(/\n/).filter(l => l.trim()).map(l => `<p class="c7"><span class="c0">${l.trim()}</span></p>`).join("\n  ");
-      })()
+    ? `<p class="c7" style="white-space:pre-line"><span class="c0">${data.relato_fatos.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</span></p>`
     : `<p class="c7"><span class="c4 c3">CONSIDERANDO</span><span class="c0"> a denúncia formal regularmente protocolada perante esta Corregedoria, instruída com elementos audiovisuais que apontam indícios de possíveis irregularidades funcionais;</span></p>
   <p class="c7"><span class="c4 c3">CONSIDERANDO</span><span class="c0"> a necessidade de apuração ampla, técnica, imparcial e rigorosa dos fatos narrados, assegurando aos envolvidos o pleno exercício do contraditório e da ampla defesa, nos termos do devido processo legal;</span></p>
   <p class="c7"><span class="c4 c3">CONSIDERANDO</span><span class="c0"> que os elementos preliminares indicam, em tese, possíveis transgressões disciplinares relacionadas à conduta funcional, tratamento dispensado a superiores, pares e civis, emprego de algemas, uso progressivo da força e eventual descumprimento de deveres regulamentares;</span></p>
