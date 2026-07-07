@@ -10,11 +10,12 @@ interface PortariaPreviewProps {
 }
 
 export function PortariaPreview({ data, inqueritoNumero }: PortariaPreviewProps) {
-  const dataEmissao = format(new Date(data.data_emissao), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
-  const dataInicio = format(new Date(data.data_inicio), "dd/MM/yyyy");
+  const parseLocalDate = (dateStr: string) => { const [y, m, d] = dateStr.split("-").map(Number); return new Date(y, m - 1, d); };
+  const dataEmissao = format(parseLocalDate(data.data_emissao), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+  const dataInicio = format(parseLocalDate(data.data_inicio), "dd/MM/yyyy");
   const isIndeterminado = data.periodo === "indeterminado" || !data.data_termino;
   const isDisciplinar = data.tipo_afastamento === "disciplinar";
-  const dataTermino = isIndeterminado ? "" : (data.data_termino ? format(new Date(data.data_termino), "dd/MM/yyyy") : "");
+  const dataTermino = isIndeterminado ? "" : (data.data_termino ? format(parseLocalDate(data.data_termino), "dd/MM/yyyy") : "");
 
   return (
     <div className="bg-white text-black rounded-lg shadow-lg overflow-hidden print:shadow-none" id="portaria-document">

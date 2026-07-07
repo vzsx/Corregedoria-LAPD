@@ -8,6 +8,11 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+
+function parseLocalDate(dateStr: string): Date {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
 import { useAuth } from "@/hooks/use-auth";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -830,7 +835,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
                       <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground mt-1">
                         <span>RG PM: {a.rg_pm}</span>
                         <span>{a.unidade}</span>
-                        <span>Período: {(a as any).periodo === "indeterminado" || !a.data_termino ? "Indeterminado" : `${format(new Date(a.data_inicio), "dd/MM/yy")} a ${format(new Date(a.data_termino), "dd/MM/yy")}`}</span>
+                        <span>Período: {(a as any).periodo === "indeterminado" || !a.data_termino ? "Indeterminado" : `${format(parseLocalDate(a.data_inicio), "dd/MM/yy")} a ${format(parseLocalDate(a.data_termino), "dd/MM/yy")}`}</span>
                       </div>
                     </div>
                     <div className="flex items-center gap-1 shrink-0 ml-4">
@@ -912,8 +917,8 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                         <Field label="Portaria"><span className="text-sm font-medium">{a.numero_portaria}</span></Field>
                         <Field label="Tipo"><span className={`text-sm font-medium ${(a as any).tipo_afastamento === "disciplinar" ? "text-red-400" : "text-amber-400"}`}>{(a as any).tipo_afastamento === "disciplinar" ? "Disciplinar" : "Cautelar"}</span></Field>
-                        <Field label="Início"><span className="text-sm font-medium">{format(new Date(a.data_inicio), "dd/MM/yyyy")}</span></Field>
-                        <Field label="Término"><span className="text-sm font-medium">{(a as any).periodo === "indeterminado" || !a.data_termino ? "Indeterminado" : format(new Date(a.data_termino), "dd/MM/yyyy")}</span></Field>
+                        <Field label="Início"><span className="text-sm font-medium">{format(parseLocalDate(a.data_inicio), "dd/MM/yyyy")}</span></Field>
+                        <Field label="Término"><span className="text-sm font-medium">{(a as any).periodo === "indeterminado" || !a.data_termino ? "Indeterminado" : format(parseLocalDate(a.data_termino), "dd/MM/yyyy")}</span></Field>
                         <Field label="Período"><span className={`text-sm font-medium ${(a as any).periodo === "indeterminado" ? "text-indigo-400" : "text-blue-400"}`}>{(a as any).periodo === "indeterminado" ? "Indeterminado" : "Determinado"}</span></Field>
                         {a.artigos && <Field label="Artigos"><span className="text-sm font-medium">{a.artigos}</span></Field>}
                         <Field label="Responsável"><span className="text-sm font-medium">{a.responsavel_nome}</span></Field>
@@ -1164,7 +1169,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
                             <Badge variant="outline" className={AFASTAMENTO_STATUS_COLOR[r.status]}>{AFASTAMENTO_STATUS_LABEL[r.status]}</Badge>
                             <span className="text-xs text-muted-foreground">Portaria nº {r.numero_portaria}</span>
                           </div>
-                          <p className="text-sm text-muted-foreground">Período: {(r as any).periodo === "indeterminado" || !r.data_termino ? "Indeterminado" : `${format(new Date(r.data_inicio), "dd/MM/yyyy")} a ${format(new Date(r.data_termino), "dd/MM/yyyy")}`}</p>
+                          <p className="text-sm text-muted-foreground">Período: {(r as any).periodo === "indeterminado" || !r.data_termino ? "Indeterminado" : `${format(parseLocalDate(r.data_inicio), "dd/MM/yyyy")} a ${format(parseLocalDate(r.data_termino), "dd/MM/yyyy")}`}</p>
                           {inq && <p className="text-sm text-muted-foreground">Inquérito vinculado: {inq.numero_inquerito}</p>}
                           <p className="text-sm text-muted-foreground">Responsável: {r.responsavel_nome}</p>
                           <div className="flex gap-2 mt-2">

@@ -21,13 +21,18 @@ export interface PortariaData {
   periodo?: "determinado" | "indeterminado";
 }
 
+function parseLocalDate(dateStr: string): Date {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
 export function generatePortariaText(data: PortariaData): string {
-  const dataEmissao = format(new Date(data.data_emissao), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
-  const dataInicio = format(new Date(data.data_inicio), "dd/MM/yyyy");
+  const dataEmissao = format(parseLocalDate(data.data_emissao), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+  const dataInicio = format(parseLocalDate(data.data_inicio), "dd/MM/yyyy");
   const cidade = "São Paulo";
   const isIndeterminado = data.periodo === "indeterminado" || !data.data_termino;
   const isDisciplinar = data.tipo_afastamento === "disciplinar";
-  const dataTermino = isIndeterminado ? "" : (data.data_termino ? format(new Date(data.data_termino), "dd/MM/yyyy") : "");
+  const dataTermino = isIndeterminado ? "" : (data.data_termino ? format(parseLocalDate(data.data_termino), "dd/MM/yyyy") : "");
 
   const art1Cautelar = isIndeterminado
     ? `Art. 1º Determinar o afastamento cautelar do serviço operacional, por prazo indeterminado dos seguintes policiais militares, a contar de ${dataInicio}:`
@@ -120,11 +125,11 @@ export function generatePortariaText(data: PortariaData): string {
 }
 
 export function generatePortariaHTML(data: PortariaData, inqueritoNumero?: string): string {
-  const dataEmissao = format(new Date(data.data_emissao), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
-  const dataInicio = format(new Date(data.data_inicio), "dd/MM/yyyy");
+  const dataEmissao = format(parseLocalDate(data.data_emissao), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+  const dataInicio = format(parseLocalDate(data.data_inicio), "dd/MM/yyyy");
   const isIndeterminado = data.periodo === "indeterminado" || !data.data_termino;
   const isDisciplinar = data.tipo_afastamento === "disciplinar";
-  const dataTermino = isIndeterminado ? "" : (data.data_termino ? format(new Date(data.data_termino), "dd/MM/yyyy") : "");
+  const dataTermino = isIndeterminado ? "" : (data.data_termino ? format(parseLocalDate(data.data_termino), "dd/MM/yyyy") : "");
 
   return `<!DOCTYPE html>
 <html>
