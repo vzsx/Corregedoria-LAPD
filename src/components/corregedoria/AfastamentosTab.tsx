@@ -231,7 +231,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
       data_emissao: format(new Date(), "yyyy-MM-dd"),
       data_inicio: format(new Date(), "yyyy-MM-dd"),
       data_termino: format(new Date(), "yyyy-MM-dd"),
-      responsavel_nome: user?.user_metadata?.full_name || "",
+      responsavel_nome: "",
       responsavel_posto: "",
       periodo: "determinado",
     });
