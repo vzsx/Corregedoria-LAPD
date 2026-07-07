@@ -37,24 +37,48 @@ export function generatePortariaText(data: PortariaData): string {
     : `Art. 3º A medida disciplinar adicional de afastamento entrará em vigor em ${dataInicio}, devendo o policial militar permanecer afastado até ${dataTermino}, nova deliberação da autoridade competente ou prazo que vier a ser fixado em decisão posterior.`;
 
   if (isDisciplinar) {
+    const art3DisciplinarText = isIndeterminado
+      ? `Art. 3º A medida disciplinar adicional de afastamento entrará em vigor em ${dataInicio}, devendo o policial militar permanecer afastado até nova deliberação da autoridade competente ou até o cumprimento do prazo que vier a ser fixado em decisão posterior.`
+      : `Art. 3º A medida disciplinar adicional de afastamento entrará em vigor em ${dataInicio}, devendo o policial militar permanecer afastado até ${dataTermino}, nova deliberação da autoridade competente ou até o cumprimento do prazo que vier a ser fixado em decisão posterior.`;
+
     return [
-      `BOLETIM CORRECIONAL Nº ${data.numero_portaria}/2026`,
+      `GOVERNO DO ESTADO DE SÃO PAULO`,
+      `SECRETARIA DE ESTADO DA SEGURANÇA PÚBLICA`,
+      `POLÍCIA MILITAR DO ESTADO DE SÃO PAULO`,
+      `QUARTEL DA CORREGEDORIA-GERAL DA POLÍCIA MILITAR`,
       ``,
+      `POLÍCIA MILITAR DO ESTADO DE SÃO PAULO`,
+      `CORREGEDORIA DA POLÍCIA MILITAR`,
+      `BOLETIM CORRECIONAL Nº ${data.numero_portaria}/2026`,
       `INSTAURAÇÃO DE PROCESSO ADMINISTRATIVO DISCIPLINAR COM AFASTAMENTO TEMPORÁRIO`,
       ``,
-      `O Corregedor ${data.responsavel_nome || "________________"} da Polícia Militar do Estado de São Paulo, no exercício de suas atribuições legais e regulamentares, com fundamento nos princípios da legalidade, disciplina, hierarquia e moralidade administrativa,`,
+      `O Corregedor ${data.responsavel_nome || "________________"} da Polícia Militar do Estado de São Paulo, no exercício de suas atribuições legais e regulamentares, com fundamento nos princípios da legalidade, disciplina, hierarquia e moralidade administrativa, bem como nas disposições do Regulamento Disciplinar da Polícia Militar e demais normas institucionais vigentes,`,
+      ``,
+      `CONSIDERANDO a denúncia formal regularmente protocolada perante esta Corregedoria, instruída com elementos audiovisuais que apontam indícios de possíveis irregularidades funcionais;`,
+      `CONSIDERANDO a necessidade de apuração ampla, técnica, imparcial e rigorosa dos fatos narrados, assegurando aos envolvidos o pleno exercício do contraditório e da ampla defesa, nos termos do devido processo legal;`,
+      `CONSIDERANDO que os elementos preliminares indicam, em tese, possíveis transgressões disciplinares relacionadas à conduta funcional, tratamento dispensado a superiores, pares e civis, emprego de algemas, uso progressivo da força e eventual descumprimento de deveres regulamentares;`,
+      `CONSIDERANDO a necessidade de resguardar a regularidade da instrução processual, a preservação da disciplina institucional e a lisura da apuração administrativa,`,
       ``,
       `RESOLVE:`,
       ``,
-      `Art. 1º Instaurar Processo Administrativo Disciplinar (PAD) para apuração integral dos fatos.`,
+      `Art. 1º - Determinar, como MEDIDA DISCIPLINAR, o afastamento dos policiais militares abaixo relacionados das atividades operacionais e funções correlatas:`,
       ``,
-      `Art. 2º Determinar, como medida disciplinar adicional, o afastamento dos policiais militares abaixo relacionados das atividades operacionais e funções correlatas:`,
+      `• ${data.posto_graduacao || "________"} ${data.nome_policial || "________"}, RG PM nº ${data.rg_pm || "________"}, lotado(a) no(a) ${data.unidade || "________"}.`,
       ``,
-      `I – ${data.posto_graduacao || "________"} ${data.nome_policial || "________"}, RG PM nº ${data.rg_pm || "________"}, lotado(a) no(a) ${data.unidade || "________"}.`,
+      art3DisciplinarText,
       ``,
-      art3Disciplinar,
+      `Art. 4º - O afastamento previsto nesta decisão possui natureza disciplinar e administrativa, sendo aplicado em razão da necessidade de preservação da ordem, da disciplina e do regular funcionamento institucional, sem prejuízo da continuidade da apuração dos fatos no âmbito do Processo Administrativo Disciplinar.`,
       ``,
-      `Publique-se. Registre-se. Cumpra-se.`,
+      `Art. 5º - O policial militar ora afastado permanecerá à disposição da Corregedoria da Polícia Militar, devendo atender às convocações, diligências e determinações expedidas pela Autoridade Correcional durante o período de vigência da medida.`,
+      ``,
+      `Art. 6º - Fica determinada a designação de Comissão Processante, mediante Portaria específica, para condução, instrução e conclusão do presente Processo Administrativo Disciplinar.`,
+      ``,
+      `Art. 7º - Concluída a instrução processual, os autos deverão ser encaminhados ao Comando-Geral para decisão final e adoção das providências cabíveis.`,
+      ``,
+      `Publique-se.`,
+      `Registre-se.`,
+      `Cumpra-se.`,
+      `________________`,
       ``,
       `${cidade}, ${dataEmissao}.`,
       ``,
@@ -206,17 +230,15 @@ img{max-width:100%}
 
   <p class="c14"><span class="c2">RESOLVE:</span></p>
 
-  <p class="c7"><span class="c4 c3">Art. 1º -</span><span class="c0"> Instaurar Processo Administrativo Disciplinar (PAD) para apuração integral dos fatos constantes na denúncia formal e nas provas audiovisuais anexadas.</span></p>
-  <p class="c7"><span class="c4 c3">Art. 2º -</span><span class="c0"> Determinar, como medida disciplinar adicional, o afastamento dos policiais militares abaixo relacionados das atividades operacionais e funções correlatas:</span></p>
+  <p class="c7"><span class="c4 c3">Art. 1º -</span><span class="c0"> Determinar, como MEDIDA DISCIPLINAR, o afastamento dos policiais militares abaixo relacionados das atividades operacionais e funções correlatas:</span></p>
   <p class="c7"><span class="c0">• ${data.posto_graduacao || "________"} ${data.nome_policial || "________"}, RG PM nº ${data.rg_pm || "________"}, lotado(a) no(a) ${data.unidade || "________"}.</span></p>
-  <p class="c7"><span class="c4 c3">Art. 3º -</span><span class="c0"> A medida disciplinar adicional de afastamento entrará em vigor em ${dataInicio}, devendo o policial militar permanecer afastado ${isIndeterminado ? "até nova deliberação da autoridade competente ou prazo que vier a ser fixado em decisão posterior." : `até ${dataTermino}, nova deliberação da autoridade competente ou prazo que vier a ser fixado em decisão posterior.`}</span></p>
-  <p class="c7"><span class="c4 c3">Art. 4º -</span><span class="c0"> O afastamento previsto nesta decisão possui natureza disciplinar e administrativa, sendo aplicado em razão da necessidade de preservação da ordem, da disciplina e do regular funcionamento institucional, sem prejuízo da continuidade da apuração dos fatos no âmbito do Processo Administrativo Disciplinar.</span></p>
-  <p class="c7"><span class="c4 c3">Art. 5º -</span><span class="c0"> O policial militar ora afastado permanecerá à disposição da Corregedoria da Polícia Militar, devendo atender às convocações, diligências e determinações expedidas pela Autoridade Correcional durante o período de vigência da medida.</span></p>
-  <p class="c7"><span class="c4 c3">Art. 6º -</span><span class="c0"> Fica determinada a designação de Comissão Processante, mediante Portaria específica, para condução, instrução e conclusão do presente Processo Administrativo Disciplinar.</span></p>
-  <p class="c7"><span class="c4 c3">Art. 7º -</span><span class="c0"> Concluída a instrução processual, os autos deverão ser encaminhados ao Comando-Geral para decisão final e adoção das providências cabíveis.</span></p>
+  <p class="c7"><span class="c4 c3">Art. 2º -</span><span class="c0"> A medida disciplinar adicional de afastamento entrará em vigor em ${dataInicio}, devendo o policial militar permanecer afastado ${isIndeterminado ? "até nova deliberação da autoridade competente ou até o cumprimento do prazo que vier a ser fixado em decisão posterior." : `até ${dataTermino}, nova deliberação da autoridade competente ou até o cumprimento do prazo que vier a ser fixado em decisão posterior.`}</span></p>
+  <p class="c7"><span class="c4 c3">Art. 3º -</span><span class="c0"> O afastamento previsto nesta decisão possui natureza disciplinar e administrativa, sendo aplicado em razão da necessidade de preservação da ordem, da disciplina e do regular funcionamento institucional, sem prejuízo da continuidade da apuração dos fatos no âmbito do Processo Administrativo Disciplinar.</span></p>
+  <p class="c7"><span class="c4 c3">Art. 4º -</span><span class="c0"> O policial militar ora afastado permanecerá à disposição da Corregedoria da Polícia Militar, devendo atender às convocações, diligências e determinações expedidas pela Autoridade Correcional durante o período de vigência da medida.</span></p>
+  <p class="c7"><span class="c4 c3">Art. 5º -</span><span class="c0"> Fica determinada a designação de Comissão Processante, mediante Portaria específica, para condução, instrução e conclusão do presente Processo Administrativo Disciplinar.</span></p>
+  <p class="c7"><span class="c4 c3">Art. 6º -</span><span class="c0"> Concluída a instrução processual, os autos deverão ser encaminhados ao Comando-Geral para decisão final e adoção das providências cabíveis.</span></p>
 
-  <p class="c7"><span class="c4 c3">Publique-se.<br>Registre-se.<br>Cumpra-se.</span></p>
-  <p class="c7"><span class="c4 c3">________________</span></p>
+  <p class="c7"><span class="c4 c3">Publique-se.<br>Registre-se.<br>Cumpra-se.<br>________________</span></p>
   ` : `
   <!-- PORTARIA -->
   <h3 class="c1"><span class="c2">PORTARIA Nº${data.numero_portaria || "____"}/2026 – CPM</span></h3>
