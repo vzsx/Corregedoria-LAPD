@@ -17,7 +17,6 @@ export interface PortariaData {
   inquerito_numero: string;
   responsavel_nome: string;
   responsavel_posto: string;
-  relato_fatos?: string;
   periodo?: "determinado" | "indeterminado";
 }
 
@@ -47,12 +46,6 @@ export function generatePortariaText(data: PortariaData): string {
       ? `Art. 3º A medida disciplinar adicional de afastamento entrará em vigor em ${dataInicio}, devendo o policial militar permanecer afastado até nova deliberação da autoridade competente ou até o cumprimento do prazo que vier a ser fixado em decisão posterior.`
       : `Art. 3º A medida disciplinar adicional de afastamento entrará em vigor em ${dataInicio}, devendo o policial militar permanecer afastado até ${dataTermino}, nova deliberação da autoridade competente ou até o cumprimento do prazo que vier a ser fixado em decisão posterior.`;
 
-    const normalizeRelato = (t: string) => t.replace(/<br\s*\/?>/gi, "\n").replace(/\\n/g, "\n").replace(/\r\n/g, "\n").replace(/\r/g, "\n");
-
-    const relatoFatos = data.relato_fatos
-      ? `\n${normalizeRelato(data.relato_fatos).split(/\n/).filter(l => l.trim()).join("\n")}\n`
-      : `\nCONSIDERANDO a denúncia formal regularmente protocolada perante esta Corregedoria, instruída com elementos audiovisuais que apontam indícios de possíveis irregularidades funcionais;\nCONSIDERANDO a necessidade de apuração ampla, técnica, imparcial e rigorosa dos fatos narrados, assegurando aos envolvidos o pleno exercício do contraditório e da ampla defesa, nos termos do devido processo legal;\nCONSIDERANDO que os elementos preliminares indicam, em tese, possíveis transgressões disciplinares relacionadas à conduta funcional, tratamento dispensado a superiores, pares e civis, emprego de algemas, uso progressivo da força e eventual descumprimento de deveres regulamentares;\nCONSIDERANDO a necessidade de resguardar a regularidade da instrução processual, a preservação da disciplina institucional e a lisura da apuração administrativa,\n`;
-
     return [
       `GOVERNO DO ESTADO DE SÃO PAULO`,
       `SECRETARIA DE ESTADO DA SEGURANÇA PÚBLICA`,
@@ -65,7 +58,12 @@ export function generatePortariaText(data: PortariaData): string {
       `INSTAURAÇÃO DE PROCESSO ADMINISTRATIVO DISCIPLINAR COM AFASTAMENTO TEMPORÁRIO`,
       ``,
       `O Corregedor ${data.responsavel_nome || "________________"} da Polícia Militar do Estado de São Paulo, no exercício de suas atribuições legais e regulamentares, com fundamento nos princípios da legalidade, disciplina, hierarquia e moralidade administrativa, bem como nas disposições do Regulamento Disciplinar da Polícia Militar e demais normas institucionais vigentes,`,
-      relatoFatos,
+      ``,
+      `CONSIDERANDO a denúncia formal regularmente protocolada perante esta Corregedoria, instruída com elementos audiovisuais que apontam indícios de possíveis irregularidades funcionais;`,
+      `CONSIDERANDO a necessidade de apuração ampla, técnica, imparcial e rigorosa dos fatos narrados, assegurando aos envolvidos o pleno exercício do contraditório e da ampla defesa, nos termos do devido processo legal;`,
+      `CONSIDERANDO que os elementos preliminares indicam, em tese, possíveis transgressões disciplinares relacionadas à conduta funcional, tratamento dispensado a superiores, pares e civis, emprego de algemas, uso progressivo da força e eventual descumprimento de deveres regulamentares;`,
+      `CONSIDERANDO a necessidade de resguardar a regularidade da instrução processual, a preservação da disciplina institucional e a lisura da apuração administrativa,`,
+      ``,
       `RESOLVE:`,
       ``,
       `Art. 1º - Determinar, como MEDIDA DISCIPLINAR, o afastamento dos policiais militares abaixo relacionados das atividades operacionais e funções correlatas:`,
@@ -230,13 +228,10 @@ img{max-width:100%}
 
   <p class="c7"><span class="c4 c3">O Corregedor ${data.responsavel_nome || "________________"} da Polícia Militar do Estado de São Paulo</span><span class="c0">, no exercício de suas atribuições legais e regulamentares, com fundamento nos princípios da legalidade, disciplina, hierarquia e moralidade administrativa, bem como nas disposições do Regulamento Disciplinar da Polícia Militar e demais normas institucionais vigentes,</span></p>
 
-  ${data.relato_fatos
-    ? `<p class="c7" style="white-space:pre-line"><span class="c0">${data.relato_fatos.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</span></p>`
-    : `<p class="c7"><span class="c4 c3">CONSIDERANDO</span><span class="c0"> a denúncia formal regularmente protocolada perante esta Corregedoria, instruída com elementos audiovisuais que apontam indícios de possíveis irregularidades funcionais;</span></p>
+  <p class="c7"><span class="c4 c3">CONSIDERANDO</span><span class="c0"> a denúncia formal regularmente protocolada perante esta Corregedoria, instruída com elementos audiovisuais que apontam indícios de possíveis irregularidades funcionais;</span></p>
   <p class="c7"><span class="c4 c3">CONSIDERANDO</span><span class="c0"> a necessidade de apuração ampla, técnica, imparcial e rigorosa dos fatos narrados, assegurando aos envolvidos o pleno exercício do contraditório e da ampla defesa, nos termos do devido processo legal;</span></p>
   <p class="c7"><span class="c4 c3">CONSIDERANDO</span><span class="c0"> que os elementos preliminares indicam, em tese, possíveis transgressões disciplinares relacionadas à conduta funcional, tratamento dispensado a superiores, pares e civis, emprego de algemas, uso progressivo da força e eventual descumprimento de deveres regulamentares;</span></p>
-  <p class="c7"><span class="c4 c3">CONSIDERANDO</span><span class="c0"> a necessidade de resguardar a regularidade da instrução processual, a preservação da disciplina institucional e a lisura da apuração administrativa,</span></p>`
-  }
+  <p class="c7"><span class="c4 c3">CONSIDERANDO</span><span class="c0"> a necessidade de resguardar a regularidade da instrução processual, a preservação da disciplina institucional e a lisura da apuração administrativa,</span></p>
 
   <p class="c14"><span class="c2">RESOLVE:</span></p>
 

@@ -59,7 +59,6 @@ interface PortariaFormData {
   data_termino: string;
   artigos: string;
   observacoes: string;
-  relato_fatos: string;
   inquerito_id: string;
   responsavel_nome: string;
   responsavel_posto: string;
@@ -85,7 +84,6 @@ function toPortariaData(form: PortariaFormData, inqueritoNumero?: string): Porta
     inquerito_numero: inqueritoNumero || "",
     responsavel_nome: form.responsavel_nome,
     responsavel_posto: form.responsavel_posto,
-    relato_fatos: form.relato_fatos,
     periodo: form.periodo,
   };
 }
@@ -102,7 +100,6 @@ const defaultForm: PortariaFormData = {
   data_termino: format(new Date(), "yyyy-MM-dd"),
   artigos: "",
   observacoes: "",
-  relato_fatos: "",
   inquerito_id: "",
   responsavel_nome: "",
   responsavel_posto: "",
@@ -260,7 +257,6 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
       data_termino: form.periodo === "indeterminado" ? null : form.data_termino,
       artigos: form.artigos || null,
       observacoes: form.observacoes || null,
-      relato_fatos: form.relato_fatos || null,
       inquerito_id: form.inquerito_id || null,
       responsavel_nome: form.responsavel_nome,
       responsavel_posto: form.responsavel_posto,
@@ -466,10 +462,9 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
       unidade: a.unidade,
       data_inicio: a.data_inicio,
       data_termino: a.data_termino,
-                          artigos: a.artigos || "",
-                          observacoes: a.observacoes || "",
-                          relato_fatos: (a as any).relato_fatos || "",
-                          inquerito_id: a.inquerito_id || "",
+      artigos: a.artigos || "",
+      observacoes: a.observacoes || "",
+      inquerito_id: a.inquerito_id || "",
       responsavel_nome: a.responsavel_nome,
       responsavel_posto: a.responsavel_posto,
       responsavel_assinatura: a.responsavel_assinatura || "",
@@ -558,10 +553,6 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
           <div className="md:col-span-2 lg:col-span-1">
             <Label className="text-xs font-semibold">Observações</Label>
             <Textarea value={afastamentoForm.observacoes} onChange={e => setAfastamentoForm(f => ({ ...f, observacoes: e.target.value }))} placeholder="Observações (opcional)" className="min-h-[80px]" />
-          </div>
-          <div className="md:col-span-2 lg:col-span-3">
-            <Label className="text-xs font-semibold">Relato dos Fatos</Label>
-            <Textarea value={afastamentoForm.relato_fatos} onChange={e => setAfastamentoForm(f => ({ ...f, relato_fatos: e.target.value }))} placeholder="Descreva detalhadamente os fatos que fundamentam a medida disciplinar..." className="min-h-[120px]" />
           </div>
         </div>
       </div>
@@ -890,10 +881,9 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
                           unidade: a.unidade,
                           data_inicio: a.data_inicio,
                           data_termino: a.data_termino,
-                          artigos: a.artigos || "",
-                          observacoes: a.observacoes || "",
-                          relato_fatos: (a as any).relato_fatos || "",
-                          inquerito_id: a.inquerito_id || "",
+      artigos: a.artigos || "",
+      observacoes: a.observacoes || "",
+      inquerito_id: a.inquerito_id || "",
                           responsavel_nome: a.responsavel_nome,
                           responsavel_posto: a.responsavel_posto,
                           responsavel_assinatura: a.responsavel_assinatura || "",
@@ -1186,7 +1176,6 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
                                 data_termino: r.data_termino,
                                 artigos: r.artigos || "",
                                 observacoes: r.observacoes || "",
-                                relato_fatos: (r as any).relato_fatos || "",
                                 inquerito_id: r.inquerito_id || "",
                                 responsavel_nome: r.responsavel_nome,
                                 responsavel_posto: r.responsavel_posto,

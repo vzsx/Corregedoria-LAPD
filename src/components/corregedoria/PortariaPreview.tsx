@@ -72,11 +72,6 @@ export function PortariaPreview({ data, inqueritoNumero }: PortariaPreviewProps)
 
               <p className="pc7"><span className="pc4 pc3">O Corregedor {data.responsavel_nome || "________________"} da Polícia Militar do Estado de São Paulo</span><span className="pc0">, no exercício de suas atribuições legais e regulamentares, com fundamento nos princípios da legalidade, disciplina, hierarquia e moralidade administrativa, bem como nas disposições do Regulamento Disciplinar da Polícia Militar e demais normas institucionais vigentes,</span></p>
 
-              {data.relato_fatos
-                ? <p className="pc7" style={{whiteSpace: "pre-line"}}><span className="pc0">{data.relato_fatos}</span></p>
-                : <></>
-              }
-
               <p className="pc14"><span className="pc2">RESOLVE:</span></p>
 
               <p className="pc7"><span className="pc4 pc3">Art. 1º -</span><span className="pc0"> Determinar, como MEDIDA DISCIPLINAR, o afastamento dos policiais militares abaixo relacionados das atividades operacionais e funções correlatas:</span></p>
