@@ -17,13 +17,20 @@ export interface PortariaData {
   inquerito_numero: string;
   responsavel_nome: string;
   responsavel_posto: string;
+  periodo?: "determinado" | "indeterminado";
 }
 
 export function generatePortariaText(data: PortariaData): string {
   const dataEmissao = format(new Date(data.data_emissao), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
   const dataInicio = format(new Date(data.data_inicio), "dd/MM/yyyy");
-  const dataTermino = format(new Date(data.data_termino), "dd/MM/yyyy");
   const cidade = "São Paulo";
+  const isIndeterminado = data.periodo === "indeterminado";
+  const isDisciplinar = data.tipo_afastamento === "disciplinar";
+  const prazoTexto = isIndeterminado
+    ? "por tempo indeterminado"
+    : `no período de ${dataInicio} a ${format(new Date(data.data_termino), "dd/MM/yyyy")}`;
+  const tipoLabel = isDisciplinar ? "medida disciplinar" : "afastamento cautelar do serviço operacional";
+  const artigosTexto = data.artigos ? `, por suposta prática dos artigos: ${data.artigos}` : "";
 
   return [
     `PORTARIA Nº ${data.numero_portaria} – CPM`,
@@ -32,7 +39,7 @@ export function generatePortariaText(data: PortariaData): string {
     ``,
     `RESOLVE:`,
     ``,
-    `Art. 1º Determinar o afastamento cautelar do serviço operacional, no período de ${dataInicio} a ${dataTermino}, do seguinte policial militar:`,
+    `Art. 1º Determinar o ${tipoLabel} do serviço operacional, ${prazoTexto}, do seguinte policial militar${artigosTexto}:`,
     ``,
     `I – ${data.posto_graduacao} ${data.nome_policial}, RG PM nº ${data.rg_pm}, lotado(a) no(a) ${data.unidade}.`,
     ``,
@@ -57,8 +64,13 @@ export function generatePortariaText(data: PortariaData): string {
 export function generatePortariaHTML(data: PortariaData, inqueritoNumero?: string): string {
   const dataEmissao = format(new Date(data.data_emissao), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
   const dataInicio = format(new Date(data.data_inicio), "dd/MM/yyyy");
-  const dataTermino = format(new Date(data.data_termino), "dd/MM/yyyy");
+  const isIndeterminado = data.periodo === "indeterminado";
   const isDisciplinar = data.tipo_afastamento === "disciplinar";
+  const dataTermino = isIndeterminado ? "" : format(new Date(data.data_termino), "dd/MM/yyyy");
+  const tipoLabel = isDisciplinar ? "medida disciplinar" : "afastamento cautelar do serviço operacional";
+  const prazoTexto = isIndeterminado
+    ? `<span class="c4 c3">por tempo indeterminado</span>`
+    : `<span class="c4 c3">${dataInicio} a ${dataTermino}</span><span class="c4">, dos seguintes policiais militares, a contar de </span><span class="c2">${dataInicio}</span>`;
 
   return `<!DOCTYPE html>
 <html>
@@ -112,10 +124,16 @@ img{max-width:100%}
 .signature-name{font-family:'Pinyon Script',cursive;font-size:30pt;color:#000;font-weight:400;line-height:1}
 .signature-line{display:inline-block;width:80mm;border-bottom:1px solid #000;height:12pt}
 .signature-title{font-size:11pt;color:#000;margin-top:2pt}
+.badge-tipo{display:inline-block;padding:2pt 8pt;border-radius:3pt;font-size:9pt;font-weight:700;letter-spacing:0.5pt;margin-bottom:8pt}
+.badge-cautelar{background-color:#FEF3C7;color:#92400E;border:1pt solid #F59E0B}
+.badge-disciplinar{background-color:#FEE2E2;color:#991B1B;border:1pt solid #EF4444}
+.badge-determinado{background-color:#DBEAFE;color:#1E40AF;border:1pt solid #3B82F6}
+.badge-indeterminado{background-color:#E0E7FF;color:#3730A3;border:1pt solid #6366F1}
 @media print{
   body{margin:0;padding:0}
   .c8{max-width:none;padding:0}
   .watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.08}
+  .badge-tipo{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 </style>
 </head>
@@ -175,6 +193,8 @@ img{max-width:100%}
   <!-- PORTARIA -->
   <h3 class="c1"><span class="c2">PORTARIA Nº${data.numero_portaria || "____"}/2026 – CPM</span></h3>
 
+  <p><span class="badge-tipo badge-cautelar">AFASTAMENTO CAUTELAR</span>&nbsp;<span class="badge-tipo ${isIndeterminado ? 'badge-indeterminado' : 'badge-determinado'}">${isIndeterminado ? 'PERÍODO INDETERMINADO' : 'PERÍODO DETERMINADO'}</span></p>
+
   <!-- TEXTO -->
   <p class="c7">
     <span class="c4 c3">O CORREGEDOR DA POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</span>
@@ -194,11 +214,8 @@ img{max-width:100%}
   <p class="c7">
     <span class="c4 c3">Art. 1º</span>
     <span class="c4">&nbsp;Determinar o </span>
-    <span class="c4 c3">afastamento cautelar do serviço operacional</span>
-    <span class="c4">, pelo prazo </span>
-    <span class="c4 c3">${dataInicio} a ${dataTermino}</span>
-    <span class="c4">, dos seguintes policiais militares, a contar de </span>
-    <span class="c2">${dataInicio}</span>
+    <span class="c4 c3">${tipoLabel}</span>
+    <span class="c4">, pelo prazo ${prazoTexto}</span>
   </p>
 
   <p class="c7">

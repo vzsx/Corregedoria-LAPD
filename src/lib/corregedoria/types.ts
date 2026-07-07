@@ -140,6 +140,7 @@ export interface Afastamento {
   autor_id: string | null;
   autor_nome: string | null;
   historico_versoes: any;
+  periodo: "determinado" | "indeterminado" | null;
   created_at: string;
   updated_at: string;
 }

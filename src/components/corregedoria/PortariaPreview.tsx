@@ -12,7 +12,13 @@ interface PortariaPreviewProps {
 export function PortariaPreview({ data, inqueritoNumero }: PortariaPreviewProps) {
   const dataEmissao = format(new Date(data.data_emissao), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
   const dataInicio = format(new Date(data.data_inicio), "dd/MM/yyyy");
-  const dataTermino = format(new Date(data.data_termino), "dd/MM/yyyy");
+  const isIndeterminado = data.periodo === "indeterminado";
+  const isDisciplinar = data.tipo_afastamento === "disciplinar";
+  const dataTermino = isIndeterminado ? "" : format(new Date(data.data_termino), "dd/MM/yyyy");
+  const tipoLabel = isDisciplinar ? "medida disciplinar" : "afastamento cautelar do serviço operacional";
+  const prazoTexto = isIndeterminado
+    ? <span className="pc4 pc3">por tempo indeterminado</span>
+    : <><span className="pc4 pc3">{dataInicio} a {dataTermino}</span><span className="pc4">, dos seguintes policiais militares, a contar de </span><span className="pc2">{dataInicio}</span></>;
 
   return (
     <div className="bg-white text-black rounded-lg shadow-lg overflow-hidden print:shadow-none" id="portaria-document">
@@ -36,7 +42,12 @@ export function PortariaPreview({ data, inqueritoNumero }: PortariaPreviewProps)
         .pc14{padding-top:12pt;padding-bottom:12pt;line-height:1.0;text-align:justify}
         .portaria-doc p{margin:0;color:#000000;font-size:11pt;font-family:"Arial"}
         .portaria-doc h3{padding-top:14pt;color:#434343;font-size:11pt;padding-bottom:4pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}
-        @media print{.pc8{max-width:none}}
+        .badge-tipo{display:inline-block;padding:2pt 8pt;border-radius:3pt;font-size:9pt;font-weight:700;letter-spacing:0.5pt}
+        .badge-cautelar{background-color:#FEF3C7;color:#92400E;border:1pt solid #F59E0B}
+        .badge-disciplinar{background-color:#FEE2E2;color:#991B1B;border:1pt solid #EF4444}
+        .badge-determinado{background-color:#DBEAFE;color:#1E40AF;border:1pt solid #3B82F6}
+        .badge-indeterminado{background-color:#E0E7FF;color:#3730A3;border:1pt solid #6366F1}
+        @media print{.pc8{max-width:none}.badge-tipo{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
       `}</style>
 
       <div className="portaria-doc">
@@ -64,6 +75,8 @@ export function PortariaPreview({ data, inqueritoNumero }: PortariaPreviewProps)
           {/* PORTARIA */}
           <h3><span className="pc2">PORTARIA Nº{data.numero_portaria || "____"}/2026 – CPM</span></h3>
 
+          <p><span className={`badge-tipo ${isDisciplinar ? 'badge-disciplinar' : 'badge-cautelar'}`}>{isDisciplinar ? 'MEDIDA DISCIPLINAR' : 'AFASTAMENTO CAUTELAR'}</span>&nbsp;<span className={`badge-tipo ${isIndeterminado ? 'badge-indeterminado' : 'badge-determinado'}`}>{isIndeterminado ? 'PERÍODO INDETERMINADO' : 'PERÍODO DETERMINADO'}</span></p>
+
           {/* TEXTO */}
           <p className="pc7">
             <span className="pc4 pc3">O CORREGEDOR DA POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</span>
@@ -74,7 +87,7 @@ export function PortariaPreview({ data, inqueritoNumero }: PortariaPreviewProps)
             <span className="pc4 pc3">CONSIDERANDO</span>
             <span className="pc4">&nbsp;a necessidade de assegurar a regular, isenta e eficaz apuração dos fatos constantes de procedimento apuratório instaurado para verificar </span>
             <span className="pc3 pc4">suposta prática dos artigos: </span>
-            <span className="pc3">.____________<br /></span>
+            <span className="pc3">{data.artigos || ".____________"}<br /></span>
             <span><br /></span>
             <span className="pc2">RESOLVE:</span>
           </p>
@@ -83,11 +96,8 @@ export function PortariaPreview({ data, inqueritoNumero }: PortariaPreviewProps)
           <p className="pc7">
             <span className="pc4 pc3">Art. 1º</span>
             <span className="pc4">&nbsp;Determinar o </span>
-            <span className="pc4 pc3">afastamento cautelar do serviço operacional</span>
-            <span className="pc4">, pelo prazo </span>
-            <span className="pc4 pc3">{dataInicio} a {dataTermino}</span>
-            <span className="pc4">, dos seguintes policiais militares, a contar de </span>
-            <span className="pc2">{dataInicio}</span>
+            <span className="pc4 pc3">{tipoLabel}</span>
+            <span className="pc4">, pelo prazo {prazoTexto}</span>
           </p>
 
           <p className="pc7">

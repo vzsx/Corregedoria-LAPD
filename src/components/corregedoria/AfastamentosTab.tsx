@@ -59,6 +59,7 @@ interface PortariaFormData {
   responsavel_posto: string;
   responsavel_assinatura: string;
   status: AfastamentoStatus;
+  periodo: "determinado" | "indeterminado";
 }
 
 const MOTIVO_PADRAO = "Art. 4º O afastamento de que trata esta Portaria possui caráter meramente cautelar e não punitivo, podendo ser revisto ou revogado a qualquer tempo, conforme o andamento do procedimento apuratório.";
@@ -78,6 +79,7 @@ function toPortariaData(form: PortariaFormData, inqueritoNumero?: string): Porta
     inquerito_numero: inqueritoNumero || "",
     responsavel_nome: form.responsavel_nome,
     responsavel_posto: form.responsavel_posto,
+    periodo: form.periodo,
   };
 }
 
@@ -98,6 +100,7 @@ const defaultForm: PortariaFormData = {
   responsavel_posto: "",
   responsavel_assinatura: "",
   status: "ativo",
+  periodo: "determinado",
 };
 
 export interface AfastamentosTabProps {
@@ -230,6 +233,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
       data_termino: format(new Date(), "yyyy-MM-dd"),
       responsavel_nome: user?.user_metadata?.full_name || "",
       responsavel_posto: "",
+      periodo: "determinado",
     });
     setInqueritoSearch("");
   };
@@ -245,7 +249,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
       rg_pm: form.rg_pm,
       unidade: form.unidade,
       data_inicio: form.data_inicio,
-      data_termino: form.data_termino,
+      data_termino: form.periodo === "indeterminado" ? null : form.data_termino,
       artigos: form.artigos || null,
       observacoes: form.observacoes || null,
       inquerito_id: form.inquerito_id || null,
@@ -257,6 +261,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
       autor_id: user?.id || null,
       autor_nome: user?.user_metadata?.full_name || form.responsavel_nome,
       tipo_afastamento: form.tipo_afastamento,
+      periodo: form.periodo,
     };
   };
 
@@ -459,6 +464,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
       responsavel_posto: a.responsavel_posto,
       responsavel_assinatura: a.responsavel_assinatura || "",
       status: a.status,
+      periodo: ((a as any).periodo || "determinado") as "determinado" | "indeterminado",
     });
     setEditingAfastamentoId(a.id);
     setAfastamentoEditDialogOpen(true);
@@ -503,13 +509,38 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
             <Input value={afastamentoForm.unidade} onChange={e => setAfastamentoForm(f => ({ ...f, unidade: e.target.value }))} placeholder="Unidade de lotação" required />
           </div>
           <div>
+            <Label className="text-xs font-semibold">Período do Afastamento *</Label>
+            <div className="flex gap-2 mt-1">
+              <Button
+                type="button"
+                variant={afastamentoForm.periodo === "determinado" ? "default" : "outline"}
+                size="sm"
+                className="flex-1 text-xs"
+                onClick={() => setAfastamentoForm(f => ({ ...f, periodo: "determinado" }))}
+              >
+                <Clock className="h-3 w-3 mr-1" /> Determinado
+              </Button>
+              <Button
+                type="button"
+                variant={afastamentoForm.periodo === "indeterminado" ? "default" : "outline"}
+                size="sm"
+                className="flex-1 text-xs"
+                onClick={() => setAfastamentoForm(f => ({ ...f, periodo: "indeterminado" }))}
+              >
+                <Ban className="h-3 w-3 mr-1" /> Indeterminado
+              </Button>
+            </div>
+          </div>
+          <div>
             <Label className="text-xs font-semibold">Data de Início do Afastamento *</Label>
             <Input type="date" value={afastamentoForm.data_inicio} onChange={e => setAfastamentoForm(f => ({ ...f, data_inicio: e.target.value }))} required />
           </div>
-          <div>
-            <Label className="text-xs font-semibold">Data de Término do Afastamento *</Label>
-            <Input type="date" value={afastamentoForm.data_termino} onChange={e => setAfastamentoForm(f => ({ ...f, data_termino: e.target.value }))} required />
-          </div>
+          {afastamentoForm.periodo === "determinado" && (
+            <div>
+              <Label className="text-xs font-semibold">Data de Término do Afastamento *</Label>
+              <Input type="date" value={afastamentoForm.data_termino} onChange={e => setAfastamentoForm(f => ({ ...f, data_termino: e.target.value }))} required />
+            </div>
+          )}
           <div className="md:col-span-2 lg:col-span-1">
             <Label className="text-xs font-semibold">Artigos (CPM/RDPM) *</Label>
             <Input value={afastamentoForm.artigos} onChange={e => setAfastamentoForm(f => ({ ...f, artigos: e.target.value }))} placeholder="Ex: Art. 187, 188 do CPM" required />
@@ -790,7 +821,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
                       <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground mt-1">
                         <span>RG PM: {a.rg_pm}</span>
                         <span>{a.unidade}</span>
-                        <span>Período: {format(new Date(a.data_inicio), "dd/MM/yy")} a {format(new Date(a.data_termino), "dd/MM/yy")}</span>
+                        <span>Período: {(a as any).periodo === "indeterminado" ? "Indeterminado" : `${format(new Date(a.data_inicio), "dd/MM/yy")} a ${format(new Date(a.data_termino), "dd/MM/yy")}`}</span>
                       </div>
                     </div>
                     <div className="flex items-center gap-1 shrink-0 ml-4">
@@ -868,8 +899,11 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
                     <div className="border-t border-border p-4 bg-muted/20 space-y-4">
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                         <Field label="Portaria"><span className="text-sm font-medium">{a.numero_portaria}</span></Field>
+                        <Field label="Tipo"><span className={`text-sm font-medium ${(a as any).tipo_afastamento === "disciplinar" ? "text-red-400" : "text-amber-400"}`}>{(a as any).tipo_afastamento === "disciplinar" ? "Disciplinar" : "Cautelar"}</span></Field>
                         <Field label="Início"><span className="text-sm font-medium">{format(new Date(a.data_inicio), "dd/MM/yyyy")}</span></Field>
-                        <Field label="Término"><span className="text-sm font-medium">{format(new Date(a.data_termino), "dd/MM/yyyy")}</span></Field>
+                        <Field label="Término"><span className="text-sm font-medium">{(a as any).periodo === "indeterminado" ? "Indeterminado" : format(new Date(a.data_termino), "dd/MM/yyyy")}</span></Field>
+                        <Field label="Período"><span className={`text-sm font-medium ${(a as any).periodo === "indeterminado" ? "text-indigo-400" : "text-blue-400"}`}>{(a as any).periodo === "indeterminado" ? "Indeterminado" : "Determinado"}</span></Field>
+                        {a.artigos && <Field label="Artigos"><span className="text-sm font-medium">{a.artigos}</span></Field>}
                         <Field label="Responsável"><span className="text-sm font-medium">{a.responsavel_nome}</span></Field>
                       </div>
                       {inq && (
@@ -1118,7 +1152,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
                             <Badge variant="outline" className={AFASTAMENTO_STATUS_COLOR[r.status]}>{AFASTAMENTO_STATUS_LABEL[r.status]}</Badge>
                             <span className="text-xs text-muted-foreground">Portaria nº {r.numero_portaria}</span>
                           </div>
-                          <p className="text-sm text-muted-foreground">Período: {format(new Date(r.data_inicio), "dd/MM/yyyy")} a {format(new Date(r.data_termino), "dd/MM/yyyy")}</p>
+                          <p className="text-sm text-muted-foreground">Período: {(r as any).periodo === "indeterminado" ? "Indeterminado" : `${format(new Date(r.data_inicio), "dd/MM/yyyy")} a ${format(new Date(r.data_termino), "dd/MM/yyyy")}`}</p>
                           {inq && <p className="text-sm text-muted-foreground">Inquérito vinculado: {inq.numero_inquerito}</p>}
                           <p className="text-sm text-muted-foreground">Responsável: {r.responsavel_nome}</p>
                           <div className="flex gap-2 mt-2">
