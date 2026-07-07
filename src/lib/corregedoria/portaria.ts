@@ -26,11 +26,43 @@ export function generatePortariaText(data: PortariaData): string {
   const cidade = "São Paulo";
   const isIndeterminado = data.periodo === "indeterminado";
   const isDisciplinar = data.tipo_afastamento === "disciplinar";
-  const prazoTexto = isIndeterminado
-    ? "por tempo indeterminado"
-    : `no período de ${dataInicio} a ${format(new Date(data.data_termino), "dd/MM/yyyy")}`;
-  const tipoLabel = isDisciplinar ? "medida disciplinar" : "afastamento cautelar do serviço operacional";
-  const artigosTexto = data.artigos ? `, por suposta prática dos artigos: ${data.artigos}` : "";
+  const dataTermino = isIndeterminado ? "" : format(new Date(data.data_termino), "dd/MM/yyyy");
+
+  const art1Cautelar = isIndeterminado
+    ? `Art. 1º Determinar o afastamento cautelar do serviço operacional, por prazo indeterminado dos seguintes policiais militares, a contar de ${dataInicio}:`
+    : `Art. 1º Determinar o afastamento cautelar do serviço operacional, pelo prazo ${dataInicio} a ${dataTermino}, dos seguintes policiais militares, a contar de ${dataInicio}:`;
+
+  const art3Disciplinar = isIndeterminado
+    ? `Art. 3º A medida disciplinar adicional de afastamento entrará em vigor em ${dataInicio}, devendo o policial militar permanecer afastado até nova deliberação da autoridade competente ou prazo que vier a ser fixado em decisão posterior.`
+    : `Art. 3º A medida disciplinar adicional de afastamento entrará em vigor em ${dataInicio}, devendo o policial militar permanecer afastado até ${dataTermino}, nova deliberação da autoridade competente ou prazo que vier a ser fixado em decisão posterior.`;
+
+  if (isDisciplinar) {
+    return [
+      `BOLETIM CORRECIONAL Nº ${data.numero_portaria}/2026`,
+      ``,
+      `INSTAURAÇÃO DE PROCESSO ADMINISTRATIVO DISCIPLINAR COM AFASTAMENTO TEMPORÁRIO`,
+      ``,
+      `O Corregedor ${data.responsavel_nome || "________________"} da Polícia Militar do Estado de São Paulo, no exercício de suas atribuições legais e regulamentares, com fundamento nos princípios da legalidade, disciplina, hierarquia e moralidade administrativa,`,
+      ``,
+      `RESOLVE:`,
+      ``,
+      `Art. 1º Instaurar Processo Administrativo Disciplinar (PAD) para apuração integral dos fatos.`,
+      ``,
+      `Art. 2º Determinar, como medida disciplinar adicional, o afastamento dos policiais militares abaixo relacionados das atividades operacionais e funções correlatas:`,
+      ``,
+      `I – ${data.posto_graduacao || "________"} ${data.nome_policial || "________"}, RG PM nº ${data.rg_pm || "________"}, lotado(a) no(a) ${data.unidade || "________"}.`,
+      ``,
+      art3Disciplinar,
+      ``,
+      `Publique-se. Registre-se. Cumpra-se.`,
+      ``,
+      `${cidade}, ${dataEmissao}.`,
+      ``,
+      `____________________________________`,
+      `${data.responsavel_nome || "________________"}`,
+      `${data.responsavel_posto || ""}`,
+    ].join("\n");
+  }
 
   return [
     `PORTARIA Nº ${data.numero_portaria} – CPM`,
@@ -39,7 +71,7 @@ export function generatePortariaText(data: PortariaData): string {
     ``,
     `RESOLVE:`,
     ``,
-    `Art. 1º Determinar o ${tipoLabel} do serviço operacional, ${prazoTexto}, do seguinte policial militar${artigosTexto}:`,
+    art1Cautelar,
     ``,
     `I – ${data.posto_graduacao} ${data.nome_policial}, RG PM nº ${data.rg_pm}, lotado(a) no(a) ${data.unidade}.`,
     ``,
@@ -67,10 +99,6 @@ export function generatePortariaHTML(data: PortariaData, inqueritoNumero?: strin
   const isIndeterminado = data.periodo === "indeterminado";
   const isDisciplinar = data.tipo_afastamento === "disciplinar";
   const dataTermino = isIndeterminado ? "" : format(new Date(data.data_termino), "dd/MM/yyyy");
-  const tipoLabel = isDisciplinar ? "medida disciplinar" : "afastamento cautelar do serviço operacional";
-  const prazoTexto = isIndeterminado
-    ? `<span class="c4 c3">por tempo indeterminado</span>`
-    : `<span class="c4 c3">${dataInicio} a ${dataTermino}</span><span class="c4">, dos seguintes policiais militares, a contar de </span><span class="c2">${dataInicio}</span>`;
 
   return `<!DOCTYPE html>
 <html>
@@ -181,7 +209,7 @@ img{max-width:100%}
   <p class="c7"><span class="c4 c3">Art. 1º -</span><span class="c0"> Instaurar Processo Administrativo Disciplinar (PAD) para apuração integral dos fatos constantes na denúncia formal e nas provas audiovisuais anexadas.</span></p>
   <p class="c7"><span class="c4 c3">Art. 2º -</span><span class="c0"> Determinar, como medida disciplinar adicional, o afastamento dos policiais militares abaixo relacionados das atividades operacionais e funções correlatas:</span></p>
   <p class="c7"><span class="c0">• ${data.posto_graduacao || "________"} ${data.nome_policial || "________"}, RG PM nº ${data.rg_pm || "________"}, lotado(a) no(a) ${data.unidade || "________"}.</span></p>
-  <p class="c7"><span class="c4 c3">Art. 3º -</span><span class="c0"> A medida disciplinar adicional de afastamento entrará em vigor em ${dataInicio}, devendo o policial militar permanecer afastado até ${dataTermino}, nova deliberação da autoridade competente ou prazo que vier a ser fixado em decisão posterior.</span></p>
+  <p class="c7"><span class="c4 c3">Art. 3º -</span><span class="c0"> A medida disciplinar adicional de afastamento entrará em vigor em ${dataInicio}, devendo o policial militar permanecer afastado ${isIndeterminado ? "até nova deliberação da autoridade competente ou prazo que vier a ser fixado em decisão posterior." : `até ${dataTermino}, nova deliberação da autoridade competente ou prazo que vier a ser fixado em decisão posterior.`}</span></p>
   <p class="c7"><span class="c4 c3">Art. 4º -</span><span class="c0"> O afastamento previsto nesta decisão possui natureza disciplinar e administrativa, sendo aplicado em razão da necessidade de preservação da ordem, da disciplina e do regular funcionamento institucional, sem prejuízo da continuidade da apuração dos fatos no âmbito do Processo Administrativo Disciplinar.</span></p>
   <p class="c7"><span class="c4 c3">Art. 5º -</span><span class="c0"> O policial militar ora afastado permanecerá à disposição da Corregedoria da Polícia Militar, devendo atender às convocações, diligências e determinações expedidas pela Autoridade Correcional durante o período de vigência da medida.</span></p>
   <p class="c7"><span class="c4 c3">Art. 6º -</span><span class="c0"> Fica determinada a designação de Comissão Processante, mediante Portaria específica, para condução, instrução e conclusão do presente Processo Administrativo Disciplinar.</span></p>
@@ -211,9 +239,10 @@ img{max-width:100%}
   <!-- ARTIGOS -->
   <p class="c7">
     <span class="c4 c3">Art. 1º</span>
-    <span class="c4">&nbsp;Determinar o </span>
-    <span class="c4 c3">${tipoLabel}</span>
-    <span class="c4">, pelo prazo ${prazoTexto}</span>
+    ${isIndeterminado
+      ? `<span class="c4">&nbsp;Determinar o afastamento cautelar do serviço operacional, por prazo indeterminado dos seguintes policiais militares, a contar de </span><span class="c2">${dataInicio}</span>`
+      : `<span class="c4">&nbsp;Determinar o afastamento cautelar do serviço operacional, pelo prazo </span><span class="c4 c3">${dataInicio} a ${dataTermino}</span><span class="c4">, dos seguintes policiais militares, a contar de </span><span class="c2">${dataInicio}</span>`
+    }
   </p>
 
   <p class="c7">

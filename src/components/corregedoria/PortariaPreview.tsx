@@ -15,10 +15,6 @@ export function PortariaPreview({ data, inqueritoNumero }: PortariaPreviewProps)
   const isIndeterminado = data.periodo === "indeterminado";
   const isDisciplinar = data.tipo_afastamento === "disciplinar";
   const dataTermino = isIndeterminado ? "" : format(new Date(data.data_termino), "dd/MM/yyyy");
-  const tipoLabel = isDisciplinar ? "medida disciplinar" : "afastamento cautelar do serviço operacional";
-  const prazoTexto = isIndeterminado
-    ? <span className="pc4 pc3">por tempo indeterminado</span>
-    : <><span className="pc4 pc3">{dataInicio} a {dataTermino}</span><span className="pc4">, dos seguintes policiais militares, a contar de </span><span className="pc2">{dataInicio}</span></>;
 
   return (
     <div className="bg-white text-black rounded-lg shadow-lg overflow-hidden print:shadow-none" id="portaria-document">
@@ -42,12 +38,7 @@ export function PortariaPreview({ data, inqueritoNumero }: PortariaPreviewProps)
         .pc14{padding-top:12pt;padding-bottom:12pt;line-height:1.0;text-align:justify}
         .portaria-doc p{margin:0;color:#000000;font-size:11pt;font-family:"Arial"}
         .portaria-doc h3{padding-top:14pt;color:#434343;font-size:11pt;padding-bottom:4pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}
-        .badge-tipo{display:inline-block;padding:2pt 8pt;border-radius:3pt;font-size:9pt;font-weight:700;letter-spacing:0.5pt}
-        .badge-cautelar{background-color:#FEF3C7;color:#92400E;border:1pt solid #F59E0B}
-        .badge-disciplinar{background-color:#FEE2E2;color:#991B1B;border:1pt solid #EF4444}
-        .badge-determinado{background-color:#DBEAFE;color:#1E40AF;border:1pt solid #3B82F6}
-        .badge-indeterminado{background-color:#E0E7FF;color:#3730A3;border:1pt solid #6366F1}
-        @media print{.pc8{max-width:none}.badge-tipo{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+        @media print{.pc8{max-width:none}}
       `}</style>
 
       <div className="portaria-doc">
@@ -72,68 +63,95 @@ export function PortariaPreview({ data, inqueritoNumero }: PortariaPreviewProps)
           <p className="pc14"><span className="pc5 pc3">POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</span></p>
           <p className="pc14"><span className="pc5 pc3">CORREGEDORIA DA POLÍCIA MILITAR</span></p>
 
-          {/* PORTARIA */}
-          <h3><span className="pc2">PORTARIA Nº{data.numero_portaria || "____"}/2026 – CPM</span></h3>
+          {isDisciplinar ? (
+            <>
+              {/* BOLETIM CORRECIONAL */}
+              <h3><span className="pc2">BOLETIM CORRECIONAL Nº {data.numero_portaria || "____"}/2026</span></h3>
+              <p className="pc14"><span className="pc5 pc3">INSTAURAÇÃO DE PROCESSO ADMINISTRATIVO DISCIPLINAR COM AFASTAMENTO TEMPORÁRIO</span></p>
 
-          {/* TEXTO */}
-          <p className="pc7">
-            <span className="pc4 pc3">O CORREGEDOR DA POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</span>
-            <span className="pc0">, no uso de suas atribuições legais e regulamentares, especialmente nos termos do Regulamento Disciplinar da Polícia Militar do Estado de São Paulo (RDPM),</span>
-          </p>
+              <p className="pc7"><span className="pc4 pc3">O Corregedor {data.responsavel_nome || "________________"} da Polícia Militar do Estado de São Paulo</span><span className="pc0">, no exercício de suas atribuições legais e regulamentares, com fundamento nos princípios da legalidade, disciplina, hierarquia e moralidade administrativa,</span></p>
 
-          <p className="pc7">
-            <span className="pc4 pc3">CONSIDERANDO</span>
-            <span className="pc4">&nbsp;a necessidade de assegurar a regular, isenta e eficaz apuração dos fatos constantes de procedimento apuratório instaurado para verificar </span>
-            <span className="pc3 pc4">suposta prática dos artigos: </span>
-            <span className="pc3">{data.artigos || ".____________"}<br /></span>
-            <span><br /></span>
-            <span className="pc2">RESOLVE:</span>
-          </p>
+              <p className="pc7"><span className="pc4 pc3">CONSIDERANDO</span><span className="c0"> a denúncia formal regularmente protocolada perante esta Corregedoria;</span></p>
+              <p className="pc7"><span className="pc4 pc3">CONSIDERANDO</span><span className="c0"> a necessidade de apuração ampla, técnica, imparcial e rigorosa dos fatos narrados;</span></p>
 
-          {/* ARTIGOS */}
-          <p className="pc7">
-            <span className="pc4 pc3">Art. 1º</span>
-            <span className="pc4">&nbsp;Determinar o </span>
-            <span className="pc4 pc3">{tipoLabel}</span>
-            <span className="pc4">, pelo prazo {prazoTexto}</span>
-          </p>
+              <p className="pc14"><span className="pc2">RESOLVE:</span></p>
 
-          <p className="pc7">
-            <span className="pc4">I – {data.posto_graduacao || "________"} {data.nome_policial || "________"}, RG PM nº {data.rg_pm || "________"}, lotado(a) no(a) {data.unidade || "________"};<br /><br /></span>
-            <span className="pc4 pc3">Art. 2º</span>
-            <span className="pc4">&nbsp;Durante o afastamento, os policiais militares permanecerão </span>
-            <span className="pc4 pc3">à disposição da Corregedoria da Polícia Militar</span>
-            <span className="pc4">, devendo cumprir rigorosamente as determinações administrativas que lhes forem expedidas, manter seus dados de contato atualizados e </span>
-            <span className="pc4 pc3">abster-se de frequentar dependências operacionais</span>
-            <span className="pc0">, salvo mediante autorização expressa.</span>
-          </p>
+              <p className="pc7"><span className="pc4 pc3">Art. 1º -</span><span className="pc0"> Instaurar Processo Administrativo Disciplinar (PAD) para apuração integral dos fatos.</span></p>
+              <p className="pc7"><span className="pc4 pc3">Art. 2º -</span><span className="pc0"> Determinar, como medida disciplinar adicional, o afastamento dos policiais militares abaixo relacionados das atividades operacionais e funções correlatas:</span></p>
+              <p className="pc7"><span className="pc0">• {data.posto_graduacao || "________"} {data.nome_policial || "________"}, RG PM nº {data.rg_pm || "________"}, lotado(a) no(a) {data.unidade || "________"}.</span></p>
+              <p className="pc7">
+                <span className="pc4 pc3">Art. 3º -</span>
+                <span className="pc0"> A medida disciplinar adicional de afastamento entrará em vigor em {dataInicio}, devendo o policial militar permanecer afastado {isIndeterminado ? "até nova deliberação da autoridade competente ou prazo que vier a ser fixado em decisão posterior." : `até ${dataTermino}, nova deliberação da autoridade competente ou prazo que vier a ser fixado em decisão posterior.`}</span>
+              </p>
+              <p className="pc7"><span className="pc4 pc3">Art. 4º -</span><span className="pc0"> O afastamento previsto nesta decisão possui natureza disciplinar e administrativa.</span></p>
+              <p className="pc7"><span className="pc4 pc3">Art. 5º -</span><span className="pc0"> O policial militar ora afastado permanecerá à disposição da Corregedoria da Polícia Militar.</span></p>
 
-          <p className="pc7">
-            <span className="pc4 pc3">Art. 3º</span>
-            <span className="pc4">&nbsp;Os policiais militares ficam </span>
-            <span className="pc4 pc3">temporariamente impedidos de exercer atividade operacional</span>
-            <span className="pc4">&nbsp;e de </span>
-            <span className="pc4 pc3">portar arma de fogo institucional</span>
-            <span className="pc0">, devendo o armamento ser recolhido na forma da legislação e normas internas vigentes.</span>
-          </p>
+              <p className="pc7"><span className="pc4 pc3">Publique-se.<br />Registre-se.<br />Cumpra-se.</span></p>
+            </>
+          ) : (
+            <>
+              {/* PORTARIA CAUTELAR */}
+              <h3><span className="pc2">PORTARIA Nº{data.numero_portaria || "____"}/2026 – CPM</span></h3>
 
-          <p className="pc7">
-            <span className="pc4 pc3">Art. 4º</span>
-            <span className="pc4">&nbsp;O afastamento de que trata esta Portaria possui </span>
-            <span className="pc4 pc3">caráter meramente cautelar e não punitivo</span>
-            <span className="pc0">, podendo ser revisto ou revogado a qualquer tempo, conforme o andamento do procedimento apuratório.</span>
-          </p>
+              <p className="pc7">
+                <span className="pc4 pc3">O CORREGEDOR DA POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</span>
+                <span className="pc0">, no uso de suas atribuições legais e regulamentares, especialmente nos termos do Regulamento Disciplinar da Polícia Militar do Estado de São Paulo (RDPM),</span>
+              </p>
 
-          <p className="pc7">
-            <span className="pc4 pc3">Art. 5º</span>
-            <span className="pc0">&nbsp;Esta Portaria entra em vigor na data de sua publicação.</span>
-          </p>
+              <p className="pc7">
+                <span className="pc4 pc3">CONSIDERANDO</span>
+                <span className="pc4">&nbsp;a necessidade de assegurar a regular, isenta e eficaz apuração dos fatos constantes de procedimento apuratório instaurado para verificar </span>
+                <span className="pc3 pc4">suposta prática dos artigos: </span>
+                <span className="pc3">{data.artigos || ".____________"}<br /></span>
+                <span><br /></span>
+                <span className="pc2">RESOLVE:</span>
+              </p>
 
-          {/* PUBLIQUE-SE */}
-          <p className="pc7">
-            <span className="pc4 pc3">Publique-se. Registre-se. Cumpra-se.</span>
-            <hr />
-          </p>
+              <p className="pc7">
+                <span className="pc4 pc3">Art. 1º</span>
+                {isIndeterminado
+                  ? <><span className="pc4">&nbsp;Determinar o afastamento cautelar do serviço operacional, por prazo indeterminado dos seguintes policiais militares, a contar de </span><span className="pc2">{dataInicio}</span></>
+                  : <><span className="pc4">&nbsp;Determinar o afastamento cautelar do serviço operacional, pelo prazo </span><span className="pc4 pc3">{dataInicio} a {dataTermino}</span><span className="pc4">, dos seguintes policiais militares, a contar de </span><span className="pc2">{dataInicio}</span></>
+                }
+              </p>
+
+              <p className="pc7">
+                <span className="pc4">I – {data.posto_graduacao || "________"} {data.nome_policial || "________"}, RG PM nº {data.rg_pm || "________"}, lotado(a) no(a) {data.unidade || "________"};<br /><br /></span>
+                <span className="pc4 pc3">Art. 2º</span>
+                <span className="pc4">&nbsp;Durante o afastamento, os policiais militares permanecerão </span>
+                <span className="pc4 pc3">à disposição da Corregedoria da Polícia Militar</span>
+                <span className="pc4">, devendo cumprir rigorosamente as determinações administrativas que lhes forem expedidas, manter seus dados de contato atualizados e </span>
+                <span className="pc4 pc3">abster-se de frequentar dependências operacionais</span>
+                <span className="pc0">, salvo mediante autorização expressa.</span>
+              </p>
+
+              <p className="pc7">
+                <span className="pc4 pc3">Art. 3º</span>
+                <span className="pc4">&nbsp;Os policiais militares ficam </span>
+                <span className="pc4 pc3">temporariamente impedidos de exercer atividade operacional</span>
+                <span className="pc4">&nbsp;e de </span>
+                <span className="pc4 pc3">portar arma de fogo institucional</span>
+                <span className="pc0">, devendo o armamento ser recolhido na forma da legislação e normas internas vigentes.</span>
+              </p>
+
+              <p className="pc7">
+                <span className="pc4 pc3">Art. 4º</span>
+                <span className="pc4">&nbsp;O afastamento de que trata esta Portaria possui </span>
+                <span className="pc4 pc3">caráter meramente cautelar e não punitivo</span>
+                <span className="pc0">, podendo ser revisto ou revogado a qualquer tempo, conforme o andamento do procedimento apuratório.</span>
+              </p>
+
+              <p className="pc7">
+                <span className="pc4 pc3">Art. 5º</span>
+                <span className="pc0">&nbsp;Esta Portaria entra em vigor na data de sua publicação.</span>
+              </p>
+
+              <p className="pc7">
+                <span className="pc4 pc3">Publique-se. Registre-se. Cumpra-se.</span>
+                <hr />
+              </p>
+            </>
+          )}
 
           {/* DATA */}
           <p className="pc11" style={{ marginTop: "30pt", marginBottom: "18pt" }}>
