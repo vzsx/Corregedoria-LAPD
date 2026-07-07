@@ -72,7 +72,7 @@ export function PortariaPreview({ data, inqueritoNumero }: PortariaPreviewProps)
               <p className="pc7"><span className="pc4 pc3">O Corregedor {data.responsavel_nome || "________________"} da Polícia Militar do Estado de São Paulo</span><span className="pc0">, no exercício de suas atribuições legais e regulamentares, com fundamento nos princípios da legalidade, disciplina, hierarquia e moralidade administrativa, bem como nas disposições do Regulamento Disciplinar da Polícia Militar e demais normas institucionais vigentes,</span></p>
 
               {data.relato_fatos
-                ? data.relato_fatos.split(/\n/).filter(l => l.trim()).map((line, i) => <p key={i} className="pc7"><span className="pc0">{line.trim()}</span></p>)
+                ? data.relato_fatos.replace(/<br\s*\/?>/gi, "\n").replace(/\\n/g, "\n").replace(/\r\n/g, "\n").replace(/\r/g, "\n").split(/\n/).filter(l => l.trim()).map((line, i) => <p key={i} className="pc7"><span className="pc0">{line.trim()}</span></p>)
                 : <></>
               }
 
