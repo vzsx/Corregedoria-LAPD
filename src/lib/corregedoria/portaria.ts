@@ -60,7 +60,7 @@ export function generatePortariaText(data: PortariaData): string {
       `O Corregedor ${data.responsavel_nome || "________________"} da Polícia Militar do Estado de São Paulo, no exercício de suas atribuições legais e regulamentares, com fundamento nos princípios da legalidade, disciplina, hierarquia e moralidade administrativa, bem como nas disposições do Regulamento Disciplinar da Polícia Militar e demais normas institucionais vigentes,`,
       ``,
       ...(data.relato_fatos
-        ? data.relato_fatos.split(/\n\s*\n/).filter(p => p.trim()).map(p => p.trim())
+        ? data.relato_fatos.split(/\n/).filter(p => p.trim()).map(p => p.trim())
         : [
           `CONSIDERANDO a denúncia formal regularmente protocolada perante esta Corregedoria, instruída com elementos audiovisuais que apontam indícios de possíveis irregularidades funcionais;`,
           `CONSIDERANDO a necessidade de apuração ampla, técnica, imparcial e rigorosa dos fatos narrados, assegurando aos envolvidos o pleno exercício do contraditório e da ampla defesa, nos termos do devido processo legal;`,
@@ -234,7 +234,7 @@ img{max-width:100%}
   <p class="c7"><span class="c4 c3">O Corregedor ${data.responsavel_nome || "________________"} da Polícia Militar do Estado de São Paulo</span><span class="c0">, no exercício de suas atribuições legais e regulamentares, com fundamento nos princípios da legalidade, disciplina, hierarquia e moralidade administrativa, bem como nas disposições do Regulamento Disciplinar da Polícia Militar e demais normas institucionais vigentes,</span></p>
 
   ${data.relato_fatos
-    ? data.relato_fatos.split(/\n\s*\n/).filter(p => p.trim()).map(p => `<p class="c7"><span class="c0">${p.trim().replace(/\n/g, "<br>")}</span></p>`).join("\n  ")
+    ? data.relato_fatos.split(/\n/).filter(p => p.trim()).map(p => `<p class="c7"><span class="c0">${p.trim()}</span></p>`).join("\n  ")
     : `<p class="c7"><span class="c4 c3">CONSIDERANDO</span><span class="c0"> a denúncia formal regularmente protocolada perante esta Corregedoria, instruída com elementos audiovisuais que apontam indícios de possíveis irregularidades funcionais;</span></p>
   <p class="c7"><span class="c4 c3">CONSIDERANDO</span><span class="c0"> a necessidade de apuração ampla, técnica, imparcial e rigorosa dos fatos narrados, assegurando aos envolvidos o pleno exercício do contraditório e da ampla defesa, nos termos do devido processo legal;</span></p>
   <p class="c7"><span class="c4 c3">CONSIDERANDO</span><span class="c0"> que os elementos preliminares indicam, em tese, possíveis transgressões disciplinares relacionadas à conduta funcional, tratamento dispensado a superiores, pares e civis, emprego de algemas, uso progressivo da força e eventual descumprimento de deveres regulamentares;</span></p>
