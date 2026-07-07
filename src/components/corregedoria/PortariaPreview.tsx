@@ -72,7 +72,7 @@ export function PortariaPreview({ data, inqueritoNumero }: PortariaPreviewProps)
               <p className="pc7"><span className="pc4 pc3">O Corregedor {data.responsavel_nome || "________________"} da Polícia Militar do Estado de São Paulo</span><span className="pc0">, no exercício de suas atribuições legais e regulamentares, com fundamento nos princípios da legalidade, disciplina, hierarquia e moralidade administrativa, bem como nas disposições do Regulamento Disciplinar da Polícia Militar e demais normas institucionais vigentes,</span></p>
 
               {data.relato_fatos
-                ? <p className="pc7"><span className="pc0">{data.relato_fatos.split("\n").map((line, i) => <span key={i}>{line}{i < (data.relato_fatos || "").split("\n").length - 1 && <br />}</span>)}</span></p>
+                ? data.relato_fatos.split(/\n\s*\n/).filter(Boolean).map((p, i) => <p key={i} className="pc7"><span className="pc0">{p.trim().split("\n").map((line, j) => <span key={j}>{line}{j < p.trim().split("\n").length - 1 && <br />}</span>)}</span></p>)
                 : <>
                   <p className="pc7"><span className="pc4 pc3">CONSIDERANDO</span><span className="pc0"> a denúncia formal regularmente protocolada perante esta Corregedoria, instruída com elementos audiovisuais que apontam indícios de possíveis irregularidades funcionais;</span></p>
                   <p className="pc7"><span className="pc4 pc3">CONSIDERANDO</span><span className="pc0"> a necessidade de apuração ampla, técnica, imparcial e rigorosa dos fatos narrados, assegurando aos envolvidos o pleno exercício do contraditório e da ampla defesa, nos termos do devido processo legal;</span></p>
