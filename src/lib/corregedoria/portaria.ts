@@ -193,8 +193,6 @@ img{max-width:100%}
   <!-- PORTARIA -->
   <h3 class="c1"><span class="c2">PORTARIA Nº${data.numero_portaria || "____"}/2026 – CPM</span></h3>
 
-  <p><span class="badge-tipo badge-cautelar">AFASTAMENTO CAUTELAR</span>&nbsp;<span class="badge-tipo ${isIndeterminado ? 'badge-indeterminado' : 'badge-determinado'}">${isIndeterminado ? 'PERÍODO INDETERMINADO' : 'PERÍODO DETERMINADO'}</span></p>
-
   <!-- TEXTO -->
   <p class="c7">
     <span class="c4 c3">O CORREGEDOR DA POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</span>

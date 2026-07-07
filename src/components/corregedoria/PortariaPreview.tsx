@@ -75,8 +75,6 @@ export function PortariaPreview({ data, inqueritoNumero }: PortariaPreviewProps)
           {/* PORTARIA */}
           <h3><span className="pc2">PORTARIA Nº{data.numero_portaria || "____"}/2026 – CPM</span></h3>
 
-          <p><span className={`badge-tipo ${isDisciplinar ? 'badge-disciplinar' : 'badge-cautelar'}`}>{isDisciplinar ? 'MEDIDA DISCIPLINAR' : 'AFASTAMENTO CAUTELAR'}</span>&nbsp;<span className={`badge-tipo ${isIndeterminado ? 'badge-indeterminado' : 'badge-determinado'}`}>{isIndeterminado ? 'PERÍODO INDETERMINADO' : 'PERÍODO DETERMINADO'}</span></p>
-
           {/* TEXTO */}
           <p className="pc7">
             <span className="pc4 pc3">O CORREGEDOR DA POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</span>
