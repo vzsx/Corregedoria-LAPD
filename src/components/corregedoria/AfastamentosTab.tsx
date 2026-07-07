@@ -39,7 +39,7 @@ import type {
   Afastamento, AfastamentoStatus,
   InvestigacaoPolicial, InqueritoPolicial,
   Advertencia, VersaoDocumento,
-  Denuncia, Investigacao, Relatorio, Depoimento,
+  Denuncia, Investigacao, Relatorio, Depoimento, Ipm,
 } from "@/lib/corregedoria/types";
 import { generatePortariaText, printPortaria } from "@/lib/corregedoria/portaria";
 import type { PortariaData } from "@/lib/corregedoria/portaria";
@@ -60,6 +60,7 @@ interface PortariaFormData {
   artigos: string;
   observacoes: string;
   inquerito_id: string;
+  ipm_id: string;
   responsavel_nome: string;
   responsavel_posto: string;
   responsavel_assinatura: string;
@@ -69,7 +70,7 @@ interface PortariaFormData {
 
 const MOTIVO_PADRAO = "Art. 4º O afastamento de que trata esta Portaria possui caráter meramente cautelar e não punitivo, podendo ser revisto ou revogado a qualquer tempo, conforme o andamento do procedimento apuratório.";
 
-function toPortariaData(form: PortariaFormData, inqueritoNumero?: string): PortariaData {
+function toPortariaData(form: PortariaFormData, inqueritoNumero?: string, relatoFatos?: string): PortariaData {
   return {
     tipo_afastamento: form.tipo_afastamento,
     numero_portaria: form.numero_portaria,
@@ -84,6 +85,7 @@ function toPortariaData(form: PortariaFormData, inqueritoNumero?: string): Porta
     inquerito_numero: inqueritoNumero || "",
     responsavel_nome: form.responsavel_nome,
     responsavel_posto: form.responsavel_posto,
+    relato_fatos: relatoFatos,
     periodo: form.periodo,
   };
 }
@@ -101,6 +103,7 @@ const defaultForm: PortariaFormData = {
   artigos: "",
   observacoes: "",
   inquerito_id: "",
+  ipm_id: "",
   responsavel_nome: "",
   responsavel_posto: "",
   responsavel_assinatura: "",
@@ -113,6 +116,7 @@ export interface AfastamentosTabProps {
   investigacoes: Investigacao[];
   relatorios: Relatorio[];
   depoimentos: Depoimento[];
+  ipms: Ipm[];
   afastamentoDenuncias: any[];
   afastamentoInvestigacoes: any[];
   afastamentoRelatorios: any[];
@@ -137,7 +141,7 @@ export interface AfastamentosTabProps {
   onReload?: () => void;
 }
 
-export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimentos, afastamentoDenuncias, afastamentoInvestigacoes, afastamentoRelatorios, afastamentoDepoimentos, linking, linkAfastamentoDenunciaId, setLinkAfastamentoDenunciaId, linkAfastamentoInvestigacaoId, setLinkAfastamentoInvestigacaoId, linkAfastamentoRelatorioId, setLinkAfastamentoRelatorioId, linkAfastamentoDepoimentoId, setLinkAfastamentoDepoimentoId, handleLinkAfastamentoDenuncia, handleUnlinkAfastamentoDenuncia, handleLinkAfastamentoInvestigacao, handleUnlinkAfastamentoInvestigacao, handleLinkAfastamentoRelatorio, handleUnlinkAfastamentoRelatorio, handleLinkAfastamentoDepoimento, handleUnlinkAfastamentoDepoimento, onReload }: AfastamentosTabProps) {
+export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimentos, ipms, afastamentoDenuncias, afastamentoInvestigacoes, afastamentoRelatorios, afastamentoDepoimentos, linking, linkAfastamentoDenunciaId, setLinkAfastamentoDenunciaId, linkAfastamentoInvestigacaoId, setLinkAfastamentoInvestigacaoId, linkAfastamentoRelatorioId, setLinkAfastamentoRelatorioId, linkAfastamentoDepoimentoId, setLinkAfastamentoDepoimentoId, handleLinkAfastamentoDenuncia, handleUnlinkAfastamentoDenuncia, handleLinkAfastamentoInvestigacao, handleUnlinkAfastamentoInvestigacao, handleLinkAfastamentoRelatorio, handleUnlinkAfastamentoRelatorio, handleLinkAfastamentoDepoimento, handleUnlinkAfastamentoDepoimento, onReload }: AfastamentosTabProps) {
   const { user, isAdmin, roles } = useAuth();
   const currentRole: string = (roles[0] || "consulta") as string;
   const canDelete = currentRole === "corregedor_geral" || currentRole === "subcorregedor" || isAdmin;
@@ -156,6 +160,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [inqueritoSearch, setInqueritoSearch] = useState("");
+  const [ipmSearch, setIpmSearch] = useState("");
 
   const [afastamentoForm, setAfastamentoForm] = useState<PortariaFormData>(defaultForm);
   const [afastamentoDialogOpen, setAfastamentoDialogOpen] = useState(false);
@@ -206,6 +211,11 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
   }, []);
 
   const getInquerito = (id: string | null) => inqueritos.find(i => i.id === id);
+  const getIpmRelatorioFatos = (ipmId: string) => {
+    if (!ipmId) return "";
+    const ipm = ipms.find(i => i.id === ipmId);
+    return ipm?.relatorio_fatos || "";
+  };
 
   const stats = {
     ativos: afastamentos.filter(a => a.status === "ativo").length,
@@ -245,7 +255,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
 
   const formToDb = (form: PortariaFormData) => {
     const inq = form.inquerito_id ? getInquerito(form.inquerito_id) : null;
-    const docText = generatePortariaText(toPortariaData(form, inq?.numero_inquerito));
+    const docText = generatePortariaText(toPortariaData(form, inq?.numero_inquerito, getIpmRelatorioFatos(form.ipm_id)));
     return {
       numero_portaria: form.numero_portaria,
       data_emissao: form.data_emissao,
@@ -258,6 +268,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
       artigos: form.artigos || null,
       observacoes: form.observacoes || null,
       inquerito_id: form.inquerito_id || null,
+      ipm_id: form.ipm_id || null,
       responsavel_nome: form.responsavel_nome,
       responsavel_posto: form.responsavel_posto,
       responsavel_assinatura: form.responsavel_assinatura || null,
@@ -418,6 +429,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
       data_inicio: format(new Date(), "yyyy-MM-dd"),
       data_termino: format(new Date(), "yyyy-MM-dd"),
       inquerito_id: a.inquerito_id,
+      ipm_id: a.ipm_id || "",
       responsavel_nome: a.responsavel_nome,
       responsavel_posto: a.responsavel_posto,
       motivo_afastamento: MOTIVO_PADRAO,
@@ -432,7 +444,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
 
   const openPreview = (form: PortariaFormData) => {
     const inq = form.inquerito_id ? getInquerito(form.inquerito_id) : null;
-    setPreviewData(toPortariaData(form, inq?.numero_inquerito));
+    setPreviewData(toPortariaData(form, inq?.numero_inquerito, getIpmRelatorioFatos(form.ipm_id)));
     setPreviewInquerito(inq?.numero_inquerito || "");
     setPreviewOpen(true);
   };
@@ -465,6 +477,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
       artigos: a.artigos || "",
       observacoes: a.observacoes || "",
       inquerito_id: a.inquerito_id || "",
+      ipm_id: (a as any).ipm_id || "",
       responsavel_nome: a.responsavel_nome,
       responsavel_posto: a.responsavel_posto,
       responsavel_assinatura: a.responsavel_assinatura || "",
@@ -477,6 +490,10 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
 
   const filteredInqueritos = inqueritos.filter(i =>
     !inqueritoSearch || i.numero_inquerito.toLowerCase().includes(inqueritoSearch.toLowerCase())
+  );
+
+  const filteredIpms = ipms.filter(i =>
+    !ipmSearch || i.numero_ipm.toLowerCase().includes(ipmSearch.toLowerCase()) || i.encarregado_nome.toLowerCase().includes(ipmSearch.toLowerCase())
   );
 
   const renderFormFields = (isEdit: boolean) => (
@@ -618,6 +635,57 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
           )}
         </div>
       </div>
+
+      {/* Seção: IPM Vinculado (disciplinar) */}
+      {afastamentoForm.tipo_afastamento === "disciplinar" && (
+        <div className="border border-border rounded-lg overflow-hidden">
+          <div className="bg-muted/50 px-4 py-3 border-b border-border">
+            <h3 className="font-bold text-sm uppercase tracking-wider flex items-center gap-2">
+              <FileText className="h-4 w-4" /> IPM VINCULADO (Relato dos Fatos)
+            </h3>
+          </div>
+          <div className="p-4 space-y-3">
+            {afastamentoForm.ipm_id && (
+              <div className="flex items-center justify-between bg-primary/5 border border-primary/20 rounded-lg px-4 py-3">
+                <div className="flex items-center gap-3">
+                  <FileText className="h-5 w-5 text-primary" />
+                  <div>
+                    <p className="text-sm font-semibold">IPM nº {ipms.find(i => i.id === afastamentoForm.ipm_id)?.numero_ipm}</p>
+                    <p className="text-xs text-muted-foreground line-clamp-2">{ipms.find(i => i.id === afastamentoForm.ipm_id)?.relatorio_fatos?.substring(0, 120)}...</p>
+                  </div>
+                </div>
+                <Button variant="ghost" size="sm" onClick={() => setAfastamentoForm(f => ({ ...f, ipm_id: "" }))} className="gap-1 text-destructive">
+                  <Unlink className="h-4 w-4" /> Desvincular
+                </Button>
+              </div>
+            )}
+            {!afastamentoForm.ipm_id && (
+              <div>
+                <Input
+                  placeholder="Buscar IPM por número..."
+                  value={ipmSearch}
+                  onChange={e => setIpmSearch(e.target.value)}
+                />
+                <div className="mt-2 max-h-40 overflow-y-auto space-y-1">
+                  {filteredIpms.map(ipm => (
+                    <button
+                      key={ipm.id}
+                      type="button"
+                      className="w-full text-left p-2 rounded hover:bg-muted text-sm flex items-center justify-between"
+                      onClick={() => { setAfastamentoForm(f => ({ ...f, ipm_id: ipm.id })); setIpmSearch(""); }}
+                    >
+                      <div>
+                        <span className="font-medium">IPM nº {ipm.numero_ipm}</span>
+                        <span className="text-muted-foreground ml-2">- {ipm.encarregado_nome}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Seção 2: Dados da Autoridade Responsável */}
       <div className="border border-border rounded-lg overflow-hidden">
@@ -855,12 +923,13 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
                           artigos: a.artigos || "",
                           observacoes: a.observacoes || "",
                           inquerito_id: a.inquerito_id || "",
+                          ipm_id: (a as any).ipm_id || "",
                           responsavel_nome: a.responsavel_nome,
                           responsavel_posto: a.responsavel_posto,
                           responsavel_assinatura: a.responsavel_assinatura || "",
                           status: a.status,
                           periodo: ((a as any).periodo || "determinado") as "determinado" | "indeterminado",
-                        }, inq?.numero_inquerito));
+                        }, inq?.numero_inquerito, getIpmRelatorioFatos((a as any).ipm_id || "")));
                         setPreviewInquerito(inq?.numero_inquerito || "");
                         setPreviewOpen(true);
                       }}>
@@ -881,15 +950,16 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
                           unidade: a.unidade,
                           data_inicio: a.data_inicio,
                           data_termino: a.data_termino,
-      artigos: a.artigos || "",
-      observacoes: a.observacoes || "",
-      inquerito_id: a.inquerito_id || "",
+                          artigos: a.artigos || "",
+                          observacoes: a.observacoes || "",
+                          inquerito_id: a.inquerito_id || "",
+                          ipm_id: (a as any).ipm_id || "",
                           responsavel_nome: a.responsavel_nome,
                           responsavel_posto: a.responsavel_posto,
                           responsavel_assinatura: a.responsavel_assinatura || "",
                           status: a.status,
                           periodo: ((a as any).periodo || "determinado") as "determinado" | "indeterminado",
-                        }, inq?.numero_inquerito), inq?.numero_inquerito);
+                        }, inq?.numero_inquerito, getIpmRelatorioFatos((a as any).ipm_id || "")), inq?.numero_inquerito);
                       }}>
                         <Printer className="h-4 w-4" />
                       </Button>
@@ -1177,12 +1247,13 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
                                 artigos: r.artigos || "",
                                 observacoes: r.observacoes || "",
                                 inquerito_id: r.inquerito_id || "",
+                                ipm_id: (r as any).ipm_id || "",
                                 responsavel_nome: r.responsavel_nome,
                                 responsavel_posto: r.responsavel_posto,
                                 responsavel_assinatura: r.responsavel_assinatura || "",
                                 status: r.status,
                                 periodo: ((r as any).periodo || "determinado") as "determinado" | "indeterminado",
-                              }, inq?.numero_inquerito));
+                              }, inq?.numero_inquerito, getIpmRelatorioFatos((r as any).ipm_id || "")));
                               setPreviewInquerito(inq?.numero_inquerito || "");
                               setPreviewOpen(true);
                             }}>

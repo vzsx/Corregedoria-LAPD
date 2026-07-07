@@ -132,6 +132,8 @@ export interface Afastamento {
   artigos: string | null;
   observacoes: string | null;
   inquerito_id: string | null;
+  ipm_id: string | null;
+  relato_fatos: string | null;
   responsavel_nome: string;
   responsavel_posto: string;
   responsavel_assinatura: string | null;

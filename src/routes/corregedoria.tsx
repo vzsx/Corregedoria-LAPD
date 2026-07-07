@@ -5332,6 +5332,7 @@ function Corregedoria() {
               handleUnlinkAfastamentoRelatorio={handleUnlinkAfastamentoRelatorio}
               handleLinkAfastamentoDepoimento={handleLinkAfastamentoDepoimento}
               handleUnlinkAfastamentoDepoimento={handleUnlinkAfastamentoDepoimento}
+              ipms={ipms}
             />
           )}
 

@@ -14,3 +14,7 @@ ALTER COLUMN data_termino DROP NOT NULL;
 -- Add relato_fatos column for disciplinar documents
 ALTER TABLE public.afastamentos
 ADD COLUMN IF NOT EXISTS relato_fatos TEXT;
+
+-- Add ipm_id column to link disciplinar afastamento to IPM
+ALTER TABLE public.afastamentos
+ADD COLUMN IF NOT EXISTS ipm_id TEXT;
