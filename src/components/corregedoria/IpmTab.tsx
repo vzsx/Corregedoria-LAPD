@@ -249,7 +249,7 @@ img{max-width:100%}
 
   <!-- RELATORIO DOS FATOS -->
   <p class="c11"><span class="c4 c7">RELATÓRIO DOS FATOS:</span></p>
-  <p class="c1"><span class="c4">${relatorioFatos}</span></p>
+  <p class="c1"><span class="c4">${relatorioFatos.replace(/\n/g, ' ')}</span></p>
   <p class="c1"><span class="c4">Nada mais a relatar.</span></p>
 
   <!-- LINHA -->
