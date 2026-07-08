@@ -32,7 +32,7 @@ export function PortariaPreview({ data, inqueritoNumero }: PortariaPreviewProps)
         .pc6{padding-top:0pt;padding-bottom:0pt;line-height:1.15;orphans:2;widows:2;text-align:center}
         .pc7{padding-top:12pt;padding-bottom:12pt;line-height:1.0;orphans:2;widows:2;text-align:left}
         .pc8{background-color:#ffffff;max-width:451.4pt;padding:72pt 72pt 72pt 72pt;margin:0 auto}
-        .pc9{padding-top:12pt;padding-bottom:12pt;line-height:1.0;text-align:center;height:11pt}
+        .pc9{padding:0;margin:0;height:12pt;line-height:1.0}
         .pc11{padding-top:12pt;padding-bottom:12pt;line-height:1.0;text-align:center}
         .pc12{padding-top:0pt;padding-bottom:0pt;line-height:1.15;text-align:right;height:11pt}
         .pc13{font-weight:400}
@@ -73,8 +73,10 @@ export function PortariaPreview({ data, inqueritoNumero }: PortariaPreviewProps)
               <p className="pc7"><span className="pc4 pc3">O Corregedor {data.responsavel_nome || "________________"} da Polícia Militar do Estado de São Paulo</span><span className="pc0">, no exercício de suas atribuições legais e regulamentares, com fundamento nos princípios da legalidade, disciplina, hierarquia e moralidade administrativa, bem como nas disposições do Regulamento Disciplinar da Polícia Militar e demais normas institucionais vigentes,</span></p>
 
               {data.relato_fatos
-                ? data.relato_fatos.split(/\n/).filter(p => p.trim()).map((p, i) => (
-                    <p key={i} className="pc7"><span className="pc0">{p.trim()}</span></p>
+                ? data.relato_fatos.split(/\r?\n/).map((p, i) => (
+                    p.trim()
+                      ? <p key={i} className="pc7"><span className="pc0">{p.trim()}</span></p>
+                      : <p key={i} className="pc9">&nbsp;</p>
                   ))
                 : <>
                   <p className="pc7"><span className="pc4 pc3">CONSIDERANDO</span><span className="pc0"> a denúncia formal regularmente protocolada perante esta Corregedoria, instruída com elementos audiovisuais que apontam indícios de possíveis irregularidades funcionais;</span></p>
