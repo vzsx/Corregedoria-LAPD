@@ -116,7 +116,7 @@ function generateIpmHtml(data: IpmFormData, autorNome?: string, autorPosto?: str
   const autorNomeFinal = autorNome || data.autoridade_nome || "";
   const autorPostoFinal = autorPosto || data.autoridade_posto || "";
 
-  const relatorioFatos = data.relatorio_fatos || "(de acordo com o questionário)";
+  const relatorioFatos = (data.relatorio_fatos || "(de acordo com o questionário)").replace(/\r?\n/g, '\n').replace(/<br\s*\/?>/gi, '\n');
   const enquadramentoLegal = enquadramentosStr || "(de acordo com o questionário)";
   const conclusao = data.conclusao_parcial || "Os fatos narrados indicam, em tese, infração disciplinar e possível crime militar, razão pela qual o presente IPM deverá prosseguir até sua conclusão, com posterior remessa à autoridade competente para análise e aplicação das providências legais cabíveis. Nada mais.";
 
@@ -249,7 +249,7 @@ img{max-width:100%}
 
   <!-- RELATORIO DOS FATOS -->
   <p class="c11"><span class="c4 c7">RELATÓRIO DOS FATOS:</span></p>
-  <p class="c1"><span class="c4">${relatorioFatos.replace(/\n/g, ' ')}</span></p>
+  <p class="c1"><span class="c4">${relatorioFatos.replace(/\n/g, '<br>')}</span></p>
   <p class="c1"><span class="c4">Nada mais a relatar.</span></p>
 
   <!-- LINHA -->
