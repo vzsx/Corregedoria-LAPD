@@ -87,7 +87,7 @@ function parseLocalDate(dateStr: string) {
 function generateInformeHtml(t: Transparencia): string {
   const isArquivamento = t.tipo === "arquivamento";
   const dataFormatada = format(parseLocalDate(t.data_emissao), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
-  const considerandosRaw = t.considerandos.replace(/nº\s*____/g, t.numero_referencia ? `nº ${t.numero_referencia}` : "nº ____");
+  const considerandosRaw = t.considerandos.replace(/n[ºo°]\s*_{2,}/g, t.numero_referencia ? `nº ${t.numero_referencia}` : "nº ____");
   const considerandos = considerandosRaw.split("\n").filter(l => l.trim());
   const numeroFormatado = t.numero_informe.padStart(3, "0");
   const ano = new Date().getFullYear();
@@ -160,12 +160,17 @@ img{max-width:100%}
   <p class="c1"><span class="c4 c7">Publique-se. Registre-se. Cumpra-se.</span></p>
 
   <div class="signature-block" style="margin-top:30pt;text-align:center;">
-    <p style="margin:0 0 18pt 0;"><span class="c4">___________________________</span></p>
-    <p style="margin:0 0 4pt 0;"><span class="c4">São Paulo, ${dataFormatada}.</span></p>
-    <p style="margin:12pt 0 4pt 0;"><span class="c4">Corregedor Responsável:</span></p>
-    <p style="margin:0 0 2pt 0;"><span class="c4">${t.responsavel_posto} ${t.responsavel_nome}</span></p>
-    <p style="margin:12pt 0 0 0;">
-      <span class="c4">Assinatura: </span>${t.responsavel_nome ? `<span class="signature-name">${t.responsavel_nome}</span>` : `<span class="signature-line"></span>`}
+    <p class="c14" style="margin:0 0 18pt 0;">
+      <span class="c4">São Paulo, ${dataFormatada}.</span>
+    </p>
+    <p class="c14" style="margin:0 0 6pt 0;line-height:1;">
+      <span class="c4">Ass: </span>${t.responsavel_nome ? `<span class="signature-name">${t.responsavel_nome}</span>` : `<span class="signature-line"></span>`}
+    </p>
+    <p class="c14" style="margin:0;line-height:1;">
+      <span class="c4">${t.responsavel_posto ? `${t.responsavel_posto} ` : ""}${t.responsavel_nome || ""}</span>
+    </p>
+    <p class="c14" style="margin:2pt 0 0 0;">
+      <span class="c4" style="font-size:11pt;">Corregedor da Polícia Militar do Estado de São Paulo</span>
     </p>
   </div>
 </div>
@@ -176,7 +181,7 @@ img{max-width:100%}
 function generateInformeText(t: Transparencia): string {
   const isArquivamento = t.tipo === "arquivamento";
   const dataFormatada = format(parseLocalDate(t.data_emissao), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
-  const considerandosRaw = t.considerandos.replace(/nº\s*____/g, t.numero_referencia ? `nº ${t.numero_referencia}` : "nº ____");
+  const considerandosRaw = t.considerandos.replace(/n[ºo°]\s*_{2,}/g, t.numero_referencia ? `nº ${t.numero_referencia}` : "nº ____");
   const considerandos = considerandosRaw.split("\n").filter(l => l.trim());
   const numeroFormatado = t.numero_informe.padStart(3, "0");
   const ano = new Date().getFullYear();
@@ -211,15 +216,11 @@ function generateInformeText(t: Transparencia): string {
     ``,
     `Publique-se. Registre-se. Cumpra-se.`,
     ``,
-    `___________________________`,
-    ``,
     `São Paulo, ${dataFormatada}.`,
     ``,
-    `Corregedor Responsável:`,
-    `${t.responsavel_posto} ${t.responsavel_nome}`,
-    ``,
-    `Assinatura:`,
-    `${t.responsavel_nome || "________________"}`,
+    `Ass: ${t.responsavel_nome || ""}`,
+    `${t.responsavel_posto ? `${t.responsavel_posto} ` : ""}${t.responsavel_nome || ""}`,
+    `Corregedor da Polícia Militar do Estado de São Paulo`,
   ].join("\n");
 }
 
@@ -511,19 +512,23 @@ export function TransparenciaTab({ transparencias, setTransparencias, denuncias 
                 <Label className="text-xs font-semibold">Denúncia Vinculada *</Label>
                 <Select value={form.denuncia_id || undefined} onValueChange={v => {
                   const d = denuncias.find((d: any) => d.id === v);
-                  const proto = d?.dados_detalhados?.numero_protocolo || "";
+                  const proto = d?.dados_detalhados?.numero_protocolo || d?.titulo || "";
                   setForm(f => ({ ...f, denuncia_id: v, numero_referencia: proto }));
                 }}>
                   <SelectTrigger><SelectValue placeholder="Selecionar denúncia..." /></SelectTrigger>
                   <SelectContent>
                     {denuncias.map((d: any) => (
                       <SelectItem key={d.id} value={d.id}>
-                        {d.dados_detalhados?.numero_protocolo ? `Nº ${d.dados_detalhados.numero_protocolo}` : d.titulo}
+                        {d.dados_detalhados?.numero_protocolo ? `Nº ${d.dados_detalhados.numero_protocolo}` : d.titulo || d.id.slice(0, 8)}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+            <div>
+              <Label className="text-xs font-semibold">Nº de Referência (aparece no documento)</Label>
+              <Input value={form.numero_referencia} onChange={e => setForm(f => ({ ...f, numero_referencia: e.target.value }))} placeholder="Ex: Nº0001/26" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
