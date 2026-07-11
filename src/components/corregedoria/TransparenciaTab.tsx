@@ -91,7 +91,7 @@ function generateInformeHtml(t: Transparencia): string {
   const considerandos = considerandosRaw.split("\n").filter(l => l.trim());
   const numeroFormatado = t.numero_informe.padStart(3, "0");
   const ano = new Date().getFullYear();
-  const numRef = !isArquivamento && t.numero_referencia ? t.numero_referencia : `${numeroFormatado}/${ano}`;
+  const numRef = t.numero_referencia ? t.numero_referencia : `${numeroFormatado}/${ano}`;
 
   return `<!DOCTYPE html>
 <html>
@@ -185,7 +185,7 @@ function generateInformeText(t: Transparencia): string {
   const considerandos = considerandosRaw.split("\n").filter(l => l.trim());
   const numeroFormatado = t.numero_informe.padStart(3, "0");
   const ano = new Date().getFullYear();
-  const numRef = !isArquivamento && t.numero_referencia ? t.numero_referencia : `${numeroFormatado}/${ano}`;
+  const numRef = t.numero_referencia ? t.numero_referencia : `${numeroFormatado}/${ano}`;
 
   return [
     `GOVERNO DO ESTADO DE SÃO PAULO`,
