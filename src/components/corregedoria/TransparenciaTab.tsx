@@ -218,6 +218,7 @@ export function TransparenciaTab({ transparencias, setTransparencias, denuncias 
     tipo: "arquivamento" as "arquivamento" | "solucionada",
     numero_informe: "",
     data_emissao: format(new Date(), "yyyy-MM-dd"),
+    denuncia_id: "",
     numero_referencia: "",
     responsavel_nome: user?.user_metadata?.full_name || "",
     responsavel_posto: user?.user_metadata?.patente || "",
@@ -279,6 +280,7 @@ export function TransparenciaTab({ transparencias, setTransparencias, denuncias 
       tipo: t.tipo,
       numero_informe: t.numero_informe,
       data_emissao: t.data_emissao,
+      denuncia_id: "",
       numero_referencia: t.numero_referencia,
       responsavel_nome: t.responsavel_nome,
       responsavel_posto: t.responsavel_posto,
@@ -473,13 +475,14 @@ export function TransparenciaTab({ transparencias, setTransparencias, denuncias 
               </div>
               <div>
                 <Label className="text-xs font-semibold">Denúncia Vinculada (opcional)</Label>
-                <Select value={form.numero_referencia} onValueChange={v => {
+                <Select value={form.denuncia_id} onValueChange={v => {
                   const d = denuncias.find((d: any) => d.id === v);
-                  const proto = d?.dados_detalhados?.numero_protocolo || d?.numero_registro || "";
-                  setForm(f => ({ ...f, numero_referencia: proto ? `${proto}` : v }));
+                  const proto = d?.dados_detalhados?.numero_protocolo || "";
+                  setForm(f => ({ ...f, denuncia_id: v, numero_referencia: proto }));
                 }}>
                   <SelectTrigger><SelectValue placeholder="Selecionar denúncia..." /></SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="">Nenhuma</SelectItem>
                     {denuncias.map((d: any) => (
                       <SelectItem key={d.id} value={d.id}>
                         {d.dados_detalhados?.numero_protocolo ? `Nº ${d.dados_detalhados.numero_protocolo}` : d.titulo}
