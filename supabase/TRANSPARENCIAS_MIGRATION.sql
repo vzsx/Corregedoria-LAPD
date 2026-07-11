@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS public.transparencias (
   tipo TEXT NOT NULL CHECK (tipo IN ('arquivamento', 'solucionada')),
   data_emissao TEXT NOT NULL,
   numero_referencia TEXT,
+  denuncia_id UUID,
   responsavel_nome TEXT NOT NULL,
   responsavel_posto TEXT NOT NULL,
   responsavel_assinatura TEXT,

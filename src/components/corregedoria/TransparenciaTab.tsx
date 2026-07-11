@@ -24,6 +24,7 @@ export interface Transparencia {
   tipo: "arquivamento" | "solucionada";
   data_emissao: string;
   numero_referencia: string;
+  denuncia_id: string | null;
   responsavel_nome: string;
   responsavel_posto: string;
   responsavel_assinatura: string | null;
@@ -304,7 +305,7 @@ export function TransparenciaTab({ transparencias, setTransparencias, denuncias 
       tipo: t.tipo,
       numero_informe: t.numero_informe,
       data_emissao: t.data_emissao,
-      denuncia_id: "",
+      denuncia_id: (t as any).denuncia_id || "",
       numero_referencia: t.numero_referencia,
       responsavel_nome: t.responsavel_nome,
       responsavel_posto: t.responsavel_posto,
@@ -329,6 +330,7 @@ export function TransparenciaTab({ transparencias, setTransparencias, denuncias 
         tipo: form.tipo,
         data_emissao: form.data_emissao,
         numero_referencia: form.numero_referencia,
+        denuncia_id: form.denuncia_id || null,
         responsavel_nome: form.responsavel_nome,
         responsavel_posto: form.responsavel_posto,
         responsavel_assinatura: form.responsavel_assinatura || null,
@@ -512,14 +514,16 @@ export function TransparenciaTab({ transparencias, setTransparencias, denuncias 
                 <Label className="text-xs font-semibold">Denúncia Vinculada *</Label>
                 <Select value={form.denuncia_id || undefined} onValueChange={v => {
                   const d = denuncias.find((d: any) => d.id === v);
-                  const proto = d?.dados_detalhados?.numero_protocolo || "";
+                  const numReg = d?.numero_registro;
+                  const ano = new Date().getFullYear();
+                  const proto = numReg ? `Nº${String(numReg).padStart(4, "0")}/${String(ano).slice(2)}` : "";
                   setForm(f => ({ ...f, denuncia_id: v, numero_referencia: proto }));
                 }}>
                   <SelectTrigger><SelectValue placeholder="Selecionar denúncia..." /></SelectTrigger>
                   <SelectContent>
                     {denuncias.map((d: any) => (
                       <SelectItem key={d.id} value={d.id}>
-                        {d.dados_detalhados?.numero_protocolo ? `Nº ${d.dados_detalhados.numero_protocolo} - ${d.titulo}` : d.titulo}
+                        #{d.numero_registro?.toString().padStart(4, "0")} - {d.titulo}
                       </SelectItem>
                     ))}
                   </SelectContent>
