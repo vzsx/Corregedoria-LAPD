@@ -49,7 +49,7 @@ interface TransparenciaTabProps {
 }
 
 const DEFAULT_CONSIDERANDOS_ARQUIVAMENTO = `CONSIDERANDO a conclusão da apuração administrativa referente à denúncia protocolada sob o nº ____;
-CONSIDERANDO que, durante a instrução do procedimento, foram realizadas todas as diligências necessárias para verificação dos fatos narrados;
+CONSIDERANDO que, durante a instrução do procedimento, foram realizadas as diligências necessárias para verificação dos fatos narrados;
 CONSIDERANDO que os elementos produzidos não evidenciaram materialidade ou indícios suficientes capazes de corroborar as alegações apresentadas;`;
 
 const DEFAULT_CONSIDERANDOS_SOLUCIONADA = `CONSIDERANDO a conclusão da apuração administrativa referente à denúncia protocolada sob o nº ____;
@@ -57,7 +57,7 @@ CONSIDERANDO que, durante a instrução do procedimento, foram realizadas todas 
 CONSIDERANDO que os elementos de prova produzidos evidenciaram a materialidade dos fatos e permitiram a correta identificação das circunstâncias apuradas;`;
 
 const DEFAULT_ARTIGOS_ARQUIVAMENTO = {
-  art1: "Determinar o ARQUIVAMENTO, em razão da INSUFICIÊNCIA DE ELEMENTOS PROBATÓRIOS que sustentem a continuidade da apuração administrativa.",
+  art1: "Determinar o ARQUIVAMENTO em razão da INSUFICIÊNCIA DE ELEMENTOS PROBATÓRIOS que sustentam a continuidade da apuração administrativa.",
   art2: "O arquivamento fundamenta-se na inexistência de provas consistentes e suficientes para comprovar os fatos narrados na denúncia, não sendo constatados elementos objetivos que justifiquem a instauração ou prosseguimento de procedimento disciplinar.",
   art3: "O presente arquivamento possui natureza administrativa e poderá ser revisto caso surjam novos elementos de prova ou fatos supervenientes relevantes.",
   art4: "Dê-se ciência às partes interessadas, observadas as normas de sigilo e proteção de dados aplicáveis.",
@@ -512,14 +512,14 @@ export function TransparenciaTab({ transparencias, setTransparencias, denuncias 
                 <Label className="text-xs font-semibold">Denúncia Vinculada *</Label>
                 <Select value={form.denuncia_id || undefined} onValueChange={v => {
                   const d = denuncias.find((d: any) => d.id === v);
-                  const proto = d?.dados_detalhados?.numero_protocolo || d?.titulo || "";
+                  const proto = d?.dados_detalhados?.numero_protocolo || "";
                   setForm(f => ({ ...f, denuncia_id: v, numero_referencia: proto }));
                 }}>
                   <SelectTrigger><SelectValue placeholder="Selecionar denúncia..." /></SelectTrigger>
                   <SelectContent>
                     {denuncias.map((d: any) => (
                       <SelectItem key={d.id} value={d.id}>
-                        {d.dados_detalhados?.numero_protocolo ? `Nº ${d.dados_detalhados.numero_protocolo}` : d.titulo || d.id.slice(0, 8)}
+                        {d.dados_detalhados?.numero_protocolo ? `Nº ${d.dados_detalhados.numero_protocolo} - ${d.titulo}` : d.titulo}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -576,30 +576,18 @@ export function TransparenciaTab({ transparencias, setTransparencias, denuncias 
               </div>
             )}
 
-            {/* Arquivamento-specific: Considerandos + Artigos */}
+            {/* Arquivamento-specific: just shows fixed text info */}
             {form.tipo === "arquivamento" && (
-              <>
-                <div>
-                  <Label className="text-xs font-semibold">CONSIDERANDOs (um por linha)</Label>
-                  <Textarea value={form.considerandos} onChange={e => setForm(f => ({ ...f, considerandos: e.target.value }))} className="min-h-[100px] font-mono text-xs" />
-                </div>
-                <div>
-                  <Label className="text-xs font-semibold">Art. 1º</Label>
-                  <Textarea value={form.artigo_1} onChange={e => setForm(f => ({ ...f, artigo_1: e.target.value }))} className="min-h-[60px]" />
-                </div>
-                <div>
-                  <Label className="text-xs font-semibold">Art. 2º</Label>
-                  <Textarea value={form.artigo_2} onChange={e => setForm(f => ({ ...f, artigo_2: e.target.value }))} className="min-h-[60px]" />
-                </div>
-                <div>
-                  <Label className="text-xs font-semibold">Art. 3º</Label>
-                  <Textarea value={form.artigo_3} onChange={e => setForm(f => ({ ...f, artigo_3: e.target.value }))} className="min-h-[60px]" />
-                </div>
-                <div>
-                  <Label className="text-xs font-semibold">Art. 4º</Label>
-                  <Textarea value={form.artigo_4} onChange={e => setForm(f => ({ ...f, artigo_4: e.target.value }))} className="min-h-[60px]" />
-                </div>
-              </>
+              <div className="border rounded-lg p-4 bg-muted/30 space-y-2">
+                <Label className="text-sm font-bold">Artigos do Arquivamento (fixos)</Label>
+                <p className="text-xs text-muted-foreground">Os artigos são gerados automaticamente conforme o modelo padrão.</p>
+                <ul className="text-xs text-muted-foreground list-disc pl-5 space-y-1">
+                  <li><strong>Art. 1º</strong> – Determinar o ARQUIVAMENTO...</li>
+                  <li><strong>Art. 2º</strong> – O arquivamento fundamenta-se...</li>
+                  <li><strong>Art. 3º</strong> – O presente arquivamento possui natureza administrativa...</li>
+                  <li><strong>Art. 4º</strong> – Dê-se ciência às partes interessadas...</li>
+                </ul>
+              </div>
             )}
 
             <div className="flex justify-end gap-2 pt-4 border-t">
