@@ -92,7 +92,7 @@ function generateInformeHtml(t: Transparencia): string {
   const considerandos = considerandosRaw.split("\n").filter(l => l.trim());
   const numeroFormatado = t.numero_informe.padStart(3, "0");
   const ano = new Date().getFullYear();
-  const numRef = t.numero_referencia || "";
+  const numRef = t.numero_informe || "";
 
   return `<!DOCTYPE html>
 <html>
@@ -186,7 +186,7 @@ function generateInformeText(t: Transparencia): string {
   const considerandos = considerandosRaw.split("\n").filter(l => l.trim());
   const numeroFormatado = t.numero_informe.padStart(3, "0");
   const ano = new Date().getFullYear();
-  const numRef = t.numero_referencia || "";
+  const numRef = t.numero_informe || "";
 
   return [
     `GOVERNO DO ESTADO DE SÃO PAULO`,
@@ -444,7 +444,7 @@ export function TransparenciaTab({ transparencias, setTransparencias, denuncias 
                     <Badge variant={t.tipo === "arquivamento" ? "secondary" : "default"}>
                       {t.tipo === "arquivamento" ? "Arquivamento" : "Solucionada"}
                     </Badge>
-                    <span className="font-bold text-sm">INFORME DE {t.tipo === "arquivamento" ? "ARQUIVAMENTO" : "DENÚNCIA SOLUCIONADA"}{t.numero_referencia ? ` Nº ${t.numero_referencia}` : ""}/{new Date().getFullYear()} – CPM</span>
+                    <span className="font-bold text-sm">INFORME DE {t.tipo === "arquivamento" ? "ARQUIVAMENTO" : "DENÚNCIA SOLUCIONADA"} Nº {t.numero_informe}/{new Date().getFullYear()} – CPM</span>
                   </div>
                   <p className="text-xs text-muted-foreground">Ref: {t.numero_referencia || "–"} | {t.responsavel_posto} {t.responsavel_nome}</p>
                   <p className="text-xs text-muted-foreground mt-1">Criado em {format(parseLocalDate(t.data_emissao), "dd/MM/yyyy")}</p>
