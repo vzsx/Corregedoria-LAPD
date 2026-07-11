@@ -65,6 +65,8 @@ function Denuncias() {
     provas_selecionadas: [] as string[],
     provas_outro: "",
     provas_descricao: "",
+    numero_protocolo: "",
+    anexo_denuncia: "",
     declaracao_assinatura: ""
   });
 
@@ -436,6 +438,39 @@ function Denuncias() {
                   <p className="text-[9px] text-muted-foreground italic mt-1">
                     * Importante: Todas as provas (vídeos, imagens, áudios) devem ser enviadas através de links (Imgur, YouTube, Medal, etc).
                   </p>
+                </div>
+              </div>
+            </section>
+
+            {/* 7B. PROTOCOLO E ANEXO */}
+            <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
+              <div className="mb-6 flex items-center gap-3 border-b border-border pb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded bg-indigo-500/10 text-indigo-600">
+                  <FileText className="h-5 w-5" />
+                </div>
+                <h3 className="font-bold uppercase tracking-wider text-foreground">Protocolo e Anexo</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Nº Protocolo da Denúncia</Label>
+                  <Input
+                    value={formData.numero_protocolo}
+                    onChange={(e) => setFormData({...formData, numero_protocolo: e.target.value})}
+                    placeholder="Ex: 001/2025"
+                    className="bg-background border-input text-foreground"
+                  />
+                  <p className="text-[9px] text-muted-foreground italic mt-1">
+                    * Número será exibido nos Informes de Transparência.
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Link do Anexo da Denúncia</Label>
+                  <Input
+                    value={formData.anexo_denuncia}
+                    onChange={(e) => setFormData({...formData, anexo_denuncia: e.target.value})}
+                    placeholder="Cole o link do documento (Google Drive, etc)"
+                    className="bg-background border-input text-foreground"
+                  />
                 </div>
               </div>
             </section>

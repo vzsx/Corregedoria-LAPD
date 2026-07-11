@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
-  Eye, Printer, Plus, Search, FileText, Archive, CheckCircle2, History, Filter
+  Eye, Printer, Plus, Search, FileText, Archive, CheckCircle2, History, Filter, Trash2
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -41,6 +41,7 @@ export interface Transparencia {
 interface TransparenciaTabProps {
   transparencias: Transparencia[];
   setTransparencias: React.Dispatch<React.SetStateAction<Transparencia[]>>;
+  denuncias: any[];
 }
 
 const DEFAULT_CONSIDERANDOS_ARQUIVAMENTO = `CONSIDERANDO a conclusão da apuração administrativa referente à denúncia protocolada sob o nº ____;
@@ -73,7 +74,8 @@ function parseLocalDate(dateStr: string) {
 function generateInformeHtml(t: Transparencia): string {
   const isArquivamento = t.tipo === "arquivamento";
   const dataFormatada = format(parseLocalDate(t.data_emissao), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
-  const considerandos = t.considerandos.split("\n").filter(l => l.trim());
+  const considerandosRaw = t.considerandos.replace(/nº\s*____/g, t.numero_referencia ? `nº ${t.numero_referencia}` : "nº ____");
+  const considerandos = considerandosRaw.split("\n").filter(l => l.trim());
   const numeroFormatado = t.numero_informe.padStart(3, "0");
   const ano = new Date().getFullYear();
 
@@ -159,7 +161,8 @@ img{max-width:100%}
 function generateInformeText(t: Transparencia): string {
   const isArquivamento = t.tipo === "arquivamento";
   const dataFormatada = format(parseLocalDate(t.data_emissao), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
-  const considerandos = t.considerandos.split("\n").filter(l => l.trim());
+  const considerandosRaw = t.considerandos.replace(/nº\s*____/g, t.numero_referencia ? `nº ${t.numero_referencia}` : "nº ____");
+  const considerandos = considerandosRaw.split("\n").filter(l => l.trim());
   const numeroFormatado = t.numero_informe.padStart(3, "0");
   const ano = new Date().getFullYear();
 
@@ -201,7 +204,7 @@ function generateInformeText(t: Transparencia): string {
   ].join("\n");
 }
 
-export function TransparenciaTab({ transparencias, setTransparencias }: TransparenciaTabProps) {
+export function TransparenciaTab({ transparencias, setTransparencias, denuncias }: TransparenciaTabProps) {
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterTipo, setFilterTipo] = useState<"todos" | "arquivamento" | "solucionada">("todos");
@@ -246,12 +249,21 @@ export function TransparenciaTab({ transparencias, setTransparencias }: Transpar
     total: transparencias.length,
   }), [transparencias]);
 
+  const nextNumero = useMemo(() => {
+    const maxNum = transparencias.reduce((max, t) => {
+      const n = parseInt(t.numero_informe, 10);
+      return !isNaN(n) && n > max ? n : max;
+    }, 0);
+    return String(maxNum + 1).padStart(3, "0");
+  }, [transparencias]);
+
   const openForm = (tipo?: "arquivamento" | "solucionada") => {
     setEditingId(null);
     const t = tipo || "arquivamento";
     setForm({
       ...defaultForm,
       tipo: t,
+      numero_informe: nextNumero,
       considerandos: t === "arquivamento" ? DEFAULT_CONSIDERANDOS_ARQUIVAMENTO : DEFAULT_CONSIDERANDOS_SOLUCIONADA,
       artigo_1: t === "arquivamento" ? DEFAULT_ARTIGOS_ARQUIVAMENTO.art1 : DEFAULT_ARTIGOS_SOLUCIONADA.art1,
       artigo_2: t === "arquivamento" ? DEFAULT_ARTIGOS_ARQUIVAMENTO.art2 : DEFAULT_ARTIGOS_SOLUCIONADA.art2,
@@ -337,6 +349,17 @@ export function TransparenciaTab({ transparencias, setTransparencias }: Transpar
     setTimeout(() => win.print(), 500);
   };
 
+  const handleDelete = async (id: string) => {
+    if (!confirm("Tem certeza que deseja excluir este informe?")) return;
+    try {
+      const { error } = await supabase.from("transparencias").delete().eq("id", id);
+      if (error) throw error;
+      setTransparencias(prev => prev.filter(t => t.id !== id));
+    } catch (err) {
+      console.error("Erro ao excluir:", err);
+    }
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col gap-4 border-b border-border pb-4">
@@ -399,6 +422,9 @@ export function TransparenciaTab({ transparencias, setTransparencias }: Transpar
                   <Button variant="ghost" size="icon" className="h-8 w-8" title="Editar" onClick={() => openEdit(t)}>
                     <Filter className="h-4 w-4" />
                   </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" title="Excluir" onClick={() => handleDelete(t.id)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             </div>
@@ -436,8 +462,8 @@ export function TransparenciaTab({ transparencias, setTransparencias }: Transpar
                 </Select>
               </div>
               <div>
-                <Label className="text-xs font-semibold">Nº do Informe *</Label>
-                <Input value={form.numero_informe} onChange={e => setForm(f => ({ ...f, numero_informe: e.target.value }))} placeholder="Ex: 001" />
+                <Label className="text-xs font-semibold">Nº do Informe * (próximo: {nextNumero})</Label>
+                <Input value={form.numero_informe} onChange={e => setForm(f => ({ ...f, numero_informe: e.target.value }))} placeholder={nextNumero} />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -446,8 +472,21 @@ export function TransparenciaTab({ transparencias, setTransparencias }: Transpar
                 <Input type="date" value={form.data_emissao} onChange={e => setForm(f => ({ ...f, data_emissao: e.target.value }))} />
               </div>
               <div>
-                <Label className="text-xs font-semibold">Nº Referência (denúncia/investigação)</Label>
-                <Input value={form.numero_referencia} onChange={e => setForm(f => ({ ...f, numero_referencia: e.target.value }))} placeholder="Ex: 001/2025" />
+                <Label className="text-xs font-semibold">Denúncia Vinculada (opcional)</Label>
+                <Select value={form.numero_referencia} onValueChange={v => {
+                  const d = denuncias.find((d: any) => d.id === v);
+                  const proto = d?.dados_detalhados?.numero_protocolo || d?.numero_registro || "";
+                  setForm(f => ({ ...f, numero_referencia: proto ? `${proto}` : v }));
+                }}>
+                  <SelectTrigger><SelectValue placeholder="Selecionar denúncia..." /></SelectTrigger>
+                  <SelectContent>
+                    {denuncias.map((d: any) => (
+                      <SelectItem key={d.id} value={d.id}>
+                        {d.dados_detalhados?.numero_protocolo ? `Nº ${d.dados_detalhados.numero_protocolo}` : d.titulo}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">

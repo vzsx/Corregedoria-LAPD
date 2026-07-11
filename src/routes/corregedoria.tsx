@@ -2406,16 +2406,16 @@ function Corregedoria() {
             label="Afastamentos" 
           />
           <SidebarItem 
-            active={activeTab === "oficiais"} 
-            onClick={() => handleTabChange("oficiais")} 
-            icon={Users} 
-            label="Oficiais" 
-          />
-          <SidebarItem 
             active={activeTab === "transparencias"} 
             onClick={() => handleTabChange("transparencias")} 
             icon={FileText} 
             label="Transparências" 
+          />
+          <SidebarItem 
+            active={activeTab === "oficiais"} 
+            onClick={() => handleTabChange("oficiais")} 
+            icon={Users} 
+            label="Oficiais" 
           />
 
     {isAdmin && (
@@ -5351,6 +5351,7 @@ function Corregedoria() {
             <TransparenciaTab
               transparencias={transparencias}
               setTransparencias={setTransparencias}
+              denuncias={denuncias}
             />
           )}
 
