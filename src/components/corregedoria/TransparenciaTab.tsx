@@ -12,6 +12,7 @@ import {
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useAuth } from "@/hooks/use-auth";
+import { logAudit } from "@/lib/audit-log";
 import { supabase } from "@/integrations/supabase/client";
 import { BRASAO_SP_LOGO, PM_LOGO } from "./ipm-logos";
 import { PMESP_WATERMARK } from "./pmesp-watermark";
@@ -30,6 +31,7 @@ export interface Transparencia {
   artigo_2: string;
   artigo_3: string;
   artigo_4: string;
+  artigo_5: string | null;
   observacoes: string | null;
   status: string;
   autor_id: string | null;
@@ -62,8 +64,9 @@ const DEFAULT_ARTIGOS_ARQUIVAMENTO = {
 const DEFAULT_ARTIGOS_SOLUCIONADA = {
   art1: "Declarar solucionada a denúncia, em razão da conclusão da apuração administrativa e do esclarecimento integral dos fatos apresentados.",
   art2: "Concluir que a investigação produziu elementos suficientes para fundamentar as providências administrativas cabíveis, conforme constatado durante a instrução do procedimento.",
-  art3: "Determinar o encaminhamento dos autos à autoridade competente para adoção das medidas administrativas e disciplinares eventualmente pertinentes, observadas as normas legais e regulamentares aplicáveis.",
-  art4: "Dê-se ciência às partes interessadas, observadas as normas de sigilo e proteção de dados aplicáveis.",
+  art3: "Em decorrência das conclusões alcançadas na apuração, foram adotadas as seguintes medidas administrativas e disciplinares:\n\n• (Conforme o Questionário de seleção de opções: 'Advertência, Prisão Militar, exoneração da polícia militar, afastamento como medida disciplinar e opcionalmente a opção de para se escolher apenas uma delas, e que fique apenas a debaixo das outras')",
+  art4: "Determinar o encaminhamento dos autos à autoridade competente para adoção das demais providências administrativas e disciplinares, se fizerem necessárias, observadas as normas legais e regulamentares aplicáveis.",
+  art5: "Dê-se ciência às partes interessadas, observadas as normas de sigilo e proteção de dados aplicáveis.",
 };
 
 function parseLocalDate(dateStr: string) {
@@ -140,8 +143,9 @@ img{max-width:100%}
 
   <p class="c1"><span class="c4 c7">Art. 1º -</span><span class="c4"> ${t.artigo_1}</span></p>
   <p class="c1"><span class="c4 c7">Art. 2º -</span><span class="c4"> ${t.artigo_2}</span></p>
-  <p class="c1"><span class="c4 c7">Art. 3º -</span><span class="c4"> ${t.artigo_3}</span></p>
+  <p class="c1"><span class="c4 c7">Art. 3º -</span><span class="c4">${t.artigo_3.replace(/\n/g, '<br>')}</span></p>
   <p class="c1"><span class="c4 c7">Art. 4º -</span><span class="c4"> ${t.artigo_4}</span></p>
+  ${(t as any).artigo_5 ? `<p class="c1"><span class="c4 c7">Art. 5º -</span><span class="c4"> ${(t as any).artigo_5}</span></p>` : ""}
 
   <p class="c1"><span class="c4 c7">Publique-se. Registre-se. Cumpra-se.</span></p>
 
@@ -191,6 +195,7 @@ function generateInformeText(t: Transparencia): string {
     ``,
     `Art. 4º - ${t.artigo_4}`,
     ``,
+    ...(t.artigo_5 ? [`Art. 5º - ${t.artigo_5}`, ``] : []),
     `Publique-se. Registre-se. Cumpra-se.`,
     ``,
     `São Paulo, ${dataFormatada}.`,
@@ -228,6 +233,7 @@ export function TransparenciaTab({ transparencias, setTransparencias, denuncias 
     artigo_2: DEFAULT_ARTIGOS_ARQUIVAMENTO.art2,
     artigo_3: DEFAULT_ARTIGOS_ARQUIVAMENTO.art3,
     artigo_4: DEFAULT_ARTIGOS_ARQUIVAMENTO.art4,
+    artigo_5: "",
     observacoes: "",
   }), [user]);
 
@@ -270,6 +276,7 @@ export function TransparenciaTab({ transparencias, setTransparencias, denuncias 
       artigo_2: t === "arquivamento" ? DEFAULT_ARTIGOS_ARQUIVAMENTO.art2 : DEFAULT_ARTIGOS_SOLUCIONADA.art2,
       artigo_3: t === "arquivamento" ? DEFAULT_ARTIGOS_ARQUIVAMENTO.art3 : DEFAULT_ARTIGOS_SOLUCIONADA.art3,
       artigo_4: t === "arquivamento" ? DEFAULT_ARTIGOS_ARQUIVAMENTO.art4 : DEFAULT_ARTIGOS_SOLUCIONADA.art4,
+      artigo_5: t === "arquivamento" ? "" : (DEFAULT_ARTIGOS_SOLUCIONADA as any).art5 || "",
     });
     setShowForm(true);
   };
@@ -290,6 +297,7 @@ export function TransparenciaTab({ transparencias, setTransparencias, denuncias 
       artigo_2: t.artigo_2,
       artigo_3: t.artigo_3,
       artigo_4: t.artigo_4,
+      artigo_5: t.artigo_5 || "",
       observacoes: t.observacoes || "",
     });
     setShowForm(true);
@@ -311,6 +319,7 @@ export function TransparenciaTab({ transparencias, setTransparencias, denuncias 
         artigo_2: form.artigo_2,
         artigo_3: form.artigo_3,
         artigo_4: form.artigo_4,
+        artigo_5: form.artigo_5 || null,
         observacoes: form.observacoes || null,
         status: "concluido",
         autor_id: user?.id || null,
@@ -326,6 +335,7 @@ export function TransparenciaTab({ transparencias, setTransparencias, denuncias 
           .single();
         if (error) throw error;
         setTransparencias(prev => prev.map(t => t.id === editingId ? data as Transparencia : t));
+        logAudit({ action: "update", entity_type: "transparencia", entity_id: editingId, details: { tipo: form.tipo, numero_informe: form.numero_informe } });
       } else {
         const { data, error } = await supabase
           .from("transparencias")
@@ -334,6 +344,7 @@ export function TransparenciaTab({ transparencias, setTransparencias, denuncias 
           .single();
         if (error) throw error;
         setTransparencias(prev => [data as Transparencia, ...prev]);
+        logAudit({ action: "create", entity_type: "transparencia", entity_id: data.id, details: { tipo: form.tipo, numero_informe: form.numero_informe } });
       }
       setShowForm(false);
     } catch (err) {
@@ -357,6 +368,7 @@ export function TransparenciaTab({ transparencias, setTransparencias, denuncias 
       const { error } = await supabase.from("transparencias").delete().eq("id", id);
       if (error) throw error;
       setTransparencias(prev => prev.filter(t => t.id !== id));
+      logAudit({ action: "delete", entity_type: "transparencia", entity_id: id });
     } catch (err) {
       console.error("Erro ao excluir:", err);
     }
@@ -520,6 +532,10 @@ export function TransparenciaTab({ transparencias, setTransparencias, denuncias 
             <div>
               <Label className="text-xs font-semibold">Art. 4º</Label>
               <Textarea value={form.artigo_4} onChange={e => setForm(f => ({ ...f, artigo_4: e.target.value }))} className="min-h-[60px]" />
+            </div>
+            <div>
+              <Label className="text-xs font-semibold">Art. 5º (opcional — apenas Denúncia Solucionada)</Label>
+              <Textarea value={form.artigo_5} onChange={e => setForm(f => ({ ...f, artigo_5: e.target.value }))} className="min-h-[60px]" placeholder="Deixe vazio se não houver Art. 5º" />
             </div>
             <div className="flex justify-end gap-2 pt-4 border-t">
               <Button variant="outline" onClick={() => setShowForm(false)}>Cancelar</Button>

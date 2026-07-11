@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS public.transparencias (
   artigo_2 TEXT NOT NULL,
   artigo_3 TEXT NOT NULL,
   artigo_4 TEXT NOT NULL,
+  artigo_5 TEXT,
   observacoes TEXT,
   status TEXT NOT NULL DEFAULT 'concluido',
   autor_id UUID,
