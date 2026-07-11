@@ -75,7 +75,7 @@ const DEFAULT_ARTIGOS_SOLUCIONADA = {
   art1: "Declarar solucionada a denúncia, em razão da conclusão da apuração administrativa e do esclarecimento integral dos fatos apresentados.",
   art2: "Concluir que a investigação produziu elementos suficientes para fundamentar as providências administrativas cabíveis, conforme constatado durante a instrução do procedimento.",
   art3: "Em decorrência das conclusões alcançadas na apuração, foram adotadas as seguintes medidas administrativas e disciplinares:",
-  art4: "Determinar o encaminhamento dos autos à autoridade competente para adoção das demais providências administrativas e disciplinares, se fizerem necessárias, observadas as normas legais e regulamentares aplicáveis.",
+  art4: "Determinar o encaminhamento dos autos à autoridade competente para adoção das demais providências administrativas e disciplinares que se fizerem necessárias, observadas as normas legais e regulamentares aplicáveis.",
   art5: "Dê-se ciência às partes interessadas, observadas as normas de sigilo e proteção de dados aplicáveis.",
 };
 
@@ -91,6 +91,7 @@ function generateInformeHtml(t: Transparencia): string {
   const considerandos = considerandosRaw.split("\n").filter(l => l.trim());
   const numeroFormatado = t.numero_informe.padStart(3, "0");
   const ano = new Date().getFullYear();
+  const numRef = !isArquivamento && t.numero_referencia ? t.numero_referencia : `${numeroFormatado}/${ano}`;
 
   return `<!DOCTYPE html>
 <html>
@@ -100,12 +101,12 @@ function generateInformeHtml(t: Transparencia): string {
 @import url('https://fonts.googleapis.com/css2?family=Pinyon+Script&display=swap');
 @page { size: A4 portrait; margin: 3cm 2cm 3cm 2cm; }
 *{box-sizing:border-box}
+body{margin:0;padding:0}
 p{margin:0 0 8pt 0;color:#000;font-size:11pt;font-family:"Arial",sans-serif;line-height:1.15;text-align:justify;overflow-wrap:break-word}
 .c3{padding:0;margin:0;line-height:1.15;text-align:center}
 .c4{color:#000;font-weight:700;font-size:11pt;font-family:"Arial",sans-serif}
 .c7{font-weight:700}
 .c1{padding:0;margin:0 0 8pt 0;line-height:1.15;text-align:justify}
-.c11{padding:0;margin:0 0 8pt 0;line-height:1.15;text-align:justify}
 .c14{padding:0;margin:0 0 8pt 0;line-height:1.15;text-align:center}
 .doc-content{position:relative;background:#fff;max-width:160mm;margin:0 auto;padding:72pt}
 table td,table th{padding:0}
@@ -115,7 +116,6 @@ img{max-width:100%}
 .signature-block{page-break-inside:avoid}
 .signature-name{font-family:'Pinyon Script',cursive;font-size:30pt;color:#000;font-weight:400;line-height:1}
 .signature-line{display:inline-block;border-bottom:1px solid #000;width:46mm;height:1pt}
-.signature-title{font-size:11pt;color:#000}
 @media print{.doc-content{max-width:none;padding:0}}
 </style>
 </head>
@@ -143,27 +143,28 @@ img{max-width:100%}
   <p class="c14" style="margin-top:24pt;"><span class="c4">POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</span></p>
   <p class="c14"><span class="c4">CORREGEDORIA DA POLÍCIA MILITAR</span></p>
 
-  <p class="c14" style="margin-top:20pt;"><span class="c4">${isArquivamento ? "INFORME DE ARQUIVAMENTO" : "INFORME DE DENÚNCIA SOLUCIONADA"} N° ${!isArquivamento && t.numero_referencia ? t.numero_referencia : numeroFormatado}/${ano} – CPM</span></p>
+  <p class="c14" style="margin-top:20pt;"><span class="c4">${isArquivamento ? "INFORME DE ARQUIVAMENTO" : "INFORME DE DENÚNCIA SOLUCIONADA"} Nº ${numRef} – CPM</span></p>
 
-  <p class="c1">A CORREGEDORIA DA POLÍCIA MILITAR DO ESTADO DE SÃO PAULO, no uso de suas atribuições legais e regulamentares, torna público o seguinte informe.</p>
+  <p class="c1">A CORREGEDORIA DA POLÍCIA MILITAR DO ESTADO DE SÃO PAULO, no uso de suas atribuições legais e regulamentares, torna público o seguinte informe:</p>
 
-  ${considerandos.map(c => `<p class="c1"><span class="c4 c7">${c.startsWith("CONSIDERANDO") ? "" : ""}${c}</span></p>`).join("\n\n  ")}
+  ${considerandos.map(c => `<p class="c1"><span class="c4 c7">${c}</span></p>`).join("\n\n  ")}
 
   <p class="c1"><span class="c4 c7">RESOLVE:</span></p>
 
-  <p class="c1"><span class="c4 c7">Art. 1º -</span><span class="c4"> ${t.artigo_1}</span></p>
-  <p class="c1"><span class="c4 c7">Art. 2º -</span><span class="c4"> ${t.artigo_2}</span></p>
-  <p class="c1"><span class="c4 c7">Art. 3º -</span><span class="c4">${t.artigo_3.replace(/\n/g, '<br>')}</span></p>
-  <p class="c1"><span class="c4 c7">Art. 4º -</span><span class="c4"> ${t.artigo_4}</span></p>
-  ${(t as any).artigo_5 ? `<p class="c1"><span class="c4 c7">Art. 5º -</span><span class="c4"> ${(t as any).artigo_5}</span></p>` : ""}
+  <p class="c1"><span class="c4 c7">Art. 1º</span><span class="c4"> ${t.artigo_1}</span></p>
+  <p class="c1"><span class="c4 c7">Art. 2º</span><span class="c4"> ${t.artigo_2}</span></p>
+  <p class="c1"><span class="c4 c7">Art. 3º</span><span class="c4">${t.artigo_3.replace(/\n/g, '<br>')}</span></p>
+  <p class="c1"><span class="c4 c7">Art. 4º</span><span class="c4"> ${t.artigo_4}</span></p>
+  <p class="c1"><span class="c4 c7">Art. 5º</span><span class="c4"> ${t.artigo_5 || "Dê-se ciência às partes interessadas, observadas as normas de sigilo e proteção de dados aplicáveis."}</span></p>
 
   <p class="c1"><span class="c4 c7">Publique-se. Registre-se. Cumpra-se.</span></p>
 
   <div class="signature-block" style="margin-top:30pt;text-align:center;">
-    <p style="margin:0 0 18pt 0;"><span class="c4">São Paulo, ${dataFormatada}.</span></p>
-    <p style="margin:0 0 4pt 0;"><span class="c4">Corregedor Responsável:</span></p>
+    <p style="margin:0 0 18pt 0;"><span class="c4">___________________________</span></p>
+    <p style="margin:0 0 4pt 0;"><span class="c4">São Paulo, ${dataFormatada}.</span></p>
+    <p style="margin:12pt 0 4pt 0;"><span class="c4">Corregedor Responsável:</span></p>
     <p style="margin:0 0 2pt 0;"><span class="c4">${t.responsavel_posto} ${t.responsavel_nome}</span></p>
-    <p style="margin:6pt 0 0 0;">
+    <p style="margin:12pt 0 0 0;">
       <span class="c4">Assinatura: </span>${t.responsavel_nome ? `<span class="signature-name">${t.responsavel_nome}</span>` : `<span class="signature-line"></span>`}
     </p>
   </div>
@@ -179,6 +180,7 @@ function generateInformeText(t: Transparencia): string {
   const considerandos = considerandosRaw.split("\n").filter(l => l.trim());
   const numeroFormatado = t.numero_informe.padStart(3, "0");
   const ano = new Date().getFullYear();
+  const numRef = !isArquivamento && t.numero_referencia ? t.numero_referencia : `${numeroFormatado}/${ano}`;
 
   return [
     `GOVERNO DO ESTADO DE SÃO PAULO`,
@@ -189,33 +191,35 @@ function generateInformeText(t: Transparencia): string {
     `POLÍCIA MILITAR DO ESTADO DE SÃO PAULO`,
     `CORREGEDORIA DA POLÍCIA MILITAR`,
     ``,
-    `${isArquivamento ? "INFORME DE ARQUIVAMENTO" : "INFORME DE DENÚNCIA SOLUCIONADA"} N° ${!isArquivamento && t.numero_referencia ? t.numero_referencia : numeroFormatado}/${ano} – CPM`,
+    `${isArquivamento ? "INFORME DE ARQUIVAMENTO" : "INFORME DE DENÚNCIA SOLUCIONADA"} Nº ${numRef} – CPM`,
     ``,
-    `A CORREGEDORIA DA POLÍCIA MILITAR DO ESTADO DE SÃO PAULO, no uso de suas atribuições legais e regulamentares, torna público o seguinte informe.`,
+    `A CORREGEDORIA DA POLÍCIA MILITAR DO ESTADO DE SÃO PAULO, no uso de suas atribuições legais e regulamentares, torna público o seguinte informe:`,
     ``,
     ...considerandos,
     ``,
     `RESOLVE:`,
     ``,
-    `Art. 1º - ${t.artigo_1}`,
+    `Art. 1º ${t.artigo_1}`,
     ``,
-    `Art. 2º - ${t.artigo_2}`,
+    `Art. 2º ${t.artigo_2}`,
     ``,
-    `Art. 3º - ${t.artigo_3}`,
+    `Art. 3º ${t.artigo_3}`,
     ``,
-    `Art. 4º - ${t.artigo_4}`,
+    `Art. 4º ${t.artigo_4}`,
     ``,
-    ...(t.artigo_5 ? [`Art. 5º - ${t.artigo_5}`, ``] : []),
+    `Art. 5º ${t.artigo_5 || "Dê-se ciência às partes interessadas, observadas as normas de sigilo e proteção de dados aplicáveis."}`,
+    ``,
     `Publique-se. Registre-se. Cumpra-se.`,
+    ``,
+    `___________________________`,
     ``,
     `São Paulo, ${dataFormatada}.`,
     ``,
     `Corregedor Responsável:`,
     `${t.responsavel_posto} ${t.responsavel_nome}`,
     ``,
-    `____________________________________`,
+    `Assinatura:`,
     `${t.responsavel_nome || "________________"}`,
-    `${t.responsavel_posto}`,
   ].join("\n");
 }
 
@@ -535,8 +539,8 @@ export function TransparenciaTab({ transparencias, setTransparencias, denuncias 
             {/* Solucionada-specific: Measures checklist */}
             {form.tipo === "solucionada" && (
               <div className="border rounded-lg p-4 bg-muted/30 space-y-3">
-                <Label className="text-xs font-semibold">Art. 3º – Medidas Disciplinares Adotadas</Label>
-                <p className="text-xs text-muted-foreground">Selecione as medidas aplicáveis:</p>
+                <Label className="text-sm font-bold">Art. 3º – Medidas Disciplinares Adotadas</Label>
+                <p className="text-xs text-muted-foreground">Selecione as medidas aplicáveis (podem selecionar mais de uma):</p>
                 <div className="grid grid-cols-1 gap-2">
                   {MEDIDAS_OPTIONS.map(medida => (
                     <label key={medida} className="flex items-center gap-2 cursor-pointer text-sm">
@@ -556,9 +560,10 @@ export function TransparenciaTab({ transparencias, setTransparencias, denuncias 
                   ))}
                 </div>
                 {form.medidas.length > 0 && (
-                  <div className="mt-2 text-xs text-muted-foreground">
-                    <strong>Pré-visualização Art. 3º:</strong>
-                    <ul className="list-disc pl-5 mt-1 space-y-0.5">
+                  <div className="mt-3 p-3 bg-background rounded border text-xs">
+                    <p className="font-semibold mb-1">Pré-visualização Art. 3º:</p>
+                    <p className="text-muted-foreground mb-1">Em decorrência das conclusões alcançadas na apuração, foram adotadas as seguintes medidas administrativas e disciplinares:</p>
+                    <ul className="list-disc pl-5 space-y-0.5">
                       {form.medidas.map(m => <li key={m}>{m}</li>)}
                     </ul>
                   </div>
