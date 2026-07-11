@@ -1,5 +1,5 @@
 export type Status = "pendente" | "em_analise" | "concluida" | "arquivada";
-export type Tab = "dashboard" | "denuncias" | "investigacoes" | "inqueritos" | "atos" | "oficiais" | "solicitacoes" | "depoimentos" | "relatorios_gerais" | "afastamentos" | "ipm" | "membros" | "auditoria";
+export type Tab = "dashboard" | "denuncias" | "investigacoes" | "inqueritos" | "atos" | "oficiais" | "solicitacoes" | "depoimentos" | "relatorios_gerais" | "afastamentos" | "ipm" | "membros" | "auditoria" | "transparencias";
 
 export interface Denuncia {
   id: string;

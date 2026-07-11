@@ -29,6 +29,7 @@ import { SidebarItem } from "@/components/corregedoria/SidebarItem";
 import { StatCard } from "@/components/corregedoria/StatCard";
 import { Field } from "@/components/corregedoria/Field";
 import { AfastamentosTab } from "@/components/corregedoria/AfastamentosTab";
+import { TransparenciaTab, Transparencia } from "@/components/corregedoria/TransparenciaTab";
 import { IpmTab } from "@/components/corregedoria/IpmTab";
 import { Pagination } from "@/components/pagination";
 import { STATUS_LABEL, STATUS_COLOR } from "@/lib/corregedoria/constants";
@@ -651,6 +652,7 @@ function Corregedoria() {
   const [depoimentos, setDepoimentos] = useState<Depoimento[]>([]);
   const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
   const [oficiais, setOficiais] = useState<Profile[]>([]);
+  const [transparencias, setTransparencias] = useState<Transparencia[]>([]);
   const [fetching, setFetching] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -878,7 +880,7 @@ function Corregedoria() {
       return;
     }
     const load = async () => {
-      const [denunciasRes, investigacoesRes, relatoriosRes, drRes, irRes, diRes, depoimentosRes, ddRes, perfisRes, rgvRes, ivRes, ipmsRes, adRes, aiRes, arRes, adeRes] = await Promise.all([
+      const [denunciasRes, investigacoesRes, relatoriosRes, drRes, irRes, diRes, depoimentosRes, ddRes, perfisRes, rgvRes, ivRes, ipmsRes, adRes, aiRes, arRes, adeRes, transparenciasRes] = await Promise.all([
         supabase.from("denuncias").select("*").order("created_at", { ascending: false }),
         supabase.from("investigacoes").select("*").order("created_at", { ascending: false }),
         supabase.from("relatorios").select("*").order("created_at", { ascending: false }),
@@ -894,7 +896,8 @@ function Corregedoria() {
         supabase.from("afastamento_denuncia").select("*"),
         supabase.from("afastamento_investigacao").select("*"),
         supabase.from("afastamento_relatorio").select("*"),
-        supabase.from("afastamento_depoimento").select("*")
+        supabase.from("afastamento_depoimento").select("*"),
+        supabase.from("transparencias").select("*").order("created_at", { ascending: false })
       ]);
       
       if (denunciasRes.data) setDenuncias(denunciasRes.data as Denuncia[]);
@@ -912,6 +915,7 @@ function Corregedoria() {
       if (aiRes.data) setAfastamentoInvestigacoes(aiRes.data);
       if (arRes.data) setAfastamentoRelatorios(arRes.data);
       if (adeRes.data) setAfastamentoDepoimentos(adeRes.data);
+      if (transparenciasRes.data) setTransparencias(transparenciasRes.data as Transparencia[]);
       
       // Filtrar oficiais para mostrar apenas os aprovados (não pendentes)
       if (perfisRes.data) {
@@ -2406,6 +2410,12 @@ function Corregedoria() {
             onClick={() => handleTabChange("oficiais")} 
             icon={Users} 
             label="Oficiais" 
+          />
+          <SidebarItem 
+            active={activeTab === "transparencias"} 
+            onClick={() => handleTabChange("transparencias")} 
+            icon={FileText} 
+            label="Transparências" 
           />
 
     {isAdmin && (
@@ -5333,6 +5343,14 @@ function Corregedoria() {
               handleLinkAfastamentoDepoimento={handleLinkAfastamentoDepoimento}
               handleUnlinkAfastamentoDepoimento={handleUnlinkAfastamentoDepoimento}
               ipms={ipms}
+            />
+          )}
+
+          {/* TRANSPARENCIAS TAB */}
+          {activeTab === "transparencias" && (
+            <TransparenciaTab
+              transparencias={transparencias}
+              setTransparencias={setTransparencias}
             />
           )}
 
