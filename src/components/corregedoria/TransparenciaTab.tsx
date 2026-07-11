@@ -91,12 +91,6 @@ function generateInformeHtml(t: Transparencia): string {
   const considerandos = considerandosRaw.split("\n").filter(l => l.trim());
   const numeroFormatado = t.numero_informe.padStart(3, "0");
   const ano = new Date().getFullYear();
-  const medidas = (t as any).medidas as string[] | null;
-  const hasMedidas = isArquivamento === false && medidas && medidas.length > 0;
-
-  const art3Html = hasMedidas
-    ? `${t.artigo_3}<br><br>${medidas!.map(m => `• ${m}`).join("<br>")}`
-    : t.artigo_3.replace(/\n/g, '<br>');
 
   return `<!DOCTYPE html>
 <html>
@@ -159,7 +153,7 @@ img{max-width:100%}
 
   <p class="c1"><span class="c4 c7">Art. 1º -</span><span class="c4"> ${t.artigo_1}</span></p>
   <p class="c1"><span class="c4 c7">Art. 2º -</span><span class="c4"> ${t.artigo_2}</span></p>
-  <p class="c1"><span class="c4 c7">Art. 3º -</span><span class="c4">${art3Html}</span></p>
+  <p class="c1"><span class="c4 c7">Art. 3º -</span><span class="c4">${t.artigo_3.replace(/\n/g, '<br>')}</span></p>
   <p class="c1"><span class="c4 c7">Art. 4º -</span><span class="c4"> ${t.artigo_4}</span></p>
   ${(t as any).artigo_5 ? `<p class="c1"><span class="c4 c7">Art. 5º -</span><span class="c4"> ${(t as any).artigo_5}</span></p>` : ""}
 
@@ -185,12 +179,6 @@ function generateInformeText(t: Transparencia): string {
   const considerandos = considerandosRaw.split("\n").filter(l => l.trim());
   const numeroFormatado = t.numero_informe.padStart(3, "0");
   const ano = new Date().getFullYear();
-  const medidas = (t as any).medidas as string[] | null;
-  const hasMedidas = isArquivamento === false && medidas && medidas.length > 0;
-
-  const art3Text = hasMedidas
-    ? `${t.artigo_3}\n\n${medidas!.map(m => `• ${m}`).join("\n")}`
-    : t.artigo_3;
 
   return [
     `GOVERNO DO ESTADO DE SÃO PAULO`,
@@ -213,7 +201,7 @@ function generateInformeText(t: Transparencia): string {
     ``,
     `Art. 2º - ${t.artigo_2}`,
     ``,
-    `Art. 3º - ${art3Text}`,
+    `Art. 3º - ${t.artigo_3}`,
     ``,
     `Art. 4º - ${t.artigo_4}`,
     ``,
@@ -322,7 +310,7 @@ export function TransparenciaTab({ transparencias, setTransparencias, denuncias 
       artigo_3: t.artigo_3,
       artigo_4: t.artigo_4,
       artigo_5: t.artigo_5 || "",
-      medidas: (t as any).medidas || [],
+      medidas: [],
       observacoes: t.observacoes || "",
     });
     setShowForm(true);
@@ -345,7 +333,9 @@ export function TransparenciaTab({ transparencias, setTransparencias, denuncias 
         artigo_3: form.artigo_3,
         artigo_4: form.artigo_4,
         artigo_5: form.artigo_5 || null,
-        medidas: form.medidas.length > 0 ? form.medidas : null,
+        artigo_3: form.tipo === "solucionada" && form.medidas.length > 0
+          ? `${form.artigo_3}\n\n${form.medidas.map(m => `• ${m}`).join("\n")}`
+          : form.artigo_3,
         observacoes: form.observacoes || null,
         status: "concluido",
         autor_id: user?.id || null,
