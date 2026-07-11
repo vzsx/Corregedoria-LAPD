@@ -475,14 +475,13 @@ export function TransparenciaTab({ transparencias, setTransparencias, denuncias 
               </div>
               <div>
                 <Label className="text-xs font-semibold">Denúncia Vinculada (opcional)</Label>
-                <Select value={form.denuncia_id} onValueChange={v => {
+                <Select value={form.denuncia_id || undefined} onValueChange={v => {
                   const d = denuncias.find((d: any) => d.id === v);
                   const proto = d?.dados_detalhados?.numero_protocolo || "";
                   setForm(f => ({ ...f, denuncia_id: v, numero_referencia: proto }));
                 }}>
                   <SelectTrigger><SelectValue placeholder="Selecionar denúncia..." /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Nenhuma</SelectItem>
                     {denuncias.map((d: any) => (
                       <SelectItem key={d.id} value={d.id}>
                         {d.dados_detalhados?.numero_protocolo ? `Nº ${d.dados_detalhados.numero_protocolo}` : d.titulo}
