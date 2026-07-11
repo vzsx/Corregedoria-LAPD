@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
@@ -32,6 +33,7 @@ export interface Transparencia {
   artigo_3: string;
   artigo_4: string;
   artigo_5: string | null;
+  medidas: string[] | null;
   observacoes: string | null;
   status: string;
   autor_id: string | null;
@@ -55,16 +57,24 @@ CONSIDERANDO que, durante a instrução do procedimento, foram realizadas todas 
 CONSIDERANDO que os elementos de prova produzidos evidenciaram a materialidade dos fatos e permitiram a correta identificação das circunstâncias apuradas;`;
 
 const DEFAULT_ARTIGOS_ARQUIVAMENTO = {
-  art1: "Determinar o arquivamento da denúncia, em razão da insuficiência de elementos probatórios que sustentem a continuidade da apuração administrativa.",
+  art1: "Determinar o ARQUIVAMENTO, em razão da INSUFICIÊNCIA DE ELEMENTOS PROBATÓRIOS que sustentem a continuidade da apuração administrativa.",
   art2: "O arquivamento fundamenta-se na inexistência de provas consistentes e suficientes para comprovar os fatos narrados na denúncia, não sendo constatados elementos objetivos que justifiquem a instauração ou prosseguimento de procedimento disciplinar.",
   art3: "O presente arquivamento possui natureza administrativa e poderá ser revisto caso surjam novos elementos de prova ou fatos supervenientes relevantes.",
   art4: "Dê-se ciência às partes interessadas, observadas as normas de sigilo e proteção de dados aplicáveis.",
 };
 
+const MEDIDAS_OPTIONS = [
+  "Advertência",
+  "Prisão Militar",
+  "Exoneração da Polícia Militar",
+  "Afastamento como Medida Disciplinar",
+  "Orientação",
+];
+
 const DEFAULT_ARTIGOS_SOLUCIONADA = {
   art1: "Declarar solucionada a denúncia, em razão da conclusão da apuração administrativa e do esclarecimento integral dos fatos apresentados.",
   art2: "Concluir que a investigação produziu elementos suficientes para fundamentar as providências administrativas cabíveis, conforme constatado durante a instrução do procedimento.",
-  art3: "Em decorrência das conclusões alcançadas na apuração, foram adotadas as seguintes medidas administrativas e disciplinares:\n\n• (Conforme o Questionário de seleção de opções: 'Advertência, Prisão Militar, exoneração da polícia militar, afastamento como medida disciplinar e opcionalmente a opção de para se escolher apenas uma delas, e que fique apenas a debaixo das outras')",
+  art3: "Em decorrência das conclusões alcançadas na apuração, foram adotadas as seguintes medidas administrativas e disciplinares:",
   art4: "Determinar o encaminhamento dos autos à autoridade competente para adoção das demais providências administrativas e disciplinares, se fizerem necessárias, observadas as normas legais e regulamentares aplicáveis.",
   art5: "Dê-se ciência às partes interessadas, observadas as normas de sigilo e proteção de dados aplicáveis.",
 };
@@ -81,6 +91,12 @@ function generateInformeHtml(t: Transparencia): string {
   const considerandos = considerandosRaw.split("\n").filter(l => l.trim());
   const numeroFormatado = t.numero_informe.padStart(3, "0");
   const ano = new Date().getFullYear();
+  const medidas = (t as any).medidas as string[] | null;
+  const hasMedidas = isArquivamento === false && medidas && medidas.length > 0;
+
+  const art3Html = hasMedidas
+    ? `${t.artigo_3}<br><br>${medidas!.map(m => `• ${m}`).join("<br>")}`
+    : t.artigo_3.replace(/\n/g, '<br>');
 
   return `<!DOCTYPE html>
 <html>
@@ -143,7 +159,7 @@ img{max-width:100%}
 
   <p class="c1"><span class="c4 c7">Art. 1º -</span><span class="c4"> ${t.artigo_1}</span></p>
   <p class="c1"><span class="c4 c7">Art. 2º -</span><span class="c4"> ${t.artigo_2}</span></p>
-  <p class="c1"><span class="c4 c7">Art. 3º -</span><span class="c4">${t.artigo_3.replace(/\n/g, '<br>')}</span></p>
+  <p class="c1"><span class="c4 c7">Art. 3º -</span><span class="c4">${art3Html}</span></p>
   <p class="c1"><span class="c4 c7">Art. 4º -</span><span class="c4"> ${t.artigo_4}</span></p>
   ${(t as any).artigo_5 ? `<p class="c1"><span class="c4 c7">Art. 5º -</span><span class="c4"> ${(t as any).artigo_5}</span></p>` : ""}
 
@@ -169,6 +185,12 @@ function generateInformeText(t: Transparencia): string {
   const considerandos = considerandosRaw.split("\n").filter(l => l.trim());
   const numeroFormatado = t.numero_informe.padStart(3, "0");
   const ano = new Date().getFullYear();
+  const medidas = (t as any).medidas as string[] | null;
+  const hasMedidas = isArquivamento === false && medidas && medidas.length > 0;
+
+  const art3Text = hasMedidas
+    ? `${t.artigo_3}\n\n${medidas!.map(m => `• ${m}`).join("\n")}`
+    : t.artigo_3;
 
   return [
     `GOVERNO DO ESTADO DE SÃO PAULO`,
@@ -191,7 +213,7 @@ function generateInformeText(t: Transparencia): string {
     ``,
     `Art. 2º - ${t.artigo_2}`,
     ``,
-    `Art. 3º - ${t.artigo_3}`,
+    `Art. 3º - ${art3Text}`,
     ``,
     `Art. 4º - ${t.artigo_4}`,
     ``,
@@ -234,6 +256,7 @@ export function TransparenciaTab({ transparencias, setTransparencias, denuncias 
     artigo_3: DEFAULT_ARTIGOS_ARQUIVAMENTO.art3,
     artigo_4: DEFAULT_ARTIGOS_ARQUIVAMENTO.art4,
     artigo_5: "",
+    medidas: [] as string[],
     observacoes: "",
   }), [user]);
 
@@ -277,6 +300,7 @@ export function TransparenciaTab({ transparencias, setTransparencias, denuncias 
       artigo_3: t === "arquivamento" ? DEFAULT_ARTIGOS_ARQUIVAMENTO.art3 : DEFAULT_ARTIGOS_SOLUCIONADA.art3,
       artigo_4: t === "arquivamento" ? DEFAULT_ARTIGOS_ARQUIVAMENTO.art4 : DEFAULT_ARTIGOS_SOLUCIONADA.art4,
       artigo_5: t === "arquivamento" ? "" : (DEFAULT_ARTIGOS_SOLUCIONADA as any).art5 || "",
+      medidas: [],
     });
     setShowForm(true);
   };
@@ -298,6 +322,7 @@ export function TransparenciaTab({ transparencias, setTransparencias, denuncias 
       artigo_3: t.artigo_3,
       artigo_4: t.artigo_4,
       artigo_5: t.artigo_5 || "",
+      medidas: (t as any).medidas || [],
       observacoes: t.observacoes || "",
     });
     setShowForm(true);
@@ -320,6 +345,7 @@ export function TransparenciaTab({ transparencias, setTransparencias, denuncias 
         artigo_3: form.artigo_3,
         artigo_4: form.artigo_4,
         artigo_5: form.artigo_5 || null,
+        medidas: form.medidas.length > 0 ? form.medidas : null,
         observacoes: form.observacoes || null,
         status: "concluido",
         autor_id: user?.id || null,
@@ -466,6 +492,8 @@ export function TransparenciaTab({ transparencias, setTransparencias, denuncias 
                     artigo_2: t === "arquivamento" ? DEFAULT_ARTIGOS_ARQUIVAMENTO.art2 : DEFAULT_ARTIGOS_SOLUCIONADA.art2,
                     artigo_3: t === "arquivamento" ? DEFAULT_ARTIGOS_ARQUIVAMENTO.art3 : DEFAULT_ARTIGOS_SOLUCIONADA.art3,
                     artigo_4: t === "arquivamento" ? DEFAULT_ARTIGOS_ARQUIVAMENTO.art4 : DEFAULT_ARTIGOS_SOLUCIONADA.art4,
+                    artigo_5: t === "arquivamento" ? "" : (DEFAULT_ARTIGOS_SOLUCIONADA as any).art5 || "",
+                    medidas: t === "solucionada" ? [] : f.medidas,
                   }));
                 }}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
@@ -486,7 +514,7 @@ export function TransparenciaTab({ transparencias, setTransparencias, denuncias 
                 <Input type="date" value={form.data_emissao} onChange={e => setForm(f => ({ ...f, data_emissao: e.target.value }))} />
               </div>
               <div>
-                <Label className="text-xs font-semibold">Denúncia Vinculada (opcional)</Label>
+                <Label className="text-xs font-semibold">Denúncia Vinculada *</Label>
                 <Select value={form.denuncia_id || undefined} onValueChange={v => {
                   const d = denuncias.find((d: any) => d.id === v);
                   const proto = d?.dados_detalhados?.numero_protocolo || "";
@@ -513,33 +541,70 @@ export function TransparenciaTab({ transparencias, setTransparencias, denuncias 
                 <Input value={form.responsavel_posto} onChange={e => setForm(f => ({ ...f, responsavel_posto: e.target.value }))} placeholder="Ex: Ten Cel PM" />
               </div>
             </div>
-            <div>
-              <Label className="text-xs font-semibold">CONSIDERANDOs (um por linha)</Label>
-              <Textarea value={form.considerandos} onChange={e => setForm(f => ({ ...f, considerandos: e.target.value }))} className="min-h-[100px] font-mono text-xs" />
-            </div>
-            <div>
-              <Label className="text-xs font-semibold">Art. 1º</Label>
-              <Textarea value={form.artigo_1} onChange={e => setForm(f => ({ ...f, artigo_1: e.target.value }))} className="min-h-[60px]" />
-            </div>
-            <div>
-              <Label className="text-xs font-semibold">Art. 2º</Label>
-              <Textarea value={form.artigo_2} onChange={e => setForm(f => ({ ...f, artigo_2: e.target.value }))} className="min-h-[60px]" />
-            </div>
-            <div>
-              <Label className="text-xs font-semibold">Art. 3º</Label>
-              <Textarea value={form.artigo_3} onChange={e => setForm(f => ({ ...f, artigo_3: e.target.value }))} className="min-h-[60px]" />
-            </div>
-            <div>
-              <Label className="text-xs font-semibold">Art. 4º</Label>
-              <Textarea value={form.artigo_4} onChange={e => setForm(f => ({ ...f, artigo_4: e.target.value }))} className="min-h-[60px]" />
-            </div>
-            <div>
-              <Label className="text-xs font-semibold">Art. 5º (opcional — apenas Denúncia Solucionada)</Label>
-              <Textarea value={form.artigo_5} onChange={e => setForm(f => ({ ...f, artigo_5: e.target.value }))} className="min-h-[60px]" placeholder="Deixe vazio se não houver Art. 5º" />
-            </div>
+
+            {/* Solucionada-specific: Measures checklist */}
+            {form.tipo === "solucionada" && (
+              <div className="border rounded-lg p-4 bg-muted/30 space-y-3">
+                <Label className="text-xs font-semibold">Art. 3º – Medidas Disciplinares Adotadas</Label>
+                <p className="text-xs text-muted-foreground">Selecione as medidas aplicáveis:</p>
+                <div className="grid grid-cols-1 gap-2">
+                  {MEDIDAS_OPTIONS.map(medida => (
+                    <label key={medida} className="flex items-center gap-2 cursor-pointer text-sm">
+                      <Checkbox
+                        checked={form.medidas.includes(medida)}
+                        onCheckedChange={(checked) => {
+                          setForm(f => ({
+                            ...f,
+                            medidas: checked
+                              ? [...f.medidas, medida]
+                              : f.medidas.filter(m => m !== medida),
+                          }));
+                        }}
+                      />
+                      {medida}
+                    </label>
+                  ))}
+                </div>
+                {form.medidas.length > 0 && (
+                  <div className="mt-2 text-xs text-muted-foreground">
+                    <strong>Pré-visualização Art. 3º:</strong>
+                    <ul className="list-disc pl-5 mt-1 space-y-0.5">
+                      {form.medidas.map(m => <li key={m}>{m}</li>)}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Arquivamento-specific: Considerandos + Artigos */}
+            {form.tipo === "arquivamento" && (
+              <>
+                <div>
+                  <Label className="text-xs font-semibold">CONSIDERANDOs (um por linha)</Label>
+                  <Textarea value={form.considerandos} onChange={e => setForm(f => ({ ...f, considerandos: e.target.value }))} className="min-h-[100px] font-mono text-xs" />
+                </div>
+                <div>
+                  <Label className="text-xs font-semibold">Art. 1º</Label>
+                  <Textarea value={form.artigo_1} onChange={e => setForm(f => ({ ...f, artigo_1: e.target.value }))} className="min-h-[60px]" />
+                </div>
+                <div>
+                  <Label className="text-xs font-semibold">Art. 2º</Label>
+                  <Textarea value={form.artigo_2} onChange={e => setForm(f => ({ ...f, artigo_2: e.target.value }))} className="min-h-[60px]" />
+                </div>
+                <div>
+                  <Label className="text-xs font-semibold">Art. 3º</Label>
+                  <Textarea value={form.artigo_3} onChange={e => setForm(f => ({ ...f, artigo_3: e.target.value }))} className="min-h-[60px]" />
+                </div>
+                <div>
+                  <Label className="text-xs font-semibold">Art. 4º</Label>
+                  <Textarea value={form.artigo_4} onChange={e => setForm(f => ({ ...f, artigo_4: e.target.value }))} className="min-h-[60px]" />
+                </div>
+              </>
+            )}
+
             <div className="flex justify-end gap-2 pt-4 border-t">
               <Button variant="outline" onClick={() => setShowForm(false)}>Cancelar</Button>
-              <Button onClick={handleSave} disabled={saving || !form.numero_informe || !form.responsavel_nome}>
+              <Button onClick={handleSave} disabled={saving || !form.numero_informe || !form.responsavel_nome || (form.tipo === "solucionada" && !form.denuncia_id)}>
                 {saving ? "Salvando..." : editingId ? "Atualizar" : "Salvar"}
               </Button>
             </div>
