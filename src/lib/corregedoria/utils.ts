@@ -191,7 +191,7 @@ function escapeHtml(value: any): string {
 }
 
 function preserveText(value: any): string {
-  return `<span class="c5 preserve-text">${escapeHtml(value)}</span>`;
+  return `<span class="c5 preserve-text">${escapeHtml(value).replace(/\n/g, "<br>")}</span>`;
 }
 
 export const printRelatorio = (relatorio: Relatorio) => {
@@ -377,11 +377,11 @@ export const printDepoimento = (depoimento: Depoimento) => {
   sections.push(`<p class="c1"><span class="c0">Patente:</span> <span class="c5">${registradorPatente || "-"}</span></p>`);
 
   sections.push(`<p class="c11"><span class="c4">DEPOIMENTO PRESTADO</span></p>`);
-  sections.push(`<p class="c1"><span class="c5">${depoimento.depoimento}</span></p>`);
+  sections.push(`<p class="c1"><span class="c5">${depoimento.depoimento.replace(/\n/g, "<br>")}</span></p>`);
 
   if (depoimento.observacao) {
     sections.push(`<p class="c11"><span class="c4">OBSERVAÇÕES</span></p>`);
-    sections.push(`<p class="c1"><span class="c5">${depoimento.observacao}</span></p>`);
+    sections.push(`<p class="c1"><span class="c5">${depoimento.observacao.replace(/\n/g, "<br>")}</span></p>`);
   }
 
   printGeneric(
