@@ -7,7 +7,13 @@ import type { Depoimento, Relatorio, Investigacao, Denuncia } from "./types";
 export const formatDateSafe = (dateStr: any, formatStr: string) => {
   if (!dateStr) return "-";
   try {
-    const date = new Date(dateStr);
+    let date: Date;
+    if (typeof dateStr === "string" && dateStr.includes("-")) {
+      const [y, m, d] = dateStr.split("-").map(Number);
+      date = new Date(y, m - 1, d);
+    } else {
+      date = new Date(dateStr);
+    }
     if (isNaN(date.getTime())) return "-";
     return format(date, formatStr);
   } catch {

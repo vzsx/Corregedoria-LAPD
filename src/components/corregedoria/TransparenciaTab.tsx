@@ -316,7 +316,7 @@ export function TransparenciaTab({ transparencias, setTransparencias, denuncias 
       artigo_3: t.artigo_3,
       artigo_4: t.artigo_4,
       artigo_5: t.artigo_5 || "",
-      medidas: [],
+      medidas: t.medidas || [],
       observacoes: t.observacoes || "",
     });
     setShowForm(true);
@@ -337,12 +337,11 @@ export function TransparenciaTab({ transparencias, setTransparencias, denuncias 
         considerandos: form.considerandos,
         artigo_1: form.artigo_1,
         artigo_2: form.artigo_2,
-        artigo_3: form.artigo_3,
-        artigo_4: form.artigo_4,
-        artigo_5: form.artigo_5 || null,
         artigo_3: form.tipo === "solucionada" && form.medidas.length > 0
           ? `${form.artigo_3}\n\n${form.medidas.map(m => `• ${m}`).join("\n")}`
           : form.artigo_3,
+        artigo_4: form.artigo_4,
+        artigo_5: form.artigo_5 || null,
         observacoes: form.observacoes || null,
         status: "concluido",
         autor_id: user?.id || null,

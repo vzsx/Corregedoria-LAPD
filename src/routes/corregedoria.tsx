@@ -1462,9 +1462,10 @@ function Corregedoria() {
     setSubmittingRelatorioGeral(false);
     if (error) return toast.error("Erro ao atualizar: " + error.message);
     setRelatorios(prev => prev.map(r => r.id === editingRelatorioGeralId ? { ...r, titulo: relatorioGeralForm.titulo, oficial: relatorioGeralForm.elaborador_nome, conteudo: relatorioGeralForm.conteudo, dados_detalhados: { ...(r.dados_detalhados || {}), elaborador_nome: relatorioGeralForm.elaborador_nome, elaborador_patente: relatorioGeralForm.elaborador_patente } } : r));
+    const auditRelatorioGeralId = editingRelatorioGeralId;
     setEditingRelatorioGeralId(null);
     setIsEditRelatorioGeralDialogOpen(false);
-    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "update", entity_type: "relatorio_geral", entity_id: editingRelatorioGeralId, details: { titulo: relatorioGeralForm.titulo } });
+    logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "update", entity_type: "relatorio_geral", entity_id: auditRelatorioGeralId, details: { titulo: relatorioGeralForm.titulo } });
     toast.success("Relatório Geral atualizado!");
   };
 
@@ -1883,6 +1884,7 @@ function Corregedoria() {
     const { error } = await supabase.from("denuncia_relatorio").insert(inserts);
     setLinking(false);
     if (error) return toast.error("Erro ao vincular documentos");
+    setDenunciaRelatorios(prev => [...prev, ...inserts]);
     toast.success(`${relatorioIds.length} documento(s) anexado(s)!`);
     setLinkRelatorioId("");
   };
@@ -2303,7 +2305,7 @@ function Corregedoria() {
     );
   }
 
-  if (!isCorregedor && roles.includes("pending")) {
+  if (!isCorregedor && roles?.includes("pending")) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background p-6 text-center text-muted-foreground">
         <div className="max-w-md rounded-lg border border-border bg-card p-8 shadow-sm">
@@ -3123,12 +3125,15 @@ function Corregedoria() {
                                 <div className="border-l-2 border-amber-500 pl-3 bg-muted/50 py-2">
                                   <h4 className="text-[10px] font-bold uppercase tracking-widest text-foreground mb-2">3. TIPOS DE VIOLAÇÃO</h4>
                                   <div className="flex flex-wrap gap-1">
-                                    {(d.dados_detalhados.tipo_denuncia || d.dados_detalhados.tipo_denuncia)?.map((t: string) => (
+                                    {Array.isArray(d.dados_detalhados.tipo_denuncia) && d.dados_detalhados.tipo_denuncia.map((t: string) => (
                                       <Badge key={t} variant="outline" className="text-[9px] bg-muted/50 border-border text-foreground uppercase">{t}</Badge>
                                     ))}
-                                    {(d.dados_detalhados.tipo_denuncia_outro || d.dados_detalhados.tipo_denuncia_outro) && (
+                                    {typeof d.dados_detalhados.tipo_denuncia === "string" && d.dados_detalhados.tipo_denuncia && (
+                                      <Badge variant="outline" className="text-[9px] bg-muted/50 border-border text-foreground uppercase">{d.dados_detalhados.tipo_denuncia}</Badge>
+                                    )}
+                                    {d.dados_detalhados.tipo_denuncia_outro && (
                                       <Badge variant="outline" className="text-[9px] bg-card text-muted-foreground">
-                                        {d.dados_detalhados.tipo_denuncia_outro || d.dados_detalhados.tipo_denuncia_outro}
+                                        {d.dados_detalhados.tipo_denuncia_outro}
                                       </Badge>
                                     )}
                                   </div>
@@ -3628,7 +3633,7 @@ function Corregedoria() {
                             <div className="flex-1">
                               <div className="flex flex-wrap items-center gap-3 mb-2">
                                 <Badge variant="outline" className="bg-muted border-border text-foreground font-mono">
-                                  #{inv.numero_registro.toString().padStart(4, '0')}
+                                  #{inv.numero_registro?.toString().padStart(4, '0')}
                                 </Badge>
                                 <h3 className="font-bold uppercase text-foreground tracking-wide">{inv.titulo}</h3>
                                 <Badge variant="outline" className={`font-mono text-xs ${STATUS_COLOR[inv.status]}`}>
@@ -5210,7 +5215,7 @@ function Corregedoria() {
                     <div className="grid grid-cols-2 gap-y-2">
                       {["Uso excessivo da força","Abuso de autoridade","Corrupção","Conduta imprópria","Discriminação / Racismo","Ameaça / Intimidação","Violação de procedimentos","Falsificação de relatório","Assédio","Outro"].map(tipo => (
                         <div key={tipo} className="flex items-center space-x-2">
-                          <Checkbox id={`edit-tipo-ip-${tipo}`} checked={relatorioForm.dados_detalhados.tipo_denuncia_selecionado === tipo} onCheckedChange={() => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, tipo_denuncia_selecionado: tipo}})} className="border-border data-[state=checked]:bg-amber-600 data-[state=checked]:border-zinc-600" />
+                          <Checkbox id={`edit-tipo-ip-${tipo}`} checked={relatorioForm.dados_detalhados.tipo_denuncia_selecionado === tipo} onCheckedChange={(checked) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, tipo_denuncia_selecionado: checked ? tipo : ""}})} className="border-border data-[state=checked]:bg-amber-600 data-[state=checked]:border-zinc-600" />
                           <Label htmlFor={`edit-tipo-ip-${tipo}`} className="text-[10px] text-foreground font-normal">{tipo}</Label>
                         </div>
                       ))}
