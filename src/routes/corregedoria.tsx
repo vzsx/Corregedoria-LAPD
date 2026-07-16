@@ -31,6 +31,7 @@ import { Field } from "@/components/corregedoria/Field";
 import { AfastamentosTab } from "@/components/corregedoria/AfastamentosTab";
 import { TransparenciaTab, Transparencia } from "@/components/corregedoria/TransparenciaTab";
 import { IpmTab } from "@/components/corregedoria/IpmTab";
+import { AtosAdminTab, AtosAdmin } from "@/components/corregedoria/AtosAdminTab";
 import { Pagination } from "@/components/pagination";
 import { STATUS_LABEL, STATUS_COLOR } from "@/lib/corregedoria/constants";
 import { formatDateSafe, printRelatorio, printDepoimento, printInvestigacao, printDenuncia } from "@/lib/corregedoria/utils";
@@ -653,6 +654,7 @@ function Corregedoria() {
   const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
   const [oficiais, setOficiais] = useState<Profile[]>([]);
   const [transparencias, setTransparencias] = useState<Transparencia[]>([]);
+  const [atos, setAtos] = useState<AtosAdmin[]>([]);
   const [fetching, setFetching] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -880,7 +882,7 @@ function Corregedoria() {
       return;
     }
     const load = async () => {
-      const [denunciasRes, investigacoesRes, relatoriosRes, drRes, irRes, diRes, depoimentosRes, ddRes, perfisRes, rgvRes, ivRes, ipmsRes, adRes, aiRes, arRes, adeRes, transparenciasRes] = await Promise.all([
+      const [denunciasRes, investigacoesRes, relatoriosRes, drRes, irRes, diRes, depoimentosRes, ddRes, perfisRes, rgvRes, ivRes, ipmsRes, adRes, aiRes, arRes, adeRes, transparenciasRes, atosRes] = await Promise.all([
         supabase.from("denuncias").select("*").order("created_at", { ascending: false }),
         supabase.from("investigacoes").select("*").order("created_at", { ascending: false }),
         supabase.from("relatorios").select("*").order("created_at", { ascending: false }),
@@ -897,7 +899,8 @@ function Corregedoria() {
         supabase.from("afastamento_investigacao").select("*"),
         supabase.from("afastamento_relatorio").select("*"),
         supabase.from("afastamento_depoimento").select("*"),
-        supabase.from("transparencias").select("*").order("created_at", { ascending: false })
+        supabase.from("transparencias").select("*").order("created_at", { ascending: false }),
+        supabase.from("atos_administrativos").select("*").order("created_at", { ascending: false })
       ]);
       
       if (denunciasRes.data) setDenuncias(denunciasRes.data as Denuncia[]);
@@ -916,6 +919,7 @@ function Corregedoria() {
       if (arRes.data) setAfastamentoRelatorios(arRes.data);
       if (adeRes.data) setAfastamentoDepoimentos(adeRes.data);
       if (transparenciasRes.data) setTransparencias(transparenciasRes.data as Transparencia[]);
+      if (atosRes.data) setAtos(atosRes.data as AtosAdmin[]);
       
       // Filtrar oficiais para mostrar apenas os aprovados (não pendentes)
       if (perfisRes.data) {
@@ -4016,356 +4020,7 @@ function Corregedoria() {
 
           {/* ATOS ADMINISTRATIVOS TAB */}
           {activeTab === "atos" && (
-            <div className="space-y-6 animate-fade-in">
-              <div className="flex flex-col gap-4 border-b border-border pb-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-bold uppercase tracking-wider text-foreground">Atos Administrativos</h3>
-                  
-                  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button 
-                        onClick={() => setRelatorioForm({...relatorioForm, tipo_denuncia: "Ato Administrativo", oficial: user?.user_metadata?.full_name || ""})}
-                        className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold tracking-wider uppercase text-xs"
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Novo Ato
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[600px] bg-card border-border text-foreground">
-                      <DialogHeader>
-                        <DialogTitle className="text-foreground uppercase tracking-wider">Registrar Ato Administrativo</DialogTitle>
-                      </DialogHeader>
-                      <form onSubmit={submitRelatorio} className="space-y-5 mt-4">
-                        <div className="max-h-[70vh] overflow-y-auto pr-2 space-y-6 custom-scrollbar">
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label htmlFor="titulo-ato" className="text-muted-foreground text-xs uppercase tracking-wider">Título do Ato</Label>
-                              <Input
-                                id="titulo-ato"
-                                className="bg-background border-border text-foreground"
-                                value={relatorioForm.titulo}
-                                onChange={(e) => setRelatorioForm({ ...relatorioForm, titulo: e.target.value })}
-                                placeholder="EX: ATO-001/26 - SUSPENSÃO"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="text-muted-foreground text-xs uppercase tracking-wider">Status do Ato</Label>
-                              <Select value={relatorioForm.status} onValueChange={(v: Status) => setRelatorioForm({ ...relatorioForm, status: v })}>
-                                <SelectTrigger className="bg-background border-border text-foreground h-10"><SelectValue /></SelectTrigger>
-                                <SelectContent className="bg-muted border-border text-foreground">
-                                  {Object.entries(STATUS_LABEL).map(([val, lab]) => <SelectItem key={val} value={val}>{lab}</SelectItem>)}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-
-                          {/* --- SEÇÕES ESTRUTURADAS DO ATO --- */}
-                          <div className="space-y-6">
-                            {/* 1. IDENTIFICAÇÃO */}
-                            <div className="space-y-2 border-l-2 border-red-600 pl-4 bg-red-500/5 py-2">
-                              <h4 className="text-[10px] font-bold uppercase tracking-widest text-red-500">1. IDENTIFICAÇÃO DO ATO</h4>
-                              <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-1">
-                                  <Label className="text-[9px] uppercase text-muted-foreground">Número do Inquérito</Label>
-                                  <Input value={relatorioForm.dados_detalhados.ato_numero_inquerito} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_numero_inquerito: e.target.value}})} placeholder="Nº000" className="h-8 bg-background border-border text-xs" />
-                                </div>
-                                <div className="space-y-1">
-                                  <Label className="text-[9px] uppercase text-muted-foreground">Número do Ato Administrativo</Label>
-                                  <Input value={relatorioForm.dados_detalhados.ato_numero} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_numero: e.target.value}})} placeholder="Nº000" className="h-8 bg-background border-border text-xs" />
-                                </div>
-                              </div>
-                              <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-1">
-                                  <Label className="text-[9px] uppercase text-muted-foreground">Data de Emissão</Label>
-                                  <Input type="date" value={relatorioForm.dados_detalhados.ato_data_emissao} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_data_emissao: e.target.value}})} className="h-8 bg-background border-border text-xs" />
-                                </div>
-                                <div className="space-y-1">
-                                  <Label className="text-[9px] uppercase text-muted-foreground">Tipo de Ato</Label>
-                                  <Select value={relatorioForm.dados_detalhados.ato_tipo} onValueChange={(v) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_tipo: v}})}>
-                                    <SelectTrigger className="h-8 bg-background border-border text-xs"><SelectValue placeholder="Selecione..." /></SelectTrigger>
-                                    <SelectContent className="bg-muted border-border text-foreground">
-                                      <SelectItem value="Aplicação de Medida Disciplinar">Aplicação de Medida Disciplinar</SelectItem>
-                                      <SelectItem value="Suspensão Preventiva">Suspensão Preventiva</SelectItem>
-                                      <SelectItem value="Arquivamento">Arquivamento</SelectItem>
-                                      <SelectItem value="Outro">Outro</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                              </div>
-                              {relatorioForm.dados_detalhados.ato_tipo === "Outro" && <Input placeholder="Especifique..." value={relatorioForm.dados_detalhados.ato_tipo_outro} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_tipo_outro: e.target.value}})} className="h-8 bg-background border-border text-xs mt-1" />}
-                            </div>
-
-                            {/* 2. AUTORIDADE EMISSORA */}
-                            <div className="space-y-2 border-l-2 border-zinc-500 pl-4 bg-muted/50 py-2">
-                              <h4 className="text-[10px] font-bold uppercase tracking-widest text-foreground">2. AUTORIDADE EMISSORA</h4>
-                              <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-1">
-                                  <Label className="text-[9px] uppercase text-muted-foreground">Nome do Corregedor</Label>
-                                  <Input value={relatorioForm.dados_detalhados.ato_autoridade_nome} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_autoridade_nome: e.target.value}})} className="h-8 bg-background border-border text-xs" />
-                                </div>
-                                <div className="space-y-1">
-                                  <Label className="text-[9px] uppercase text-muted-foreground">Cargo/Patente</Label>
-                                  <Input value={relatorioForm.dados_detalhados.ato_autoridade_cargo} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_autoridade_cargo: e.target.value}})} className="h-8 bg-background border-border text-xs" />
-                                </div>
-                              </div>
-                              <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Departamento / Unidade</Label><Input value={relatorioForm.dados_detalhados.ato_autoridade_unidade} disabled className="h-8 bg-background border-border text-muted-foreground text-xs" /></div>
-                            </div>
-
-                            {/* 3. OBJETO DO ATO */}
-                            <div className="space-y-2 border-l-2 border-slate-600 pl-4 bg-slate-500/5 py-3">
-                              <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">3. OBJETO DO ATO</h4>
-                              <Label className="text-[9px] uppercase text-muted-foreground">Descrição Resumida</Label>
-                              <Textarea value={relatorioForm.dados_detalhados.ato_objeto_descricao} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_objeto_descricao: e.target.value}})} rows={2} className="bg-background border-border text-xs" placeholder="Descreva o objeto..." />
-                            </div>
-
-                            {/* 4. FUNDAMENTAÇÃO */}
-                            <div className="space-y-2 border-l-2 border-zinc-600 pl-4 bg-muted/50 py-2">
-                              <h4 className="text-[10px] font-bold uppercase tracking-widest text-foreground">4. FUNDAMENTAÇÃO</h4>
-                              <Label className="text-[9px] uppercase text-muted-foreground">Base do Ato Administrativo</Label>
-                              <div className="grid grid-cols-2 gap-2">
-                                {["Relatório interno", "Denúncia formal", "Evidências coletadas", "Ordem superior", "Auditoria interna", "Outro"].map(f => (
-                                  <div key={f} className="flex items-center space-x-2">
-                                    <Checkbox id={`f-${f}`} checked={relatorioForm.dados_detalhados.ato_fundamentacao_selecionada?.includes(f)} onCheckedChange={(checked) => { const current = [...(relatorioForm.dados_detalhados.ato_fundamentacao_selecionada || [])]; if (checked) current.push(f); else current.splice(current.indexOf(f), 1); setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_fundamentacao_selecionada: current}}); }} />
-                                    <Label htmlFor={`f-${f}`} className="text-[10px] font-normal">{f}</Label>
-                                  </div>
-                                ))}
-                              </div>
-                              <div className="space-y-1"><Label className="text-[9px] uppercase text-muted-foreground">Descrição Complementar</Label><Textarea value={relatorioForm.dados_detalhados.ato_fundamentacao_complementar} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_fundamentacao_complementar: e.target.value}})} rows={2} className="bg-background border-border text-xs mt-2" placeholder="Descreva a fundamentação..." /></div>
-                            </div>
-
-                            {/* 5. DECISÃO */}
-                            <div className="space-y-2 border-l-2 border-emerald-600 pl-4 bg-emerald-500/5 py-2">
-                              <h4 className="text-[10px] font-bold uppercase tracking-widest text-emerald-500">5. DECISÃO</h4>
-                              <div className="space-y-1">
-                                <Label className="text-[9px] uppercase text-muted-foreground">Deliberação da Autoridade</Label>
-                                <Textarea value={relatorioForm.dados_detalhados.ato_decisao} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_decisao: e.target.value}})} rows={2} className="bg-background border-border text-xs" placeholder="Deliberação..." />
-                              </div>
-                            </div>
-
-                            {/* 6. MEDIDAS DETERMINADAS */}
-                            <div className="space-y-2 border-l-2 border-zinc-600 pl-4 bg-muted/50 py-2">
-                              <h4 className="text-[10px] font-bold uppercase tracking-widest text-foreground">6. MEDIDAS DETERMINADAS</h4>
-                              <div className="grid grid-cols-1 gap-2">
-                                {[
-                                  "Abertura de inquérito administrativo", 
-                                  "Afastamento preventivo", 
-                                  "Recolhimento de equipamentos funcionais", 
-                                  "Advertência formal", 
-                                  "Suspensão temporária", 
-                                  "Encaminhamento ao Ministério Público/autoridade externa", 
-                                  "Arquivamento do caso", 
-                                  "Outro"
-                                ].map(m => (
-                                  <div key={m} className="flex items-center space-x-2">
-                                    <Checkbox id={`m-ato-${m}`} checked={relatorioForm.dados_detalhados.ato_medidas_selecionadas?.includes(m)} onCheckedChange={(checked) => { const current = [...(relatorioForm.dados_detalhados.ato_medidas_selecionadas || [])]; if (checked) current.push(m); else current.splice(current.indexOf(m), 1); setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_medidas_selecionadas: current}}); }} />
-                                    <Label htmlFor={`m-ato-${m}`} className="text-[10px] font-normal">{m}</Label>
-                                  </div>
-                                ))}
-                              </div>
-                              <div className="space-y-1">
-                                <Label className="text-[9px] uppercase text-muted-foreground">Detalhamento das medidas</Label>
-                                <Textarea value={relatorioForm.dados_detalhados.ato_medidas_detalhamento} onChange={(e) => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ato_medidas_detalhamento: e.target.value}})} rows={3} className="bg-background border-border text-xs mt-2" placeholder="Detalhes das medidas..." />
-                              </div>
-                            </div>
-
-                            <div className="space-y-2">
-                              <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Conteúdo Detalhado do Ato</Label>
-                              <Textarea rows={6} className="bg-background border-border text-foreground font-mono text-xs leading-relaxed" value={relatorioForm.conteudo} onChange={(e) => setRelatorioForm({ ...relatorioForm, conteudo: e.target.value })} placeholder="Texto integral do ato administrativo..." />
-                            </div>
-
-                            <div className="pt-4 border-t border-border space-y-4">
-                              <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Documentos Anexos (Opcional)</h4>
-                              <div className="grid grid-cols-3 gap-4">
-                                <div className="space-y-1">
-                                  <Label className="text-[9px] text-muted-foreground uppercase">Denúncia</Label>
-                                  <Select value={relatorioForm.denuncia_id} onValueChange={(v) => setRelatorioForm({ ...relatorioForm, denuncia_id: v })}>
-                                    <SelectTrigger className="bg-background border-border text-foreground h-8 text-[10px] uppercase">
-                                      <SelectValue placeholder="Nenhum" />
-                                    </SelectTrigger>
-                                    <SelectContent className="bg-muted border-border text-foreground">
-                                      <SelectItem value="none">Nenhum</SelectItem>
-                                      {denuncias.map(d => (
-                                        <SelectItem key={d.id} value={d.id} className="text-[10px]">#{d.numero_registro} - {d.titulo}</SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                                <div className="space-y-1">
-                                  <Label className="text-[9px] text-muted-foreground uppercase">Investigações Vinculadas</Label>
-                                  <div className="flex flex-wrap gap-1 mb-1">
-                                    {relatorioForm.investigacao_ids.map(id => {
-                                      const inv = investigacoes.find(i => i.id === id);
-                                      return (
-                                        <Badge key={id} variant="secondary" className="text-[9px] flex items-center gap-1">
-                                          #{inv?.numero_registro || '?'} - {inv?.titulo || 'N/A'}
-                                          <button type="button" onClick={() => setRelatorioForm({...relatorioForm, investigacao_ids: relatorioForm.investigacao_ids.filter(x => x !== id)})} className="text-red-400 hover:text-red-300 ml-1">&times;</button>
-                                        </Badge>
-                                      );
-                                    })}
-                                  </div>
-                                  <div className="flex gap-2">
-                                    <select className="flex-1 h-8 bg-background border border-border text-foreground text-[10px] rounded px-2" value="" onChange={(e) => { const v = e.target.value; if (v && !relatorioForm.investigacao_ids.includes(v)) setRelatorioForm({...relatorioForm, investigacao_ids: [...relatorioForm.investigacao_ids, v]}); }}>
-                                      <option value="">Adicionar investigação...</option>
-                                      {investigacoes.filter(i => !relatorioForm.investigacao_ids.includes(i.id)).map(i => (
-                                        <option key={i.id} value={i.id}>#{i.numero_registro} - {i.titulo}</option>
-                                      ))}
-                                    </select>
-                                  </div>
-                                </div>
-                                <div className="space-y-1">
-                                  <Label className="text-[9px] text-muted-foreground uppercase">IPs Vinculados</Label>
-                                  <div className="flex flex-wrap gap-1 mb-1">
-                                    {(relatorioForm.dados_detalhados.ip_ids_vinculados || []).map((id: string) => {
-                                      const r = relatorios.find(x => x.id === id);
-                                      return (
-                                        <Badge key={id} variant="secondary" className="text-[9px] flex items-center gap-1">
-                                          #{r?.numero_registro || '?'} - {r?.titulo || 'N/A'}
-                                          <button type="button" onClick={() => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ip_ids_vinculados: (relatorioForm.dados_detalhados.ip_ids_vinculados || []).filter((x: string) => x !== id)}})} className="text-red-400 hover:text-red-300 ml-1">&times;</button>
-                                        </Badge>
-                                      );
-                                    })}
-                                  </div>
-                                  <div className="flex gap-2">
-                                    <select className="flex-1 h-8 bg-background border border-border text-foreground text-[10px] rounded px-2" value="" onChange={(e) => { const v = e.target.value; if (v) { const arr = [...(relatorioForm.dados_detalhados.ip_ids_vinculados || [])]; if (!arr.includes(v)) arr.push(v); setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, ip_ids_vinculados: arr}}); }}}>
-                                      <option value="">Adicionar IP...</option>
-                                      {relatorios.filter(r => r.tipo_denuncia === "Inquérito Policial").filter(r => !(relatorioForm.dados_detalhados.ip_ids_vinculados || []).includes(r.id)).map(r => (
-                                        <option key={r.id} value={r.id}>#{r.numero_registro} - {r.titulo}</option>
-                                      ))}
-                                    </select>
-                                  </div>
-                                </div>
-                                <div className="space-y-1">
-                                  <Label className="text-[9px] text-muted-foreground uppercase">Depoimentos Vinculados</Label>
-                                  <div className="flex flex-wrap gap-1 mb-1">
-                                    {(relatorioForm.dados_detalhados.depoimento_ids || []).map((id: string) => {
-                                      const dep = depoimentos.find(d => d.id === id);
-                                      return (
-                                        <Badge key={id} variant="secondary" className="text-[9px] flex items-center gap-1">
-                                          {dep?.oficial_nome || 'N/A'}
-                                          <button type="button" onClick={() => setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, depoimento_ids: (relatorioForm.dados_detalhados.depoimento_ids || []).filter((x: string) => x !== id)}})} className="text-red-400 hover:text-red-300 ml-1">&times;</button>
-                                        </Badge>
-                                      );
-                                    })}
-                                  </div>
-                                  <div className="flex gap-2">
-                                    <select className="flex-1 h-8 bg-background border border-border text-foreground text-[10px] rounded px-2" value="" onChange={(e) => { const v = e.target.value; if (v) { const arr = [...(relatorioForm.dados_detalhados.depoimento_ids || [])]; if (!arr.includes(v)) arr.push(v); setRelatorioForm({...relatorioForm, dados_detalhados: {...relatorioForm.dados_detalhados, depoimento_ids: arr}}); }}}>
-                                      <option value="">Adicionar depoimento...</option>
-                                      {depoimentos.filter(d => !(relatorioForm.dados_detalhados.depoimento_ids || []).includes(d.id)).map(d => (
-                                        <option key={d.id} value={d.id}>{d.oficial_nome} - {d.data_depoimento}</option>
-                                      ))}
-                                    </select>
-                                  </div>
-                                </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="pt-4 border-t border-border flex justify-end">
-                        <Button type="submit" disabled={submitting} className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 font-bold tracking-widest text-[10px] uppercase">
-                          {submitting ? "Registrando..." : "REGISTRAR ATO"}
-                          </Button>
-                        </div>
-                      </form>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-                
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground mr-2">Filtrar por Status:</span>
-                  <Button 
-                    size="sm" variant="outline"
-                    className={`font-mono text-[10px] h-7 ${atoFilter === "todas" ? "bg-slate-700 text-foreground" : "text-muted-foreground border-border"}`}
-                    onClick={() => setAtoFilter("todas")}
-                  >
-                    TODOS
-                  </Button>
-                  {Object.entries(STATUS_LABEL).map(([val, lab]) => (
-                    <Button 
-                      key={val}
-                      size="sm" variant="outline"
-                      className={`font-mono text-[10px] h-7 ${atoFilter === val ? "bg-slate-700 text-white border-slate-600" : "text-muted-foreground border-border"}`}
-                      onClick={() => setAtoFilter(val as Status)}
-                    >
-                      {lab.toUpperCase()}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="grid gap-4">
-                {relatorios
-                  .filter(r => r.tipo_denuncia === "Ato Administrativo" && (atoFilter === "todas" || r.status === atoFilter))
-                  .length === 0 ? (
-                    <div className="rounded-lg border border-border border-dashed bg-card/50 p-12 text-center text-muted-foreground">
-                      Nenhum ato administrativo encontrado com este filtro.
-                    </div>
-                  ) : (
-                    relatorios
-                      .filter(r => r.tipo_denuncia === "Ato Administrativo" && (atoFilter === "todas" || r.status === atoFilter))
-                      .map(r => (
-                        <RelatorioCard 
-                          key={r.id}
-                          relatorio={r}
-                          expanded={expandedId === r.id}
-                          onToggle={() => setExpandedId(expandedId === r.id ? null : r.id)}
-                          isAdmin={true}
-                          onApprove={approveDocumento}
-                          setExpandedId={setExpandedId}
-                          relatorios={relatorios}
-                          onEdit={(rel: any) => {
-                            setEditingRelatorioId(rel.id);
-                            const linkedInvIds = investigacaoRelatorios.filter(ir => ir.relatorio_id === rel.id).map(ir => ir.investigacao_id);
-                            setRelatorioForm({
-                              titulo: rel.titulo || "",
-                              tipo_denuncia: rel.tipo_denuncia || "Ato Administrativo",
-                              oficial: rel.oficial || "",
-                              conteudo: rel.conteudo || "",
-                              denuncia_id: "",
-                              investigacao_id: "",
-                              investigacao_ids: linkedInvIds,
-                              status: rel.status || "pendente",
-                              dados_detalhados: { ...relatorioForm.dados_detalhados, ...(rel.dados_detalhados || {}) }
-                            });
-                            setIsEditDialogOpen(true);
-                          }}
-                           onDelete={confirmDeleteDocumento}
-                          onUpdateStatus={updateRelatorioStatus}
-                          denuncias={denuncias}
-                          investigacoes={investigacoes}
-                          denunciaRelatorios={denunciaRelatorios}
-                          investigacaoRelatorios={investigacaoRelatorios}
-                          onLinkDenuncia={handleLinkDenuncia}
-                          onUnlinkDenuncia={handleUnlinkDenuncia}
-                          onLinkInvestigacao={handleLinkInvestigacao}
-                          onUnlinkInvestigacaoRelatorio={handleUnlinkInvestigacaoRelatorio}
-                          linking={linking}
-                          linkDenunciaId={linkDenunciaId}
-                          setLinkDenunciaId={setLinkDenunciaId}
-                          linkInvestigacaoId={linkInvestigacaoId}
-                          setLinkInvestigacaoId={setLinkInvestigacaoId}
-                          depoimentos={depoimentos}
-                          onPrint={printRelatorio}
-                          relatorioGeralVinculos={relatorioGeralVinculos}
-                          linkRelatorioGeralId={linkRelatorioGeralId}
-                          setLinkRelatorioGeralId={setLinkRelatorioGeralId}
-                          onLinkRelatorioGeral={handleLinkRelatorioGeral}
-                          setActiveTab={setActiveTab}
-                          onUnlinkRelatorioGeralVinculo={deleteRelatorioGeralVinculo}
-                           onUnlinkDepoimento={handleUnlinkDepoimentoRelatorio}
-                           onUnlinkDocumentoAnexado={handleUnlinkDocumentoRelatorio}
-                           ipms={ipms}
-                           ipmVinculos={ipmVinculos}
-                           linkIpmId={linkIpmId}
-                           setLinkIpmId={setLinkIpmId}
-                           handleLinkIpm={handleLinkIpm}
-                           handleUnlinkIpm={handleUnlinkIpm}
-                         />
-                      ))
-                  )
-                }
-              </div>
-            </div>
+            <AtosAdminTab atos={atos} setAtos={setAtos} denuncias={denuncias} />
           )}
 
           {/* DEPOIMENTOS */}
