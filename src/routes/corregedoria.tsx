@@ -4020,7 +4020,7 @@ function Corregedoria() {
 
           {/* ATOS ADMINISTRATIVOS TAB */}
           {activeTab === "atos" && (
-            <AtosAdminTab atos={atos} setAtos={setAtos} denuncias={denuncias} />
+            <AtosAdminTab atos={atos} setAtos={setAtos} denuncias={denuncias} ipms={ipms} />
           )}
 
           {/* DEPOIMENTOS */}

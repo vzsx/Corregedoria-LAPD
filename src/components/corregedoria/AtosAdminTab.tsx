@@ -23,6 +23,7 @@ export interface AtosAdmin {
   data_emissao: string;
   denuncia_id: string | null;
   numero_referencia: string;
+  ipm_id: string | null;
   ipm_numero: string;
   nome_policial: string;
   posto_graduacao: string;
@@ -43,6 +44,7 @@ interface AtosAdminTabProps {
   atos: AtosAdmin[];
   setAtos: React.Dispatch<React.SetStateAction<AtosAdmin[]>>;
   denuncias: any[];
+  ipms: any[];
 }
 
 const MEDIDAS_OPTIONS = [
@@ -153,28 +155,31 @@ img{max-width:100%}
   <p class="c14" style="margin-top:24pt;"><span class="c4">POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</span></p>
   <p class="c14"><span class="c4">CORREGEDORIA DA POLÍCIA MILITAR</span></p>
 
-  <p class="c14" style="margin-top:20pt;"><span class="c4">ATO DE APLICAÇÃO DE SANÇÃO DISCIPLINAR Nº ${numeroFormatado}/${String(ano).slice(2)} – CPM</span></p>
+  <p class="c14" style="margin-top:20pt;"><span class="c4">ATO DE APLICAÇÃO DE SANÇÃO DISCIPLINAR Nº ${numeroFormatado}/${String(ano).slice(2)}</span></p>
 
-  <p class="c1">A CORREGEDORIA DA POLÍCIA MILITAR DO ESTADO DE SÃO PAULO, no uso de suas atribuições legais e regulamentares, torna público o seguinte:</p>
+  <p class="c1">A CORREGEDORIA DA POLÍCIA MILITAR DO ESTADO DE SÃO PAULO, no uso de suas atribuições administrativas e disciplinares, após a conclusão do procedimento regularmente instaurado,</p>
 
   ${CONSIDERANDOS.map(c => `<p class="c1"><span class="c4 c7">${c}</span></p>`).join("\n\n  ")}
 
   <p class="c1"><span class="c4 c7">RESOLVE:</span></p>
 
-  <p class="c1"><span class="c4 c7">Art. 1º</span><span class="c4"> Aplicar sanção disciplinar ao(a) ${a.posto_graduacao} ${a.nome_policial}, R.E. nº ${a.rg_pm}, em razão da prática de infração disciplinar apurada no IPM nº ${a.ipm_numero}.</span></p>
-  <p class="c1"><span class="c4 c7">Art. 2º</span><span class="c4"> As sanções disciplinares aplicadas são as seguintes:<br>${medidasHtml}</span></p>
-  <p class="c1"><span class="c4 c7">Art. 3º</span><span class="c4"> A presente aplicação de sanção disciplinar observará os prazos e condições estabelecidos no Regulamento Disciplinar da Polícia Militar.</span></p>
-  <p class="c1"><span class="c4 c7">Art. 4º</span><span class="c4"> O(A) militar sancionado(a) poderá recorrer da decisão no prazo legal, conforme dispõe a legislação militar vigente.</span></p>
-  <p class="c1"><span class="c4 c7">Art. 5º</span><span class="c4"> Dê-se ciência ao interessado, registrando-se o cumprimento nos autos.</span></p>
+  <p class="c1"><span class="c4 c7">Art. 1º</span><span class="c4"> Aplicar ao policial militar abaixo identificado a sanção disciplinar decorrente da apuração realizada no Inquérito Policial Militar nº ${a.ipm_numero}.</span></p>
+  <p class="c1"><span class="c4">Policial Militar: ${a.nome_policial}</span></p>
+  <p class="c1"><span class="c4">Posto/Graduação: ${a.posto_graduacao}</span></p>
+  <p class="c1"><span class="c4">R.E: ${a.rg_pm}</span></p>
+  <p class="c1"><span class="c4 c7">Art. 2º</span><span class="c4"> A sanção disciplinar aplicada é a seguinte:<br>${medidasHtml}</span></p>
+  <p class="c1"><span class="c4 c7">Art. 3º</span><span class="c4"> A aplicação da sanção fundamenta-se nas provas produzidas durante a instrução do procedimento, observada a gravidade da conduta, os antecedentes funcionais, as circunstâncias do fato e os princípios da proporcionalidade e da razoabilidade.</span></p>
+  <p class="c1"><span class="c4 c7">Art. 4º</span><span class="c4"> A sanção produzirá efeitos a partir da data estabelecida neste ato, sem prejuízo dos recursos administrativos cabíveis previstos na regulamentação disciplinar.</span></p>
+  <p class="c1"><span class="c4 c7">Art. 5º</span><span class="c4"> Cientifique-se o interessado, procedam-se às anotações administrativas pertinentes e arquivem-se os autos após o cumprimento das determinações constantes neste ato.</span></p>
 
-  <p class="c1"><span class="c4 c7">Publique-se. Registre-se. Cumpra-se.</span></p>
+  <p class="c1"><span class="c4 c7">Publique-se.<br>Registre-se.<br>Cumpra-se.</span></p>
 
   <div class="signature-block" style="margin-top:30pt;text-align:center;">
     <p class="c14" style="margin:0 0 18pt 0;">
       <span class="c4">São Paulo, ${dataFormatada}.</span>
     </p>
     <p class="c14" style="margin:0 0 6pt 0;line-height:1;">
-      <span class="c4">Ass: </span>${a.responsavel_nome ? `<span class="signature-name">${a.responsavel_nome}</span>` : `<span class="signature-line"></span>`}
+      ${a.responsavel_nome ? `<span class="signature-name">${a.responsavel_nome}</span>` : `<span class="signature-line"></span>`}
     </p>
     <p class="c14" style="margin:0;line-height:1;">
       <span class="c4">${a.responsavel_posto ? `${a.responsavel_posto} ` : ""}${a.responsavel_nome || ""}</span>
@@ -203,17 +208,21 @@ function generateAtoText(a: AtosAdmin): string {
     `POLÍCIA MILITAR DO ESTADO DE SÃO PAULO`,
     `CORREGEDORIA DA POLÍCIA MILITAR`,
     ``,
-    `ATO DE APLICAÇÃO DE SANÇÃO DISCIPLINAR Nº ${numeroFormatado}/${String(ano).slice(2)} – CPM`,
+    `ATO DE APLICAÇÃO DE SANÇÃO DISCIPLINAR Nº ${numeroFormatado}/${String(ano).slice(2)}`,
     ``,
-    `A CORREGEDORIA DA POLÍCIA MILITAR DO ESTADO DE SÃO PAULO, no uso de suas atribuições legais e regulamentares, torna público o seguinte:`,
+    `A CORREGEDORIA DA POLÍCIA MILITAR DO ESTADO DE SÃO PAULO, no uso de suas atribuições administrativas e disciplinares, após a conclusão do procedimento regularmente instaurado,`,
     ``,
     ...CONSIDERANDOS,
     ``,
     `RESOLVE:`,
     ``,
-    `Art. 1º Aplicar sanção disciplinar ao(a) ${a.posto_graduacao} ${a.nome_policial}, R.E. nº ${a.rg_pm}, em razão da prática de infração disciplinar apurada no IPM nº ${a.ipm_numero}.`,
+    `Art. 1º Aplicar ao policial militar abaixo identificado a sanção disciplinar decorrente da apuração realizada no Inquérito Policial Militar nº ${a.ipm_numero}.`,
     ``,
-    `Art. 2º As sanções disciplinares aplicadas são as seguintes:`,
+    `Policial Militar: ${a.nome_policial}`,
+    `Posto/Graduação: ${a.posto_graduacao}`,
+    `R.E: ${a.rg_pm}`,
+    ``,
+    `Art. 2º A sanção disciplinar aplicada é a seguinte:`,
     ...a.medidas.map(m => {
       if (m === "Advertência") return "• Advertência";
       if (m === "Suspensão" && a.data_inicio_suspensao && a.data_fim_suspensao) {
@@ -228,23 +237,25 @@ function generateAtoText(a: AtosAdmin): string {
       return `• ${m}`;
     }),
     ``,
-    `Art. 3º A presente aplicação de sanção disciplinar observará os prazos e condições estabelecidos no Regulamento Disciplinar da Polícia Militar.`,
+    `Art. 3º A aplicação da sanção fundamenta-se nas provas produzidas durante a instrução do procedimento, observada a gravidade da conduta, os antecedentes funcionais, as circunstâncias do fato e os princípios da proporcionalidade e da razoabilidade.`,
     ``,
-    `Art. 4º O(A) militar sancionado(a) poderá recorrer da decisão no prazo legal, conforme dispõe a legislação militar vigente.`,
+    `Art. 4º A sanção produzirá efeitos a partir da data estabelecida neste ato, sem prejuízo dos recursos administrativos cabíveis previstos na regulamentação disciplinar.`,
     ``,
-    `Art. 5º Dê-se ciência ao interessado, registrando-se o cumprimento nos autos.`,
+    `Art. 5º Cientifique-se o interessado, procedam-se às anotações administrativas pertinentes e arquivem-se os autos após o cumprimento das determinações constantes neste ato.`,
     ``,
-    `Publique-se. Registre-se. Cumpra-se.`,
+    `Publique-se.`,
+    `Registre-se.`,
+    `Cumpra-se.`,
     ``,
     `São Paulo, ${dataFormatada}.`,
     ``,
-    `Ass: ${a.responsavel_nome || ""}`,
+    `${a.responsavel_nome || ""}`,
     `${a.responsavel_posto ? `${a.responsavel_posto} ` : ""}${a.responsavel_nome || ""}`,
     `Corregedor(a) da Polícia Militar`,
   ].join("\n");
 }
 
-export function AtosAdminTab({ atos, setAtos, denuncias }: AtosAdminTabProps) {
+export function AtosAdminTab({ atos, setAtos, denuncias, ipms }: AtosAdminTabProps) {
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterMedida, setFilterMedida] = useState<string>("todos");
@@ -259,6 +270,7 @@ export function AtosAdminTab({ atos, setAtos, denuncias }: AtosAdminTabProps) {
     data_emissao: format(new Date(), "yyyy-MM-dd"),
     denuncia_id: "",
     numero_referencia: "",
+    ipm_id: "",
     ipm_numero: "",
     nome_policial: "",
     posto_graduacao: "",
@@ -323,6 +335,7 @@ export function AtosAdminTab({ atos, setAtos, denuncias }: AtosAdminTabProps) {
       data_emissao: a.data_emissao,
       denuncia_id: a.denuncia_id || "",
       numero_referencia: a.numero_referencia,
+      ipm_id: a.ipm_id || "",
       ipm_numero: a.ipm_numero,
       nome_policial: a.nome_policial,
       posto_graduacao: a.posto_graduacao,
@@ -347,6 +360,7 @@ export function AtosAdminTab({ atos, setAtos, denuncias }: AtosAdminTabProps) {
         data_emissao: form.data_emissao,
         denuncia_id: form.denuncia_id || null,
         numero_referencia: form.numero_referencia,
+        ipm_id: form.ipm_id || null,
         ipm_numero: form.ipm_numero,
         nome_policial: form.nome_policial,
         posto_graduacao: form.posto_graduacao,
@@ -468,7 +482,7 @@ export function AtosAdminTab({ atos, setAtos, denuncias }: AtosAdminTabProps) {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <Badge variant="default">Ato Nº {a.numero_ato}</Badge>
-                    <span className="font-bold text-sm">ATO DE APLICAÇÃO DE SANÇÃO DISCIPLINAR Nº {a.numero_ato}/{new Date(a.data_emissao).getFullYear()} – CPM</span>
+                    <span className="font-bold text-sm">ATO DE APLICAÇÃO DE SANÇÃO DISCIPLINAR Nº {a.numero_ato}/{new Date(a.data_emissao).getFullYear()}</span>
                   </div>
                   <p className="text-xs text-muted-foreground">{a.posto_graduacao} {a.nome_policial} | R.E. {a.rg_pm} | IPM nº {a.ipm_numero}</p>
                   <p className="text-xs text-muted-foreground mt-1">Medidas: {a.medidas.join(", ") || "Nenhuma"}</p>
@@ -537,7 +551,19 @@ export function AtosAdminTab({ atos, setAtos, denuncias }: AtosAdminTabProps) {
             </div>
             <div>
               <Label className="text-xs font-semibold">IPM Vinculado</Label>
-              <Input value={form.ipm_numero} onChange={e => setForm(f => ({ ...f, ipm_numero: e.target.value }))} placeholder="Ex: 123/2026" />
+              <Select value={form.ipm_id || undefined} onValueChange={v => {
+                const ipm = ipms.find((i: any) => i.id === v);
+                setForm(f => ({ ...f, ipm_id: v, ipm_numero: ipm?.numero_ipm || "" }));
+              }}>
+                <SelectTrigger><SelectValue placeholder="Selecionar IPM..." /></SelectTrigger>
+                <SelectContent>
+                  {ipms.map((ipm: any) => (
+                    <SelectItem key={ipm.id} value={ipm.id}>
+                      Nº{ipm.numero_ipm} — {ipm.unidade || ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="grid grid-cols-3 gap-4">
               <div>
