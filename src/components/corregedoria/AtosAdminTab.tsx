@@ -69,33 +69,33 @@ function parseLocalDate(dateStr: string) {
 
 function formatMedidasHtml(medidas: string[], data: AtosAdmin): string {
   return medidas.map(m => {
-    if (m === "Advertência") return "• Advertência";
+    if (m === "Advertência") return "* Advertência";
     if (m === "Suspensão" && data.data_inicio_suspensao && data.data_fim_suspensao) {
       const di = format(parseLocalDate(data.data_inicio_suspensao), "dd/MM/yyyy", { locale: ptBR });
       const df = format(parseLocalDate(data.data_fim_suspensao), "dd/MM/yyyy", { locale: ptBR });
-      return `• Suspensão de ${di} até ${df}`;
+      return `* Suspensão de ${di} até ${df}`;
     }
-    if (m === "Serviço de Guarita" && data.horas_guarita) return `• Serviço de Guarita por ${data.horas_guarita} horas`;
-    if (m === "Serviço de Base Comunitária" && data.horas_base_comunitaria) return `• Serviço de Base Comunitária por ${data.horas_base_comunitaria} horas`;
-    if (m === "Prisão Disciplinar Militar" && data.horas_prisao_disciplinar) return `• Prisão Disciplinar Militar por ${data.horas_prisao_disciplinar} horas`;
-    if (m === "Exclusão da Corporação") return "• Exclusão da Corporação";
-    return `• ${m}`;
+    if (m === "Serviço de Guarita" && data.horas_guarita) return `* Serviço de Guarita por ${data.horas_guarita} horas`;
+    if (m === "Serviço de Base Comunitária" && data.horas_base_comunitaria) return `* Serviço de Base Comunitária por ${data.horas_base_comunitaria} horas`;
+    if (m === "Prisão Disciplinar Militar" && data.horas_prisao_disciplinar) return `* Prisão Disciplinar Militar por ${data.horas_prisao_disciplinar} horas`;
+    if (m === "Exclusão da Corporação") return "* Exclusão da Corporação";
+    return `* ${m}`;
   }).join("<br>");
 }
 
 function formatMedidasText(medidas: string[], data: AtosAdmin): string {
   return medidas.map(m => {
-    if (m === "Advertência") return "• Advertência";
+    if (m === "Advertência") return "* Advertência";
     if (m === "Suspensão" && data.data_inicio_suspensao && data.data_fim_suspensao) {
       const di = format(parseLocalDate(data.data_inicio_suspensao), "dd/MM/yyyy", { locale: ptBR });
       const df = format(parseLocalDate(data.data_fim_suspensao), "dd/MM/yyyy", { locale: ptBR });
-      return `• Suspensão de ${di} até ${df}`;
+      return `* Suspensão de ${di} até ${df}`;
     }
-    if (m === "Serviço de Guarita" && data.horas_guarita) return `• Serviço de Guarita por ${data.horas_guarita} horas`;
-    if (m === "Serviço de Base Comunitária" && data.horas_base_comunitaria) return `• Serviço de Base Comunitária por ${data.horas_base_comunitaria} horas`;
-    if (m === "Prisão Disciplinar Militar" && data.horas_prisao_disciplinar) return `• Prisão Disciplinar Militar por ${data.horas_prisao_disciplinar} horas`;
-    if (m === "Exclusão da Corporação") return "• Exclusão da Corporação";
-    return `• ${m}`;
+    if (m === "Serviço de Guarita" && data.horas_guarita) return `* Serviço de Guarita por ${data.horas_guarita} horas`;
+    if (m === "Serviço de Base Comunitária" && data.horas_base_comunitaria) return `* Serviço de Base Comunitária por ${data.horas_base_comunitaria} horas`;
+    if (m === "Prisão Disciplinar Militar" && data.horas_prisao_disciplinar) return `* Prisão Disciplinar Militar por ${data.horas_prisao_disciplinar} horas`;
+    if (m === "Exclusão da Corporação") return "* Exclusão da Corporação";
+    return `* ${m}`;
   }).join("\n");
 }
 
@@ -157,22 +157,27 @@ img{max-width:100%}
 
   <p class="c14" style="margin-top:20pt;"><span class="c4">ATO DE APLICAÇÃO DE SANÇÃO DISCIPLINAR Nº ${numeroFormatado}/${String(ano).slice(2)}</span></p>
 
-  <p class="c1">A CORREGEDORIA DA POLÍCIA MILITAR DO ESTADO DE SÃO PAULO, no uso de suas atribuições administrativas e disciplinares, após a conclusão do procedimento regularmente instaurado,</p>
+  <p class="c1"><span class="c4">A CORREGEDORIA DA POLÍCIA MILITAR DO ESTADO DE SÃO PAULO</span>, no uso de suas atribuições administrativas e disciplinares, após a conclusão do procedimento regularmente instaurado,</p>
 
-  ${CONSIDERANDOS.map(c => `<p class="c1"><span class="c4 c7">${c}</span></p>`).join("\n\n  ")}
+  ${CONSIDERANDOS.map(c => `<p class="c1"><span class="c4">${c}</span></p>`).join("\n\n  ")}
 
   <p class="c1"><span class="c4 c7">RESOLVE:</span></p>
 
   <p class="c1"><span class="c4 c7">Art. 1º</span><span class="c4"> Aplicar ao policial militar abaixo identificado a sanção disciplinar decorrente da apuração realizada no Inquérito Policial Militar nº ${a.ipm_numero}.</span></p>
-  <p class="c1"><span class="c4">Policial Militar: ${a.nome_policial}</span></p>
-  <p class="c1"><span class="c4">Posto/Graduação: ${a.posto_graduacao}</span></p>
-  <p class="c1"><span class="c4">R.E: ${a.rg_pm}</span></p>
-  <p class="c1"><span class="c4 c7">Art. 2º</span><span class="c4"> A sanção disciplinar aplicada é a seguinte:<br>${medidasHtml}</span></p>
+
+  <p class="c1"><span class="c4 c7">Policial Militar:</span><span class="c4"> ${a.nome_policial}</span></p>
+  <p class="c1"><span class="c4 c7">Posto/Graduação:</span><span class="c4"> ${a.posto_graduacao}</span></p>
+  <p class="c1"><span class="c4 c7">R.E:</span><span class="c4"> ${a.rg_pm}</span></p>
+
+  <p class="c1"><span class="c4 c7">Art. 2º</span><span class="c4"> A sanção disciplinar aplicada é a seguinte:<br><br>${medidasHtml}.</span></p>
+
   <p class="c1"><span class="c4 c7">Art. 3º</span><span class="c4"> A aplicação da sanção fundamenta-se nas provas produzidas durante a instrução do procedimento, observada a gravidade da conduta, os antecedentes funcionais, as circunstâncias do fato e os princípios da proporcionalidade e da razoabilidade.</span></p>
   <p class="c1"><span class="c4 c7">Art. 4º</span><span class="c4"> A sanção produzirá efeitos a partir da data estabelecida neste ato, sem prejuízo dos recursos administrativos cabíveis previstos na regulamentação disciplinar.</span></p>
   <p class="c1"><span class="c4 c7">Art. 5º</span><span class="c4"> Cientifique-se o interessado, procedam-se às anotações administrativas pertinentes e arquivem-se os autos após o cumprimento das determinações constantes neste ato.</span></p>
 
-  <p class="c1"><span class="c4 c7">Publique-se.<br>Registre-se.<br>Cumpra-se.</span></p>
+  <p class="c1"><span class="c4 c7">Publique-se.</span></p>
+  <p class="c1"><span class="c4 c7">Registre-se.</span></p>
+  <p class="c1"><span class="c4 c7">Cumpra-se.</span></p>
 
   <div class="signature-block" style="margin-top:30pt;text-align:center;">
     <p class="c14" style="margin:0 0 18pt 0;">
@@ -224,17 +229,17 @@ function generateAtoText(a: AtosAdmin): string {
     ``,
     `Art. 2º A sanção disciplinar aplicada é a seguinte:`,
     ...a.medidas.map(m => {
-      if (m === "Advertência") return "• Advertência";
+      if (m === "Advertência") return "* Advertência";
       if (m === "Suspensão" && a.data_inicio_suspensao && a.data_fim_suspensao) {
         const di = format(parseLocalDate(a.data_inicio_suspensao), "dd/MM/yyyy", { locale: ptBR });
         const df = format(parseLocalDate(a.data_fim_suspensao), "dd/MM/yyyy", { locale: ptBR });
-        return `• Suspensão de ${di} até ${df}`;
+        return `* Suspensão de ${di} até ${df}`;
       }
-      if (m === "Serviço de Guarita" && a.horas_guarita) return `• Serviço de Guarita por ${a.horas_guarita} horas`;
-      if (m === "Serviço de Base Comunitária" && a.horas_base_comunitaria) return `• Serviço de Base Comunitária por ${a.horas_base_comunitaria} horas`;
-      if (m === "Prisão Disciplinar Militar" && a.horas_prisao_disciplinar) return `• Prisão Disciplinar Militar por ${a.horas_prisao_disciplinar} horas`;
-      if (m === "Exclusão da Corporação") return "• Exclusão da Corporação";
-      return `• ${m}`;
+      if (m === "Serviço de Guarita" && a.horas_guarita) return `* Serviço de Guarita por ${a.horas_guarita} horas`;
+      if (m === "Serviço de Base Comunitária" && a.horas_base_comunitaria) return `* Serviço de Base Comunitária por ${a.horas_base_comunitaria} horas`;
+      if (m === "Prisão Disciplinar Militar" && a.horas_prisao_disciplinar) return `* Prisão Disciplinar Militar por ${a.horas_prisao_disciplinar} horas`;
+      if (m === "Exclusão da Corporação") return "* Exclusão da Corporação";
+      return `* ${m}`;
     }),
     ``,
     `Art. 3º A aplicação da sanção fundamenta-se nas provas produzidas durante a instrução do procedimento, observada a gravidade da conduta, os antecedentes funcionais, as circunstâncias do fato e os princípios da proporcionalidade e da razoabilidade.`,
