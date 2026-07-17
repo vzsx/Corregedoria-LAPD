@@ -54,6 +54,7 @@ const MEDIDAS_OPTIONS = [
   "Serviço de Base Comunitária",
   "Prisão Disciplinar Militar",
   "Exclusão da Corporação",
+  "Orientação",
 ];
 
 const CONSIDERANDOS = [
@@ -79,6 +80,7 @@ function formatMedidasHtml(medidas: string[], data: AtosAdmin): string {
     if (m === "Serviço de Base Comunitária" && data.horas_base_comunitaria) return `* Serviço de Base Comunitária por ${data.horas_base_comunitaria} horas`;
     if (m === "Prisão Disciplinar Militar" && data.horas_prisao_disciplinar) return `* Prisão Disciplinar Militar por ${data.horas_prisao_disciplinar} horas`;
     if (m === "Exclusão da Corporação") return "* Exclusão da Corporação";
+    if (m === "Orientação") return "* Orientação";
     return `* ${m}`;
   }).join("<br>");
 }
@@ -95,6 +97,7 @@ function formatMedidasText(medidas: string[], data: AtosAdmin): string {
     if (m === "Serviço de Base Comunitária" && data.horas_base_comunitaria) return `* Serviço de Base Comunitária por ${data.horas_base_comunitaria} horas`;
     if (m === "Prisão Disciplinar Militar" && data.horas_prisao_disciplinar) return `* Prisão Disciplinar Militar por ${data.horas_prisao_disciplinar} horas`;
     if (m === "Exclusão da Corporação") return "* Exclusão da Corporação";
+    if (m === "Orientação") return "* Orientação";
     return `* ${m}`;
   }).join("\n");
 }
@@ -239,6 +242,7 @@ function generateAtoText(a: AtosAdmin): string {
       if (m === "Serviço de Base Comunitária" && a.horas_base_comunitaria) return `* Serviço de Base Comunitária por ${a.horas_base_comunitaria} horas`;
       if (m === "Prisão Disciplinar Militar" && a.horas_prisao_disciplinar) return `* Prisão Disciplinar Militar por ${a.horas_prisao_disciplinar} horas`;
       if (m === "Exclusão da Corporação") return "* Exclusão da Corporação";
+      if (m === "Orientação") return "* Orientação";
       return `* ${m}`;
     }),
     ``,
@@ -313,6 +317,7 @@ export function AtosAdminTab({ atos, setAtos, denuncias, ipms }: AtosAdminTabPro
     exclusao: atos.filter(a => a.medidas.includes("Exclusão da Corporação")).length,
     garantia: atos.filter(a => a.medidas.includes("Serviço de Guarita")).length,
     baseComunitaria: atos.filter(a => a.medidas.includes("Serviço de Base Comunitária")).length,
+    orientacao: atos.filter(a => a.medidas.includes("Orientação")).length,
   }), [atos]);
 
   const nextNumero = useMemo(() => {
@@ -471,6 +476,7 @@ export function AtosAdminTab({ atos, setAtos, denuncias, ipms }: AtosAdminTabPro
           <span>| Base Comunitária: <strong>{stats.baseComunitaria}h</strong></span>
           <span>| Prisão Disciplinar: <strong>{stats.prisao}h</strong></span>
           <span>| Exclusão: <strong>{stats.exclusao}</strong></span>
+          <span>| Orientação: <strong>{stats.orientacao}</strong></span>
         </div>
       </div>
 
@@ -644,6 +650,7 @@ export function AtosAdminTab({ atos, setAtos, denuncias, ipms }: AtosAdminTabPro
                       if (m === "Serviço de Base Comunitária" && form.horas_base_comunitaria) return <li key={m}>Serviço de Base Comunitária por {form.horas_base_comunitaria} horas</li>;
                       if (m === "Prisão Disciplinar Militar" && form.horas_prisao_disciplinar) return <li key={m}>Prisão Disciplinar Militar por {form.horas_prisao_disciplinar} horas</li>;
                       if (m === "Exclusão da Corporação") return <li key={m}>Exclusão da Corporação</li>;
+                      if (m === "Orientação") return <li key={m}>Orientação</li>;
                       return <li key={m}>{m}</li>;
                     })}
                   </ul>
