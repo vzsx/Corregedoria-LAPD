@@ -66,9 +66,11 @@ const DEFAULT_ARTIGOS_ARQUIVAMENTO = {
 
 const MEDIDAS_OPTIONS = [
   "Advertência",
-  "Prisão Militar",
-  "Exoneração da Polícia Militar",
-  "Afastamento como Medida Disciplinar",
+  "Suspensão",
+  "Serviço de Guarita",
+  "Serviço de Base Comunitária",
+  "Prisão Disciplinar Militar",
+  "Exclusão da Corporação",
   "Orientação",
 ];
 
