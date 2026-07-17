@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -378,9 +379,9 @@ export function AtosAdminTab({ atos, setAtos, denuncias, ipms }: AtosAdminTabPro
         medidas: form.medidas,
         data_inicio_suspensao: form.medidas.includes("Suspensão") ? (form.data_inicio_suspensao || null) : null,
         data_fim_suspensao: form.medidas.includes("Suspensão") ? (form.data_fim_suspensao || null) : null,
-        horas_guarita: form.medidas.includes("Serviço de Guarita") ? (Number(form.horas_guarita) || null) : null,
-        horas_base_comunitaria: form.medidas.includes("Serviço de Base Comunitária") ? (Number(form.horas_base_comunitaria) || null) : null,
-        horas_prisao_disciplinar: form.medidas.includes("Prisão Disciplinar Militar") ? (Number(form.horas_prisao_disciplinar) || null) : null,
+        horas_guarita: form.medidas.includes("Serviço de Guarita") ? (form.horas_guarita ? Number(form.horas_guarita) : null) : null,
+        horas_base_comunitaria: form.medidas.includes("Serviço de Base Comunitária") ? (form.horas_base_comunitaria ? Number(form.horas_base_comunitaria) : null) : null,
+        horas_prisao_disciplinar: form.medidas.includes("Prisão Disciplinar Militar") ? (form.horas_prisao_disciplinar ? Number(form.horas_prisao_disciplinar) : null) : null,
         responsavel_nome: form.responsavel_nome,
         responsavel_posto: form.responsavel_posto,
         updated_at: new Date().toISOString(),
@@ -407,8 +408,9 @@ export function AtosAdminTab({ atos, setAtos, denuncias, ipms }: AtosAdminTabPro
         logAudit({ action: "create", entity_type: "atos_administrativo", entity_id: data.id, details: { numero_ato: form.numero_ato, nome_policial: form.nome_policial } });
       }
       setShowForm(false);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Erro ao salvar:", err);
+      toast.error("Erro ao salvar: " + (err?.message || "Verifique os dados e tente novamente"));
     } finally {
       setSaving(false);
     }
