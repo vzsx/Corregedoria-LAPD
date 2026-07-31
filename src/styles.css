@@ -38,41 +38,41 @@
 :root {
   --radius: 0.5rem;
 
-  --background: #D8D8D8;
-  --foreground: #2A2A2A;
+  --background: #1E1E1E;
+  --foreground: #D0D0D0;
 
-  --card: #CDCDCD;
-  --card-foreground: #2A2A2A;
+  --card: #2A2A2A;
+  --card-foreground: #D0D0D0;
 
-  --popover: #CDCDCD;
-  --popover-foreground: #2A2A2A;
+  --popover: #2A2A2A;
+  --popover-foreground: #D0D0D0;
 
   --primary: #7A0000;
-  --primary-foreground: #D8D8D8;
+  --primary-foreground: #D0D0D0;
 
-  --secondary: #D0D0D0;
-  --secondary-foreground: #2A2A2A;
+  --secondary: #2E2E2E;
+  --secondary-foreground: #D0D0D0;
 
-  --muted: #D4D4D4;
-  --muted-foreground: #555555;
+  --muted: #252525;
+  --muted-foreground: #888888;
 
   --accent: #7A0000;
-  --accent-foreground: #D8D8D8;
+  --accent-foreground: #D0D0D0;
 
   --destructive: #7A0000;
-  --destructive-foreground: #D8D8D8;
+  --destructive-foreground: #D0D0D0;
 
-  --border: #B0B0B0;
-  --input: #B0B0B0;
+  --border: #3A3A3A;
+  --input: #3A3A3A;
   --ring: #7A0000;
 
   --pmesp-red: #7A0000;
   --pmesp-dark: #1A1A1A;
   --pmesp-sidebar: #1A1A1A;
-  --pmesp-card: #CDCDCD;
+  --pmesp-card: #2A2A2A;
 
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 @layer base {

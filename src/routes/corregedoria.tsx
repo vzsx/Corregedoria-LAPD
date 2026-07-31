@@ -248,7 +248,7 @@ const RelatorioCard = ({
                 size="sm"
                 onClick={() => onLinkDenuncia?.(relatorio.id)}
                 disabled={linking || !linkDenunciaId}
-                className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D8D8D8] text-xs"
+                className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D0D0D0] text-xs"
               >
                 {linking ? "Vinculando..." : "Vincular"}
               </Button>
@@ -317,7 +317,7 @@ const RelatorioCard = ({
                 size="sm"
                 onClick={() => onLinkInvestigacao?.(relatorio.id)}
                 disabled={linking || !linkInvestigacaoId}
-                className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D8D8D8] text-xs"
+                className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D0D0D0] text-xs"
               >
                 {linking ? "Vinculando..." : "Vincular"}
               </Button>
@@ -415,7 +415,7 @@ const RelatorioCard = ({
                   onLinkRelatorioGeral?.(relatorio.id, tipo);
                 }}
                 disabled={linking || !linkRelatorioGeralId}
-                className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D8D8D8] text-xs"
+                className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D0D0D0] text-xs"
               >
                 {linking ? "Vinculando..." : "Vincular"}
               </Button>
@@ -470,7 +470,7 @@ const RelatorioCard = ({
                       </Select>
                     </div>
                     <Button size="sm" onClick={() => handleLinkIpm(linkIpmId, relatorio.id, "relatorio")}
-                      disabled={linking || !linkIpmId} className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D8D8D8] text-xs">
+                      disabled={linking || !linkIpmId} className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D0D0D0] text-xs">
                       {linking ? "Vinculando..." : "Vincular"}
                     </Button>
                   </div>
@@ -2345,23 +2345,23 @@ function Corregedoria() {
       <aside className={`${
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       } fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-pmesp-sidebar transition-transform duration-300 lg:static lg:z-auto lg:w-64 lg:translate-x-0`}>
-        <div className="flex items-center justify-between border-b border-[#333333] p-4">
+        <div className="flex items-center justify-between border-b border-[#2A2A2A] p-4">
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded overflow-hidden bg-[#333333]">
               <img src="/corregedoria-logo.png" alt="Brasão PMESP" className="h-full w-full object-cover" />
             </div>
             <div>
-              <h1 className="text-sm font-semibold text-[#D8D8D8]">Corregedoria Geral</h1>
-              <p className="text-[10px] text-[#999999]">Polícia Militar de SP</p>
+              <h1 className="text-sm font-semibold text-[#D0D0D0]">Corregedoria Geral</h1>
+              <p className="text-[10px] text-[#777777]">Polícia Militar de SP</p>
             </div>
           </div>
-          <button className="lg:hidden text-[#999999] hover:text-[#D8D8D8]" onClick={() => setSidebarOpen(false)}>
+          <button className="lg:hidden text-[#888888] hover:text-[#D0D0D0]" onClick={() => setSidebarOpen(false)}>
             <X className="h-5 w-5" />
           </button>
         </div>
 
         <nav className="flex-1 space-y-1 overflow-y-auto p-3">
-          <p className="px-3 text-[10px] font-semibold uppercase tracking-widest text-[#777777] mb-1 mt-3">Operações</p>
+          <p className="px-3 text-[10px] font-semibold uppercase tracking-widest text-[#666666] mb-1 mt-3">Operações</p>
           
           <SidebarItem 
             active={activeTab === "dashboard"} 
@@ -2426,7 +2426,7 @@ function Corregedoria() {
 
     {isAdmin && (
       <>
-        <p className="px-3 text-[10px] font-semibold uppercase tracking-widest text-[#777777] mb-1 mt-6">Administrativo</p>
+        <p className="px-3 text-[10px] font-semibold uppercase tracking-widest text-[#666666] mb-1 mt-6">Administrativo</p>
         <SidebarItem 
           active={activeTab === "solicitacoes"} 
           onClick={() => handleTabChange("solicitacoes")} 
@@ -2450,15 +2450,15 @@ function Corregedoria() {
     )}
         </nav>
 
-        <div className="border-t border-[#333333] p-3">
+        <div className="border-t border-[#2A2A2A] p-3">
           <button 
             onClick={handleLogout}
-            className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm text-[#999999] transition-colors hover:bg-[#333333] hover:text-[#D8D8D8]"
+            className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm text-[#888888] transition-colors hover:bg-[#2A2A2A] hover:text-[#D0D0D0]"
           >
             <LogOut className="h-4 w-4" />
             Desconectar
           </button>
-          <div className="mt-3 px-3 text-[10px] text-[#666666]">
+          <div className="mt-3 px-3 text-[10px] text-[#555555]">
             Corregedoria PMESP v1.0
           </div>
         </div>
@@ -2576,7 +2576,7 @@ function Corregedoria() {
                   <Button 
                     size="sm" 
                     variant="outline"
-                    className={`font-mono text-xs h-8 ${denunciaFilter === "todas" ? "bg-primary text-[#D8D8D8] border-primary" : "bg-transparent text-muted-foreground border-border hover:text-foreground"}`}
+                    className={`font-mono text-xs h-8 ${denunciaFilter === "todas" ? "bg-primary text-[#D0D0D0] border-primary" : "bg-transparent text-muted-foreground border-border hover:text-foreground"}`}
                     onClick={() => setDenunciaFilter("todas")}
                   >
                     TODAS
@@ -2720,7 +2720,7 @@ function Corregedoria() {
                                   size="sm" 
                                   onClick={() => handleLinkRelatorio(d.id)}
                                   disabled={linking || !linkRelatorioId}
-                                  className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D8D8D8]"
+                                  className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D0D0D0]"
                                 >
                                   {linking ? "Vinculando..." : "Vincular"}
                                 </Button>
@@ -2825,7 +2825,7 @@ function Corregedoria() {
                                           setLinkInvestigacaoDenunciaId("");
                                         }}
                                         disabled={linking || !linkInvestigacaoDenunciaId}
-                                        className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D8D8D8] text-xs h-9"
+                                        className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D0D0D0] text-xs h-9"
                                       >
                                         {linking ? "Vinculando..." : "Vincular"}
                                       </Button>
@@ -2947,7 +2947,7 @@ function Corregedoria() {
                                           setLinkDepoimentoDenunciaId("");
                                         }}
                                         disabled={linking || !linkDepoimentoDenunciaId}
-                                        className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D8D8D8] text-xs h-9"
+                                        className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D0D0D0] text-xs h-9"
                                       >
                                         {linking ? "Vinculando..." : "Vincular"}
                                       </Button>
@@ -3041,7 +3041,7 @@ function Corregedoria() {
                                   size="sm"
                                   onClick={() => handleLinkRelatorioGeral(d.id, "denuncia")}
                                   disabled={linking || !linkRelatorioGeralId}
-                                  className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D8D8D8] text-xs"
+                                  className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D0D0D0] text-xs"
                                 >
                                   {linking ? "Vinculando..." : "Vincular"}
                                 </Button>
@@ -3096,7 +3096,7 @@ function Corregedoria() {
                                         </Select>
                                       </div>
                                       <Button size="sm" onClick={() => handleLinkIpm(linkIpmId, d.id, "denuncia")}
-                                        disabled={linking || !linkIpmId} className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D8D8D8] text-xs">
+                                        disabled={linking || !linkIpmId} className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D0D0D0] text-xs">
                                         {linking ? "Vinculando..." : "Vincular"}
                                       </Button>
                                     </div>
@@ -3228,7 +3228,7 @@ function Corregedoria() {
                               />
                               <Button
                                 size="sm"
-                                className="mt-3 bg-pmesp-sidebar hover:bg-pmesp-red text-[#D8D8D8]"
+                                className="mt-3 bg-pmesp-sidebar hover:bg-pmesp-red text-[#D0D0D0]"
                                 onClick={() => {
                                   const el = document.getElementById(`notas-${d.id}`) as HTMLTextAreaElement;
                                   updateNotas(d.id, el.value);
@@ -3259,7 +3259,7 @@ function Corregedoria() {
                      else setIsInvestigacaoDialogOpen(open);
                    }}>
                     <DialogTrigger asChild>
-                      <Button onClick={() => setIsInvestigacaoDialogOpen(true)} className="bg-pmesp-red hover:bg-pmesp-red/80 text-[#D8D8D8] font-bold tracking-wider uppercase text-xs">
+                      <Button onClick={() => setIsInvestigacaoDialogOpen(true)} className="bg-pmesp-red hover:bg-pmesp-red/80 text-[#D0D0D0] font-bold tracking-wider uppercase text-xs">
                         <Plus className="h-4 w-4 mr-2" />
                         Iniciar Investigação
                       </Button>
@@ -3569,7 +3569,7 @@ function Corregedoria() {
                               </SelectContent>
                             </Select>
                           </div>
-                          <Button type="submit" disabled={submitting} className="bg-pmesp-red hover:bg-pmesp-red/80 text-[#D8D8D8] px-8">
+                          <Button type="submit" disabled={submitting} className="bg-pmesp-red hover:bg-pmesp-red/80 text-[#D0D0D0] px-8">
                             {submitting ? "Gravando..." : (editingInvestigacaoId ? "ATUALIZAR INVESTIGAÇÃO" : "GRAVAR NO SISTEMA")}
                           </Button>
                         </div>
@@ -3583,7 +3583,7 @@ function Corregedoria() {
                   <Button 
                     size="sm" 
                     variant="outline"
-                    className={`font-mono text-xs h-8 ${investigacaoFilter === "todas" ? "bg-primary text-[#D8D8D8] border-primary" : "bg-transparent text-muted-foreground border-border hover:text-foreground"}`}
+                    className={`font-mono text-xs h-8 ${investigacaoFilter === "todas" ? "bg-primary text-[#D0D0D0] border-primary" : "bg-transparent text-muted-foreground border-border hover:text-foreground"}`}
                     onClick={() => setInvestigacaoFilter("todas")}
                   >
                     TODAS
@@ -3847,7 +3847,7 @@ function Corregedoria() {
                                   size="sm"
                                   onClick={() => handleLinkRelatorioGeral(inv.id, "investigacao")}
                                   disabled={linking || !linkRelatorioGeralId}
-                                  className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D8D8D8] text-xs"
+                                  className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D0D0D0] text-xs"
                                 >
                                   {linking ? "Vinculando..." : "Vincular"}
                                 </Button>
@@ -3902,7 +3902,7 @@ function Corregedoria() {
                                         </Select>
                                       </div>
                                       <Button size="sm" onClick={() => handleLinkIpm(linkIpmId, inv.id, "investigacao")}
-                                        disabled={linking || !linkIpmId} className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D8D8D8] text-xs">
+                                        disabled={linking || !linkIpmId} className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D0D0D0] text-xs">
                                         {linking ? "Vinculando..." : "Vincular"}
                                       </Button>
                                     </div>
@@ -3986,7 +3986,7 @@ function Corregedoria() {
                                   />
                                   <Button
                                     size="sm"
-                                    className="mt-3 bg-pmesp-sidebar hover:bg-pmesp-red text-[#D8D8D8] text-xs"
+                                    className="mt-3 bg-pmesp-sidebar hover:bg-pmesp-red text-[#D0D0D0] text-xs"
                                     onClick={() => {
                                       const el = document.getElementById(`notas-inv-${inv.id}`) as HTMLTextAreaElement;
                                       updateInvestigacaoNotas(inv.id, el.value);
@@ -4052,7 +4052,7 @@ function Corregedoria() {
                       relatorio_id_ato: "",
                       investigacao_id: "",
                       observacao: ""
-                    })} className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D8D8D8] text-[10px] uppercase tracking-widest">
+                    })} className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D0D0D0] text-[10px] uppercase tracking-widest">
                       <Plus className="h-3 w-3 mr-1" /> Novo Depoimento
                     </Button>
                   </DialogTrigger>
@@ -4161,7 +4161,7 @@ function Corregedoria() {
                         </div>
                       </div>
                       <div className="pt-4 border-t border-border flex justify-end">
-                        <Button type="submit" disabled={submittingDepoimento} className="bg-primary hover:bg-primary/80 text-[#D8D8D8] font-bold tracking-widest px-8 uppercase text-[10px]">
+                        <Button type="submit" disabled={submittingDepoimento} className="bg-primary hover:bg-primary/80 text-[#D0D0D0] font-bold tracking-widest px-8 uppercase text-[10px]">
                           {submittingDepoimento ? "Registrando..." : "REGISTRAR DEPOIMENTO"}
                         </Button>
                       </div>
@@ -4296,7 +4296,7 @@ function Corregedoria() {
                       </div>
                       <div className="pt-4 border-t border-border flex justify-end gap-2">
                         <Button type="button" variant="outline" onClick={() => setIsEditDepoimentoDialogOpen(false)} className="text-[10px] uppercase tracking-widest">Cancelar</Button>
-                        <Button type="submit" disabled={submittingDepoimento} className="bg-primary hover:bg-primary/80 text-[#D8D8D8] font-bold tracking-widest px-8 uppercase text-[10px]">
+                        <Button type="submit" disabled={submittingDepoimento} className="bg-primary hover:bg-primary/80 text-[#D0D0D0] font-bold tracking-widest px-8 uppercase text-[10px]">
                           {submittingDepoimento ? "Salvando..." : "SALVAR ALTERAÇÕES"}
                         </Button>
                       </div>
@@ -4490,7 +4490,7 @@ function Corregedoria() {
                                         </Select>
                                       </div>
                                       <Button size="sm" onClick={() => handleLinkIpm(linkIpmId, d.id, "depoimento")}
-                                        disabled={linking || !linkIpmId} className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D8D8D8] text-xs">
+                                        disabled={linking || !linkIpmId} className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D0D0D0] text-xs">
                                         {linking ? "Vinculando..." : "Vincular"}
                                       </Button>
                                     </div>
@@ -4520,7 +4520,7 @@ function Corregedoria() {
                       setRelatorioGeralForm({ titulo: "", conteudo: "", elaborador_nome: "", elaborador_patente: "", vinculos: [] });
                       setSelectedEntidadeTipo("denuncia");
                       setSelectedEntidadeId("");
-                    }} className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D8D8D8] text-[10px] uppercase tracking-widest">
+                    }} className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D0D0D0] text-[10px] uppercase tracking-widest">
                       <Plus className="h-3 w-3 mr-1" /> Novo Relatório Geral
                     </Button>
                   </DialogTrigger>
@@ -4607,13 +4607,13 @@ function Corregedoria() {
                             if (relatorioGeralForm.vinculos.some(v => v.entidade_id === selectedEntidadeId && v.entidade_tipo === selectedEntidadeTipo)) return toast.error("Documento já vinculado");
                             setRelatorioGeralForm({...relatorioGeralForm, vinculos: [...relatorioGeralForm.vinculos, { entidade_id: selectedEntidadeId, entidade_tipo: selectedEntidadeTipo }]});
                             setSelectedEntidadeId("");
-                          }} className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D8D8D8] text-xs h-9">
+                          }} className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D0D0D0] text-xs h-9">
                             Adicionar
                           </Button>
                         </div>
                       </div>
                       <div className="pt-4 border-t border-border flex justify-end">
-                        <Button type="submit" disabled={submittingRelatorioGeral} className="bg-primary hover:bg-primary/80 text-[#D8D8D8] font-bold tracking-widest px-8 uppercase text-[10px]">
+                        <Button type="submit" disabled={submittingRelatorioGeral} className="bg-primary hover:bg-primary/80 text-[#D0D0D0] font-bold tracking-widest px-8 uppercase text-[10px]">
                           {submittingRelatorioGeral ? "Criando..." : "CRIAR RELATÓRIO GERAL"}
                         </Button>
                       </div>
@@ -4650,7 +4650,7 @@ function Corregedoria() {
                       </div>
                       <div className="pt-4 border-t border-border flex justify-end gap-2">
                         <Button type="button" variant="outline" onClick={() => setIsEditRelatorioGeralDialogOpen(false)} className="text-[10px] uppercase tracking-widest">Cancelar</Button>
-                        <Button type="submit" disabled={submittingRelatorioGeral} className="bg-primary hover:bg-primary/80 text-[#D8D8D8] font-bold tracking-widest px-8 uppercase text-[10px]">
+                        <Button type="submit" disabled={submittingRelatorioGeral} className="bg-primary hover:bg-primary/80 text-[#D0D0D0] font-bold tracking-widest px-8 uppercase text-[10px]">
                           {submittingRelatorioGeral ? "Salvando..." : "SALVAR ALTERAÇÕES"}
                         </Button>
                       </div>
@@ -4804,7 +4804,7 @@ function Corregedoria() {
                                       ))}
                                     </select>
                                   </div>
-                                  <Button size="sm" className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D8D8D8] text-xs"
+                                  <Button size="sm" className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D0D0D0] text-xs"
                                     onClick={async () => {
                                       if (!selectedEntidadeId) return toast.error("Selecione um documento");
                                       setSubmittingRelatorioGeral(true);
@@ -4958,7 +4958,7 @@ function Corregedoria() {
                                   const el = document.getElementById(`patente-${oficial.id}`) as HTMLInputElement;
                                   updatePatente(oficial.id, el.value);
                                 }}
-                                className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D8D8D8] h-9 px-2"
+                                className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D0D0D0] h-9 px-2"
                               >
                                 Salvar
                               </Button>
@@ -5527,7 +5527,7 @@ function Corregedoria() {
               )}
             </div>
             <div className="pt-4 border-t border-border flex justify-end">
-              <Button type="submit" disabled={submitting} className="bg-primary hover:bg-primary/80 text-[#D8D8D8] px-8 font-bold tracking-widest text-[10px] uppercase">
+              <Button type="submit" disabled={submitting} className="bg-primary hover:bg-primary/80 text-[#D0D0D0] px-8 font-bold tracking-widest text-[10px] uppercase">
                 {submitting ? "Salvando..." : "SALVAR ALTERAÇÕES"}
               </Button>
             </div>

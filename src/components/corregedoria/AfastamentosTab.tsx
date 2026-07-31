@@ -1038,7 +1038,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
                                     {available.map(d => (<option key={d.id} value={d.id}>#{d.numero_registro} - {d.titulo}</option>))}
                                   </select>
                                 </div>
-                                <Button size="sm" onClick={() => handleLinkAfastamentoDenuncia(a.id)} disabled={linking || !linkAfastamentoDenunciaId} className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D8D8D8] text-xs h-9">
+                                <Button size="sm" onClick={() => handleLinkAfastamentoDenuncia(a.id)} disabled={linking || !linkAfastamentoDenunciaId} className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D0D0D0] text-xs h-9">
                                   {linking ? "Vinculando..." : "Vincular"}
                                 </Button>
                               </div>
@@ -1081,7 +1081,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
                                     {available.map(i => (<option key={i.id} value={i.id}>{i.titulo}</option>))}
                                   </select>
                                 </div>
-                                <Button size="sm" onClick={() => handleLinkAfastamentoInvestigacao(a.id)} disabled={linking || !linkAfastamentoInvestigacaoId} className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D8D8D8] text-xs h-9">
+                                <Button size="sm" onClick={() => handleLinkAfastamentoInvestigacao(a.id)} disabled={linking || !linkAfastamentoInvestigacaoId} className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D0D0D0] text-xs h-9">
                                   {linking ? "Vinculando..." : "Vincular"}
                                 </Button>
                               </div>
@@ -1124,7 +1124,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
                                     {available.map(r => (<option key={r.id} value={r.id}>#{r.numero_registro} - {r.titulo}</option>))}
                                   </select>
                                 </div>
-                                <Button size="sm" onClick={() => handleLinkAfastamentoRelatorio(a.id)} disabled={linking || !linkAfastamentoRelatorioId} className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D8D8D8] text-xs h-9">
+                                <Button size="sm" onClick={() => handleLinkAfastamentoRelatorio(a.id)} disabled={linking || !linkAfastamentoRelatorioId} className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D0D0D0] text-xs h-9">
                                   {linking ? "Vinculando..." : "Vincular"}
                                 </Button>
                               </div>
@@ -1167,7 +1167,7 @@ export function AfastamentosTab({ denuncias, investigacoes, relatorios, depoimen
                                     {available.map(dep => (<option key={dep.id} value={dep.id}>{dep.oficial_nome} - {dep.depoimento?.substring(0, 50)}...</option>))}
                                   </select>
                                 </div>
-                                <Button size="sm" onClick={() => handleLinkAfastamentoDepoimento(a.id)} disabled={linking || !linkAfastamentoDepoimentoId} className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D8D8D8] text-xs h-9">
+                                <Button size="sm" onClick={() => handleLinkAfastamentoDepoimento(a.id)} disabled={linking || !linkAfastamentoDepoimentoId} className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D0D0D0] text-xs h-9">
                                   {linking ? "Vinculando..." : "Vincular"}
                                 </Button>
                               </div>

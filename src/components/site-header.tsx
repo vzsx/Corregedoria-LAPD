@@ -14,7 +14,7 @@ export function SiteHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-pmesp-sidebar border-b border-[#333333]">
+    <header className="sticky top-0 z-50 bg-pmesp-sidebar border-b border-[#2A2A2A]">
       <div className="container mx-auto flex h-14 items-center justify-between px-6">
         <Link to="/" className="flex items-center gap-3 group">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded overflow-hidden bg-[#333333]">
@@ -25,10 +25,10 @@ export function SiteHeader() {
             />
           </div>
           <div className="flex flex-col leading-tight">
-            <span className="text-sm font-semibold text-[#D8D8D8] tracking-tight">
+            <span className="text-sm font-semibold text-[#D0D0D0] tracking-tight">
               Corregedoria Geral
             </span>
-            <span className="text-[10px] font-medium uppercase tracking-wider text-[#999999]">
+            <span className="text-[10px] font-medium uppercase tracking-wider text-[#777777]">
               Polícia Militar do Estado de São Paulo
             </span>
           </div>
@@ -37,23 +37,23 @@ export function SiteHeader() {
         <nav className="hidden items-center gap-1 md:flex">
           <Link
             to="/"
-            className="px-3 py-1.5 text-sm font-medium text-[#999999] rounded transition-colors hover:bg-[#333333] hover:text-[#D8D8D8]"
-            activeProps={{ className: "px-3 py-1.5 text-sm font-medium text-[#D8D8D8] bg-[#333333] rounded" }}
+            className="px-3 py-1.5 text-sm font-medium text-[#888888] rounded transition-colors hover:bg-[#2A2A2A] hover:text-[#D0D0D0]"
+            activeProps={{ className: "px-3 py-1.5 text-sm font-medium text-[#D0D0D0] bg-[#2A2A2A] rounded" }}
             activeOptions={{ exact: true }}
           >
             Quem Somos
           </Link>
           <Link
             to="/denuncias"
-            className="px-3 py-1.5 text-sm font-medium text-[#999999] rounded transition-colors hover:bg-[#333333] hover:text-[#D8D8D8]"
-            activeProps={{ className: "px-3 py-1.5 text-sm font-medium text-[#D8D8D8] bg-[#333333] rounded" }}
+            className="px-3 py-1.5 text-sm font-medium text-[#888888] rounded transition-colors hover:bg-[#2A2A2A] hover:text-[#D0D0D0]"
+            activeProps={{ className: "px-3 py-1.5 text-sm font-medium text-[#D0D0D0] bg-[#2A2A2A] rounded" }}
           >
             Fazer Denúncia
           </Link>
           <Link
             to="/acompanhar"
-            className="px-3 py-1.5 text-sm font-medium text-[#999999] rounded transition-colors hover:bg-[#333333] hover:text-[#D8D8D8]"
-            activeProps={{ className: "px-3 py-1.5 text-sm font-medium text-[#D8D8D8] bg-[#333333] rounded" }}
+            className="px-3 py-1.5 text-sm font-medium text-[#888888] rounded transition-colors hover:bg-[#2A2A2A] hover:text-[#D0D0D0]"
+            activeProps={{ className: "px-3 py-1.5 text-sm font-medium text-[#D0D0D0] bg-[#2A2A2A] rounded" }}
           >
             Acompanhar
           </Link>
@@ -65,18 +65,18 @@ export function SiteHeader() {
             <div className="flex items-center gap-2">
               {(isCorregedor || isAdmin) && (
                 <Link to="/corregedoria">
-                  <Button size="sm" className="bg-pmesp-red text-[#D8D8D8] hover:bg-pmesp-red/80 font-medium text-xs h-8">
+                  <Button size="sm" className="bg-pmesp-red text-[#D0D0D0] hover:bg-pmesp-red/80 font-medium text-xs h-8">
                     Abrir Terminal
                   </Button>
                 </Link>
               )}
-              <Button variant="ghost" size="sm" onClick={handleLogout} className="text-[#999999] hover:text-[#D8D8D8] hover:bg-[#333333] text-xs h-8">
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="text-[#888888] hover:text-[#D0D0D0] hover:bg-[#2A2A2A] text-xs h-8">
                 <LogOut className="mr-1.5 h-3.5 w-3.5" /> Sair
               </Button>
             </div>
           ) : (
             <Link to="/auth">
-              <Button size="sm" className="bg-pmesp-red text-[#D8D8D8] hover:bg-pmesp-red/80 font-medium text-xs h-8">
+              <Button size="sm" className="bg-pmesp-red text-[#D0D0D0] hover:bg-pmesp-red/80 font-medium text-xs h-8">
                 Acesso Restrito
               </Button>
             </Link>

@@ -50,7 +50,7 @@ function Index() {
             </div>
 
             <div
-              className={`mb-6 inline-flex items-center gap-2 rounded border border-[#333333] bg-[#333333]/50 px-3 py-1 text-xs font-medium uppercase tracking-widest text-[#999999] transition-all duration-700 ${
+              className={`mb-6 inline-flex items-center gap-2 rounded border border-[#333333] bg-[#2A2A2A] px-3 py-1 text-xs font-medium uppercase tracking-widest text-[#888888] transition-all duration-700 ${
                 mounted ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
               }`}
             >
@@ -59,17 +59,17 @@ function Index() {
             </div>
 
             <h1
-              className={`text-3xl font-semibold leading-tight text-[#D8D8D8] md:text-4xl transition-all duration-700 delay-150 ${
+              className={`text-3xl font-semibold leading-tight text-[#D0D0D0] md:text-4xl transition-all duration-700 delay-150 ${
                 mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
               }`}
             >
               Corregedoria Polícia Militar
               <br />
-              <span className="text-[#999999] font-normal text-2xl md:text-3xl">do Estado de São Paulo</span>
+              <span className="text-[#888888] font-normal text-2xl md:text-3xl">do Estado de São Paulo</span>
             </h1>
 
             <p
-              className={`mx-auto mt-5 max-w-2xl text-base text-[#999999] transition-all duration-700 delay-300 ${
+              className={`mx-auto mt-5 max-w-2xl text-base text-[#888888] transition-all duration-700 delay-300 ${
                 mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
               }`}
             >
@@ -85,7 +85,7 @@ function Index() {
               <Link to="/denuncias">
                 <Button
                   size="lg"
-                  className="bg-pmesp-red text-[#D8D8D8] hover:bg-pmesp-red/80 font-medium"
+                  className="bg-pmesp-red text-[#D0D0D0] hover:bg-pmesp-red/80 font-medium"
                 >
                   Fazer uma Denúncia
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -96,7 +96,7 @@ function Index() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="border-[#333333] text-[#999999] hover:bg-[#333333] hover:text-[#D8D8D8] font-medium"
+                  className="border-[#333333] text-[#888888] hover:bg-[#2A2A2A] hover:text-[#D0D0D0] font-medium"
                 >
                   Acesso Corregedor
                   <Lock className="ml-2 h-4 w-4" />
@@ -109,7 +109,7 @@ function Index() {
                 mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
               }`}
             >
-              <Link to="/acompanhar" className="text-xs text-[#777777] hover:text-[#999999] underline underline-offset-4 transition-colors">
+              <Link to="/acompanhar" className="text-xs text-[#666666] hover:text-[#888888] underline underline-offset-4 transition-colors">
                 Já fez uma denúncia? Acompanhe o andamento
               </Link>
             </div>
@@ -152,7 +152,7 @@ function Index() {
           ].map((f, i) => (
             <div
               key={f.title}
-              className={`rounded-lg border border-border bg-pmesp-card p-6 transition-all duration-500 hover:shadow-card-hover
+              className={`rounded-lg border border-border bg-card p-6 transition-all duration-500 hover:shadow-card-hover
                 ${aboutSection.inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
               style={{ transitionDelay: aboutSection.inView ? `${i * 120}ms` : "0ms" }}
             >
@@ -173,7 +173,7 @@ function Index() {
       {/* ── CTA ── */}
       <section className="container mx-auto px-6 pb-20" ref={ctaSection.ref}>
         <div
-          className={`rounded-lg border border-border bg-pmesp-card p-10 text-center md:p-14 transition-all duration-700
+          className={`rounded-lg border border-border bg-card p-10 text-center md:p-14 transition-all duration-700
             ${ctaSection.inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
         >
           <FileText className="mx-auto h-10 w-10 text-pmesp-red" />
@@ -188,7 +188,7 @@ function Index() {
           <Link to="/denuncias" className="mt-6 inline-block">
             <Button
               size="lg"
-              className="bg-pmesp-red text-[#D8D8D8] hover:bg-pmesp-red/80 font-medium"
+              className="bg-pmesp-red text-[#D0D0D0] hover:bg-pmesp-red/80 font-medium"
             >
               Registrar Denúncia
               <ArrowRight className="ml-2 h-4 w-4" />

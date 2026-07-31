@@ -54,7 +54,7 @@ export function ConfirmDialog({
           <Button
             onClick={onConfirm}
             disabled={loading}
-            className="bg-pmesp-red hover:bg-pmesp-red/80 text-[#D8D8D8] transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+            className="bg-pmesp-red hover:bg-pmesp-red/80 text-[#D0D0D0] transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
           >
             {loading ? "Excluindo..." : confirmText}
           </Button>
