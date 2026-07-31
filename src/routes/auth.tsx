@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { GovBar } from "@/components/gov-bar";
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
@@ -117,21 +118,24 @@ function AuthPage() {
 
   return (
     <div className="flex min-h-screen bg-background">
-      {/* Left panel — dark branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-pmesp-sidebar flex-col items-center justify-center p-12 text-center">
-        <div className="flex h-20 w-20 items-center justify-center rounded overflow-hidden bg-white/10 mb-6">
-          <img src="/corregedoria-logo.png" alt="Brasão PMESP" className="h-full w-full object-cover" />
+      {/* Left panel — dark branding (gov.br style) */}
+      <div className="hidden lg:flex lg:w-1/2 bg-pmesp-sidebar flex-col">
+        <GovBar />
+        <div className="flex flex-1 flex-col items-center justify-center p-12 text-center">
+          <div className="flex h-20 w-20 items-center justify-center rounded overflow-hidden bg-[#3A3A3A] mb-6">
+            <img src="/corregedoria-logo.png" alt="Brasão PMESP" className="h-full w-full object-cover" />
+          </div>
+          <h2 className="text-2xl font-semibold text-[#E8E8E8]">
+            Corregedoria Geral
+          </h2>
+          <p className="mt-2 text-sm text-[#999999]">
+            Polícia Militar do Estado de São Paulo
+          </p>
+          <div className="mt-6 h-px w-12 bg-[#3A3A3A]" />
+          <p className="mt-6 max-w-xs text-xs text-[#777777] leading-relaxed">
+            Sistema de gestão e acompanhamento dos procedimentos corregatórios internos.
+          </p>
         </div>
-        <h2 className="text-2xl font-semibold text-white">
-          Corregedoria Geral
-        </h2>
-        <p className="mt-2 text-sm text-white/50">
-          Polícia Militar do Estado de São Paulo
-        </p>
-        <div className="mt-6 h-px w-12 bg-white/10" />
-        <p className="mt-6 max-w-xs text-xs text-white/40 leading-relaxed">
-          Sistema de gestão e acompanhamento dos procedimentos corregatórios internos.
-        </p>
       </div>
 
       {/* Right panel — login form */}
@@ -155,11 +159,11 @@ function AuthPage() {
           </div>
 
           {/* Card */}
-          <div className="rounded-lg border border-border bg-card p-6 shadow-card">
+          <div className="rounded-lg border border-border bg-pmesp-card p-6 shadow-card">
             <Tabs defaultValue="signin" className="w-full">
-              <TabsList className="mb-6 grid w-full grid-cols-2 bg-muted">
-                <TabsTrigger value="signin" className="data-[state=active]:bg-pmesp-red data-[state=active]:text-white data-[state=active]:shadow-sm font-medium">Entrar</TabsTrigger>
-                <TabsTrigger value="signup" className="data-[state=active]:bg-pmesp-red data-[state=active]:text-white data-[state=active]:shadow-sm font-medium">Cadastrar</TabsTrigger>
+              <TabsList className="mb-6 grid w-full grid-cols-2 bg-secondary">
+                <TabsTrigger value="signin" className="data-[state=active]:bg-pmesp-red data-[state=active]:text-[#E8E8E8] data-[state=active]:shadow-sm font-medium">Entrar</TabsTrigger>
+                <TabsTrigger value="signup" className="data-[state=active]:bg-pmesp-red data-[state=active]:text-[#E8E8E8] data-[state=active]:shadow-sm font-medium">Cadastrar</TabsTrigger>
               </TabsList>
 
               <TabsContent value="signin">
@@ -188,7 +192,7 @@ function AuthPage() {
                       className="bg-background"
                     />
                   </div>
-                  <Button type="submit" disabled={loading} className="w-full bg-pmesp-red text-white hover:bg-pmesp-red/90 font-medium mt-2">
+                  <Button type="submit" disabled={loading} className="w-full bg-pmesp-red text-[#E8E8E8] hover:bg-pmesp-red/90 font-medium mt-2">
                     {loading ? "Processando..." : "Entrar"}
                   </Button>
                 </form>
@@ -221,7 +225,7 @@ function AuthPage() {
                     />
                   </div>
                   <p className="text-xs text-muted-foreground">Seu nome será usado como identificador de acesso ao sistema.</p>
-                  <Button type="submit" disabled={loading} className="w-full bg-pmesp-red text-white hover:bg-pmesp-red/90 font-medium mt-2">
+                  <Button type="submit" disabled={loading} className="w-full bg-pmesp-red text-[#E8E8E8] hover:bg-pmesp-red/90 font-medium mt-2">
                     {loading ? "Enviando solicitação..." : "Solicitar Acesso"}
                   </Button>
                 </form>

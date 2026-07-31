@@ -955,7 +955,7 @@ export function IpmTab({ denuncias, investigacoes, relatorios, depoimentos, ipmV
                                 </Select>
                               </div>
                               <Button size="sm" onClick={() => handleLinkIpm(ipm.id, denunciaLinkId, "denuncia")}
-                                disabled={parentLinking || !denunciaLinkId} className="bg-card hover:bg-slate-700 text-white text-xs">
+                                disabled={parentLinking || !denunciaLinkId} className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#E8E8E8] text-xs">
                                 {parentLinking ? "Vinculando..." : "Vincular"}
                               </Button>
                             </div>
@@ -1012,7 +1012,7 @@ export function IpmTab({ denuncias, investigacoes, relatorios, depoimentos, ipmV
                                 </Select>
                               </div>
                               <Button size="sm" onClick={() => handleLinkIpm(ipm.id, investigacaoLinkId, "investigacao")}
-                                disabled={parentLinking || !investigacaoLinkId} className="bg-card hover:bg-slate-700 text-white text-xs">
+                                disabled={parentLinking || !investigacaoLinkId} className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#E8E8E8] text-xs">
                                 {parentLinking ? "Vinculando..." : "Vincular"}
                               </Button>
                             </div>
@@ -1070,7 +1070,7 @@ export function IpmTab({ denuncias, investigacoes, relatorios, depoimentos, ipmV
                                 </Select>
                               </div>
                               <Button size="sm" onClick={() => handleLinkIpm(ipm.id, atoLinkId, "relatorio")}
-                                disabled={parentLinking || !atoLinkId} className="bg-card hover:bg-slate-700 text-white text-xs">
+                                disabled={parentLinking || !atoLinkId} className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#E8E8E8] text-xs">
                                 {parentLinking ? "Vinculando..." : "Vincular"}
                               </Button>
                             </div>
@@ -1127,7 +1127,7 @@ export function IpmTab({ denuncias, investigacoes, relatorios, depoimentos, ipmV
                                 </Select>
                               </div>
                               <Button size="sm" onClick={() => handleLinkIpm(ipm.id, depoimentoLinkId, "depoimento")}
-                                disabled={parentLinking || !depoimentoLinkId} className="bg-card hover:bg-slate-700 text-white text-xs">
+                                disabled={parentLinking || !depoimentoLinkId} className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#E8E8E8] text-xs">
                                 {parentLinking ? "Vinculando..." : "Vincular"}
                               </Button>
                             </div>

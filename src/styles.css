@@ -31,47 +31,53 @@
   --color-pmesp-red: var(--pmesp-red);
   --color-pmesp-dark: var(--pmesp-dark);
   --color-pmesp-sidebar: var(--pmesp-sidebar);
+  --color-pmesp-bar: var(--pmesp-bar);
+  --color-pmesp-card: var(--pmesp-card);
+  --color-pmesp-surface: var(--pmesp-surface);
   --font-display: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
 
 :root {
   --radius: 0.5rem;
 
-  /* Content area — light */
-  --background: #F5F5F5;
+  /* No white — all grey tones */
+  --background: #F0F0F0;
   --foreground: #1A1A1A;
 
-  --card: #FFFFFF;
+  --card: #E8E8E8;
   --card-foreground: #1A1A1A;
 
-  --popover: #FFFFFF;
+  --popover: #E8E8E8;
   --popover-foreground: #1A1A1A;
 
   --primary: #8B0000;
-  --primary-foreground: #FFFFFF;
+  --primary-foreground: #E8E8E8;
 
-  --secondary: #E5E5E5;
+  --secondary: #DCDCDC;
   --secondary-foreground: #1A1A1A;
 
-  --muted: #F0F0F0;
-  --muted-foreground: #6B6B6B;
+  --muted: #E0E0E0;
+  --muted-foreground: #5A5A5A;
 
   --accent: #8B0000;
-  --accent-foreground: #FFFFFF;
+  --accent-foreground: #E8E8E8;
 
   --destructive: #8B0000;
-  --destructive-foreground: #FFFFFF;
+  --destructive-foreground: #E8E8E8;
 
-  --border: #D4D4D4;
-  --input: #D4D4D4;
+  --border: #C8C8C8;
+  --input: #C8C8C8;
   --ring: #8B0000;
 
   --pmesp-red: #8B0000;
   --pmesp-dark: #1A1A1A;
-  --pmesp-sidebar: #111111;
+  --pmesp-sidebar: #2A2A2A;
+  --pmesp-bar: #1A1A1A;
+  --pmesp-card: #E8E8E8;
+  --pmesp-surface: #F0F0F0;
 
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06);
-  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 @layer base {
@@ -112,6 +118,15 @@
   }
   .bg-pmesp-sidebar {
     background-color: var(--pmesp-sidebar);
+  }
+  .bg-pmesp-bar {
+    background-color: var(--pmesp-bar);
+  }
+  .bg-pmesp-card {
+    background-color: var(--pmesp-card);
+  }
+  .bg-pmesp-surface {
+    background-color: var(--pmesp-surface);
   }
   .text-pmesp-red {
     color: var(--pmesp-red);
