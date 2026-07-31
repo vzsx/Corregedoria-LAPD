@@ -60,9 +60,9 @@ const ACTION_CONFIG: Record<string, { icon: React.ElementType; color: string; bg
   },
   unlink: {
     icon: Unlink,
-    color: "text-[#888888]",
-    bgColor: "bg-[#333333]/30",
-    borderColor: "border-[#444444]",
+    color: "text-muted-foreground",
+    bgColor: "bg-muted",
+    borderColor: "border-border",
     label: "Desvinculou",
   },
   status_change: {
@@ -106,16 +106,15 @@ function getRelativeTime(dateStr: string): string {
 export function AuditTimeline({ logs }: { logs: AuditEntry[] }) {
   return (
     <div className="relative">
-      {/* Vertical line */}
-      <div className="absolute left-[19px] top-0 bottom-0 w-px bg-[#333333]" />
+      <div className="absolute left-[19px] top-0 bottom-0 w-px bg-border" />
 
       <div className="space-y-1">
         {logs.map((log, i) => {
           const config = ACTION_CONFIG[log.action] || {
             icon: Clock,
-            color: "text-[#888888]",
-            bgColor: "bg-[#333333]/30",
-            borderColor: "border-[#444444]",
+            color: "text-muted-foreground",
+            bgColor: "bg-muted",
+            borderColor: "border-border",
             label: log.action,
           };
           const Icon = config.icon;
@@ -124,34 +123,32 @@ export function AuditTimeline({ logs }: { logs: AuditEntry[] }) {
           return (
             <div
               key={log.id}
-              className="relative flex items-start gap-4 py-3 pl-2 pr-4 rounded-lg transition-colors hover:bg-[#2A2A2A]/50 group"
+              className="relative flex items-start gap-4 py-3 pl-2 pr-4 rounded-lg transition-colors hover:bg-muted/50 group"
               style={{ animationDelay: `${i * 40}ms` }}
             >
-              {/* Icon dot */}
               <div className={`relative z-10 flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full border ${config.borderColor} ${config.bgColor} transition-transform group-hover:scale-110`}>
                 <Icon className={`h-4 w-4 ${config.color}`} />
               </div>
 
-              {/* Content */}
               <div className="flex-1 min-w-0 pt-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-xs font-semibold text-[#D0D0D0]">
+                  <span className="text-xs font-semibold text-foreground">
                     {log.user_name || "Sistema"}
                   </span>
                   <span className={`text-[10px] font-bold ${config.color}`}>
                     {config.label}
                   </span>
-                  <span className="text-[10px] text-[#888888]">
+                  <span className="text-[10px] text-muted-foreground">
                     {entityLabel}
                   </span>
                   {log.entity_id && (
-                    <span className="text-[10px] font-mono text-[#555555]">
+                    <span className="text-[10px] font-mono text-muted-foreground/50">
                       #{log.entity_id.slice(0, 8)}
                     </span>
                   )}
                 </div>
                 {log.details && Object.keys(log.details).length > 0 && (
-                  <p className="text-[11px] text-[#666666] mt-1 truncate max-w-md">
+                  <p className="text-[11px] text-muted-foreground mt-1 truncate max-w-md">
                     {Object.entries(log.details)
                       .map(([k, v]) => `${k}: ${String(v)}`)
                       .join(" · ")}
@@ -159,12 +156,11 @@ export function AuditTimeline({ logs }: { logs: AuditEntry[] }) {
                 )}
               </div>
 
-              {/* Timestamp */}
               <div className="flex flex-col items-end pt-1 shrink-0">
-                <span className="text-[10px] text-[#555555] tabular-nums">
+                <span className="text-[10px] text-muted-foreground/70 tabular-nums">
                   {getRelativeTime(log.created_at)}
                 </span>
-                <span className="text-[9px] text-[#444444]">
+                <span className="text-[9px] text-muted-foreground/50">
                   {format(new Date(log.created_at), "HH:mm", { locale: ptBR })}
                 </span>
               </div>

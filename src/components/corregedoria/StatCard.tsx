@@ -43,7 +43,7 @@ function AnimatedRing({
         fill="none"
         stroke="currentColor"
         strokeWidth={strokeWidth}
-        className="text-[#333333]"
+        className="text-border"
       />
       <circle
         cx={size / 2}
@@ -82,9 +82,9 @@ export function StatCard({
   const numValue = typeof value === "string" ? parseInt(value) || 0 : value;
 
   return (
-    <div className="group relative flex flex-col gap-2 rounded-lg border border-[#333333] bg-[#2A2A2A] p-5 shadow-card transition-all duration-300 hover:shadow-card-hover hover:border-[#444444] hover:scale-[1.02]">
+    <div className="group relative flex flex-col gap-2 rounded-lg border border-border bg-card p-5 shadow-card transition-all duration-300 hover:shadow-card-hover hover:border-border/80 hover:scale-[1.02]">
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-[#888888]">
+        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
           {title}
         </span>
         <div className={`flex h-8 w-8 items-center justify-center rounded-md ${color}`}>
@@ -93,18 +93,18 @@ export function StatCard({
       </div>
       <div className="flex items-end justify-between">
         <div>
-          <div className="text-3xl font-bold text-[#D0D0D0] tracking-tight tabular-nums">
+          <div className="text-3xl font-bold text-foreground tracking-tight tabular-nums">
             {value}
           </div>
           {subtitle && (
-            <div className="text-[10px] text-[#666666] mt-1">{subtitle}</div>
+            <div className="text-[10px] text-muted-foreground mt-1">{subtitle}</div>
           )}
         </div>
         {max !== undefined && (
           <AnimatedRing
             value={numValue}
             max={max}
-            color={ringColor || "text-[#7A0000]"}
+            color={ringColor || "text-primary"}
             size={48}
             strokeWidth={3}
           />

@@ -155,7 +155,7 @@ function Denuncias() {
               Um corregedor será designado para analisar as informações fornecidas.
             </p>
             <div className="mt-10 flex flex-col items-center gap-4">
-              <Button asChild className="bg-emerald-600 hover:bg-emerald-500 text-[#D0D0D0] font-bold tracking-widest uppercase px-8 shadow-sm transition-all duration-300 hover:scale-105">
+              <Button asChild className="bg-emerald-600 hover:bg-emerald-500 text-foreground font-bold tracking-widest uppercase px-8 shadow-sm transition-all duration-300 hover:scale-105">
                 <Link to="/">Voltar ao Início</Link>
               </Button>
               <button onClick={() => setSubmitted(false)} className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-4">
