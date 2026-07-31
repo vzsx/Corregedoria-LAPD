@@ -29,47 +29,49 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-gold: var(--gold);
-  --font-display: "Oswald", sans-serif;
+  --color-gov-blue: var(--gov-blue);
+  --color-gov-dark: var(--gov-dark);
+  --font-display: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
 
 :root {
   --radius: 0.5rem;
 
-  /* Azul marinho (PM SP) + dourado */
-  --background: #0A0F1D;
-  --foreground: #E8E8E8;
+  /* Institutional palette — light background + blue primary + gold accent */
+  --background: #F0F2F5;
+  --foreground: #1B2838;
 
-  --card: #111B33;
-  --card-foreground: #E8E8E8;
+  --card: #FFFFFF;
+  --card-foreground: #1B2838;
 
-  --popover: #111B33;
-  --popover-foreground: #E8E8E8;
+  --popover: #FFFFFF;
+  --popover-foreground: #1B2838;
 
-  --primary: #C9A03A;
-  --primary-foreground: #0A0F1D;
+  --primary: #1B4F8A;
+  --primary-foreground: #FFFFFF;
 
-  --secondary: #1A2744;
-  --secondary-foreground: #E8E8E8;
+  --secondary: #E2E8F0;
+  --secondary-foreground: #1B2838;
 
-  --muted: #0D1528;
-  --muted-foreground: #8A8A9A;
+  --muted: #F5F7FA;
+  --muted-foreground: #5A6B7F;
 
   --accent: #C9A03A;
-  --accent-foreground: #0A0F1D;
+  --accent-foreground: #1B2838;
 
-  --destructive: #C9A03A;
-  --destructive-foreground: #0A0F1D;
+  --destructive: #B91C1C;
+  --destructive-foreground: #FFFFFF;
 
-  --border: #1E2D4A;
-  --input: #111B33;
-  --ring: #C9A03A;
+  --border: #D1D9E0;
+  --input: #D1D9E0;
+  --ring: #1B4F8A;
 
   --gold: #C9A03A;
+  --gov-blue: #1B4F8A;
+  --gov-dark: #1B2838;
 
-  --gradient-hero: linear-gradient(135deg, #0A0F1D 0%, #1A2744 50%, #0A0F1D 100%);
-  --gradient-badge: linear-gradient(135deg, #C9A03A, #A67C20);
-  --shadow-elegant: 0 4px 20px rgba(201, 160, 58, 0.15);
-  --shadow-glow: 0 0 20px rgba(201, 160, 58, 0.3);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 @layer base {
@@ -79,25 +81,28 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
-    font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-family: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
-  h1, h2, h3 {
-    letter-spacing: -0.02em;
+  h1, h2, h3, h4, h5, h6 {
+    letter-spacing: -0.01em;
+    font-weight: 600;
   }
 }
 
 @layer utilities {
-  .bg-hero {
-    background-image: var(--gradient-hero);
+  .shadow-card {
+    box-shadow: var(--shadow-card);
   }
-  .bg-badge-gradient {
-    background-image: var(--gradient-badge);
+  .shadow-card-hover {
+    box-shadow: var(--shadow-card-hover);
   }
   .shadow-elegant {
-    box-shadow: var(--shadow-elegant);
+    box-shadow: var(--shadow-card);
   }
   .shadow-glow {
-    box-shadow: var(--shadow-glow);
+    box-shadow: var(--shadow-card);
   }
   .text-gold {
     color: var(--color-gold);
@@ -105,32 +110,39 @@
   .border-gold {
     border-color: var(--color-gold);
   }
-
+  .bg-gov-blue {
+    background-color: var(--gov-blue);
+  }
+  .bg-gov-dark {
+    background-color: var(--gov-dark);
+  }
+  .text-gov-blue {
+    color: var(--gov-blue);
+  }
+  .bg-badge-gradient {
+    background-color: var(--primary);
+  }
   .animate-fade-in {
-    animation: fadeIn 0.6s ease-out forwards;
+    animation: fadeIn 0.5s ease-out forwards;
   }
   .animate-slide-up {
-    animation: slideUp 0.6s ease-out forwards;
+    animation: slideUp 0.5s ease-out forwards;
   }
   .animate-slide-down {
-    animation: slideDown 0.4s ease-out forwards;
+    animation: slideDown 0.35s ease-out forwards;
   }
   .animate-scale-in {
-    animation: scaleIn 0.4s ease-out forwards;
-  }
-  .animate-shimmer {
-    background: linear-gradient(90deg, transparent, rgba(201, 160, 58, 0.08), transparent);
-    background-size: 200% 100%;
-    animation: shimmer 2.5s infinite;
-  }
-  .animate-border-glow {
-    box-shadow: 0 0 0 0 rgba(201, 160, 58, 0);
-    animation: borderGlow 2s ease-in-out infinite;
+    animation: fadeIn 0.4s ease-out forwards;
   }
   .animate-card-enter {
-    opacity: 0;
-    transform: translateY(20px) scale(0.98);
-    animation: cardEnter 0.5s ease-out forwards;
+    animation: slideUp 0.5s ease-out forwards;
+  }
+  .animate-shimmer {
+    background: linear-gradient(90deg, transparent, rgba(27, 79, 138, 0.06), transparent);
+    background-size: 200% 100%;
+  }
+  .animate-border-glow {
+    box-shadow: var(--shadow-card);
   }
   .stagger-1 { animation-delay: 0.05s; }
   .stagger-2 { animation-delay: 0.1s; }
@@ -138,61 +150,18 @@
   .stagger-4 { animation-delay: 0.2s; }
   .stagger-5 { animation-delay: 0.25s; }
   .stagger-6 { animation-delay: 0.3s; }
-  .stagger-7 { animation-delay: 0.35s; }
-  .stagger-8 { animation-delay: 0.4s; }
 }
 
-/* ── Custom Keyframes for Home Page Animations ── */
-@keyframes orb1 {
-  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.4; }
-  33%       { transform: translate(40px, -30px) scale(1.1); opacity: 0.6; }
-  66%       { transform: translate(-20px, 20px) scale(0.9); opacity: 0.3; }
-}
-@keyframes orb2 {
-  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
-  50%       { transform: translate(-30px, -40px) scale(1.15); opacity: 0.55; }
-}
-@keyframes ctaPulse {
-  0%, 100% { opacity: 0.5; transform: scale(1); }
-  50%       { opacity: 1; transform: scale(1.05); }
-}
-@keyframes floatIcon {
-  0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(-8px); }
-}
-@keyframes ripple {
-  0%   { transform: scale(0); opacity: 0.6; }
-  100% { transform: scale(6); opacity: 0; }
-}
+/* ── Keyframes ── */
 @keyframes fadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-10px); }
+  from { opacity: 0; transform: translateY(-8px); }
   to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to   { opacity: 1; transform: scale(1); }
-}
-@keyframes shimmer {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-@keyframes borderGlow {
-  0%, 100% { box-shadow: 0 0 5px rgba(201, 160, 58, 0.3); }
-  50%      { box-shadow: 0 0 20px rgba(201, 160, 58, 0.6); }
-}
-@keyframes cardEnter {
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-@keyframes bgPan {
-  0%   { background-position: 0% 50%; }
-  50%  { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
 }

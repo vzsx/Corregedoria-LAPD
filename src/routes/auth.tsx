@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { Shield, Lock, User, BadgeCheck, Loader2 } from "lucide-react";
+import { Shield, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { logAudit } from "@/lib/audit-log";
@@ -22,7 +22,6 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
 
-  // Normaliza o nome para ser usado como prefixo do email
   const normalizeName = (name: string) =>
     name.trim().toLowerCase().replace(/\s+/g, ".").replace(/[^a-z0-9.]/g, "");
 
@@ -48,7 +47,7 @@ function AuthPage() {
     } else {
       toast.error("Nome ou senha incorretos.");
     }
-    
+
     setLoading(false);
   };
 
@@ -74,7 +73,6 @@ function AuthPage() {
     }
 
     if (data.user) {
-      // Registrar papel pendente
       const { error: roleError } = await supabase.from("user_roles").insert({
         user_id: data.user.id,
         role: "pending",
@@ -86,7 +84,6 @@ function AuthPage() {
         return toast.error("Usuário criado na Auth, mas erro ao salvar papel: " + roleError.message);
       }
 
-      // Registrar perfil
       const { error: profileError } = await supabase.from("profiles").insert({
         id: data.user.id,
         full_name: fullName,
@@ -111,105 +108,132 @@ function AuthPage() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-10 w-10 animate-spin text-primary" />
-          <p className="text-xs uppercase tracking-widest text-muted-foreground animate-pulse">Carregando...</p>
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Carregando...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-6 font-mono">
-      <div className="w-full max-w-md space-y-8 animate-fade-in">
-        <div className="text-center animate-slide-up">
-          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full overflow-hidden bg-card border border-border shadow-sm transition-all duration-300 hover:shadow-[0_0_30px_rgba(201,160,58,0.3)] hover:border-primary/50">
-            <img src="/corregedoria-logo.png" alt="Brasão Corregedoria PMESP" className="h-full w-full object-cover transition-transform duration-500 hover:scale-110" />
+    <div className="flex min-h-screen bg-background">
+      {/* Left panel — blue branding */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gov-dark flex-col items-center justify-center p-12 text-center">
+        <div className="flex h-20 w-20 items-center justify-center rounded overflow-hidden border border-white/10 mb-6">
+          <img src="/corregedoria-logo.png" alt="Brasão PMESP" className="h-full w-full object-cover" />
+        </div>
+        <h2 className="text-2xl font-semibold text-white">
+          Corregedoria Geral
+        </h2>
+        <p className="mt-2 text-sm text-white/50">
+          Polícia Militar do Estado de São Paulo
+        </p>
+        <div className="mt-6 h-px w-12 bg-white/10" />
+        <p className="mt-6 max-w-xs text-xs text-white/40 leading-relaxed">
+          Sistema de gestão e acompanhamento dos procedimentos corregatórios internos.
+        </p>
+      </div>
+
+      {/* Right panel — login form */}
+      <div className="flex flex-1 items-center justify-center p-6">
+        <div className="w-full max-w-md space-y-6">
+          {/* Mobile logo */}
+          <div className="flex flex-col items-center lg:hidden">
+            <div className="flex h-14 w-14 items-center justify-center rounded overflow-hidden border border-border mb-4">
+              <img src="/corregedoria-logo.png" alt="Brasão PMESP" className="h-full w-full object-cover" />
+            </div>
+            <h1 className="text-lg font-semibold text-gov-dark">Corregedoria Geral</h1>
+            <p className="text-xs text-muted-foreground">PMESP</p>
           </div>
-          <h1 className="mt-6 font-display text-2xl font-black uppercase tracking-widest text-foreground">
-            Terminal Corregedoria
-          </h1>
-          <p className="mt-2 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-            Corregedoria Geral · PMESP
-          </p>
-        </div>
 
-        <div className="rounded-xl border border-border bg-card p-8 shadow-sm transition-all duration-300 hover:shadow-[0_0_40px_-10px_rgba(201,160,58,0.15)] hover:border-primary/30 animate-scale-in">
-          <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="mb-8 grid w-full grid-cols-2 bg-background border border-border p-1">
-              <TabsTrigger value="signin" className="data-[state=active]:bg-muted data-[state=active]:text-foreground cursor-pointer">ENTRAR</TabsTrigger>
-              <TabsTrigger value="signup" className="data-[state=active]:bg-muted data-[state=active]:text-foreground cursor-pointer">CADASTRAR</TabsTrigger>
-            </TabsList>
+          {/* Desktop title */}
+          <div className="hidden lg:block">
+            <h1 className="text-xl font-semibold text-gov-dark">Acesso ao Sistema</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Entre com suas credenciais para acessar o painel.
+            </p>
+          </div>
 
-            <TabsContent value="signin">
-              <form onSubmit={handleSignIn} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="login-name" className="text-xs uppercase tracking-wider text-muted-foreground">Nome</Label>
-                  <Input
-                    id="login-name"
-                    placeholder="Ex: João Silva"
-                    value={loginName}
-                    onChange={(e) => setLoginName(e.target.value)}
-                    required
-                    autoComplete="username"
-                    className="bg-background border-input focus:ring-1 focus:ring-ring focus:border-ring text-foreground"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="text-xs uppercase tracking-wider text-muted-foreground">Senha de Acesso</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    autoComplete="current-password"
-                    className="bg-background border-input focus:ring-1 focus:ring-ring focus:border-ring text-foreground"
-                  />
-                </div>
-                <Button type="submit" disabled={loading} className="w-full bg-foreground text-background hover:bg-foreground/80 hover:scale-[1.02] active:scale-[0.98] transition-all font-bold uppercase tracking-widest mt-4">
-                  {loading ? "Processando..." : "Autenticar"}
-                </Button>
-              </form>
-            </TabsContent>
+          {/* Card */}
+          <div className="rounded-lg border border-border bg-white p-6 shadow-card">
+            <Tabs defaultValue="signin" className="w-full">
+              <TabsList className="mb-6 grid w-full grid-cols-2 bg-muted">
+                <TabsTrigger value="signin" className="data-[state=active]:bg-white data-[state=active]:text-gov-dark data-[state=active]:shadow-sm font-medium">Entrar</TabsTrigger>
+                <TabsTrigger value="signup" className="data-[state=active]:bg-white data-[state=active]:text-gov-dark data-[state=active]:shadow-sm font-medium">Cadastrar</TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="signup">
-              <form onSubmit={handleSignUp} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name" className="text-xs uppercase tracking-wider text-muted-foreground">Nome Completo</Label>
-                  <Input
-                    id="name"
-                    placeholder="Ex: João Silva"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    required
-                    autoComplete="name"
-                    className="bg-background border-input focus:ring-1 focus:ring-ring focus:border-ring text-foreground"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password" className="text-xs uppercase tracking-wider text-muted-foreground">Senha</Label>
-                  <Input
-                    id="signup-password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    autoComplete="new-password"
-                    className="bg-background border-input focus:ring-1 focus:ring-ring focus:border-ring text-foreground"
-                  />
-                </div>
-                <p className="text-[10px] text-muted-foreground pt-1">Seu nome será usado como identificador de acesso ao sistema.</p>
-                <Button type="submit" disabled={loading} className="w-full bg-foreground text-background hover:bg-foreground/80 hover:scale-[1.02] active:scale-[0.98] transition-all font-bold uppercase tracking-widest mt-2">
-                  {loading ? "Enviando solicitação..." : "Solicitar Acesso"}
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
-        </div>
+              <TabsContent value="signin">
+                <form onSubmit={handleSignIn} className="space-y-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="login-name" className="text-sm font-medium text-foreground">Nome</Label>
+                    <Input
+                      id="login-name"
+                      placeholder="Ex: João Silva"
+                      value={loginName}
+                      onChange={(e) => setLoginName(e.target.value)}
+                      required
+                      autoComplete="username"
+                      className="bg-background"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="password" className="text-sm font-medium text-foreground">Senha</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      autoComplete="current-password"
+                      className="bg-background"
+                    />
+                  </div>
+                  <Button type="submit" disabled={loading} className="w-full bg-gov-blue text-white hover:bg-gov-blue/90 font-medium mt-2">
+                    {loading ? "Processando..." : "Entrar"}
+                  </Button>
+                </form>
+              </TabsContent>
 
-        <div className="flex items-center justify-center gap-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground text-center">
-          <BadgeCheck className="h-3 w-3 flex-shrink-0" />
-          <span>Sistema de Uso Restrito da Polícia Militar de São Paulo</span>
+              <TabsContent value="signup">
+                <form onSubmit={handleSignUp} className="space-y-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="name" className="text-sm font-medium text-foreground">Nome Completo</Label>
+                    <Input
+                      id="name"
+                      placeholder="Ex: João Silva"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      required
+                      autoComplete="name"
+                      className="bg-background"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="signup-password" className="text-sm font-medium text-foreground">Senha</Label>
+                    <Input
+                      id="signup-password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      autoComplete="new-password"
+                      className="bg-background"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">Seu nome será usado como identificador de acesso ao sistema.</p>
+                  <Button type="submit" disabled={loading} className="w-full bg-gov-blue text-white hover:bg-gov-blue/90 font-medium mt-2">
+                    {loading ? "Enviando solicitação..." : "Solicitar Acesso"}
+                  </Button>
+                </form>
+              </TabsContent>
+            </Tabs>
+          </div>
+
+          {/* Footer note */}
+          <div className="flex items-center justify-center gap-2 text-[11px] text-muted-foreground">
+            <Shield className="h-3 w-3 flex-shrink-0" />
+            <span>Sistema de Uso Restrito da Polícia Militar de São Paulo</span>
+          </div>
         </div>
       </div>
     </div>
