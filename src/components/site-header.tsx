@@ -23,15 +23,6 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50">
-      {/* Government identification bar */}
-      <div className="bg-gov-blue text-white">
-        <div className="container mx-auto flex h-8 items-center px-6">
-          <span className="text-xs font-medium tracking-wide">
-            Governo do Estado de São Paulo
-          </span>
-        </div>
-      </div>
-
       {/* Main header */}
       <div
         className={`border-b border-border bg-white transition-shadow duration-200 ${
@@ -48,7 +39,7 @@ export function SiteHeader() {
               />
             </div>
             <div className="flex flex-col leading-tight">
-              <span className="text-sm font-semibold text-gov-dark tracking-tight">
+              <span className="text-sm font-semibold text-pmesp-dark tracking-tight">
                 Corregedoria Geral
               </span>
               <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
@@ -61,7 +52,7 @@ export function SiteHeader() {
             <Link
               to="/"
               className="px-3 py-2 text-sm font-medium text-muted-foreground rounded-md transition-colors hover:bg-muted hover:text-foreground"
-              activeProps={{ className: "px-3 py-2 text-sm font-medium text-gov-dark bg-muted rounded-md" }}
+              activeProps={{ className: "px-3 py-2 text-sm font-medium text-pmesp-dark bg-muted rounded-md" }}
               activeOptions={{ exact: true }}
             >
               Quem Somos
@@ -69,14 +60,14 @@ export function SiteHeader() {
             <Link
               to="/denuncias"
               className="px-3 py-2 text-sm font-medium text-muted-foreground rounded-md transition-colors hover:bg-muted hover:text-foreground"
-              activeProps={{ className: "px-3 py-2 text-sm font-medium text-gov-dark bg-muted rounded-md" }}
+              activeProps={{ className: "px-3 py-2 text-sm font-medium text-pmesp-dark bg-muted rounded-md" }}
             >
               Fazer Denúncia
             </Link>
             <Link
               to="/acompanhar"
               className="px-3 py-2 text-sm font-medium text-muted-foreground rounded-md transition-colors hover:bg-muted hover:text-foreground"
-              activeProps={{ className: "px-3 py-2 text-sm font-medium text-gov-dark bg-muted rounded-md" }}
+              activeProps={{ className: "px-3 py-2 text-sm font-medium text-pmesp-dark bg-muted rounded-md" }}
             >
               Acompanhar
             </Link>
@@ -88,7 +79,7 @@ export function SiteHeader() {
               <div className="flex items-center gap-2">
                 {(isCorregedor || isAdmin) && (
                   <Link to="/corregedoria">
-                    <Button size="sm" className="bg-gov-blue text-white hover:bg-gov-blue/90 font-medium">
+                    <Button size="sm" className="bg-pmesp-red text-white hover:bg-pmesp-red/90 font-medium">
                       Abrir Terminal
                     </Button>
                   </Link>
@@ -99,7 +90,7 @@ export function SiteHeader() {
               </div>
             ) : (
               <Link to="/auth">
-                <Button size="sm" className="bg-gov-blue text-white hover:bg-gov-blue/90 font-medium">
+                <Button size="sm" className="bg-pmesp-red text-white hover:bg-pmesp-red/90 font-medium">
                   Acesso Restrito
                 </Button>
               </Link>

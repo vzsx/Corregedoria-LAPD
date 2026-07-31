@@ -28,47 +28,45 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-gold: var(--gold);
-  --color-gov-blue: var(--gov-blue);
-  --color-gov-dark: var(--gov-dark);
+  --color-pmesp-red: var(--pmesp-red);
+  --color-pmesp-dark: var(--pmesp-dark);
   --font-display: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
 
 :root {
   --radius: 0.5rem;
 
-  /* Institutional palette — light background + blue primary + gold accent */
-  --background: #F0F2F5;
-  --foreground: #1B2838;
+  /* PMESP institutional palette — cinza, vermelho, branco, preto */
+  --background: #F5F5F5;
+  --foreground: #1A1A1A;
 
   --card: #FFFFFF;
-  --card-foreground: #1B2838;
+  --card-foreground: #1A1A1A;
 
   --popover: #FFFFFF;
-  --popover-foreground: #1B2838;
+  --popover-foreground: #1A1A1A;
 
-  --primary: #1B4F8A;
+  --primary: #8B0000;
   --primary-foreground: #FFFFFF;
 
-  --secondary: #E2E8F0;
-  --secondary-foreground: #1B2838;
+  --secondary: #E5E5E5;
+  --secondary-foreground: #1A1A1A;
 
-  --muted: #F5F7FA;
-  --muted-foreground: #5A6B7F;
+  --muted: #F0F0F0;
+  --muted-foreground: #6B6B6B;
 
-  --accent: #C9A03A;
-  --accent-foreground: #1B2838;
+  --accent: #8B0000;
+  --accent-foreground: #FFFFFF;
 
-  --destructive: #B91C1C;
+  --destructive: #8B0000;
   --destructive-foreground: #FFFFFF;
 
-  --border: #D1D9E0;
-  --input: #D1D9E0;
-  --ring: #1B4F8A;
+  --border: #D4D4D4;
+  --input: #D4D4D4;
+  --ring: #8B0000;
 
-  --gold: #C9A03A;
-  --gov-blue: #1B4F8A;
-  --gov-dark: #1B2838;
+  --pmesp-red: #8B0000;
+  --pmesp-dark: #1A1A1A;
 
   --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08);
   --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -104,20 +102,14 @@
   .shadow-glow {
     box-shadow: var(--shadow-card);
   }
-  .text-gold {
-    color: var(--color-gold);
+  .bg-pmesp-red {
+    background-color: var(--pmesp-red);
   }
-  .border-gold {
-    border-color: var(--color-gold);
+  .bg-pmesp-dark {
+    background-color: var(--pmesp-dark);
   }
-  .bg-gov-blue {
-    background-color: var(--gov-blue);
-  }
-  .bg-gov-dark {
-    background-color: var(--gov-dark);
-  }
-  .text-gov-blue {
-    color: var(--gov-blue);
+  .text-pmesp-red {
+    color: var(--pmesp-red);
   }
   .bg-badge-gradient {
     background-color: var(--primary);
@@ -138,7 +130,7 @@
     animation: slideUp 0.5s ease-out forwards;
   }
   .animate-shimmer {
-    background: linear-gradient(90deg, transparent, rgba(27, 79, 138, 0.06), transparent);
+    background: linear-gradient(90deg, transparent, rgba(139, 0, 0, 0.06), transparent);
     background-size: 200% 100%;
   }
   .animate-border-glow {

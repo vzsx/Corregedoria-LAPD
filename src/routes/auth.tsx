@@ -118,7 +118,7 @@ function AuthPage() {
   return (
     <div className="flex min-h-screen bg-background">
       {/* Left panel — blue branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gov-dark flex-col items-center justify-center p-12 text-center">
+      <div className="hidden lg:flex lg:w-1/2 bg-pmesp-dark flex-col items-center justify-center p-12 text-center">
         <div className="flex h-20 w-20 items-center justify-center rounded overflow-hidden border border-white/10 mb-6">
           <img src="/corregedoria-logo.png" alt="Brasão PMESP" className="h-full w-full object-cover" />
         </div>
@@ -142,13 +142,13 @@ function AuthPage() {
             <div className="flex h-14 w-14 items-center justify-center rounded overflow-hidden border border-border mb-4">
               <img src="/corregedoria-logo.png" alt="Brasão PMESP" className="h-full w-full object-cover" />
             </div>
-            <h1 className="text-lg font-semibold text-gov-dark">Corregedoria Geral</h1>
+            <h1 className="text-lg font-semibold text-pmesp-dark">Corregedoria Geral</h1>
             <p className="text-xs text-muted-foreground">PMESP</p>
           </div>
 
           {/* Desktop title */}
           <div className="hidden lg:block">
-            <h1 className="text-xl font-semibold text-gov-dark">Acesso ao Sistema</h1>
+            <h1 className="text-xl font-semibold text-pmesp-dark">Acesso ao Sistema</h1>
             <p className="mt-1 text-sm text-muted-foreground">
               Entre com suas credenciais para acessar o painel.
             </p>
@@ -158,8 +158,8 @@ function AuthPage() {
           <div className="rounded-lg border border-border bg-white p-6 shadow-card">
             <Tabs defaultValue="signin" className="w-full">
               <TabsList className="mb-6 grid w-full grid-cols-2 bg-muted">
-                <TabsTrigger value="signin" className="data-[state=active]:bg-white data-[state=active]:text-gov-dark data-[state=active]:shadow-sm font-medium">Entrar</TabsTrigger>
-                <TabsTrigger value="signup" className="data-[state=active]:bg-white data-[state=active]:text-gov-dark data-[state=active]:shadow-sm font-medium">Cadastrar</TabsTrigger>
+                <TabsTrigger value="signin" className="data-[state=active]:bg-white data-[state=active]:text-pmesp-dark data-[state=active]:shadow-sm font-medium">Entrar</TabsTrigger>
+                <TabsTrigger value="signup" className="data-[state=active]:bg-white data-[state=active]:text-pmesp-dark data-[state=active]:shadow-sm font-medium">Cadastrar</TabsTrigger>
               </TabsList>
 
               <TabsContent value="signin">
@@ -188,7 +188,7 @@ function AuthPage() {
                       className="bg-background"
                     />
                   </div>
-                  <Button type="submit" disabled={loading} className="w-full bg-gov-blue text-white hover:bg-gov-blue/90 font-medium mt-2">
+                  <Button type="submit" disabled={loading} className="w-full bg-pmesp-red text-white hover:bg-pmesp-red/90 font-medium mt-2">
                     {loading ? "Processando..." : "Entrar"}
                   </Button>
                 </form>
@@ -221,7 +221,7 @@ function AuthPage() {
                     />
                   </div>
                   <p className="text-xs text-muted-foreground">Seu nome será usado como identificador de acesso ao sistema.</p>
-                  <Button type="submit" disabled={loading} className="w-full bg-gov-blue text-white hover:bg-gov-blue/90 font-medium mt-2">
+                  <Button type="submit" disabled={loading} className="w-full bg-pmesp-red text-white hover:bg-pmesp-red/90 font-medium mt-2">
                     {loading ? "Enviando solicitação..." : "Solicitar Acesso"}
                   </Button>
                 </form>

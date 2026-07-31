@@ -2351,7 +2351,7 @@ function Corregedoria() {
               <img src="/corregedoria-logo.png" alt="Brasão PMESP" className="h-full w-full object-cover" />
             </div>
             <div>
-              <h1 className="text-sm font-semibold text-gov-dark">Corregedoria Geral</h1>
+              <h1 className="text-sm font-semibold text-pmesp-dark">Corregedoria Geral</h1>
               <p className="text-[10px] text-muted-foreground">Polícia Militar de SP</p>
             </div>
           </div>
@@ -2473,7 +2473,7 @@ function Corregedoria() {
               <Menu className="h-5 w-5" />
             </button>
             <div className="flex flex-col">
-              <h2 className="text-base lg:text-lg font-semibold text-gov-dark">
+              <h2 className="text-base lg:text-lg font-semibold text-pmesp-dark">
                 Bem-vindo, {user?.user_metadata?.full_name || "Oficial"}
               </h2>
               <span className="text-xs text-muted-foreground">
@@ -2482,7 +2482,7 @@ function Corregedoria() {
             </div>
           </div>
           <div className="text-right">
-            <div className="text-sm font-medium text-gov-dark">{user?.user_metadata?.full_name}</div>
+            <div className="text-sm font-medium text-pmesp-dark">{user?.user_metadata?.full_name}</div>
             <div className="text-xs text-muted-foreground">{user?.user_metadata?.patente || "PMESP"}</div>
           </div>
         </header>
@@ -5044,7 +5044,7 @@ function Corregedoria() {
                       <div className="mt-2 flex gap-1.5">
                         {m.roles.length === 0 && <Badge variant="outline" className="text-muted-foreground">sem cargo</Badge>}
                         {m.roles.map((r) => (
-                          <Badge key={r} variant="outline" className="border-gold/40 text-gold">{r}</Badge>
+                          <Badge key={r} variant="outline" className="border-pmesp-red/40 text-pmesp-red">{r}</Badge>
                         ))}
                       </div>
                     </div>

@@ -1,6 +1,6 @@
 export function SiteFooter() {
   return (
-    <footer className="mt-24 border-t border-border bg-gov-dark text-white">
+    <footer className="mt-24 border-t border-border bg-pmesp-dark text-white">
       <div className="container mx-auto px-6 py-10">
         <div className="grid gap-8 md:grid-cols-3">
           {/* Branding */}
@@ -11,7 +11,7 @@ export function SiteFooter() {
             <p className="mt-1 text-xs text-white/60">
               Corregedoria Geral
             </p>
-            <div className="mt-3 h-px w-8 bg-gold/40" />
+            <div className="mt-3 h-px w-8 bg-pmesp-red/40" />
           </div>
 
           {/* Links */}

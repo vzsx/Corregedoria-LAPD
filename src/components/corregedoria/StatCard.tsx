@@ -9,7 +9,7 @@ export function StatCard({ title, value, icon: Icon, color }: { title: string; v
           <Icon className="h-4 w-4" />
         </div>
       </div>
-      <div className="text-3xl font-bold text-gov-dark tracking-tight">{value}</div>
+      <div className="text-3xl font-bold text-pmesp-dark tracking-tight">{value}</div>
     </div>
   );
 }

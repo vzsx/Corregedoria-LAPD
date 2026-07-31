@@ -18,7 +18,7 @@ export function SidebarItem({
       onClick={onClick}
       className={`flex w-full items-center justify-between rounded-md px-3 py-2.5 text-sm font-medium transition-colors ${
         active
-          ? "bg-gov-blue text-white"
+          ? "bg-pmesp-red text-white"
           : "text-muted-foreground hover:bg-muted hover:text-foreground"
       }`}
     >

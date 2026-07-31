@@ -36,9 +36,9 @@ function Index() {
       <SiteHeader />
 
       {/* ── HERO ── */}
-      <section className="relative overflow-hidden bg-gov-dark">
+      <section className="relative overflow-hidden bg-pmesp-dark">
         {/* Subtle gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-gov-dark via-gov-dark to-gov-blue/30" />
+        <div className="absolute inset-0 bg-gradient-to-br from-pmesp-dark via-pmesp-dark to-pmesp-red/30" />
 
         <div className="container relative mx-auto px-6 py-20 md:py-28">
           <div className="mx-auto max-w-3xl text-center" ref={heroSection.ref}>
@@ -91,7 +91,7 @@ function Index() {
               <Link to="/denuncias">
                 <Button
                   size="lg"
-                  className="bg-white text-gov-dark hover:bg-white/90 font-medium"
+                  className="bg-white text-pmesp-dark hover:bg-white/90 font-medium"
                 >
                   Fazer uma Denúncia
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -131,7 +131,7 @@ function Index() {
             aboutSection.inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          <h2 className="text-2xl font-semibold text-gov-dark md:text-3xl">
+          <h2 className="text-2xl font-semibold text-pmesp-dark md:text-3xl">
             Quem Somos
           </h2>
           <p className="mt-4 text-muted-foreground">
@@ -166,7 +166,7 @@ function Index() {
               <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-md bg-primary/10">
                 <f.icon className="h-5 w-5 text-primary" />
               </div>
-              <h3 className="text-base font-semibold text-gov-dark">
+              <h3 className="text-base font-semibold text-pmesp-dark">
                 {f.title}
               </h3>
               <p className="mt-2 text-sm text-muted-foreground">
@@ -185,7 +185,7 @@ function Index() {
         >
           <FileText className="mx-auto h-10 w-10 text-primary" />
 
-          <h2 className="mt-4 text-xl font-semibold text-gov-dark">
+          <h2 className="mt-4 text-xl font-semibold text-pmesp-dark">
             Presenciou uma irregularidade?
           </h2>
           <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">
