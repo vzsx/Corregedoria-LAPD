@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { GovBar } from "@/components/gov-bar";
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
@@ -118,9 +117,8 @@ function AuthPage() {
 
   return (
     <div className="flex min-h-screen bg-[#1E1E1E]">
-      {/* Left panel — dark branding (gov.br style) */}
+      {/* Left panel — dark branding */}
       <div className="hidden lg:flex lg:w-1/2 bg-[#1A1A1A] flex-col">
-        <GovBar />
         <div className="flex flex-1 flex-col items-center justify-center p-12 text-center">
           <div className="flex h-20 w-20 items-center justify-center rounded overflow-hidden bg-[#333333] mb-6">
             <img src="/corregedoria-logo.png" alt="Brasão PMESP" className="h-full w-full object-cover" />

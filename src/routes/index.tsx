@@ -2,7 +2,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Shield, Scale, Eye, Lock, ArrowRight, FileText, Search } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { GovBar } from "@/components/gov-bar";
 import { Button } from "@/components/ui/button";
 import { useEffect, useRef, useState } from "react";
 
@@ -34,7 +33,6 @@ function Index() {
 
   return (
     <div className="min-h-screen bg-[#1E1E1E] overflow-x-hidden">
-      <GovBar />
       <SiteHeader />
 
       {/* ── HERO ── */}

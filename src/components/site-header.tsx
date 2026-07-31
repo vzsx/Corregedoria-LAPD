@@ -3,7 +3,6 @@ import { LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { NotificationBell } from "@/components/notification-bell";
-import { GovBar } from "@/components/gov-bar";
 
 export function SiteHeader() {
   const { user, isCorregedor, isAdmin, signOut } = useAuth();
@@ -16,7 +15,6 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50">
-      <GovBar />
       <div className="bg-[#1A1A1A] border-b border-[#333333]">
         <div className="container mx-auto flex h-14 items-center justify-between px-6">
           <Link to="/" className="flex items-center gap-3 group">
