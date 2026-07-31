@@ -43,9 +43,9 @@ function AuthPage() {
 
     if (!error) {
       await refreshRoles();
-      toast.success("Login realizado com sucesso.");
+      toast.success("Bem-vindo", { description: "Login realizado com sucesso. Redirecionando..." });
     } else {
-      toast.error("Nome ou senha incorretos.");
+      toast.error("Falha no login", { description: "Nome ou senha incorretos. Verifique suas credenciais." });
     }
 
     setLoading(false);

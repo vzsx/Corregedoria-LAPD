@@ -112,10 +112,10 @@ function Denuncias() {
     
     if (error) {
       console.error("Erro ao enviar denúncia:", error);
-      toast.error("Erro ao enviar denúncia. Tente novamente.");
+      toast.error("Erro ao enviar denúncia", { description: "Verifique os campos e tente novamente." });
     } else {
       logAudit({ action: "create", entity_type: "denuncia", details: { titulo: `DENÚNCIA: ${formData.denunciado_nome || "Oficial Desconhecido"}`, reclamante: finalReclamanteNome } });
-      toast.success("Denúncia protocolada com sucesso!");
+      toast.success("Denúncia protocolada", { description: "Sua denúncia foi registrada com sucesso. Você pode acompanhar pelo código de protocolo." });
       setSubmitted(true);
     }
   };

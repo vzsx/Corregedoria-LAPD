@@ -4,11 +4,13 @@ import { format } from "date-fns";
 import { 
   Shield, FileText, Loader2, Plus, FileSignature, LayoutDashboard, 
   Users, UserPlus, LogOut, Activity, Link as LinkIcon, Trash2, Edit, Pencil,
-  MessageSquare, Printer, Menu, X, ClipboardList, Gavel, ScrollText, UserCheck, Eye, Clock
+  MessageSquare, Printer, Menu, X, ClipboardList, Gavel, ScrollText, UserCheck, Eye, Clock,
+  Sun, Moon
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { useTheme } from "@/components/theme-provider";
 import { Badge } from "@/components/ui/badge";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -28,6 +30,8 @@ import { logAudit } from "@/lib/audit-log";
 import { SidebarItem } from "@/components/corregedoria/SidebarItem";
 import { StatCard } from "@/components/corregedoria/StatCard";
 import { Field } from "@/components/corregedoria/Field";
+import { AuditTimeline } from "@/components/corregedoria/AuditTimeline";
+import { DocumentPreview } from "@/components/corregedoria/DocumentPreview";
 import { AfastamentosTab } from "@/components/corregedoria/AfastamentosTab";
 import { TransparenciaTab, Transparencia } from "@/components/corregedoria/TransparenciaTab";
 import { IpmTab } from "@/components/corregedoria/IpmTab";
@@ -622,6 +626,7 @@ const RelatorioCard = ({
 function Corregedoria() {
   const { user, loading, isCorregedor, isAdmin, roles, signOut } = useAuth();
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/" });
@@ -1061,12 +1066,11 @@ function Corregedoria() {
   const approveUser = async (roleId: string, newRole: "corregedor" | "admin") => {
     const { error } = await supabase.from("user_roles").update({ role: newRole }).eq("id", roleId);
     if (error) {
-      toast.error("Erro ao aprovar usuário");
+      toast.error("Erro ao aprovar usuário", { description: "Verifique as permissões e tente novamente." });
     } else {
-      toast.success("Usuário aprovado com sucesso!");
-      logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "status_change", entity_type: "user_role", entity_id: roleId, details: { novo_role: newRole } });
-      // Pegar o ID do usuário que foi aprovado antes de filtrar
       const approvedUser = pendingUsers.find(p => p.role_id === roleId);
+      toast.success("Usuário aprovado", { description: `${approvedUser?.full_name || "Oficial"} agora tem permissão de ${newRole}.` });
+      logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "status_change", entity_type: "user_role", entity_id: roleId, details: { novo_role: newRole } });
       if (approvedUser) {
         setOficiais(prev => [...prev, {
           id: approvedUser.user_id,
@@ -1108,23 +1112,23 @@ function Corregedoria() {
 
   const updateStatus = async (id: string, status: Status) => {
     const { error } = await supabase.from("denuncias").update({ status }).eq("id", id);
-    if (error) return toast.error("Erro ao atualizar");
+    if (error) return toast.error("Erro ao atualizar", { description: "Não foi possível alterar o status da denúncia." });
     setDenuncias((d) => d.map((x) => (x.id === id ? { ...x, status } : x)));
     logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "status_change", entity_type: "denuncia", entity_id: id, details: { para: status } });
-    toast.success("Status atualizado");
+    toast.success("Status alterado", { description: `Denúncia #${id.slice(0,8)} agora está "${status}".` });
   };
 
   const updateInvestigacaoStatus = async (id: string, status: Status) => {
     const { error } = await supabase.from("investigacoes").update({ status }).eq("id", id);
-    if (error) return toast.error("Erro ao atualizar");
+    if (error) return toast.error("Erro ao atualizar", { description: "Não foi possível alterar o status da investigação." });
     setInvestigacoes((d) => d.map((x) => (x.id === id ? { ...x, status } : x)));
     logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "status_change", entity_type: "investigacao", entity_id: id, details: { para: status } });
-    toast.success("Status da investigação atualizado");
+    toast.success("Status alterado", { description: `Investigação #${id.slice(0,8)} agora está "${status}".` });
   };
 
   const updateRelatorioStatus = async (id: string, status: Status) => {
     const { error } = await supabase.from("relatorios").update({ status }).eq("id", id);
-    if (error) return toast.error("Erro ao atualizar");
+    if (error) return toast.error("Erro ao atualizar", { description: "Não foi possível alterar o status do documento." });
     setRelatorios((d) => d.map((x) => (x.id === id ? { ...x, status } : x)));
     logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "status_change", entity_type: "relatorio", entity_id: id, details: { para: status } });
     toast.success("Status do documento atualizado");
@@ -1183,7 +1187,7 @@ function Corregedoria() {
     }
 
     setSubmitting(false);
-    toast.success("Documento criado com sucesso!");
+    toast.success("Documento criado", { description: `${relatorioForm.tipo_denuncia} — "${relatorioForm.titulo}" registrado no sistema.` });
     logAudit({ user_id: user?.id, user_name: user?.user_metadata?.full_name, action: "create", entity_type: "relatorio", entity_id: data[0].id, details: { titulo: relatorioForm.titulo, tipo: relatorioForm.tipo_denuncia } });
     setRelatorios([data[0] as Relatorio, ...relatorios]);
     setIsDialogOpen(false);
@@ -2286,7 +2290,8 @@ function Corregedoria() {
   if (loading || fetching) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background p-6">
-        <div className="w-full max-w-4xl space-y-6">
+        <div className="w-full max-w-5xl space-y-6">
+          {/* Header skeleton */}
           <div className="flex items-center gap-4">
             <Skeleton className="h-12 w-12 rounded-md" />
             <div className="space-y-2">
@@ -2294,12 +2299,32 @@ function Corregedoria() {
               <Skeleton className="h-3 w-24" />
             </div>
           </div>
-          <div className="grid grid-cols-4 gap-4">
+          {/* Stat cards skeleton */}
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
             {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-24 rounded-lg" />
+              <div key={i} className="rounded-lg border border-border bg-card p-5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <Skeleton className="h-3 w-20" />
+                  <Skeleton className="h-8 w-8 rounded-md" />
+                </div>
+                <Skeleton className="h-8 w-16" />
+                <Skeleton className="h-2 w-24" />
+              </div>
             ))}
           </div>
-          <SkeletonTable rows={6} />
+          {/* Table skeleton */}
+          <div className="space-y-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-4 rounded-lg border border-border bg-card p-4">
+                <Skeleton className="h-8 w-8 rounded-md" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-3 w-3/5" />
+                  <Skeleton className="h-2 w-2/5" />
+                </div>
+                <Skeleton className="h-6 w-16 rounded-full" />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -2450,7 +2475,14 @@ function Corregedoria() {
     )}
         </nav>
 
-        <div className="border-t border-[#333333] p-3">
+        <div className="border-t border-[#333333] p-3 space-y-2">
+          <button
+            onClick={toggleTheme}
+            className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm text-[#888888] transition-colors hover:bg-[#2A2A2A] hover:text-[#D0D0D0]"
+          >
+            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            {theme === "dark" ? "Modo Claro" : "Modo Escuro"}
+          </button>
           <button 
             onClick={handleLogout}
             className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm text-[#888888] transition-colors hover:bg-[#2A2A2A] hover:text-[#D0D0D0]"
@@ -2497,33 +2529,39 @@ function Corregedoria() {
               <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
                   <StatCard 
                   title="Total de Denúncias" 
-                  value={denuncias.length.toString()} 
+                  value={denuncias.length} 
+                  subtitle={`${denuncias.filter(d => d.status === "pendente").length} pendentes`}
                   icon={Activity} 
-                  color="text-foreground" 
+                  color="bg-[#7A0000]/10 text-[#7A0000]"
+                  ringColor="text-[#7A0000]"
+                  max={Math.max(denuncias.length, 10)}
                 />
                 <StatCard 
                   title="Investigações Ativas" 
-                  value={investigacoes.filter(i => i.status !== "concluida" && i.status !== "arquivada").length.toString()} 
+                  value={investigacoes.filter(i => i.status !== "concluida" && i.status !== "arquivada").length} 
+                  subtitle={`${investigacoes.length} total`}
                   icon={Shield} 
-                  color="text-muted-foreground" 
+                  color="bg-amber-500/10 text-amber-500"
+                  ringColor="text-amber-500"
+                  max={Math.max(investigacoes.length, 10)}
                 />
                 <StatCard 
                   title="Inquéritos Policiais" 
-                  value={relatorios.filter(r => r.tipo_denuncia === "Inquérito Policial").length.toString()} 
+                  value={relatorios.filter(r => r.tipo_denuncia === "Inquérito Policial").length} 
+                  subtitle={`${relatorios.filter(r => r.tipo_denuncia === "Inquérito Policial" && r.status === "pendente").length} pendentes`}
                   icon={FileSignature} 
-                  color="text-foreground" 
+                  color="bg-blue-500/10 text-blue-500"
+                  ringColor="text-blue-500"
+                  max={Math.max(relatorios.filter(r => r.tipo_denuncia === "Inquérito Policial").length, 10)}
                 />
                 <StatCard 
                   title="Atos Administrativos" 
-                  value={relatorios.filter(r => r.tipo_denuncia === "Ato Administrativo").length.toString()} 
+                  value={relatorios.filter(r => r.tipo_denuncia === "Ato Administrativo").length} 
+                  subtitle={`${relatorios.filter(r => r.tipo_denuncia === "Ato Administrativo" && r.status === "pendente").length} pendentes`}
                   icon={FileText} 
-                  color="text-emerald-600" 
-                />
-                <StatCard 
-                  title="Aguardando Revisão" 
-                  value={relatorios.filter(r => r.status === "pendente").length.toString()} 
-                  icon={Shield} 
-                  color="text-muted-foreground" 
+                  color="bg-emerald-500/10 text-emerald-500"
+                  ringColor="text-emerald-500"
+                  max={Math.max(relatorios.filter(r => r.tipo_denuncia === "Ato Administrativo").length, 10)}
                 />
               </div>
 
@@ -5076,6 +5114,10 @@ function Corregedoria() {
           {/* AUDITORIA TAB (Admin only) */}
           {activeTab === "auditoria" && isAdmin && (
             <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-foreground">
+                <ScrollText className="h-4 w-4" />
+                Log de Auditoria
+              </div>
               {auditLoading ? (
                 <div className="space-y-3">
                   {Array.from({ length: 8 }).map((_, i) => (
@@ -5095,42 +5137,7 @@ function Corregedoria() {
                 </div>
               ) : (
                 <>
-                  <div className="space-y-2">
-                    {auditLogs.map((log) => (
-                      <div
-                        key={log.id}
-                        className="flex items-start gap-4 rounded-lg border border-border bg-card p-4 transition-all duration-200 hover:bg-muted/30"
-                      >
-                        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-                          ACTION_COLOR[log.action] || "bg-muted/50 border-border"
-                        }`}>
-                          {log.action === "create" ? <Clock className="h-4 w-4" /> :
-                           log.action === "delete" ? <Clock className="h-4 w-4" /> :
-                           <Eye className="h-4 w-4" />}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-xs font-semibold text-foreground">{log.user_name || "Sistema"}</span>
-                            <span className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border ${
-                              ACTION_COLOR[log.action] || "text-muted-foreground border-border bg-muted/50"
-                            }`}>
-                              {ACTION_LABEL[log.action] || log.action}
-                            </span>
-                            <span className="text-[10px] text-muted-foreground uppercase">{log.entity_type}</span>
-                            {log.entity_id && (
-                              <span className="text-[10px] font-mono text-muted-foreground/50">#{log.entity_id.slice(0, 8)}</span>
-                            )}
-                          </div>
-                          <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
-                            {log.details ? JSON.stringify(log.details).slice(0, 120) : ""}
-                          </p>
-                          <p className="text-[10px] text-muted-foreground/50 mt-1">
-                            {format(new Date(log.created_at), "dd/MM/yyyy 'às' HH:mm")}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <AuditTimeline logs={auditLogs} />
                   <Pagination
                     current={auditPage}
                     total={auditTotal}
