@@ -50,7 +50,7 @@ function Index() {
             </div>
 
             <div
-              className={`mb-6 inline-flex items-center gap-2 rounded border border-[#888888] bg-[#B0B0B0]/20 px-3 py-1 text-xs font-medium uppercase tracking-widest text-[#DADADA] transition-all duration-700 ${
+              className={`mb-6 inline-flex items-center gap-2 rounded border border-[#333333] bg-[#333333]/50 px-3 py-1 text-xs font-medium uppercase tracking-widest text-[#999999] transition-all duration-700 ${
                 mounted ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
               }`}
             >
@@ -59,17 +59,17 @@ function Index() {
             </div>
 
             <h1
-              className={`text-3xl font-semibold leading-tight text-[#ECECEC] md:text-4xl transition-all duration-700 delay-150 ${
+              className={`text-3xl font-semibold leading-tight text-[#D8D8D8] md:text-4xl transition-all duration-700 delay-150 ${
                 mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
               }`}
             >
               Corregedoria Polícia Militar
               <br />
-              <span className="text-[#DADADA] font-normal text-2xl md:text-3xl">do Estado de São Paulo</span>
+              <span className="text-[#999999] font-normal text-2xl md:text-3xl">do Estado de São Paulo</span>
             </h1>
 
             <p
-              className={`mx-auto mt-5 max-w-2xl text-base text-[#DADADA] transition-all duration-700 delay-300 ${
+              className={`mx-auto mt-5 max-w-2xl text-base text-[#999999] transition-all duration-700 delay-300 ${
                 mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
               }`}
             >
@@ -85,7 +85,7 @@ function Index() {
               <Link to="/denuncias">
                 <Button
                   size="lg"
-                  className="bg-pmesp-red text-[#ECECEC] hover:bg-pmesp-red/80 font-medium"
+                  className="bg-pmesp-red text-[#D8D8D8] hover:bg-pmesp-red/80 font-medium"
                 >
                   Fazer uma Denúncia
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -96,7 +96,7 @@ function Index() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="border-[#888888] text-[#DADADA] hover:bg-[#B0B0B0] hover:text-[#3A3A3A] font-medium"
+                  className="border-[#333333] text-[#999999] hover:bg-[#333333] hover:text-[#D8D8D8] font-medium"
                 >
                   Acesso Corregedor
                   <Lock className="ml-2 h-4 w-4" />
@@ -109,7 +109,7 @@ function Index() {
                 mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
               }`}
             >
-              <Link to="/acompanhar" className="text-xs text-[#B0B0B0] hover:text-[#DADADA] underline underline-offset-4 transition-colors">
+              <Link to="/acompanhar" className="text-xs text-[#777777] hover:text-[#999999] underline underline-offset-4 transition-colors">
                 Já fez uma denúncia? Acompanhe o andamento
               </Link>
             </div>
@@ -188,7 +188,7 @@ function Index() {
           <Link to="/denuncias" className="mt-6 inline-block">
             <Button
               size="lg"
-              className="bg-pmesp-red text-[#ECECEC] hover:bg-pmesp-red/80 font-medium"
+              className="bg-pmesp-red text-[#D8D8D8] hover:bg-pmesp-red/80 font-medium"
             >
               Registrar Denúncia
               <ArrowRight className="ml-2 h-4 w-4" />

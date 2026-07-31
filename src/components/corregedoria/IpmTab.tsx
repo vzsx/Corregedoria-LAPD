@@ -168,7 +168,7 @@ h2{
 .c9{font-weight:400;text-decoration:none;vertical-align:baseline;font-size:11pt;font-family:"Arial",sans-serif;font-style:normal}
 .c15{padding:0;margin:14pt 0 8pt 0;line-height:1.15;orphans:2;widows:2;text-align:left;page-break-after:avoid}
 .c12{text-decoration:none;vertical-align:baseline;font-size:11pt;font-family:"Arial",sans-serif;font-style:normal}
-.c6{background-color:#ffffff;max-width:160mm}
+.c6{background-color:#E8E8E8;max-width:160mm}
 .c0{color:#434343;font-weight:700}
 .c2{font-style:italic}
 .c5{color:#434343}
@@ -662,7 +662,7 @@ export function IpmTab({ denuncias, investigacoes, relatorios, depoimentos, ipmV
           </div>
           <div className="bg-muted/20 border border-border rounded-lg p-4">
             <p className="text-xs font-semibold text-muted-foreground mb-2">PRÉ-VISUALIZAÇÃO DA PORTARIA</p>
-            <div className="bg-white rounded border border-border overflow-hidden" style={{ height: "400px" }}>
+            <div className="bg-[#E8E8E8] rounded border border-border overflow-hidden" style={{ height: "400px" }}>
               <iframe
                 srcDoc={generateIpmHtml(form, user?.user_metadata?.full_name, user?.user_metadata?.patente)}
                 title="Pré-visualização"
@@ -955,7 +955,7 @@ export function IpmTab({ denuncias, investigacoes, relatorios, depoimentos, ipmV
                                 </Select>
                               </div>
                               <Button size="sm" onClick={() => handleLinkIpm(ipm.id, denunciaLinkId, "denuncia")}
-                                disabled={parentLinking || !denunciaLinkId} className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#ECECEC] text-xs">
+                                disabled={parentLinking || !denunciaLinkId} className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D8D8D8] text-xs">
                                 {parentLinking ? "Vinculando..." : "Vincular"}
                               </Button>
                             </div>
@@ -1012,7 +1012,7 @@ export function IpmTab({ denuncias, investigacoes, relatorios, depoimentos, ipmV
                                 </Select>
                               </div>
                               <Button size="sm" onClick={() => handleLinkIpm(ipm.id, investigacaoLinkId, "investigacao")}
-                                disabled={parentLinking || !investigacaoLinkId} className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#ECECEC] text-xs">
+                                disabled={parentLinking || !investigacaoLinkId} className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D8D8D8] text-xs">
                                 {parentLinking ? "Vinculando..." : "Vincular"}
                               </Button>
                             </div>
@@ -1070,7 +1070,7 @@ export function IpmTab({ denuncias, investigacoes, relatorios, depoimentos, ipmV
                                 </Select>
                               </div>
                               <Button size="sm" onClick={() => handleLinkIpm(ipm.id, atoLinkId, "relatorio")}
-                                disabled={parentLinking || !atoLinkId} className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#ECECEC] text-xs">
+                                disabled={parentLinking || !atoLinkId} className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D8D8D8] text-xs">
                                 {parentLinking ? "Vinculando..." : "Vincular"}
                               </Button>
                             </div>
@@ -1127,7 +1127,7 @@ export function IpmTab({ denuncias, investigacoes, relatorios, depoimentos, ipmV
                                 </Select>
                               </div>
                               <Button size="sm" onClick={() => handleLinkIpm(ipm.id, depoimentoLinkId, "depoimento")}
-                                disabled={parentLinking || !depoimentoLinkId} className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#ECECEC] text-xs">
+                                disabled={parentLinking || !depoimentoLinkId} className="bg-pmesp-sidebar hover:bg-pmesp-red text-[#D8D8D8] text-xs">
                                 {parentLinking ? "Vinculando..." : "Vincular"}
                               </Button>
                             </div>
@@ -1192,7 +1192,7 @@ export function IpmTab({ denuncias, investigacoes, relatorios, depoimentos, ipmV
       <Dialog open={docPreviewOpen} onOpenChange={setDocPreviewOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle className="flex items-center gap-2"><Eye className="h-5 w-5" /> Documento do IPM</DialogTitle></DialogHeader>
-          <div className="bg-white text-black rounded-lg overflow-hidden border" style={{ minHeight: "800px" }}>
+          <div className="bg-[#E8E8E8] text-black rounded-lg overflow-hidden border" style={{ minHeight: "800px" }}>
             <iframe
               srcDoc={docPreviewContent}
               title="Pré-visualização IPM"

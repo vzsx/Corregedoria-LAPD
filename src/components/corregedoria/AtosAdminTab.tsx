@@ -690,7 +690,7 @@ export function AtosAdminTab({ atos, setAtos, denuncias, ipms }: AtosAdminTabPro
           </DialogHeader>
           {previewData && (
             <>
-              <div className="bg-white rounded border overflow-hidden" style={{ minHeight: "800px" }}>
+              <div className="bg-[#E8E8E8] rounded border overflow-hidden" style={{ minHeight: "800px" }}>
                 <iframe
                   srcDoc={generateAtoHtml(previewData)}
                   title="Pré-visualização"

@@ -615,7 +615,7 @@ export function TransparenciaTab({ transparencias, setTransparencias, denuncias 
           </DialogHeader>
           {previewData && (
             <>
-              <div className="bg-white rounded border overflow-hidden" style={{ minHeight: "800px" }}>
+              <div className="bg-[#E8E8E8] rounded border overflow-hidden" style={{ minHeight: "800px" }}>
                 <iframe
                   srcDoc={generateInformeHtml(previewData)}
                   title="Pré-visualização"

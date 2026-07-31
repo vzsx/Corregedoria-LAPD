@@ -18,7 +18,7 @@ export function PortariaPreview({ data, inqueritoNumero }: PortariaPreviewProps)
   const dataTermino = isIndeterminado ? "" : (data.data_termino ? format(parseLocalDate(data.data_termino), "dd/MM/yyyy") : "");
 
   return (
-    <div className="bg-white text-black rounded-lg shadow-lg overflow-hidden print:shadow-none" id="portaria-document">
+    <div className="bg-[#E8E8E8] text-black rounded-lg shadow-lg overflow-hidden print:shadow-none" id="portaria-document">
       <style>{`
         @page { margin: 0; }
         ol{margin:0;padding:0}
@@ -31,7 +31,7 @@ export function PortariaPreview({ data, inqueritoNumero }: PortariaPreviewProps)
         .pc5{color:#000000;font-size:11pt;font-family:"Arial";font-style:normal}
         .pc6{padding-top:0pt;padding-bottom:0pt;line-height:1.15;orphans:2;widows:2;text-align:center}
         .pc7{padding-top:12pt;padding-bottom:12pt;line-height:1.0;orphans:2;widows:2;text-align:left}
-        .pc8{background-color:#ffffff;max-width:451.4pt;padding:72pt 72pt 72pt 72pt;margin:0 auto}
+        .pc8{background-color:#E8E8E8;max-width:451.4pt;padding:72pt 72pt 72pt 72pt;margin:0 auto}
         .pc9{padding:0;margin:0;height:12pt;line-height:1.0}
         .pc11{padding-top:12pt;padding-bottom:12pt;line-height:1.0;text-align:center}
         .pc12{padding-top:0pt;padding-bottom:0pt;line-height:1.15;text-align:right;height:11pt}
