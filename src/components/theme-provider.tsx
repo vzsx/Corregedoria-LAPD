@@ -12,12 +12,17 @@ export function useTheme() {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>(() => {
-    const saved = localStorage.getItem("corregedoria-theme");
-    return (saved === "light" || saved === "dark") ? saved : "dark";
-  });
+  const [theme, setTheme] = useState<Theme>("dark");
 
   useEffect(() => {
+    const saved = localStorage.getItem("corregedoria-theme");
+    if (saved === "light" || saved === "dark") {
+      setTheme(saved);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
     const root = document.documentElement;
     root.classList.remove("dark", "light");
     root.classList.add(theme);
