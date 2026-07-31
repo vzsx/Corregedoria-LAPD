@@ -36,9 +36,8 @@ function Index() {
       <SiteHeader />
 
       {/* ── HERO ── */}
-      <section className="relative overflow-hidden bg-pmesp-dark">
-        {/* Subtle gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-pmesp-dark via-pmesp-dark to-pmesp-red/30" />
+      <section className="relative overflow-hidden bg-pmesp-sidebar">
+        <div className="absolute inset-0 bg-gradient-to-br from-pmesp-sidebar via-pmesp-sidebar to-pmesp-red/20" />
 
         <div className="container relative mx-auto px-6 py-20 md:py-28">
           <div className="mx-auto max-w-3xl text-center" ref={heroSection.ref}>
@@ -91,7 +90,7 @@ function Index() {
               <Link to="/denuncias">
                 <Button
                   size="lg"
-                  className="bg-white text-pmesp-dark hover:bg-white/90 font-medium"
+                  className="bg-pmesp-red text-white hover:bg-pmesp-red/80 font-medium"
                 >
                   Fazer uma Denúncia
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -131,7 +130,7 @@ function Index() {
             aboutSection.inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          <h2 className="text-2xl font-semibold text-pmesp-dark md:text-3xl">
+          <h2 className="text-2xl font-semibold text-foreground md:text-3xl">
             Quem Somos
           </h2>
           <p className="mt-4 text-muted-foreground">
@@ -159,14 +158,14 @@ function Index() {
           ].map((f, i) => (
             <div
               key={f.title}
-              className={`rounded-lg border border-border bg-white p-6 transition-all duration-500 hover:shadow-card-hover
+              className={`rounded-lg border border-border bg-card p-6 transition-all duration-500 hover:shadow-card-hover
                 ${aboutSection.inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
               style={{ transitionDelay: aboutSection.inView ? `${i * 120}ms` : "0ms" }}
             >
-              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-md bg-primary/10">
-                <f.icon className="h-5 w-5 text-primary" />
+              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-md bg-pmesp-red/10">
+                <f.icon className="h-5 w-5 text-pmesp-red" />
               </div>
-              <h3 className="text-base font-semibold text-pmesp-dark">
+              <h3 className="text-base font-semibold text-foreground">
                 {f.title}
               </h3>
               <p className="mt-2 text-sm text-muted-foreground">
@@ -180,12 +179,12 @@ function Index() {
       {/* ── CTA ── */}
       <section className="container mx-auto px-6 pb-20" ref={ctaSection.ref}>
         <div
-          className={`rounded-lg border border-border bg-white p-10 text-center md:p-14 transition-all duration-700
+          className={`rounded-lg border border-border bg-card p-10 text-center md:p-14 transition-all duration-700
             ${ctaSection.inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
         >
-          <FileText className="mx-auto h-10 w-10 text-primary" />
+          <FileText className="mx-auto h-10 w-10 text-pmesp-red" />
 
-          <h2 className="mt-4 text-xl font-semibold text-pmesp-dark">
+          <h2 className="mt-4 text-xl font-semibold text-foreground">
             Presenciou uma irregularidade?
           </h2>
           <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">
@@ -195,7 +194,7 @@ function Index() {
           <Link to="/denuncias" className="mt-6 inline-block">
             <Button
               size="lg"
-              className="bg-primary text-white hover:bg-primary/90 font-medium"
+              className="bg-pmesp-red text-white hover:bg-pmesp-red/80 font-medium"
             >
               Registrar Denúncia
               <ArrowRight className="ml-2 h-4 w-4" />

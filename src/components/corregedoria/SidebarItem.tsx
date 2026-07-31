@@ -16,10 +16,10 @@ export function SidebarItem({
   return (
     <button
       onClick={onClick}
-      className={`flex w-full items-center justify-between rounded-md px-3 py-2.5 text-sm font-medium transition-colors ${
+      className={`flex w-full items-center justify-between rounded px-3 py-2 text-sm font-medium transition-colors ${
         active
           ? "bg-pmesp-red text-white"
-          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+          : "text-white/50 hover:bg-white/5 hover:text-white/80"
       }`}
     >
       <div className="flex items-center gap-2.5">
@@ -29,7 +29,7 @@ export function SidebarItem({
       {badge !== undefined && (
         <span
           className={`flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[10px] font-bold ${
-            active ? "bg-white/20 text-white" : "bg-primary/10 text-primary"
+            active ? "bg-white/20 text-white" : "bg-pmesp-red/80 text-white"
           }`}
         >
           {badge}

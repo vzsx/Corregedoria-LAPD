@@ -22,80 +22,73 @@ export function SiteHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-50">
-      {/* Main header */}
-      <div
-        className={`border-b border-border bg-white transition-shadow duration-200 ${
-          scrolled ? "shadow-md" : "shadow-sm"
-        }`}
-      >
-        <div className="container mx-auto flex h-16 items-center justify-between px-6">
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded overflow-hidden border border-border">
-              <img
-                src="/corregedoria-logo.png"
-                alt="Brasão Corregedoria PMESP"
-                className="h-full w-full object-cover"
-              />
-            </div>
-            <div className="flex flex-col leading-tight">
-              <span className="text-sm font-semibold text-pmesp-dark tracking-tight">
-                Corregedoria Geral
-              </span>
-              <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-                Polícia Militar do Estado de São Paulo
-              </span>
-            </div>
-          </Link>
-
-          <nav className="hidden items-center gap-1 md:flex">
-            <Link
-              to="/"
-              className="px-3 py-2 text-sm font-medium text-muted-foreground rounded-md transition-colors hover:bg-muted hover:text-foreground"
-              activeProps={{ className: "px-3 py-2 text-sm font-medium text-pmesp-dark bg-muted rounded-md" }}
-              activeOptions={{ exact: true }}
-            >
-              Quem Somos
-            </Link>
-            <Link
-              to="/denuncias"
-              className="px-3 py-2 text-sm font-medium text-muted-foreground rounded-md transition-colors hover:bg-muted hover:text-foreground"
-              activeProps={{ className: "px-3 py-2 text-sm font-medium text-pmesp-dark bg-muted rounded-md" }}
-            >
-              Fazer Denúncia
-            </Link>
-            <Link
-              to="/acompanhar"
-              className="px-3 py-2 text-sm font-medium text-muted-foreground rounded-md transition-colors hover:bg-muted hover:text-foreground"
-              activeProps={{ className: "px-3 py-2 text-sm font-medium text-pmesp-dark bg-muted rounded-md" }}
-            >
-              Acompanhar
-            </Link>
-          </nav>
-
-          <div className="flex items-center gap-2">
-            {user && <NotificationBell />}
-            {user ? (
-              <div className="flex items-center gap-2">
-                {(isCorregedor || isAdmin) && (
-                  <Link to="/corregedoria">
-                    <Button size="sm" className="bg-pmesp-red text-white hover:bg-pmesp-red/90 font-medium">
-                      Abrir Terminal
-                    </Button>
-                  </Link>
-                )}
-                <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground">
-                  <LogOut className="mr-2 h-4 w-4" /> Sair
-                </Button>
-              </div>
-            ) : (
-              <Link to="/auth">
-                <Button size="sm" className="bg-pmesp-red text-white hover:bg-pmesp-red/90 font-medium">
-                  Acesso Restrito
-                </Button>
-              </Link>
-            )}
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-pmesp-sidebar">
+      <div className="container mx-auto flex h-14 items-center justify-between px-6">
+        <Link to="/" className="flex items-center gap-3 group">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded overflow-hidden bg-white/10">
+            <img
+              src="/corregedoria-logo.png"
+              alt="Brasão Corregedoria PMESP"
+              className="h-full w-full object-cover"
+            />
           </div>
+          <div className="flex flex-col leading-tight">
+            <span className="text-sm font-semibold text-white tracking-tight">
+              Corregedoria Geral
+            </span>
+            <span className="text-[10px] font-medium uppercase tracking-wider text-white/50">
+              Polícia Militar do Estado de São Paulo
+            </span>
+          </div>
+        </Link>
+
+        <nav className="hidden items-center gap-1 md:flex">
+          <Link
+            to="/"
+            className="px-3 py-1.5 text-sm font-medium text-white/60 rounded transition-colors hover:bg-white/10 hover:text-white"
+            activeProps={{ className: "px-3 py-1.5 text-sm font-medium text-white bg-white/10 rounded" }}
+            activeOptions={{ exact: true }}
+          >
+            Quem Somos
+          </Link>
+          <Link
+            to="/denuncias"
+            className="px-3 py-1.5 text-sm font-medium text-white/60 rounded transition-colors hover:bg-white/10 hover:text-white"
+            activeProps={{ className: "px-3 py-1.5 text-sm font-medium text-white bg-white/10 rounded" }}
+          >
+            Fazer Denúncia
+          </Link>
+          <Link
+            to="/acompanhar"
+            className="px-3 py-1.5 text-sm font-medium text-white/60 rounded transition-colors hover:bg-white/10 hover:text-white"
+            activeProps={{ className: "px-3 py-1.5 text-sm font-medium text-white bg-white/10 rounded" }}
+          >
+            Acompanhar
+          </Link>
+        </nav>
+
+        <div className="flex items-center gap-2">
+          {user && <NotificationBell />}
+          {user ? (
+            <div className="flex items-center gap-2">
+              {(isCorregedor || isAdmin) && (
+                <Link to="/corregedoria">
+                  <Button size="sm" className="bg-pmesp-red text-white hover:bg-pmesp-red/80 font-medium text-xs h-8">
+                    Abrir Terminal
+                  </Button>
+                </Link>
+              )}
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="text-white/60 hover:text-white hover:bg-white/10 text-xs h-8">
+                <LogOut className="mr-1.5 h-3.5 w-3.5" /> Sair
+              </Button>
+            </div>
+          ) : (
+            <Link to="/auth">
+              <Button size="sm" className="bg-pmesp-red text-white hover:bg-pmesp-red/80 font-medium text-xs h-8">
+                Acesso Restrito
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
     </header>

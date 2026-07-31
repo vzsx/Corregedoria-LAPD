@@ -108,7 +108,7 @@ function AuthPage() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <Loader2 className="h-8 w-8 animate-spin text-pmesp-red" />
           <p className="text-sm text-muted-foreground">Carregando...</p>
         </div>
       </div>
@@ -117,9 +117,9 @@ function AuthPage() {
 
   return (
     <div className="flex min-h-screen bg-background">
-      {/* Left panel — blue branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-pmesp-dark flex-col items-center justify-center p-12 text-center">
-        <div className="flex h-20 w-20 items-center justify-center rounded overflow-hidden border border-white/10 mb-6">
+      {/* Left panel — dark branding */}
+      <div className="hidden lg:flex lg:w-1/2 bg-pmesp-sidebar flex-col items-center justify-center p-12 text-center">
+        <div className="flex h-20 w-20 items-center justify-center rounded overflow-hidden bg-white/10 mb-6">
           <img src="/corregedoria-logo.png" alt="Brasão PMESP" className="h-full w-full object-cover" />
         </div>
         <h2 className="text-2xl font-semibold text-white">
@@ -139,27 +139,27 @@ function AuthPage() {
         <div className="w-full max-w-md space-y-6">
           {/* Mobile logo */}
           <div className="flex flex-col items-center lg:hidden">
-            <div className="flex h-14 w-14 items-center justify-center rounded overflow-hidden border border-border mb-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded overflow-hidden bg-pmesp-sidebar mb-4">
               <img src="/corregedoria-logo.png" alt="Brasão PMESP" className="h-full w-full object-cover" />
             </div>
-            <h1 className="text-lg font-semibold text-pmesp-dark">Corregedoria Geral</h1>
+            <h1 className="text-lg font-semibold text-foreground">Corregedoria Geral</h1>
             <p className="text-xs text-muted-foreground">PMESP</p>
           </div>
 
           {/* Desktop title */}
           <div className="hidden lg:block">
-            <h1 className="text-xl font-semibold text-pmesp-dark">Acesso ao Sistema</h1>
+            <h1 className="text-xl font-semibold text-foreground">Acesso ao Sistema</h1>
             <p className="mt-1 text-sm text-muted-foreground">
               Entre com suas credenciais para acessar o painel.
             </p>
           </div>
 
           {/* Card */}
-          <div className="rounded-lg border border-border bg-white p-6 shadow-card">
+          <div className="rounded-lg border border-border bg-card p-6 shadow-card">
             <Tabs defaultValue="signin" className="w-full">
               <TabsList className="mb-6 grid w-full grid-cols-2 bg-muted">
-                <TabsTrigger value="signin" className="data-[state=active]:bg-white data-[state=active]:text-pmesp-dark data-[state=active]:shadow-sm font-medium">Entrar</TabsTrigger>
-                <TabsTrigger value="signup" className="data-[state=active]:bg-white data-[state=active]:text-pmesp-dark data-[state=active]:shadow-sm font-medium">Cadastrar</TabsTrigger>
+                <TabsTrigger value="signin" className="data-[state=active]:bg-pmesp-red data-[state=active]:text-white data-[state=active]:shadow-sm font-medium">Entrar</TabsTrigger>
+                <TabsTrigger value="signup" className="data-[state=active]:bg-pmesp-red data-[state=active]:text-white data-[state=active]:shadow-sm font-medium">Cadastrar</TabsTrigger>
               </TabsList>
 
               <TabsContent value="signin">
@@ -231,7 +231,7 @@ function AuthPage() {
 
           {/* Footer note */}
           <div className="flex items-center justify-center gap-2 text-[11px] text-muted-foreground">
-            <Shield className="h-3 w-3 flex-shrink-0" />
+            <Shield className="h-3 w-3 flex-shrink-0 text-pmesp-red" />
             <span>Sistema de Uso Restrito da Polícia Militar de São Paulo</span>
           </div>
         </div>
