@@ -2345,7 +2345,7 @@ function Corregedoria() {
       <aside className={`${
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       } fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-pmesp-sidebar transition-transform duration-300 lg:static lg:z-auto lg:w-64 lg:translate-x-0`}>
-        <div className="flex items-center justify-between border-b border-[#2A2A2A] p-4">
+        <div className="flex items-center justify-between border-b border-[#333333] p-4">
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded overflow-hidden bg-[#333333]">
               <img src="/corregedoria-logo.png" alt="Brasão PMESP" className="h-full w-full object-cover" />
@@ -2450,7 +2450,7 @@ function Corregedoria() {
     )}
         </nav>
 
-        <div className="border-t border-[#2A2A2A] p-3">
+        <div className="border-t border-[#333333] p-3">
           <button 
             onClick={handleLogout}
             className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm text-[#888888] transition-colors hover:bg-[#2A2A2A] hover:text-[#D0D0D0]"

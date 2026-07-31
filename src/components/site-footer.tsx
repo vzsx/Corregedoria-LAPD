@@ -1,6 +1,6 @@
 export function SiteFooter() {
   return (
-    <footer className="mt-24 border-t border-[#2A2A2A] bg-pmesp-sidebar text-[#D0D0D0]">
+    <footer className="mt-24 border-t border-[#333333] bg-[#1A1A1A] text-[#D0D0D0]">
       <div className="container mx-auto px-6 py-8">
         <div className="flex flex-col items-center gap-6 md:flex-row md:justify-between">
           <div>
@@ -23,7 +23,7 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-6 border-t border-[#2A2A2A] pt-4 flex flex-col items-center gap-1 md:flex-row md:justify-between">
+        <div className="mt-6 border-t border-[#333333] pt-4 flex flex-col items-center gap-1 md:flex-row md:justify-between">
           <p className="text-[11px] text-[#666666]">
             © {new Date().getFullYear()} PMESP — Corregedoria Geral
           </p>

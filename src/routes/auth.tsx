@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { GovBar } from "@/components/gov-bar";
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
@@ -106,32 +107,35 @@ function AuthPage() {
 
   if (authLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="flex min-h-screen items-center justify-center bg-[#1E1E1E]">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-pmesp-red" />
-          <p className="text-sm text-muted-foreground">Carregando...</p>
+          <Loader2 className="h-8 w-8 animate-spin text-[#7A0000]" />
+          <p className="text-sm text-[#888888]">Carregando...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
-      {/* Left panel — dark branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-pmesp-sidebar flex-col items-center justify-center p-12 text-center">
-        <div className="flex h-20 w-20 items-center justify-center rounded overflow-hidden bg-[#2A2A2A] mb-6">
-          <img src="/corregedoria-logo.png" alt="Brasão PMESP" className="h-full w-full object-cover" />
+    <div className="flex min-h-screen bg-[#1E1E1E]">
+      {/* Left panel — dark branding (gov.br style) */}
+      <div className="hidden lg:flex lg:w-1/2 bg-[#1A1A1A] flex-col">
+        <GovBar />
+        <div className="flex flex-1 flex-col items-center justify-center p-12 text-center">
+          <div className="flex h-20 w-20 items-center justify-center rounded overflow-hidden bg-[#333333] mb-6">
+            <img src="/corregedoria-logo.png" alt="Brasão PMESP" className="h-full w-full object-cover" />
+          </div>
+          <h2 className="text-2xl font-semibold text-[#D0D0D0]">
+            Corregedoria Geral
+          </h2>
+          <p className="mt-2 text-sm text-[#888888]">
+            Polícia Militar do Estado de São Paulo
+          </p>
+          <div className="mt-6 h-px w-12 bg-[#333333]" />
+          <p className="mt-6 max-w-xs text-xs text-[#666666] leading-relaxed">
+            Sistema de gestão e acompanhamento dos procedimentos corregatórios internos.
+          </p>
         </div>
-        <h2 className="text-2xl font-semibold text-[#D0D0D0]">
-          Corregedoria Geral
-        </h2>
-        <p className="mt-2 text-sm text-[#888888]">
-          Polícia Militar do Estado de São Paulo
-        </p>
-        <div className="mt-6 h-px w-12 bg-[#333333]" />
-        <p className="mt-6 max-w-xs text-xs text-[#666666] leading-relaxed">
-          Sistema de gestão e acompanhamento dos procedimentos corregatórios internos.
-        </p>
       </div>
 
       {/* Right panel — login form */}
@@ -139,33 +143,33 @@ function AuthPage() {
         <div className="w-full max-w-md space-y-6">
           {/* Mobile logo */}
           <div className="flex flex-col items-center lg:hidden">
-            <div className="flex h-14 w-14 items-center justify-center rounded overflow-hidden bg-pmesp-sidebar mb-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded overflow-hidden bg-[#1A1A1A] mb-4">
               <img src="/corregedoria-logo.png" alt="Brasão PMESP" className="h-full w-full object-cover" />
             </div>
-            <h1 className="text-lg font-semibold text-foreground">Corregedoria Geral</h1>
-            <p className="text-xs text-muted-foreground">PMESP</p>
+            <h1 className="text-lg font-semibold text-[#D0D0D0]">Corregedoria Geral</h1>
+            <p className="text-xs text-[#888888]">PMESP</p>
           </div>
 
           {/* Desktop title */}
           <div className="hidden lg:block">
-            <h1 className="text-xl font-semibold text-foreground">Acesso ao Sistema</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <h1 className="text-xl font-semibold text-[#D0D0D0]">Acesso ao Sistema</h1>
+            <p className="mt-1 text-sm text-[#888888]">
               Entre com suas credenciais para acessar o painel.
             </p>
           </div>
 
           {/* Card */}
-          <div className="rounded-lg border border-border bg-card p-6 shadow-card">
+          <div className="rounded-lg border border-[#333333] bg-[#2A2A2A] p-6 shadow-card">
             <Tabs defaultValue="signin" className="w-full">
-              <TabsList className="mb-6 grid w-full grid-cols-2 bg-secondary">
-                <TabsTrigger value="signin" className="data-[state=active]:bg-pmesp-red data-[state=active]:text-[#D0D0D0] data-[state=active]:shadow-sm font-medium">Entrar</TabsTrigger>
-                <TabsTrigger value="signup" className="data-[state=active]:bg-pmesp-red data-[state=active]:text-[#D0D0D0] data-[state=active]:shadow-sm font-medium">Cadastrar</TabsTrigger>
+              <TabsList className="mb-6 grid w-full grid-cols-2 bg-[#1E1E1E]">
+                <TabsTrigger value="signin" className="data-[state=active]:bg-[#7A0000] data-[state=active]:text-[#D0D0D0] data-[state=active]:shadow-sm font-medium">Entrar</TabsTrigger>
+                <TabsTrigger value="signup" className="data-[state=active]:bg-[#7A0000] data-[state=active]:text-[#D0D0D0] data-[state=active]:shadow-sm font-medium">Cadastrar</TabsTrigger>
               </TabsList>
 
               <TabsContent value="signin">
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="login-name" className="text-sm font-medium text-foreground">Nome</Label>
+                    <Label htmlFor="login-name" className="text-sm font-medium text-[#D0D0D0]">Nome</Label>
                     <Input
                       id="login-name"
                       placeholder="Ex: João Silva"
@@ -173,11 +177,11 @@ function AuthPage() {
                       onChange={(e) => setLoginName(e.target.value)}
                       required
                       autoComplete="username"
-                      className="bg-background"
+                      className="bg-[#1E1E1E] border-[#333333] text-[#D0D0D0]"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="password" className="text-sm font-medium text-foreground">Senha</Label>
+                    <Label htmlFor="password" className="text-sm font-medium text-[#D0D0D0]">Senha</Label>
                     <Input
                       id="password"
                       type="password"
@@ -185,10 +189,10 @@ function AuthPage() {
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       autoComplete="current-password"
-                      className="bg-background"
+                      className="bg-[#1E1E1E] border-[#333333] text-[#D0D0D0]"
                     />
                   </div>
-                  <Button type="submit" disabled={loading} className="w-full bg-pmesp-red text-[#D0D0D0] hover:bg-pmesp-red/90 font-medium mt-2">
+                  <Button type="submit" disabled={loading} className="w-full bg-[#7A0000] text-[#D0D0D0] hover:bg-[#7A0000]/90 font-medium mt-2">
                     {loading ? "Processando..." : "Entrar"}
                   </Button>
                 </form>
@@ -197,7 +201,7 @@ function AuthPage() {
               <TabsContent value="signup">
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="name" className="text-sm font-medium text-foreground">Nome Completo</Label>
+                    <Label htmlFor="name" className="text-sm font-medium text-[#D0D0D0]">Nome Completo</Label>
                     <Input
                       id="name"
                       placeholder="Ex: João Silva"
@@ -205,11 +209,11 @@ function AuthPage() {
                       onChange={(e) => setFullName(e.target.value)}
                       required
                       autoComplete="name"
-                      className="bg-background"
+                      className="bg-[#1E1E1E] border-[#333333] text-[#D0D0D0]"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="signup-password" className="text-sm font-medium text-foreground">Senha</Label>
+                    <Label htmlFor="signup-password" className="text-sm font-medium text-[#D0D0D0]">Senha</Label>
                     <Input
                       id="signup-password"
                       type="password"
@@ -217,11 +221,11 @@ function AuthPage() {
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       autoComplete="new-password"
-                      className="bg-background"
+                      className="bg-[#1E1E1E] border-[#333333] text-[#D0D0D0]"
                     />
                   </div>
-                  <p className="text-xs text-muted-foreground">Seu nome será usado como identificador de acesso ao sistema.</p>
-                  <Button type="submit" disabled={loading} className="w-full bg-pmesp-red text-[#D0D0D0] hover:bg-pmesp-red/90 font-medium mt-2">
+                  <p className="text-xs text-[#888888]">Seu nome será usado como identificador de acesso ao sistema.</p>
+                  <Button type="submit" disabled={loading} className="w-full bg-[#7A0000] text-[#D0D0D0] hover:bg-[#7A0000]/90 font-medium mt-2">
                     {loading ? "Enviando solicitação..." : "Solicitar Acesso"}
                   </Button>
                 </form>
@@ -230,8 +234,8 @@ function AuthPage() {
           </div>
 
           {/* Footer note */}
-          <div className="flex items-center justify-center gap-2 text-[11px] text-muted-foreground">
-            <Shield className="h-3 w-3 flex-shrink-0 text-pmesp-red" />
+          <div className="flex items-center justify-center gap-2 text-[11px] text-[#888888]">
+            <Shield className="h-3 w-3 flex-shrink-0 text-[#7A0000]" />
             <span>Sistema de Uso Restrito da Polícia Militar de São Paulo</span>
           </div>
         </div>

@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Shield, Scale, Eye, Lock, ArrowRight, FileText } from "lucide-react";
+import { Shield, Scale, Eye, Lock, ArrowRight, FileText, Search } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { GovBar } from "@/components/gov-bar";
 import { Button } from "@/components/ui/button";
 import { useEffect, useRef, useState } from "react";
 
@@ -32,17 +33,18 @@ function Index() {
   useEffect(() => { setTimeout(() => setMounted(true), 50); }, []);
 
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
+    <div className="min-h-screen bg-[#1E1E1E] overflow-x-hidden">
+      <GovBar />
       <SiteHeader />
 
       {/* ── HERO ── */}
-      <section className="relative overflow-hidden bg-pmesp-sidebar">
-        <div className="absolute inset-0 bg-gradient-to-br from-pmesp-sidebar via-pmesp-sidebar to-pmesp-red/20" />
+      <section className="relative overflow-hidden bg-[#1A1A1A]">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#1A1A1A] via-[#1A1A1A] to-[#7A0000]/20" />
 
-        <div className="container relative mx-auto px-6 py-20 md:py-28">
+        <div className="container relative mx-auto px-6 py-16 md:py-24">
           <div className="mx-auto max-w-3xl text-center" ref={heroSection.ref}>
             <div
-              className={`mx-auto mb-6 flex h-28 w-28 items-center justify-center transition-all duration-700 ${
+              className={`mx-auto mb-6 flex h-24 w-24 items-center justify-center transition-all duration-700 ${
                 mounted ? "opacity-100 scale-100" : "opacity-0 scale-90"
               }`}
             >
@@ -85,7 +87,7 @@ function Index() {
               <Link to="/denuncias">
                 <Button
                   size="lg"
-                  className="bg-pmesp-red text-[#D0D0D0] hover:bg-pmesp-red/80 font-medium"
+                  className="bg-[#7A0000] text-[#D0D0D0] hover:bg-[#7A0000]/80 font-medium"
                 >
                   Fazer uma Denúncia
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -118,17 +120,17 @@ function Index() {
       </section>
 
       {/* ── QUEM SOMOS ── */}
-      <section className="container mx-auto px-6 py-20" ref={aboutSection.ref}>
+      <section className="container mx-auto px-6 py-16" ref={aboutSection.ref}>
         <div
           className={`mx-auto max-w-3xl text-center transition-all duration-700 ${
             aboutSection.inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          <h2 className="text-2xl font-semibold text-foreground md:text-3xl">
+          <h2 className="text-2xl font-semibold text-[#D0D0D0] md:text-3xl">
             Quem Somos
           </h2>
-          <p className="mt-4 text-muted-foreground">
-            A <span className="font-medium text-foreground">Corregedoria da Polícia Militar (PMESP)</span> é o órgão encarregado de investigar suspeitas de má conduta, corrupção, uso excessivo de força ou violação de regulamentos por parte de seus próprios policiais. Seu principal objetivo é manter a integridade da corporação militar e garantir a transparência perante a sociedade.
+          <p className="mt-4 text-[#888888]">
+            A <span className="font-medium text-[#D0D0D0]">Corregedoria da Polícia Militar (PMESP)</span> é o órgão encarregado de investigar suspeitas de má conduta, corrupção, uso excessivo de força ou violação de regulamentos por parte de seus próprios policiais. Seu principal objetivo é manter a integridade da corporação militar e garantir a transparência perante a sociedade.
           </p>
         </div>
 
@@ -152,17 +154,17 @@ function Index() {
           ].map((f, i) => (
             <div
               key={f.title}
-              className={`rounded-lg border border-border bg-card p-6 transition-all duration-500 hover:shadow-card-hover
+              className={`rounded-lg border border-[#333333] bg-[#2A2A2A] p-6 transition-all duration-500 hover:shadow-card-hover
                 ${aboutSection.inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
               style={{ transitionDelay: aboutSection.inView ? `${i * 120}ms` : "0ms" }}
             >
-              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-md bg-pmesp-red/10">
-                <f.icon className="h-5 w-5 text-pmesp-red" />
+              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-md bg-[#7A0000]/10">
+                <f.icon className="h-5 w-5 text-[#7A0000]" />
               </div>
-              <h3 className="text-base font-semibold text-foreground">
+              <h3 className="text-base font-semibold text-[#D0D0D0]">
                 {f.title}
               </h3>
-              <p className="mt-2 text-sm text-muted-foreground">
+              <p className="mt-2 text-sm text-[#888888]">
                 {f.text}
               </p>
             </div>
@@ -171,24 +173,24 @@ function Index() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="container mx-auto px-6 pb-20" ref={ctaSection.ref}>
+      <section className="container mx-auto px-6 pb-16" ref={ctaSection.ref}>
         <div
-          className={`rounded-lg border border-border bg-card p-10 text-center md:p-14 transition-all duration-700
+          className={`rounded-lg border border-[#333333] bg-[#2A2A2A] p-10 text-center md:p-14 transition-all duration-700
             ${ctaSection.inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
         >
-          <FileText className="mx-auto h-10 w-10 text-pmesp-red" />
+          <FileText className="mx-auto h-10 w-10 text-[#7A0000]" />
 
-          <h2 className="mt-4 text-xl font-semibold text-foreground">
+          <h2 className="mt-4 text-xl font-semibold text-[#D0D0D0]">
             Presenciou uma irregularidade?
           </h2>
-          <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">
+          <p className="mx-auto mt-2 max-w-xl text-sm text-[#888888]">
             Toda denúncia, anônima ou identificada, é registrada e investigada
             pela equipe da Corregedoria.
           </p>
           <Link to="/denuncias" className="mt-6 inline-block">
             <Button
               size="lg"
-              className="bg-pmesp-red text-[#D0D0D0] hover:bg-pmesp-red/80 font-medium"
+              className="bg-[#7A0000] text-[#D0D0D0] hover:bg-[#7A0000]/80 font-medium"
             >
               Registrar Denúncia
               <ArrowRight className="ml-2 h-4 w-4" />
